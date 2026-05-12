@@ -15,7 +15,7 @@ const config: Config = {
   },
 
   // Set the production url of your site here
-  url: 'https://docs.scenemakerai.solbox.com',
+  url: 'https://doc.scenemaker.solbox.com',
   // 커스텀 도메인 적용 후에는 호스트가 이 리포 전용이므로 서브패스 불필요
   baseUrl: '/',
 
