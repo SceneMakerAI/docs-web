@@ -1,0 +1,50 @@
+{
+  "link.title.문서": {
+    "message": "Documentation",
+    "description": "The title of the footer links column with title=문서 in the footer"
+  },
+  "link.title.커뮤니티": {
+    "message": "Community",
+    "description": "The title of the footer links column with title=커뮤니티 in the footer"
+  },
+  "link.title.더 보기": {
+    "message": "More",
+    "description": "The title of the footer links column with title=더 보기 in the footer"
+  },
+  "link.item.label.시작하기": {
+    "message": "Getting Started",
+    "description": "The label of footer link with label=시작하기 linking to /docs/intro"
+  },
+  "link.item.label.아키텍처": {
+    "message": "Architecture",
+    "description": "The label of footer link with label=아키텍처 linking to /docs/architecture"
+  },
+  "link.item.label.오픈소스 기여": {
+    "message": "Open Source",
+    "description": "The label of footer link with label=오픈소스 기여 linking to /docs/contribute"
+  },
+  "link.item.label.Hugging Face": {
+    "message": "Hugging Face",
+    "description": "The label of footer link with label=Hugging Face linking to https://huggingface.co/Qwen"
+  },
+  "link.item.label.LangChain": {
+    "message": "LangChain",
+    "description": "The label of footer link with label=LangChain linking to https://www.langchain.com/"
+  },
+  "link.item.label.블로그": {
+    "message": "Blog",
+    "description": "The label of footer link with label=블로그 linking to /blog"
+  },
+  "link.item.label.GitHub": {
+    "message": "GitHub",
+    "description": "The label of footer link with label=GitHub linking to https://github.com/SceneMakerAI/docs-web"
+  },
+  "link.item.label.Solbox": {
+    "message": "Solbox",
+    "description": "The label of footer link with label=Solbox linking to https://solbox.com"
+  },
+  "copyright": {
+    "message": "Copyright © 2026 SceneMakerAI · Solbox Inc. Built with Docusaurus.",
+    "description": "The footer copyright"
+  }
+}
