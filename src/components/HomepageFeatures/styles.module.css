@@ -1,6 +1,106 @@
+/* 4대 AI 서비스 섹션 — design.md `feature-card-light` 패턴 */
+
 .features {
+  padding: var(--smk-s-section) 0;
+  width: 100%;
+}
+
+.sectionHeader {
+  margin-bottom: var(--smk-s-xxxl);
+}
+
+.sectionTitle {
+  font-family: var(--smk-font-display);
+  font-size: 48px;
+  font-weight: 500;
+  line-height: 1.1;
+  letter-spacing: -0.96px;
+  color: var(--smk-ink);
+  margin: 0 0 var(--smk-s-md) 0;
+}
+
+.sectionSubtitle {
+  font-family: var(--smk-font-body);
+  font-size: 18px;
+  line-height: 1.5;
+  color: var(--smk-mute);
+  max-width: 640px;
+  margin: 0;
+}
+
+.cardCol {
+  margin-bottom: var(--smk-s-xl);
+}
+
+.card {
+  background: var(--smk-surface-card);
+  border: 1px solid var(--smk-hairline-light);
+  border-radius: var(--smk-r-lg);
+  padding: var(--smk-s-xxl);
+  display: flex;
+  flex-direction: column;
+  gap: var(--smk-s-lg);
+  height: 100%;
+}
+
+.chip {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--smk-r-md);
   display: flex;
   align-items: center;
-  padding: 2rem 0;
-  width: 100%;
+  justify-content: center;
+  color: var(--smk-on-dark);
+  font-family: var(--smk-font-display);
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.chipTeal {
+  background: var(--smk-accent-teal);
+}
+.chipPink {
+  background: var(--smk-accent-pink);
+}
+.chipWarning {
+  background: var(--smk-accent-warning);
+}
+.chipLightGreen {
+  background: var(--smk-accent-light-green);
+}
+
+.cardTitle {
+  font-family: var(--smk-font-display);
+  font-size: 24px;
+  font-weight: 500;
+  line-height: 1.3;
+  color: var(--smk-ink);
+  margin: 0;
+}
+
+.cardDescription {
+  font-family: var(--smk-font-body);
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--smk-body);
+  margin: 0;
+}
+
+/* 다크 모드 — Infima dark canvas와 어울리도록 surface/text 조정 */
+[data-theme='dark'] .card {
+  background: var(--smk-surface-elevated);
+  border-color: var(--smk-hairline-dark);
+}
+
+[data-theme='dark'] .cardTitle,
+[data-theme='dark'] .sectionTitle {
+  color: var(--smk-on-dark);
+}
+
+[data-theme='dark'] .cardDescription {
+  color: var(--smk-on-dark-mute);
+}
+
+[data-theme='dark'] .sectionSubtitle {
+  color: var(--smk-on-dark-mute);
 }

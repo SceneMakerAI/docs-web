@@ -1,23 +1,103 @@
-/**
- * CSS files with the .module.css suffix will be treated as CSS modules
- * and scoped locally.
- */
+/* 홈페이지 Hero — design.md `hero-band-dark` + `button-primary` + `button-outline-dark` 패턴 */
 
-.heroBanner {
-  padding: 4rem 0;
-  text-align: center;
+.hero {
+  background: var(--smk-canvas-dark);
+  padding: var(--smk-s-band) 0;
+  color: var(--smk-on-dark);
   position: relative;
   overflow: hidden;
 }
 
-@media screen and (max-width: 996px) {
-  .heroBanner {
-    padding: 2rem;
-  }
+.heroInner {
+  display: flex;
+  flex-direction: column;
+  gap: var(--smk-s-xl);
+  align-items: flex-start;
 }
 
-.buttons {
+.eyebrow {
+  padding: var(--smk-s-xs) var(--smk-s-md);
+  background: var(--smk-surface-elevated);
+  border: 1px solid var(--smk-hairline-dark);
+  border-radius: var(--smk-r-full);
+  font-family: var(--smk-font-body);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--smk-on-dark-mute);
+}
+
+.heroTitle {
+  font-family: var(--smk-font-display);
+  font-size: clamp(40px, 8vw, 88px);
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: -0.025em;
+  color: var(--smk-on-dark);
+  margin: 0;
+}
+
+.heroSubtitle {
+  font-family: var(--smk-font-body);
+  font-size: 18px;
+  line-height: 1.5;
+  color: var(--smk-on-dark-mute);
+  max-width: 680px;
+  margin: 0;
+}
+
+.ctaGroup {
   display: flex;
+  gap: var(--smk-s-lg);
+  flex-wrap: wrap;
+  margin-top: var(--smk-s-md);
+}
+
+.ctaPrimary {
+  display: inline-flex;
   align-items: center;
-  justify-content: center;
+  padding: var(--smk-s-md) 28px;
+  background: var(--smk-canvas-light);
+  color: var(--smk-canvas-dark);
+  font-family: var(--smk-font-body);
+  font-size: 15px;
+  font-weight: 600;
+  border-radius: var(--smk-r-full);
+  text-decoration: none;
+  transition: background 0.15s ease;
+}
+
+.ctaPrimary:hover {
+  background: var(--smk-faint);
+  color: var(--smk-canvas-dark);
+  text-decoration: none;
+}
+
+.ctaSecondary {
+  display: inline-flex;
+  align-items: center;
+  padding: 13px 27px;
+  background: transparent;
+  color: var(--smk-on-dark);
+  font-family: var(--smk-font-body);
+  font-size: 15px;
+  font-weight: 600;
+  border: 1px solid var(--smk-on-dark);
+  border-radius: var(--smk-r-full);
+  text-decoration: none;
+  transition: background 0.15s ease;
+}
+
+.ctaSecondary:hover {
+  background: var(--smk-surface-elevated);
+  color: var(--smk-on-dark);
+  text-decoration: none;
+}
+
+@media screen and (max-width: 996px) {
+  .hero {
+    padding: var(--smk-s-block) 0;
+  }
+  .heroSubtitle {
+    font-size: 16px;
+  }
 }

@@ -1,0 +1,82 @@
+/* 2026년 목표 KPI 섹션 — design.md `plan-card` + `plan-card-featured` 패턴
+   light/dark 테마와 무관하게 항상 다크 캔버스(두 모드 밴드 alternation) */
+
+.kpiBand {
+  background: var(--smk-canvas-dark);
+  padding: var(--smk-s-section) 0;
+  color: var(--smk-on-dark);
+}
+
+.sectionHeader {
+  margin-bottom: var(--smk-s-xxxl);
+}
+
+.sectionTitle {
+  font-family: var(--smk-font-display);
+  font-size: 48px;
+  font-weight: 500;
+  line-height: 1.1;
+  letter-spacing: -0.96px;
+  color: var(--smk-on-dark);
+  margin: 0 0 var(--smk-s-md) 0;
+}
+
+.sectionSubtitle {
+  font-family: var(--smk-font-body);
+  font-size: 18px;
+  line-height: 1.5;
+  color: var(--smk-on-dark-mute);
+  max-width: 640px;
+  margin: 0;
+}
+
+.cellCol {
+  margin-bottom: var(--smk-s-xl);
+}
+
+.cell {
+  background: var(--smk-surface-elevated);
+  border-radius: var(--smk-r-lg);
+  padding: var(--smk-s-xxl);
+  display: flex;
+  flex-direction: column;
+  gap: var(--smk-s-md);
+  height: 100%;
+}
+
+.cellFeatured {
+  background: var(--smk-primary);
+}
+
+.value {
+  font-family: var(--smk-font-display);
+  font-size: 64px;
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: -1.28px;
+  color: var(--smk-on-dark);
+}
+
+.label {
+  font-family: var(--smk-font-body);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--smk-on-dark);
+}
+
+.note {
+  font-family: var(--smk-font-body);
+  font-size: 13px;
+  color: var(--smk-on-dark-mute);
+}
+
+@media screen and (max-width: 996px) {
+  .sectionTitle {
+    font-size: 36px;
+    letter-spacing: -0.72px;
+  }
+  .value {
+    font-size: 48px;
+    letter-spacing: -0.96px;
+  }
+}

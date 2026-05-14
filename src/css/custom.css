@@ -1,30 +1,98 @@
 /**
- * Any CSS included here will be global. The classic template
- * bundles Infima by default. Infima is a CSS framework designed to
- * work well for content-centric websites.
+ * SceneMakerAI 디자인 토큰 — `.aidocs/design.md`(Revolut 스타일) 기반.
+ *
+ * - Canvas는 true black ↔ white 두 모드.
+ * - Cobalt violet(`--smk-primary`)은 브랜드 stamp로 절제 사용.
+ * - Accent 팔레트(teal/pink/warning/light-green)는 제품 illustration·badge에만.
  */
 
-/* You can override the default Infima variables here. */
 :root {
-  --ifm-color-primary: #2e8555;
-  --ifm-color-primary-dark: #29784c;
-  --ifm-color-primary-darker: #277148;
-  --ifm-color-primary-darkest: #205d3b;
-  --ifm-color-primary-light: #33925d;
-  --ifm-color-primary-lighter: #359962;
-  --ifm-color-primary-lightest: #3cad6e;
+  /* ─────────── Brand / Primary ─────────── */
+  --smk-primary: #494fdf;
+  --smk-primary-bright: #4f55f1;
+  --smk-primary-deep: #3a40c4;
+  --smk-on-primary: #ffffff;
+
+  /* ─────────── Canvas / Surface ─────────── */
+  --smk-canvas-dark: #000000;
+  --smk-canvas-light: #ffffff;
+  --smk-surface-soft: #f4f4f4;
+  --smk-surface-card: #ffffff;
+  --smk-surface-deep: #0a0a0a;
+  --smk-surface-elevated: #16181a;
+
+  /* ─────────── Hairlines / Dividers ─────────── */
+  --smk-hairline-light: #e2e2e7;
+  --smk-hairline-dark: rgba(255, 255, 255, 0.12);
+  --smk-hairline-strong: #191c1f;
+
+  /* ─────────── Text ─────────── */
+  --smk-ink: #191c1f;
+  --smk-body: #1f2226;
+  --smk-charcoal: #3a3d40;
+  --smk-mute: #505a63;
+  --smk-stone: #8d969e;
+  --smk-faint: #c9c9cd;
+  --smk-on-dark: #ffffff;
+  --smk-on-dark-mute: rgba(255, 255, 255, 0.72);
+
+  /* ─────────── Accents (illustration only — never as button surface) ─────────── */
+  --smk-accent-teal: #00a87e;
+  --smk-accent-pink: #e61e49;
+  --smk-accent-light-green: #428619;
+  --smk-accent-warning: #ec7e00;
+  --smk-accent-yellow: #b09000;
+  --smk-accent-light-blue: #007bc2;
+  --smk-accent-blue-link: #376cd5;
+
+  /* ─────────── Typography ─────────── */
+  --smk-font-display: 'Geist', 'Inter Display', 'General Sans', system-ui, -apple-system, sans-serif;
+  --smk-font-body: 'Inter', system-ui, -apple-system, sans-serif;
+
+  /* ─────────── Radius ─────────── */
+  --smk-r-sm: 8px;
+  --smk-r-md: 12px;
+  --smk-r-lg: 20px;
+  --smk-r-xl: 28px;
+  --smk-r-full: 9999px;
+
+  /* ─────────── Spacing ─────────── */
+  --smk-s-xs: 6px;
+  --smk-s-sm: 8px;
+  --smk-s-md: 14px;
+  --smk-s-lg: 16px;
+  --smk-s-xl: 24px;
+  --smk-s-xxl: 32px;
+  --smk-s-xxxl: 48px;
+  --smk-s-block: 80px;
+  --smk-s-section: 88px;
+  --smk-s-band: 120px;
+
+  /* ─────────── Infima overrides — cobalt brand ─────────── */
+  --ifm-color-primary: var(--smk-primary);
+  --ifm-color-primary-dark: var(--smk-primary-deep);
+  --ifm-color-primary-darker: #3338b9;
+  --ifm-color-primary-darkest: #2a2e98;
+  --ifm-color-primary-light: var(--smk-primary-bright);
+  --ifm-color-primary-lighter: #5d63f3;
+  --ifm-color-primary-lightest: #7c80f6;
+
+  --ifm-font-family-base: var(--smk-font-body);
+  --ifm-heading-font-family: var(--smk-font-display);
+
   --ifm-code-font-size: 95%;
   --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.1);
 }
 
-/* For readability concerns, you should choose a lighter palette in dark mode. */
+/* 다크 모드: cobalt 톤만 한 단계 밝게 — 캔버스/서피스는 Infima 기본을 따름 */
 [data-theme='dark'] {
-  --ifm-color-primary: #25c2a0;
-  --ifm-color-primary-dark: #21af90;
-  --ifm-color-primary-darker: #1fa588;
-  --ifm-color-primary-darkest: #1a8870;
-  --ifm-color-primary-light: #29d5b0;
-  --ifm-color-primary-lighter: #32d8b4;
-  --ifm-color-primary-lightest: #4fddbf;
+  --ifm-color-primary: var(--smk-primary-bright);
+  --ifm-color-primary-dark: var(--smk-primary);
+  --ifm-color-primary-darker: var(--smk-primary-deep);
+  --ifm-color-primary-darkest: #2a2e98;
+  --ifm-color-primary-light: #5d63f3;
+  --ifm-color-primary-lighter: #7c80f6;
+  --ifm-color-primary-lightest: #a3a6f9;
+
   --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
 }
