@@ -15,10 +15,9 @@ const config: Config = {
   },
 
   // Set the production url of your site here
-  url: 'https://scenemakerai.github.io',
-  // Set the /<baseUrl>/ pathname under which your site is served
-  // For GitHub pages deployment, it is often '/<projectName>/'
-  baseUrl: '/docs-web/',
+  url: 'https://doc.scenemaker.solbox.com',
+  // 커스텀 도메인 적용 후에는 호스트가 이 리포 전용이므로 서브패스 불필요
+  baseUrl: '/',
 
   // GitHub pages deployment config.
   organizationName: 'SceneMakerAI', // GitHub org name
