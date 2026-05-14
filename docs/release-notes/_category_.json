@@ -1,0 +1,8 @@
+{
+  "label": "릴리즈 노트",
+  "position": 4,
+  "link": {
+    "type": "generated-index",
+    "description": "SceneMakerAI 4대 서비스(모아보기·리믹스·광고·Batch)의 버전별 변경 사항입니다. 사이트(docs-web) 자체의 변경 이력은 GitHub Release를 참고하세요."
+  }
+}

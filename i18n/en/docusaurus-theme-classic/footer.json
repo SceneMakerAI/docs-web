@@ -23,6 +23,10 @@
     "message": "Open Source",
     "description": "The label of footer link with label=오픈소스 기여 linking to /docs/contribute"
   },
+  "link.item.label.릴리즈 노트": {
+    "message": "Release Notes",
+    "description": "The label of footer link with label=릴리즈 노트 linking to /docs/release-notes/overview"
+  },
   "link.item.label.Hugging Face": {
     "message": "Hugging Face",
     "description": "The label of footer link with label=Hugging Face linking to https://huggingface.co/Qwen"

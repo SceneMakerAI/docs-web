@@ -85,13 +85,7 @@ const config: Config = {
         src: 'img/logo.svg',
       },
       items: [
-        {to: '/blog', label: '블로그', position: 'left'},
-        {
-          type: 'docSidebar',
-          sidebarId: 'docsSidebar',
-          position: 'left',
-          label: '문서',
-        },
+        {to: '/about', label: '프로젝트 소개', position: 'left'},
         {
           type: 'docSidebar',
           sidebarId: 'architectureSidebar',
@@ -100,11 +94,23 @@ const config: Config = {
         },
         {
           type: 'docSidebar',
+          sidebarId: 'docsSidebar',
+          position: 'left',
+          label: '문서',
+        },
+        {to: '/blog', label: '블로그', position: 'left'},
+        {
+          type: 'docSidebar',
           sidebarId: 'contributeSidebar',
           position: 'left',
           label: '오픈소스 기여',
         },
-        {to: '/about', label: '프로젝트 소개', position: 'left'},
+        {
+          type: 'docSidebar',
+          sidebarId: 'releaseNotesSidebar',
+          position: 'left',
+          label: '릴리즈 노트',
+        },
         {
           type: 'localeDropdown',
           position: 'right',
@@ -133,6 +139,10 @@ const config: Config = {
             {
               label: '오픈소스 기여',
               to: '/docs/contribute/overview',
+            },
+            {
+              label: '릴리즈 노트',
+              to: '/docs/release-notes/overview',
             },
           ],
         },

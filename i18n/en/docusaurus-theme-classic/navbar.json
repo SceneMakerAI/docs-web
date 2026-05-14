@@ -23,6 +23,10 @@
     "message": "Open Source",
     "description": "Navbar item with label 오픈소스 기여"
   },
+  "item.label.릴리즈 노트": {
+    "message": "Release Notes",
+    "description": "Navbar item with label 릴리즈 노트"
+  },
   "item.label.프로젝트 소개": {
     "message": "About",
     "description": "Navbar item with label 프로젝트 소개"

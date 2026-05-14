@@ -1,0 +1,31 @@
+---
+id: overview
+title: 릴리즈 노트 개요
+sidebar_position: 0
+slug: /release-notes/overview
+description: SceneMakerAI 4대 서비스의 버전별 변경 사항. 작성·관리 정책과 인덱스.
+---
+
+SceneMakerAI 프로젝트(**모아보기 · 리믹스 · 광고 · Batch**)의 버전별 변경 사항을 모은 곳입니다.
+
+> 🚧 첫 릴리즈 전입니다. 릴리즈 시점에 본 인덱스에 항목이 추가됩니다.
+
+## 다루는 것
+
+- 4대 서비스의 **SemVer 버전 단위** 변경 사항 — 신규 기능, 동작 변경, 버그 수정
+- **호환성 변경**과 마이그레이션 안내
+- 의존 모델/라이브러리(Qwen, vLLM, LangGraph, faster-whisper 등) **버전 변경**
+
+## 다루지 않는 것
+
+- **docs-web 사이트 자체의 변경**(레이아웃, 문서 수정 등) — [GitHub Release](https://github.com/SceneMakerAI/docs-web/releases) 또는 `git log`로 관리합니다.
+- **개별 PR 단위의 작은 변경** — 누적되어 다음 마이너/패치 릴리즈에 포함됩니다.
+
+## 작성·관리 룰
+
+릴리즈 노트의 파일 명명·정렬·본문 구조·머지 시점은
+[CONTRIBUTING.md — 릴리즈 노트 룰](https://github.com/SceneMakerAI/docs-web/blob/main/CONTRIBUTING.md#8-릴리즈-노트-룰)에 정의되어 있습니다.
+
+## 인덱스
+
+릴리즈가 추가되면 좌측 사이드바에 최신순으로 누적됩니다.
