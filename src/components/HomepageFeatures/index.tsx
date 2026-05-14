@@ -27,11 +27,17 @@ const FeatureList: FeatureItem[] = [
       <>콘텐츠 맥락에 가장 어울리는 광고를 매칭합니다. 임베딩·검색 기반.</>
     ),
   },
+  {
+    title: 'Batch',
+    description: (
+      <>방송 아카이브를 야간 배치로 일괄 분석합니다. 재처리·재인덱싱 파이프라인.</>
+    ),
+  },
 ];
 
 function Feature({title, description}: FeatureItem) {
   return (
-    <div className={clsx('col col--4')}>
+    <div className={clsx('col col--3')}>
       <div className="text--center padding-horiz--md">
         <Heading as="h3">{title}</Heading>
         <p>{description}</p>
