@@ -17,11 +17,11 @@
   },
   "link.item.label.아키텍처": {
     "message": "Architecture",
-    "description": "The label of footer link with label=아키텍처 linking to /docs/architecture"
+    "description": "The label of footer link with label=아키텍처 linking to /docs/architecture/overview"
   },
   "link.item.label.오픈소스 기여": {
     "message": "Open Source",
-    "description": "The label of footer link with label=오픈소스 기여 linking to /docs/contribute"
+    "description": "The label of footer link with label=오픈소스 기여 linking to /docs/contribute/overview"
   },
   "link.item.label.릴리즈 노트": {
     "message": "Release Notes",

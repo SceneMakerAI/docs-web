@@ -1,0 +1,8 @@
+{
+  "label": "Release Notes",
+  "position": 4,
+  "link": {
+    "type": "generated-index",
+    "description": "Version-by-version changes for SceneMakerAI's four services (Highlights, Remix, Ad, Batch). For docs-web site changes themselves, see GitHub Releases."
+  }
+}
