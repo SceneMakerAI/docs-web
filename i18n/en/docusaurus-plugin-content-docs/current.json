@@ -6,9 +6,5 @@
   "sidebar.docsSidebar.category.가이드": {
     "message": "Guide",
     "description": "The label for category '가이드' in sidebar 'docsSidebar'"
-  },
-  "sidebar.docsSidebar.category.튜토리얼 (샘플 — 추후 제거)": {
-    "message": "Tutorial (sample — to be removed)",
-    "description": "The label for category '튜토리얼 (샘플 — 추후 제거)' in sidebar 'docsSidebar'"
   }
 }
