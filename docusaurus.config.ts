@@ -74,8 +74,7 @@ const config: Config = {
   ],
 
   themeConfig: {
-    // Replace with your project's social card
-    image: 'img/docusaurus-social-card.jpg',
+    // 자체 OG 이미지(1200x630) 준비 후 image: 'img/og.png' 형태로 활성화
     colorMode: {
       respectPrefersColorScheme: true,
     },
