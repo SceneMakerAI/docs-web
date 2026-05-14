@@ -84,6 +84,19 @@
   --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.1);
 }
 
+/* Navbar 로고: sample.pen 의 워드마크 18px Geist 옆에 맞춰 24×24 */
+.navbar__logo {
+  height: 24px;
+  width: 24px;
+}
+.navbar__logo img {
+  height: 24px;
+  width: 24px;
+}
+.navbar__brand {
+  gap: 10px;
+}
+
 /* 다크 모드: cobalt 톤만 한 단계 밝게 — 캔버스/서피스는 Infima 기본을 따름 */
 [data-theme='dark'] {
   --ifm-color-primary: var(--smk-primary-bright);

@@ -7,7 +7,7 @@ import type * as Preset from '@docusaurus/preset-classic';
 const config: Config = {
   title: 'SceneMakerAI',
   tagline: '오픈소스 AI로 방송 콘텐츠를 재가공하다 — SceneMakerAI 기술 블로그 · 문서',
-  favicon: 'img/favicon.ico',
+  favicon: 'img/favicon.svg',
 
   // Future flags, see https://docusaurus.io/docs/api/docusaurus-config#future
   future: {
@@ -26,28 +26,16 @@ const config: Config = {
   onBrokenLinks: 'throw',
 
   headTags: [
-    {
-      tagName: 'link',
-      attributes: {
-        rel: 'preconnect',
-        href: 'https://fonts.googleapis.com',
-      },
-    },
-    {
-      tagName: 'link',
-      attributes: {
-        rel: 'preconnect',
-        href: 'https://fonts.gstatic.com',
-        crossorigin: 'anonymous',
-      },
-    },
-    {
-      tagName: 'link',
-      attributes: {
-        rel: 'stylesheet',
-        href: 'https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap',
-      },
-    },
+    // 파비콘 변형 (SVG 우선 — favicon 옵션 / PNG·ICO·apple-touch-icon fallback)
+    { tagName: 'link', attributes: { rel: 'icon', type: 'image/png', sizes: '32x32', href: '/img/favicon-32x32.png' } },
+    { tagName: 'link', attributes: { rel: 'icon', type: 'image/png', sizes: '16x16', href: '/img/favicon-16x16.png' } },
+    { tagName: 'link', attributes: { rel: 'icon', type: 'image/x-icon', href: '/img/favicon.ico' } },
+    { tagName: 'link', attributes: { rel: 'apple-touch-icon', sizes: '180x180', href: '/img/apple-touch-icon.png' } },
+
+    // Google Fonts (Geist + Inter) — design.md 의 font-display / font-body 토큰
+    { tagName: 'link', attributes: { rel: 'preconnect', href: 'https://fonts.googleapis.com' } },
+    { tagName: 'link', attributes: { rel: 'preconnect', href: 'https://fonts.gstatic.com', crossorigin: 'anonymous' } },
+    { tagName: 'link', attributes: { rel: 'stylesheet', href: 'https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap' } },
   ],
 
   i18n: {
@@ -99,7 +87,8 @@ const config: Config = {
   ],
 
   themeConfig: {
-    // 자체 OG 이미지(1200x630) 준비 후 image: 'img/og.png' 형태로 활성화
+    // OpenGraph / Twitter card 공용 이미지 — sample.pen hero 톤, gemini-3-pro-image-preview 로 생성
+    image: 'img/og.jpg',
     colorMode: {
       respectPrefersColorScheme: true,
     },
@@ -108,6 +97,7 @@ const config: Config = {
       logo: {
         alt: 'SceneMakerAI Logo',
         src: 'img/logo.svg',
+        srcDark: 'img/logo-dark.svg',
       },
       items: [
         {to: '/about', label: '프로젝트 소개', position: 'left'},
