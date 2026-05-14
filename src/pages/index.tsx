@@ -21,7 +21,7 @@ function HomepageHeader() {
           <Link
             className="button button--secondary button--lg"
             to="/docs/intro">
-            Docusaurus Tutorial - 5min ⏱️
+            문서 시작하기 →
           </Link>
         </div>
       </div>
@@ -30,11 +30,10 @@ function HomepageHeader() {
 }
 
 export default function Home(): ReactNode {
-  const {siteConfig} = useDocusaurusContext();
   return (
     <Layout
-      title={`Hello from ${siteConfig.title}`}
-      description="Description will go into a meta tag in <head />">
+      title="SceneMakerAI — 오픈소스 AI 로 방송 콘텐츠를 재가공"
+      description="오픈소스 멀티모달 LLM 으로 방송 콘텐츠(드라마·예능·다큐멘터리)를 재가공하는 솔박스 사내 프로젝트. 모아보기·리믹스·광고·Batch 4대 서비스와 오픈소스 기여.">
       <HomepageHeader />
       <main>
         <HomepageFeatures />
