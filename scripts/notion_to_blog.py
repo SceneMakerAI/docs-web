@@ -173,14 +173,41 @@ def slugify(title):
     return slug or "post"
 
 
-def save_as_blog_post(page, date_str, tags):
+def scan_existing_posts():
+    """blog/ 아래 .md 파일을 스캔해 {notion_id: filepath} 맵 반환."""
+    mapping = {}
+    if not os.path.isdir(SAVE_DIR_ROOT):
+        return mapping
+    for fname in os.listdir(SAVE_DIR_ROOT):
+        if not fname.endswith(".md"):
+            continue
+        fpath = os.path.join(SAVE_DIR_ROOT, fname)
+        with open(fpath, encoding="utf-8") as f:
+            for line in f:
+                line = line.strip()
+                if line.startswith("notion_id:"):
+                    nid = line.split(":", 1)[1].strip()
+                    mapping[nid] = fpath
+                    break
+                if line == "---" and mapping:
+                    break
+    return mapping
+
+
+def save_as_blog_post(page, date_str, tags, existing_map):
     if len(date_str) > 10:
         date_str = date_str[:10]
 
     page_id = page["id"]
     title = read_title_plain(page["properties"], NOTION_PROPERTY_TITLE) or "제목없음"
     slug = slugify(title)
-    filename = f"{SAVE_DIR_ROOT}/{date_str}-{slug}.md"
+    new_filename = f"{SAVE_DIR_ROOT}/{date_str}-{slug}.md"
+
+    # 이전 파일이 다른 이름으로 존재하면 삭제 (제목 변경 케이스)
+    old_filename = existing_map.get(page_id)
+    if old_filename and old_filename != new_filename and os.path.exists(old_filename):
+        os.remove(old_filename)
+        print(f">> 이름 변경으로 기존 파일 삭제: {old_filename}")
 
     tags_line = (
         "\ntags: [" + ", ".join(f'"{t}"' for t in tags) + "]"
@@ -192,6 +219,7 @@ def save_as_blog_post(page, date_str, tags):
         f'title: "{title}"\n'
         f"date: {date_str}\n"
         f"authors: [{DEFAULT_AUTHOR}]{tags_line}\n"
+        f"notion_id: {page_id}\n"
         f"---\n\n"
     )
 
@@ -199,10 +227,18 @@ def save_as_blog_post(page, date_str, tags):
     body = "".join(block_to_markdown(b) for b in blocks)
 
     os.makedirs(SAVE_DIR_ROOT, exist_ok=True)
-    with open(filename, "w", encoding="utf-8") as f:
+    with open(new_filename, "w", encoding="utf-8") as f:
         f.write(frontmatter + body)
 
-    return title, filename
+    return title, new_filename
+
+
+def remove_orphans(existing_map, synced_ids):
+    """ALL 모드에서 Notion에 없는 파일 삭제."""
+    for notion_id, fpath in existing_map.items():
+        if notion_id not in synced_ids and os.path.exists(fpath):
+            os.remove(fpath)
+            print(f">> Notion에서 삭제됨, 파일 제거: {fpath}")
 
 
 def main():
@@ -224,9 +260,13 @@ def main():
             "date": {"equals": target_date},
         }
 
+    existing_map = scan_existing_posts()
+    print(f">> 기존 파일 {len(existing_map)}개 추적 중")
+
     has_more = True
     next_cursor = None
     saved = 0
+    synced_ids = set()
 
     while has_more:
         if next_cursor:
@@ -247,12 +287,16 @@ def main():
                 print(f">> WARN: 날짜 읽기 실패 (type={dtype})")
                 continue
             tags = read_tags(props, NOTION_PROPERTY_TAGS)
-            title, filepath = save_as_blog_post(page, page_date, tags)
+            title, filepath = save_as_blog_post(page, page_date, tags, existing_map)
+            synced_ids.add(page["id"])
             print(f">> 저장: {filepath} ({title})")
             saved += 1
 
         has_more = data.get("has_more", False)
         next_cursor = data.get("next_cursor")
+
+    if fetch_mode == "ALL":
+        remove_orphans(existing_map, synced_ids)
 
     print(f">> 완료: {saved}개 저장")
 
