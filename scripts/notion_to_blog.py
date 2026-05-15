@@ -173,34 +173,6 @@ def slugify(title):
     return slug or "post"
 
 
-def page_id_short(page_id):
-    return page_id.replace("-", "")[:8]
-
-
-def build_body_with_truncate(blocks):
-    parts = []
-    truncated = False
-    for block in blocks:
-        md = block_to_markdown(block)
-        if not md:
-            continue
-        parts.append(md)
-        if not truncated and block["type"] == "paragraph" and md.strip():
-            parts.append("<!-- truncate -->\n\n")
-            truncated = True
-    return "".join(parts)
-
-
-def extract_description(blocks):
-    for block in blocks:
-        if block["type"] == "paragraph":
-            rich_text = block["paragraph"].get("rich_text", [])
-            text = extract_text_from_rich_text(rich_text).strip()
-            if text:
-                return text[:150]
-    return ""
-
-
 def save_as_blog_post(page, date_str, tags):
     if len(date_str) > 10:
         date_str = date_str[:10]
@@ -208,33 +180,27 @@ def save_as_blog_post(page, date_str, tags):
     page_id = page["id"]
     title = read_title_plain(page["properties"], NOTION_PROPERTY_TITLE) or "제목없음"
     slug = slugify(title)
-    short_id = page_id_short(page_id)
-    filename = f"{SAVE_DIR_ROOT}/{date_str}-{short_id}.md"
-
-    blocks = get_page_blocks(page_id)
-    description = extract_description(blocks)
+    filename = f"{SAVE_DIR_ROOT}/{date_str}-{slug}.md"
 
     tags_line = (
         "\ntags: [" + ", ".join(f'"{t}"' for t in tags) + "]"
         if tags
         else ""
     )
-    desc_line = f'\ndescription: "{description}"' if description else ""
     frontmatter = (
         f"---\n"
         f'title: "{title}"\n'
         f"date: {date_str}\n"
-        f"slug: {slug}\n"
-        f"authors: [{DEFAULT_AUTHOR}]{tags_line}{desc_line}\n"
+        f"authors: [{DEFAULT_AUTHOR}]{tags_line}\n"
         f"---\n\n"
     )
 
-    body = build_body_with_truncate(blocks)
-    notion_link = f"\n---\n\n> 원본: [Notion에서 보기]({page['url']})\n"
+    blocks = get_page_blocks(page_id)
+    body = "".join(block_to_markdown(b) for b in blocks)
 
     os.makedirs(SAVE_DIR_ROOT, exist_ok=True)
     with open(filename, "w", encoding="utf-8") as f:
-        f.write(frontmatter + body + notion_link)
+        f.write(frontmatter + body)
 
     return title, filename
 
