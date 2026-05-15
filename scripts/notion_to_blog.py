@@ -196,7 +196,7 @@ def scan_existing_posts():
     return load_sync_map()
 
 
-def save_as_blog_post(page, date_str, tags, existing_map):
+def save_as_blog_post(page, date_str, existing_map):
     if len(date_str) > 10:
         date_str = date_str[:10]
 
@@ -211,25 +211,12 @@ def save_as_blog_post(page, date_str, tags, existing_map):
         os.remove(old_filename)
         print(f">> 이름 변경으로 기존 파일 삭제: {old_filename}")
 
-    tags_line = (
-        "\ntags: [" + ", ".join(f'"{t}"' for t in tags) + "]"
-        if tags
-        else ""
-    )
-    frontmatter = (
-        f"---\n"
-        f'title: "{title}"\n'
-        f"date: {date_str}\n"
-        f"authors: [{DEFAULT_AUTHOR}]{tags_line}\n"
-        f"---\n\n"
-    )
-
     blocks = get_page_blocks(page_id)
     body = "".join(block_to_markdown(b) for b in blocks)
 
     os.makedirs(SAVE_DIR_ROOT, exist_ok=True)
     with open(new_filename, "w", encoding="utf-8") as f:
-        f.write(frontmatter + body)
+        f.write(body)
 
     return title, new_filename
 
@@ -292,8 +279,7 @@ def main():
             if not page_date:
                 print(f">> WARN: 날짜 읽기 실패 (type={dtype})")
                 continue
-            tags = read_tags(props, NOTION_PROPERTY_TAGS)
-            title, filepath = save_as_blog_post(page, page_date, tags, existing_map)
+            title, filepath = save_as_blog_post(page, page_date, existing_map)
             existing_map[page["id"]] = filepath
             synced_files.add(filepath)
             print(f">> 저장: {filepath} ({title})")
