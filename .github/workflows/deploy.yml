@@ -14,10 +14,10 @@ permissions:
   pages: write
   id-token: write
 
-# 동시 배포 방지 (이전 배포 끝나기 전 새 push가 와도 큐 처리)
+# 새 배포가 시작되면 이전 대기 중인 배포는 취소
 concurrency:
   group: pages
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   build:
