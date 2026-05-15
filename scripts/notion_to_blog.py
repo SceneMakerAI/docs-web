@@ -173,25 +173,27 @@ def slugify(title):
     return slug or "post"
 
 
+SYNC_MAP_FILE = f"{SAVE_DIR_ROOT}/.notion-sync.json"
+
+
+def load_sync_map():
+    """저장된 {notion_id: filepath} 맵 로드."""
+    if not os.path.exists(SYNC_MAP_FILE):
+        return {}
+    import json
+    with open(SYNC_MAP_FILE, encoding="utf-8") as f:
+        return json.load(f)
+
+
+def save_sync_map(mapping):
+    import json
+    os.makedirs(SAVE_DIR_ROOT, exist_ok=True)
+    with open(SYNC_MAP_FILE, "w", encoding="utf-8") as f:
+        json.dump(mapping, f, ensure_ascii=False, indent=2)
+
+
 def scan_existing_posts():
-    """blog/ 아래 .md 파일을 스캔해 {notion_id: filepath} 맵 반환."""
-    mapping = {}
-    if not os.path.isdir(SAVE_DIR_ROOT):
-        return mapping
-    for fname in os.listdir(SAVE_DIR_ROOT):
-        if not fname.endswith(".md"):
-            continue
-        fpath = os.path.join(SAVE_DIR_ROOT, fname)
-        with open(fpath, encoding="utf-8") as f:
-            for line in f:
-                line = line.strip()
-                if line.startswith("notion_id:"):
-                    nid = line.split(":", 1)[1].strip()
-                    mapping[nid] = fpath
-                    break
-                if line == "---" and mapping:
-                    break
-    return mapping
+    return load_sync_map()
 
 
 def save_as_blog_post(page, date_str, tags, existing_map):
@@ -219,7 +221,6 @@ def save_as_blog_post(page, date_str, tags, existing_map):
         f'title: "{title}"\n'
         f"date: {date_str}\n"
         f"authors: [{DEFAULT_AUTHOR}]{tags_line}\n"
-        f"notion_id: {page_id}\n"
         f"---\n\n"
     )
 
@@ -293,6 +294,7 @@ def main():
                 continue
             tags = read_tags(props, NOTION_PROPERTY_TAGS)
             title, filepath = save_as_blog_post(page, page_date, tags, existing_map)
+            existing_map[page["id"]] = filepath
             synced_files.add(filepath)
             print(f">> 저장: {filepath} ({title})")
             saved += 1
@@ -302,6 +304,11 @@ def main():
 
     if fetch_mode == "ALL":
         remove_orphans(synced_files)
+        # orphan 제거 후 맵도 정리
+        new_map = {k: v for k, v in existing_map.items() if v in synced_files}
+        save_sync_map(new_map)
+    else:
+        save_sync_map(existing_map)
 
     print(f">> 완료: {saved}개 저장")
 
