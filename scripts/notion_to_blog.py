@@ -233,12 +233,17 @@ def save_as_blog_post(page, date_str, tags, existing_map):
     return title, new_filename
 
 
-def remove_orphans(existing_map, synced_ids):
-    """ALL 모드에서 Notion에 없는 파일 삭제."""
-    for notion_id, fpath in existing_map.items():
-        if notion_id not in synced_ids and os.path.exists(fpath):
+def remove_orphans(synced_files):
+    """ALL 모드에서 이번 동기화에 포함되지 않은 .md 파일 전부 삭제."""
+    if not os.path.isdir(SAVE_DIR_ROOT):
+        return
+    for fname in os.listdir(SAVE_DIR_ROOT):
+        if not fname.endswith(".md"):
+            continue
+        fpath = os.path.join(SAVE_DIR_ROOT, fname)
+        if fpath not in synced_files:
             os.remove(fpath)
-            print(f">> Notion에서 삭제됨, 파일 제거: {fpath}")
+            print(f">> 미추적 파일 삭제: {fpath}")
 
 
 def main():
@@ -266,7 +271,7 @@ def main():
     has_more = True
     next_cursor = None
     saved = 0
-    synced_ids = set()
+    synced_files = set()
 
     while has_more:
         if next_cursor:
@@ -288,7 +293,7 @@ def main():
                 continue
             tags = read_tags(props, NOTION_PROPERTY_TAGS)
             title, filepath = save_as_blog_post(page, page_date, tags, existing_map)
-            synced_ids.add(page["id"])
+            synced_files.add(filepath)
             print(f">> 저장: {filepath} ({title})")
             saved += 1
 
@@ -296,7 +301,7 @@ def main():
         next_cursor = data.get("next_cursor")
 
     if fetch_mode == "ALL":
-        remove_orphans(existing_map, synced_ids)
+        remove_orphans(synced_files)
 
     print(f">> 완료: {saved}개 저장")
 
