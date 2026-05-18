@@ -233,7 +233,7 @@ def save_contribution(page, date_str, existing_map):
     number = read_number(props, NOTION_PROPERTY_NUMBER)
 
     slug = slugify(f"{project}-{title}" if project else title)
-    slug_url = f"/contribute/overview/{number}" if number is not None else f"/contribute/{slug}"
+    slug_url = f"/contribute/{number}" if number is not None else f"/contribute/{slug}"
     new_filename = f"{SAVE_DIR}/{date_str}-{slug}.md"
 
     # 파일명 변경 처리

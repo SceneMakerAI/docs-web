@@ -11,7 +11,8 @@ const config: Config = {
 
   // Future flags, see https://docusaurus.io/docs/api/docusaurus-config#future
   future: {
-    v4: true, // Improve compatibility with the upcoming Docusaurus v4
+    v4: true,
+    faster: false, // 네이티브 바이너리(Rspack/SWC/lightningcss)가 이 환경에서 SIGBUS 발생
   },
 
   // Set the production url of your site here

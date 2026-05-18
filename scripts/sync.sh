@@ -18,13 +18,12 @@ set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$REPO_ROOT"
 
-# .env 자동 로드 (blog/.env → .env 순서로 탐색)
-for env_file in "blog/.env" ".env"; do
+# .env 자동 로드 (존재하는 파일 모두 소싱, 나중 파일이 앞 파일을 덮어씀)
+for env_file in ".env" "blog/.env"; do
   if [[ -f "$env_file" ]]; then
     set -a
     source "$env_file"
     set +a
-    break
   fi
 done
 
