@@ -7,8 +7,7 @@ from datetime import datetime, timezone, timedelta
 
 SAVE_DIR = "docs/contribute"
 STATIC_IMG_DIR = "static/img/contribute"
-OVERVIEW_FILE = f"{SAVE_DIR}/overview.md"
-SKIP_FILES = {"overview.md", "TEMPLATE.md"}
+SKIP_FILES = {"_category_.json", ".contribute-sync.json"}
 
 NOTION_PROPERTY_TITLE = os.environ.get("NOTION_PROPERTY_TITLE", "제목")
 NOTION_PROPERTY_DATE = os.environ.get("NOTION_PROPERTY_DATE", "날짜")
@@ -196,19 +195,6 @@ def save_sync_map(mapping):
         json.dump(mapping, f, ensure_ascii=False, indent=2)
 
 
-def update_overview_count(count):
-    """overview.md의 '현재: X건' 숫자를 갱신."""
-    if not os.path.exists(OVERVIEW_FILE):
-        return
-    with open(OVERVIEW_FILE, encoding="utf-8") as f:
-        content = f.read()
-    updated = re.sub(r"현재: \d+건", f"현재: {count}건", content)
-    if updated != content:
-        with open(OVERVIEW_FILE, "w", encoding="utf-8") as f:
-            f.write(updated)
-        print(f">> overview.md 카운트 갱신: {count}건")
-
-
 def save_contribution(page, date_str, existing_map):
     if len(date_str) > 10:
         date_str = date_str[:10]
@@ -336,12 +322,7 @@ def main():
         existing_map = {k: v for k, v in existing_map.items() if v in synced_files}
 
     save_sync_map(existing_map)
-
-    # overview.md 카운트 갱신 (전체 추적 파일 수 기준)
-    total = len(existing_map)
-    update_overview_count(total)
-
-    print(f">> 완료: {saved}개 저장, 누적 {total}건")
+    print(f">> 완료: {saved}개 저장, 누적 {len(existing_map)}건")
 
 
 if __name__ == "__main__":
