@@ -52,5 +52,8 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add blog/ static/img/blog/ docs/contribute/ static/img/contribute/ 2>/dev/null || git add blog/
-          git diff --staged --quiet || git commit -m "chore: Notion 자동 동기화 $(date +'%Y-%m-%d')"
-          git push
+          if ! git diff --staged --quiet; then
+            git commit -m "chore: Notion 자동 동기화 $(date +'%Y-%m-%d')"
+            git pull --rebase origin main
+            git push
+          fi
