@@ -8,7 +8,7 @@ description: SceneMakerAI의 오픈소스 기여 목록. 목표 30건.
 
 SceneMakerAI 프로젝트가 외부 오픈소스 생태계에 기여한 PR·Issue·Discussion·데이터셋을 건별로 정리합니다.
 
-**목표: 누적 30건 이상** / 현재: 0건
+**목표: 누적 30건 이상** / 현재: 1건
 
 ---
 
