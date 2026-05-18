@@ -282,7 +282,7 @@ def main():
     if not verify_database_access():
         sys.exit(1)
 
-    fetch_mode = os.environ.get("FETCH_MODE", "ALL")  # 기여는 기본 ALL
+    fetch_mode = os.environ.get("CONTRIBUTE_FETCH_MODE", "ALL")  # 블로그 FETCH_MODE와 분리
     url = f"https://api.notion.com/v1/databases/{DATABASE_ID}/query"
     payload = {}
 
