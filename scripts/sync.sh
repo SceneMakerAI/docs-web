@@ -1,16 +1,17 @@
 #!/usr/bin/env bash
-# Notion → blog/ 동기화 후 커밋·푸시해 사이트에 즉시 반영한다.
+# Notion → blog/ 및 docs/contribute/ 동기화 후 커밋·푸시해 사이트에 즉시 반영한다.
 #
 # 필수 환경변수:
-#   NOTION_TOKEN          Notion Integration 토큰
-#   NOTION_DATABASE_ID    동기화할 Notion DB ID
+#   NOTION_TOKEN              Notion Integration 토큰
+#   NOTION_DATABASE_ID        블로그 Notion DB ID
 #
 # 선택 환경변수:
-#   FETCH_MODE            DAILY(기본) | ALL
-#   BLOG_DEFAULT_AUTHOR   기본 저자 키 (기본: minsung)
+#   NOTION_CONTRIBUTE_DATABASE_ID   기여 Notion DB ID (설정 시 기여 섹션도 동기화)
+#   FETCH_MODE                      DAILY(기본) | ALL
+#   BLOG_DEFAULT_AUTHOR             기본 저자 키 (기본: minsung)
 #
 # 사용 예:
-#   NOTION_TOKEN=... NOTION_DATABASE_ID=... ./scripts/sync.sh
+#   ./scripts/sync.sh
 #   FETCH_MODE=ALL ./scripts/sync.sh
 set -euo pipefail
 
@@ -36,18 +37,26 @@ fi
 export FETCH_MODE="${FETCH_MODE:-DAILY}"
 DATE="$(date +%Y-%m-%d)"
 
-echo "=== Notion 동기화 시작 (FETCH_MODE=${FETCH_MODE}) ==="
+echo "=== [1/2] 블로그 동기화 (FETCH_MODE=${FETCH_MODE}) ==="
 python scripts/notion_to_blog.py
 
+if [[ -n "${NOTION_CONTRIBUTE_DATABASE_ID:-}" ]]; then
+  echo "=== [2/2] 오픈소스 기여 동기화 ==="
+  python scripts/notion_to_contribute.py
+else
+  echo "=== [2/2] 기여 동기화 생략 (NOTION_CONTRIBUTE_DATABASE_ID 미설정) ==="
+fi
+
 echo "=== git 커밋·푸시 ==="
-git add blog/ static/img/blog/ 2>/dev/null || git add blog/
+git add blog/ static/img/blog/ docs/contribute/ static/img/contribute/ 2>/dev/null \
+  || git add blog/ docs/contribute/
 
 if git diff --cached --quiet; then
   echo "변경 사항 없음 — 푸시 생략"
   exit 0
 fi
 
-git commit -m "chore(blog): Notion 동기화 ${DATE}"
+git commit -m "chore: Notion 동기화 ${DATE}"
 git push origin main
 
-echo "=== 배포 트리거 완료 → https://doc.scenemaker.solbox.com/blog/ ==="
+echo "=== 배포 트리거 완료 → https://doc.scenemaker.solbox.com/ ==="
