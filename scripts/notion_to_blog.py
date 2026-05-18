@@ -10,7 +10,6 @@ STATIC_IMG_DIR = "static/img/blog"
 NOTION_PROPERTY_TITLE = os.environ.get("NOTION_PROPERTY_TITLE", "제목")
 NOTION_PROPERTY_DATE = os.environ.get("NOTION_PROPERTY_DATE", "날짜")
 NOTION_PROPERTY_TAGS = os.environ.get("NOTION_PROPERTY_TAGS", "")
-NOTION_PROPERTY_NUMBER = os.environ.get("NOTION_PROPERTY_NUMBER", "번호")
 DEFAULT_AUTHOR = os.environ.get("BLOG_DEFAULT_AUTHOR", "minsung")
 TIMEZONE_HOURS = 9
 
@@ -115,14 +114,6 @@ def read_tags(props, prop_name):
         s = p.get("select")
         return [s["name"]] if s else []
     return []
-
-
-def read_number(props, prop_name):
-    p = props.get(prop_name, {})
-    if p.get("type") == "number":
-        n = p.get("number")
-        return int(n) if n is not None else None
-    return None
 
 
 def get_page_blocks(page_id):
@@ -313,11 +304,9 @@ def save_as_blog_post(page, date_str, existing_map):
                 os.remove(candidate)
                 print(f">> 이름 변경으로 기존 파일 삭제: {candidate}")
 
-    number = read_number(page["properties"], NOTION_PROPERTY_NUMBER)
-    slug_for_url = str(number) if number is not None else slug
     tags = read_tags(page["properties"], NOTION_PROPERTY_TAGS)
     blocks = get_page_blocks(page_id)
-    frontmatter = make_frontmatter(title, slug_for_url, date_str, DEFAULT_AUTHOR, tags)
+    frontmatter = make_frontmatter(title, slug, date_str, DEFAULT_AUTHOR, tags)
     body = build_body(blocks, slug)
 
     os.makedirs(SAVE_DIR_ROOT, exist_ok=True)
