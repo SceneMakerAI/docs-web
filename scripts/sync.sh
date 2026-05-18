@@ -1,22 +1,42 @@
 #!/usr/bin/env bash
-# blog/ 변경분을 커밋·푸시해 GitHub Actions 배포를 트리거한다.
-# 사용: ./scripts/sync.sh [커밋 메시지 (선택)]
+# Notion → blog/ 동기화 후 커밋·푸시해 사이트에 즉시 반영한다.
+#
+# 필수 환경변수:
+#   NOTION_TOKEN          Notion Integration 토큰
+#   NOTION_DATABASE_ID    동기화할 Notion DB ID
+#
+# 선택 환경변수:
+#   FETCH_MODE            DAILY(기본) | ALL
+#   BLOG_DEFAULT_AUTHOR   기본 저자 키 (기본: minsung)
+#
+# 사용 예:
+#   NOTION_TOKEN=... NOTION_DATABASE_ID=... ./scripts/sync.sh
+#   FETCH_MODE=ALL ./scripts/sync.sh
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$REPO_ROOT"
 
-DATE="$(date +%Y-%m-%d)"
-MSG="${1:-"chore(blog): 동기화 ${DATE}"}"
+if [[ -z "${NOTION_TOKEN:-}" || -z "${NOTION_DATABASE_ID:-}" ]]; then
+  echo "오류: NOTION_TOKEN, NOTION_DATABASE_ID 환경변수가 필요합니다."
+  exit 1
+fi
 
-git add blog/ static/img/
+export FETCH_MODE="${FETCH_MODE:-DAILY}"
+DATE="$(date +%Y-%m-%d)"
+
+echo "=== Notion 동기화 시작 (FETCH_MODE=${FETCH_MODE}) ==="
+python scripts/notion_to_blog.py
+
+echo "=== git 커밋·푸시 ==="
+git add blog/ static/img/blog/ 2>/dev/null || git add blog/
 
 if git diff --cached --quiet; then
   echo "변경 사항 없음 — 푸시 생략"
   exit 0
 fi
 
-git commit -m "$MSG"
+git commit -m "chore(blog): Notion 동기화 ${DATE}"
 git push origin main
 
-echo "배포 트리거 완료 → https://doc.scenemaker.solbox.com/blog/"
+echo "=== 배포 트리거 완료 → https://doc.scenemaker.solbox.com/blog/ ==="

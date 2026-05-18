@@ -6,6 +6,7 @@ from urllib.parse import urlparse
 from datetime import datetime, timezone, timedelta
 
 SAVE_DIR_ROOT = "blog"
+STATIC_IMG_DIR = "static/img/blog"
 NOTION_PROPERTY_TITLE = os.environ.get("NOTION_PROPERTY_TITLE", "제목")
 NOTION_PROPERTY_DATE = os.environ.get("NOTION_PROPERTY_DATE", "날짜")
 NOTION_PROPERTY_TAGS = os.environ.get("NOTION_PROPERTY_TAGS", "")
@@ -41,6 +42,20 @@ headers = {
     "Content-Type": "application/json",
     "Notion-Version": "2022-06-28",
 }
+
+
+def load_valid_tags():
+    """tags.yml에 정의된 태그 키 목록을 반환."""
+    tags_file = f"{SAVE_DIR_ROOT}/tags.yml"
+    if not os.path.exists(tags_file):
+        return set()
+    valid = set()
+    with open(tags_file, encoding="utf-8") as f:
+        for line in f:
+            m = re.match(r'^([a-zA-Z0-9_-]+):', line)
+            if m:
+                valid.add(m.group(1))
+    return valid
 
 
 def verify_database_access():
@@ -121,7 +136,32 @@ def extract_text_from_rich_text(rich_text_list):
     return result
 
 
-def block_to_markdown(block):
+def download_image(url: str, slug: str, index: int) -> str:
+    """Notion 이미지를 static/img/blog/{slug}/ 에 다운로드하고 로컬 경로를 반환."""
+    save_dir = f"{STATIC_IMG_DIR}/{slug}"
+    os.makedirs(save_dir, exist_ok=True)
+
+    parsed = urlparse(url)
+    ext = os.path.splitext(parsed.path)[1].lower()
+    if ext not in (".jpg", ".jpeg", ".png", ".gif", ".webp", ".svg"):
+        ext = ".jpg"
+
+    filename = f"img-{index:02d}{ext}"
+    filepath = f"{save_dir}/{filename}"
+
+    if not os.path.exists(filepath):
+        r = requests.get(url, timeout=30)
+        r.raise_for_status()
+        with open(filepath, "wb") as f:
+            f.write(r.content)
+        print(f">> 이미지 저장: {filepath}")
+    else:
+        print(f">> 이미지 캐시: {filepath}")
+
+    return f"/img/blog/{slug}/{filename}"
+
+
+def block_to_markdown(block, slug=None, image_counter=None):
     b_type = block["type"]
     if b_type in (
         "paragraph", "heading_1", "heading_2", "heading_3",
@@ -133,7 +173,7 @@ def block_to_markdown(block):
         if b_type == "paragraph":
             return content + "\n\n"
         elif b_type == "heading_1":
-            return f"# {content}\n\n"
+            return f"## {content}\n\n"  # h1 → h2 (frontmatter title이 h1)
         elif b_type == "heading_2":
             return f"## {content}\n\n"
         elif b_type == "heading_3":
@@ -161,10 +201,62 @@ def block_to_markdown(block):
             or block["image"].get("external", {}).get("url")
             or ""
         )
+        if not url:
+            return ""
+        if slug is not None and image_counter is not None:
+            try:
+                local_path = download_image(url, slug, image_counter[0])
+                image_counter[0] += 1
+                return f"![image]({local_path})\n\n"
+            except Exception as e:
+                print(f">> WARN: 이미지 다운로드 실패 ({url[:60]}...): {e}")
         return f"![image]({url})\n\n"
     elif b_type == "divider":
         return "---\n\n"
     return ""
+
+
+def build_body(blocks, slug):
+    """블록을 MDX 본문으로 변환. 첫 번째 paragraph 뒤에 truncate 마커 삽입."""
+    image_counter = [0]
+    parts = []
+    truncate_inserted = False
+
+    for block in blocks:
+        md = block_to_markdown(block, slug, image_counter)
+        if not md:
+            continue
+        parts.append(md)
+        if not truncate_inserted and block["type"] == "paragraph":
+            parts.append("{/* truncate */}\n\n")
+            truncate_inserted = True
+
+    if not truncate_inserted and parts:
+        parts.insert(1, "{/* truncate */}\n\n")
+
+    return "".join(parts)
+
+
+def make_frontmatter(title, slug, date_str, author, tags):
+    valid_tags = load_valid_tags()
+    if valid_tags:
+        filtered = [t for t in tags if t in valid_tags]
+        skipped = set(tags) - set(filtered)
+        if skipped:
+            print(f">> WARN: tags.yml에 없는 태그 제외: {skipped}")
+        tags = filtered
+
+    tags_str = ", ".join(tags)
+    safe_title = title.replace('"', '\\"')
+    return (
+        f"---\n"
+        f"slug: {slug}\n"
+        f"title: \"{safe_title}\"\n"
+        f"authors: [{author}]\n"
+        f"tags: [{tags_str}]\n"
+        f"date: {date_str}\n"
+        f"---\n\n"
+    )
 
 
 def slugify(title):
@@ -177,7 +269,6 @@ SYNC_MAP_FILE = f"{SAVE_DIR_ROOT}/.notion-sync.json"
 
 
 def load_sync_map():
-    """저장된 {notion_id: filepath} 맵 로드."""
     if not os.path.exists(SYNC_MAP_FILE):
         return {}
     import json
@@ -203,30 +294,34 @@ def save_as_blog_post(page, date_str, existing_map):
     page_id = page["id"]
     title = read_title_plain(page["properties"], NOTION_PROPERTY_TITLE) or "제목없음"
     slug = slugify(title)
-    new_filename = f"{SAVE_DIR_ROOT}/{date_str}-{slug}.md"
+    new_filename = f"{SAVE_DIR_ROOT}/{date_str}-{slug}.mdx"
 
-    # 이전 파일이 다른 이름으로 존재하면 삭제 (제목 변경 케이스)
     old_filename = existing_map.get(page_id)
-    if old_filename and old_filename != new_filename and os.path.exists(old_filename):
-        os.remove(old_filename)
-        print(f">> 이름 변경으로 기존 파일 삭제: {old_filename}")
+    if old_filename and old_filename != new_filename:
+        # .md → .mdx 마이그레이션 케이스도 포함
+        for candidate in [old_filename, old_filename.replace(".mdx", ".md")]:
+            if os.path.exists(candidate):
+                os.remove(candidate)
+                print(f">> 이름 변경으로 기존 파일 삭제: {candidate}")
 
+    tags = read_tags(page["properties"], NOTION_PROPERTY_TAGS)
     blocks = get_page_blocks(page_id)
-    body = "".join(block_to_markdown(b) for b in blocks)
+    frontmatter = make_frontmatter(title, slug, date_str, DEFAULT_AUTHOR, tags)
+    body = build_body(blocks, slug)
 
     os.makedirs(SAVE_DIR_ROOT, exist_ok=True)
     with open(new_filename, "w", encoding="utf-8") as f:
-        f.write(body)
+        f.write(frontmatter + body)
 
     return title, new_filename
 
 
 def remove_orphans(synced_files):
-    """ALL 모드에서 이번 동기화에 포함되지 않은 .md 파일 전부 삭제."""
+    """ALL 모드에서 이번 동기화에 포함되지 않은 .mdx/.md 파일을 삭제."""
     if not os.path.isdir(SAVE_DIR_ROOT):
         return
     for fname in os.listdir(SAVE_DIR_ROOT):
-        if not fname.endswith(".md"):
+        if not (fname.endswith(".mdx") or fname.endswith(".md")):
             continue
         fpath = os.path.join(SAVE_DIR_ROOT, fname)
         if fpath not in synced_files:
@@ -290,7 +385,6 @@ def main():
 
     if fetch_mode == "ALL":
         remove_orphans(synced_files)
-        # orphan 제거 후 맵도 정리
         new_map = {k: v for k, v in existing_map.items() if v in synced_files}
         save_sync_map(new_map)
     else:
