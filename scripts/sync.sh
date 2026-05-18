@@ -17,8 +17,19 @@ set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$REPO_ROOT"
 
+# .env 자동 로드 (blog/.env → .env 순서로 탐색)
+for env_file in "blog/.env" ".env"; do
+  if [[ -f "$env_file" ]]; then
+    set -a
+    source "$env_file"
+    set +a
+    break
+  fi
+done
+
 if [[ -z "${NOTION_TOKEN:-}" || -z "${NOTION_DATABASE_ID:-}" ]]; then
   echo "오류: NOTION_TOKEN, NOTION_DATABASE_ID 환경변수가 필요합니다."
+  echo "  .env 또는 blog/.env 에 두 값을 추가하거나, 환경변수로 직접 넘기세요."
   exit 1
 fi
 
