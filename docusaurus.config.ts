@@ -154,7 +154,7 @@ const config: Config = {
             },
             {
               label: '오픈소스 기여',
-              to: '/docs/contribute/overview',
+              to: '/docs/contribute',
             },
             {
               label: '릴리즈 노트',
