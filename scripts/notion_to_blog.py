@@ -227,7 +227,7 @@ def build_body(blocks, slug):
         if not md:
             continue
         parts.append(md)
-        if not truncate_inserted and block["type"] == "paragraph":
+        if not truncate_inserted:
             parts.append("{/* truncate */}\n\n")
             truncate_inserted = True
 
