@@ -1,31 +1,34 @@
 ---
 id: overview
-title: 오픈소스 기여
+title: 오픈소스 기여 개요
 sidebar_position: 1
 slug: /contribute/overview
+description: SceneMakerAI의 오픈소스 기여 목록. 목표 30건.
 ---
 
-# 오픈소스 기여
+SceneMakerAI 프로젝트가 외부 오픈소스 생태계에 기여한 PR·Issue·Discussion·데이터셋을 건별로 정리합니다.
 
-본 프로젝트와 관련된 오픈소스 저장소, 데이터셋, 디스커션을 모아둔 인덱스 페이지입니다.
+**목표: 누적 30건 이상** / 현재: 0건
 
-> 🚧 기여가 진행되는 대로 링크가 채워집니다. 목표: **누적 30건 이상의 기여**.
+---
+
+## 기여 형식
+
+각 기여는 좌측 사이드바에 개별 페이지로 등록됩니다.
+
+| 항목 | 내용 |
+|------|------|
+| 프로젝트 | 업스트림 저장소명 (vLLM, Qwen, LangGraph 등) |
+| 유형 | PR / Issue / Discussion / Dataset |
+| 날짜 | 머지·공개일 |
+| 상태 | `open` / `merged` / `closed` / `released` |
+| 링크 | 업스트림 원본 링크 |
 
 ## 프로젝트 저장소
 
 | 저장소 | 설명 | 링크 |
-| ------ | ---- | ---- |
+|--------|------|------|
 | `docs-web` | 본 문서 사이트 | [GitHub](https://github.com/SceneMakerAI/docs-web) |
-| `qwen_ai_broadcast` | 메인 프로젝트 코드 | _(준비 중 — `SceneMakerAI` 조직 이전 예정)_ |
-| `qwen3.5-broadcast-ko-rag` | 도메인 특화 RAG 파이프라인 | _(준비 중 — Hugging Face)_ |
-| `langgraph-media-blueprint` | LangGraph 워크플로우 청사진 | _(준비 중 — GitHub `SceneMakerAI/langgraph-media-blueprint`)_ |
-
-## 업스트림 참여
-
-- **Qwen (Alibaba)** — 한국어 방송 도메인 추론 관련 Issue/PR/Discussion
-- **LangChain / LangGraph** — 다단계 워크플로우 상태 관리 피드백
-- **Hugging Face** — 모델 템플릿, 데이터셋, RAG 설정 공개
-
-## 인용 방법
-
-초기 산출물 공개 후 인용 가이드를 추가합니다.
+| `qwen_ai_broadcast` | 메인 프로젝트 코드 | _(SceneMakerAI 조직 이전 예정)_ |
+| `qwen3.5-broadcast-ko-rag` | 도메인 특화 RAG 파이프라인 | _(Hugging Face 준비 중)_ |
+| `langgraph-media-blueprint` | LangGraph 워크플로우 청사진 | _(GitHub 준비 중)_ |
