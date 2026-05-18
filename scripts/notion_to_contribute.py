@@ -16,6 +16,7 @@ NOTION_PROPERTY_PROJECT = os.environ.get("NOTION_PROPERTY_PROJECT", "프로젝�
 NOTION_PROPERTY_TYPE = os.environ.get("NOTION_PROPERTY_TYPE", "유형")
 NOTION_PROPERTY_STATUS = os.environ.get("NOTION_PROPERTY_STATUS", "상태")
 NOTION_PROPERTY_URL = os.environ.get("NOTION_PROPERTY_URL", "URL")
+NOTION_PROPERTY_NUMBER = os.environ.get("NOTION_PROPERTY_NUMBER", "번호")
 
 
 def normalize_notion_database_id(raw):
@@ -74,6 +75,14 @@ def read_select(props, prop_name):
 def read_url(props, prop_name):
     p = props.get(prop_name, {})
     return p.get("url") or ""
+
+
+def read_number(props, prop_name):
+    p = props.get(prop_name, {})
+    if p.get("type") == "number":
+        n = p.get("number")
+        return int(n) if n is not None else None
+    return None
 
 
 def read_title_plain(props, prop_name):
@@ -221,8 +230,10 @@ def save_contribution(page, date_str, existing_map):
     contrib_type = read_select(props, NOTION_PROPERTY_TYPE)
     status = read_select(props, NOTION_PROPERTY_STATUS)
     upstream_url = read_url(props, NOTION_PROPERTY_URL)
+    number = read_number(props, NOTION_PROPERTY_NUMBER)
 
     slug = slugify(f"{project}-{title}" if project else title)
+    slug_url = f"/contribute/overview/{number}" if number is not None else f"/contribute/{slug}"
     new_filename = f"{SAVE_DIR}/{date_str}-{slug}.md"
 
     # 파일명 변경 처리
@@ -254,7 +265,7 @@ def save_contribution(page, date_str, existing_map):
         f"---\n"
         f"id: {slug}\n"
         f'title: "{safe_title}"\n'
-        f"slug: /contribute/{slug}\n"
+        f"slug: {slug_url}\n"
         f"description: \"{title} ({date_str}, {status})\"\n"
         f"---\n\n"
     )
