@@ -133,12 +133,28 @@ def extract_text_from_rich_text(rich_text_list):
     parts = []
     for text in rich_text_list:
         plain = text["plain_text"]
+        ann = text.get("annotations", {})
         href = text.get("href")
-        parts.append(f"[{plain}]({href})" if href else plain)
+
+        if ann.get("code"):
+            formatted = f"`{plain}`"
+        else:
+            formatted = plain
+            if ann.get("bold") and ann.get("italic"):
+                formatted = f"***{formatted}***"
+            elif ann.get("bold"):
+                formatted = f"**{formatted}**"
+            elif ann.get("italic"):
+                formatted = f"*{formatted}*"
+            if ann.get("strikethrough"):
+                formatted = f"~~{formatted}~~"
+
+        parts.append(f"[{formatted}]({href})" if href else formatted)
+
     result = ""
     for part in parts:
         if result and result[-1] not in (" ", "\n") and part and part[0] not in (" ", "\n"):
-            if result.endswith(")") or result[-1].isalnum():
+            if result.endswith(")") or result[-1].isalnum() or result[-1] in ("`", "*", "~"):
                 result += " "
         result += part
     return result
