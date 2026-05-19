@@ -1,8 +1,8 @@
 ---
-id: 2
-title: PoC 
+id: poc
+title: PoC
 sidebar_position: 1
-slug: /PoC
+slug: /poc
 ---
 
 # PoC

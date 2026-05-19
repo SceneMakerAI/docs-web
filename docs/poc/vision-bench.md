@@ -1,7 +1,7 @@
 ---
-id: 3
+id: vision-bench
 title: vision-bench
-sidebar_position: 1
+sidebar_position: 3
 slug: /vision-bench
 ---
 

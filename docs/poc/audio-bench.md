@@ -1,7 +1,7 @@
 ---
 id: audio-bench
 title: audio-bench
-sidebar_position: 1
+sidebar_position: 2
 slug: /audio-bench
 ---
 
