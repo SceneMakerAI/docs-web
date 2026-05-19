@@ -149,6 +149,12 @@ const config: Config = {
         },
         {
           type: 'docSidebar',
+          sidebarId: 'installSidebar',
+          position: 'left',
+          label: '설치',
+        },
+        {
+          type: 'docSidebar',
           sidebarId: 'pocSidebar',
           position: 'left',
           label: 'PoC',

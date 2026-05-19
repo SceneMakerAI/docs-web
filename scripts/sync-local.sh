@@ -65,6 +65,12 @@ if [ -n "$NOTION_RELEASE" ]; then
   pids+=($!)
 fi
 
+if [ -n "$NOTION_INSTALL" ]; then
+  NOTION_DATABASE_ID="$NOTION_INSTALL" SAVE_DIR=docs/install FETCH_MODE=ALL \
+    python scripts/notion_to_docs_generic.py &
+  pids+=($!)
+fi
+
 if [ ${#pids[@]} -eq 0 ]; then
   echo "동기화할 DB가 없습니다. .env 파일에 NOTION_* 변수를 설정하세요."
   exit 0

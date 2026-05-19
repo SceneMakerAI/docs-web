@@ -31,6 +31,7 @@ jobs:
       _POC_DB:          ${{ secrets.NOTION_POC }}
       _DOCS_DB:         ${{ secrets.NOTION_DOCS }}
       _RELEASE_DB:      ${{ secrets.NOTION_RELEASE }}
+      _INSTALL_DB:      ${{ secrets.NOTION_INSTALL }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -84,6 +85,12 @@ jobs:
 
           if [ -n "$_RELEASE_DB" ]; then
             NOTION_DATABASE_ID="$_RELEASE_DB" SAVE_DIR=docs/release-notes FETCH_MODE=ALL \
+              python scripts/notion_to_docs_generic.py &
+            pids+=($!)
+          fi
+
+          if [ -n "$_INSTALL_DB" ]; then
+            NOTION_DATABASE_ID="$_INSTALL_DB" SAVE_DIR=docs/install FETCH_MODE=ALL \
               python scripts/notion_to_docs_generic.py &
             pids+=($!)
           fi
