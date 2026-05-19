@@ -204,9 +204,15 @@ def block_to_markdown(block, slug, image_counter):
     return ""
 
 
+def escape_mdx_angle_brackets(text):
+    """<한글> 같이 비 ASCII를 포함한 꺾쇠 패턴을 MDX가 태그로 해석하지 않도록 이스케이프."""
+    return re.sub(r'<([^>]*[^\x00-\x7F][^>]*)>', r'&lt;\1&gt;', text)
+
+
 def blocks_to_markdown(blocks, slug):
     image_counter = [0]
-    return "".join(block_to_markdown(b, slug, image_counter) for b in blocks)
+    body = "".join(block_to_markdown(b, slug, image_counter) for b in blocks)
+    return escape_mdx_angle_brackets(body)
 
 
 def slugify(title):

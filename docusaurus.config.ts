@@ -201,7 +201,7 @@ const config: Config = {
             },
             {
               label: '아키텍처',
-              to: '/docs/architecture/overview',
+              to: '/docs/architecture',
             },
             {
               label: '오픈소스 기여',
@@ -209,7 +209,7 @@ const config: Config = {
             },
             {
               label: '릴리즈 노트',
-              to: '/docs/release-notes/overview',
+              to: '/docs/release-notes',
             },
           ],
         },

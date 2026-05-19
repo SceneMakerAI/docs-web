@@ -226,6 +226,11 @@ def block_to_markdown(block, slug=None, image_counter=None):
     return ""
 
 
+def escape_mdx_angle_brackets(text):
+    """<한글> 같이 비 ASCII를 포함한 꺾쇠 패턴을 MDX가 태그로 해석하지 않도록 이스케이프."""
+    return re.sub(r'<([^>]*[^\x00-\x7F][^>]*)>', r'&lt;\1&gt;', text)
+
+
 def build_body(blocks, slug):
     """블록을 MDX 본문으로 변환. 첫 번째 paragraph 뒤에 truncate 마커 삽입."""
     image_counter = [0]
@@ -244,7 +249,7 @@ def build_body(blocks, slug):
     if not truncate_inserted and parts:
         parts.insert(1, "{/* truncate */}\n\n")
 
-    return "".join(parts)
+    return escape_mdx_angle_brackets("".join(parts))
 
 
 def make_frontmatter(title, slug, date_str, author, tags):
