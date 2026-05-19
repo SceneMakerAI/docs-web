@@ -136,8 +136,8 @@ const config: Config = {
       title: 'SceneMakerAI',
       logo: {
         alt: 'SceneMakerAI Logo',
-        src: 'img/logo.svg',
-        srcDark: 'img/logo-dark.svg',
+        src: '/img/logo.svg',
+        srcDark: '/img/logo-dark.svg',
       },
       items: [
         {type: 'docSidebar', sidebarId: 'aboutSidebar', label: '프로젝트 소개', position: 'left'},
