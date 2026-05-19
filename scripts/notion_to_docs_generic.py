@@ -34,7 +34,7 @@ TIMEZONE_HOURS = 9
 
 SYNC_MAP_FILE = f"{SAVE_DIR}/.notion-sync.json"
 # 수동 작성 구조 파일 — sync가 절대 삭제하지 않음
-SKIP_FILES = {"_category_.json", "overview.md", "overview.mdx", "intro.mdx"}
+SKIP_FILES = {"_category_.json", "overview.mdx", "intro.mdx"}
 
 
 def normalize_notion_database_id(raw):
