@@ -114,7 +114,15 @@ def read_date_start(props, prop_name):
 
 def get_page_blocks(page_id):
     url = f"https://api.notion.com/v1/blocks/{page_id}/children"
-    return requests.get(url, headers=headers).json().get("results", [])
+    blocks = []
+    params = {}
+    while True:
+        data = requests.get(url, headers=headers, params=params).json()
+        blocks.extend(data.get("results", []))
+        if not data.get("has_more"):
+            break
+        params = {"start_cursor": data["next_cursor"]}
+    return blocks
 
 
 def extract_text_from_rich_text(rich_text_list):

@@ -224,3 +224,146 @@ Activate with: source .venv/bin/activate
 (vllm-svc) > uv pip install vllm --torch-backend=auto
 ```
 
+```shell
+(vllm-svc) > vllm serve /stg/models/Qwen3.5-122B-A10B-GPTQ-Int4 \
+  --served-model-name qwen \
+  --port 8000 \
+  --tensor-parallel-size 1 \
+  --quantization moe_wna16 \
+  --max-model-len 32768 \
+  --max-num-seqs 8 \
+  --gpu-memory-utilization 0.90 \
+  --reasoning-parser qwen3 \
+  --trust-remote-code
+```
+
+```shell
+(vllm-svc) >  curl http://localhost:8000/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "qwen",
+    "messages": [{"role":"user","content":"안녕"}],
+    "max_tokens": 100,
+    "chat_template_kwargs": {"enable_thinking": false}
+  }'
+  
+  
+{"id":"chatcmpl-89cf9de14d6fdfd2","object":"chat.completion","created":1779181606,"prompt_routed_experts":null,"model":"qwen","choices":[{"index":0,"message":{"role":"assistant","content":"안녕하세요! 반갑습니다. 😊\n오늘 어떤 도움이 필요하신가요? 궁금한 점이 있거나 대화하고 싶은 주제가 있다면 언제든지 말씀해 주세요.","refusal":null,"annotations":null,"audio":null,"function_call":null,"tool_calls":[],"reasoning":null},"logprobs":null,"finish_reason":"stop","stop_reason":null,"token_ids":null,"routed_experts":null}],"service_tier":null,"system_fingerprint":"vllm-0.21.0-2426ae93","usage":{"prompt_tokens":14,"total_tokens":49,"completion_tokens":35,"prompt_tokens_details":null},"prompt_logprobs":null,"prompt_token_ids":null,"prompt_text":null,"kv_transfer_params":null}[root@ip-172-31-22-41 models]#
+```
+
+### Service 등록
+
+실행시 /stg/models/Qwen3.5-122B-A10B-GPTQ-Int ⇒ /mnt/nvme/models/Qwen3.5-122B-A10B-GPTQ-Int4 로 모델을 옮기고 nvme 에 있는 모델을 로드 한다.
+
+- Qwen3.5-122B-A10B-GPTQ-Int4 
+```shell
+[Unit]
+Description=vLLM Qwen3.5-122B-A10B-GPTQ-Int4 Service
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/usr/service/vllm-svc
+
+Environment="PATH=/usr/service/vllm-svc/.venv/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin"
+Environment="HF_HOME=/mnt/nvme/hf-cache"
+Environment="VLLM_CACHE_ROOT=/mnt/nvme/vllm-cache"
+
+# NVMe 마운트 확인
+ExecStartPre=/bin/bash -c 'mountpoint -q /mnt/nvme || (echo "NVMe not mounted" && exit 1)'
+
+# 모델/캐시 디렉토리 준비
+ExecStartPre=/bin/mkdir -p /mnt/nvme/models /mnt/nvme/hf-cache /mnt/nvme/vllm-cache
+
+# EBS → NVMe 동기화
+ExecStartPre=/usr/bin/rsync -a --delete \
+    /stg/models/Qwen3.5-122B-A10B-GPTQ-Int4/ \
+    /mnt/nvme/models/Qwen3.5-122B-A10B-GPTQ-Int4/
+
+ExecStart=/usr/service/vllm-svc/.venv/bin/vllm serve \
+    /mnt/nvme/models/Qwen3.5-122B-A10B-GPTQ-Int4 \
+    --served-model-name qwen \
+    --port 8000 \
+    --tensor-parallel-size 1 \
+    --quantization moe_wna16 \
+    --max-model-len 32768 \
+    --max-num-seqs 8 \
+    --gpu-memory-utilization 0.90 \
+    --reasoning-parser qwen3 \
+    --trust-remote-code
+
+StandardOutput=append:/usr/service/logs/vllm/qwen_122.log
+StandardError=append:/usr/service/logs/vllm/qwen_122.log
+
+TimeoutStartSec=600
+TimeoutStopSec=60
+Restart=on-failure
+RestartSec=10
+KillMode=mixed
+
+LimitNOFILE=1048576
+LimitNPROC=1048576
+
+[Install]
+WantedBy=multi-user.target
+```
+
+- Qwen3.6-27B-FP8
+```shell
+[Unit]
+Description=vLLM Qwen3.6-27B-FP8 Service
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/usr/service/vllm-svc
+
+Environment="PATH=/usr/service/vllm-svc/.venv/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin"
+Environment="HF_HOME=/mnt/nvme/hf-cache"
+Environment="VLLM_CACHE_ROOT=/mnt/nvme/vllm-cache"
+
+# NVMe 마운트 확인
+ExecStartPre=/bin/bash -c 'mountpoint -q /mnt/nvme || (echo "NVMe not mounted" && exit 1)'
+
+# 모델/캐시 디렉토리 준비
+ExecStartPre=/bin/mkdir -p /mnt/nvme/models /mnt/nvme/hf-cache /mnt/nvme/vllm-cache
+
+# EBS → NVMe 동기화
+ExecStartPre=/usr/bin/rsync -a --delete \
+    /stg/models/Qwen3.6-27B-FP8/ \
+    /mnt/nvme/models/Qwen3.6-27B-FP8/
+
+ExecStart=/usr/service/vllm-svc/.venv/bin/vllm serve \
+    /mnt/nvme/models/Qwen3.6-27B-FP8 \
+    --served-model-name qwen \
+    --port 8000 \
+    --tensor-parallel-size 1 \
+    --max-model-len 262144 \
+    --max-num-seqs 16 \
+    --gpu-memory-utilization 0.92 \
+    --enable-prefix-caching \
+    --reasoning-parser qwen3 \
+    --trust-remote-code
+
+StandardOutput=append:/usr/service/logs/vllm/qwen_27.log
+StandardError=append:/usr/service/logs/vllm/qwen_27.log
+
+TimeoutStartSec=600
+TimeoutStopSec=60
+Restart=on-failure
+RestartSec=10
+KillMode=mixed
+LimitNOFILE=1048576
+LimitNPROC=1048576
+
+[Install]
+WantedBy=multi-user.target
+
+```
+
+감사합니다.
+
