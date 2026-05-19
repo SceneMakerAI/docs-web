@@ -5,6 +5,12 @@ on:
   push:
     branches: [main]
 
+  # Notion Sync 완료 시 자동 배포 (bot push는 push 이벤트를 트리거하지 않음)
+  workflow_run:
+    workflows: ["Notion Sync"]
+    types: [completed]
+    branches: [main]
+
   # Actions 탭에서 수동 실행 허용 (롤백/재배포에 유용)
   workflow_dispatch:
 
