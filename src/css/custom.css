@@ -106,6 +106,29 @@
   margin-bottom: 0.5rem;
 }
 
+/* ─────────── Code block: Notion 스타일 ─────────── */
+/* 라이트/다크 모두 vsDark 배경 사용 → 흰 배경 오버라이드 불필요 */
+.theme-code-block {
+  border-radius: 6px;
+  margin-bottom: 0.75rem;
+  box-shadow: none;
+}
+
+/* 언어 레이블 (Notion의 상단 언어 표시처럼) */
+.theme-code-block .prism-code {
+  font-size: 0.85rem;
+  line-height: 1.6;
+  padding: 12px 16px;
+}
+
+/* 코드 블록 상단 툴바(언어 이름·복사 버튼) — Notion 스타일로 */
+.theme-code-block-highlighted-line {
+  background-color: rgba(255, 255, 255, 0.08);
+  display: block;
+  margin: 0 -16px;
+  padding: 0 16px;
+}
+
 /* Navbar 로고: sample.pen 의 워드마크 18px Geist 옆에 맞춰 24×24 */
 .navbar__logo {
   height: 24px;
