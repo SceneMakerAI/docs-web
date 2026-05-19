@@ -14,12 +14,10 @@ sidebar_position: 1
 
 리전 선택 근거
 
-신형 GPU 인스턴스(G7e, P5, P6 등)는 공급이 수요를 못 따라잡는 상태 입니다. 그래서 리전·시간대에 따라 InsufficientInstanceCapacity 에러로 인스턴스 launch 자체가 실패하는 일이 자주 발생합니다.
+신형 GPU 인스턴스(G7e, P5, P6 등)는 공급이 수요를 못 따라잡는 상태 입니다. 리전·시간대에 따라 InsufficientInstanceCapacity 에러로 인스턴스 프로비저닝이 실패하는 일이 자주 발생합니다.
 
 이런 이유로 리전 선택은 단순히 "가까운 리전"이 아니라, 다음 두 축을 함께 따져야 합니다.
 
-- (1) 
-- (2) 
 G7e 제공 리전 비교 (2026-05-19 측정)
 
 점수 해석
@@ -41,65 +39,24 @@ aws ec2 get-spot-placement-scores \
 
 - 필요 권한: ec2:GetSpotPlacementScores
 - 비용: 무료, 평가 기간: 향후 1시간
-> 📌 GPU 인스턴스 쿼터 (모든 리전 공통 주의사항)
-
-> 
-
-> AWS 신규 계정의 GPU 관련 On-Demand 쿼터 디폴트는 모든 리전에서 0 vCPU 입니다. 첫 인스턴스를 띄우기 전 Service Quotas 콘솔 또는 API로 증설 신청이 필요합니다.
-
-> 
-
-> | 쿼터 항목 | 쿼터 코드 | 디폴트 |
-
-> |---|---|---|
-
-> | Running On-Demand G and VT instances | L-DB2E81BA | 0 |
-
-> | Running On-Demand P instances | L-7212CCBC | 0 |
-
-> | All G and VT Spot Instance Requests | L-417A185B | 0 |
-
-> 
-
-> 본인 계정 쿼터 확인:
-
-> 
-
-> `bash
-
-> aws service-quotas get-service-quota \
-
-> --region <리전> --service-code ec2 --quota-code L-DB2E81BA \
-
-> --query "Quota.Value" --output text
-
-> `
-
-> 
-
-> 증설 신청은 일반적으로 수 시간 ~ 수 일 소요. GPU 인스턴스는 AWS 심사가 까다로워 사용 목적·예상 사용량을 케이스에 상세히 작성해야 빠르게 승인됨.
-
 (1) Capacity 측면
 
-- 한·일 리전(서울·도쿄)은 점수 1 → 평일 업무시간 기준 켜기 실패 30~50% 체감
+- 한·일 리전(서울·도쿄)은 점수 1 → 평일 업무시간 기준 잦은 프로비저닝 실패 예상
 - 미국 리전 3곳(us-east-1 / us-east-2 / us-west-2)은 점수 3
-- 그중 us-west-2와 us-east-1은 점수 3인 AZ가 2개 (usw2-az1·az3 / use1-az2·az6) → 한 AZ 만석이어도 다른 AZ로 폴백 여유
+- 그중 us-west-2와 us-east-1은 점수 3인 가용영역이 2개 (usw2-az1·az3 / use1-az2·az6) → 한 가용영역의 capacity가 소진되어도 다른 가용영역으로 폴백 가능
 (2) 응답시간 측면
 
-- LLM 서빙은 모델 자체의 첫 토큰 생성에 200~500 ms 소요 → 네트워크 +150~200 ms는 실사용자 체감에서 거의 묻히는 수준
-- 인터랙티브 챗봇이 아닌 API 호출/배치 용도라면 미국 리전(약 500 ms TTFB)도 허용 범위
+- LLM 서빙은 모델 자체의 첫 토큰 생성에 200~500 ms 소요 → 네트워크 +150~200 ms는 실사용자 체감 차이가 거의 없는 수준
 - 한국 인접 우선이라면 도쿄가 sweet spot이지만 capacity 제약이 큼
 결론
 
-- 점유 안정성 을 우선 고려해 us-west-2 선택
-- 한국 사용자 인터랙티브 서빙으로 확장 시 도쿄(ap-northeast-1) 멀티리전 또는 Capacity Block for ML / Capacity Reservation 예약 검토
+- 점유 안정성 을 우선 고려해 us-west-2(오레곤) 선택
+- 한국 사용자 인터랙티브 서빙으로 확장 시 ap-northeast-1(도쿄) 멀티리전 또는 Capacity Block for ML / Capacity Reservation 예약 검토
 ---
 
 ### 1. 애플리케이션 및 OS 이미지 (Amazon Machine Image)
 
 선택한 AMI
-
-기본 포함 패키지 (실측)
 
 참고: AMI 설명상 지원 인스턴스 목록
 
@@ -138,6 +95,8 @@ g7e 패밀리 비교 (참고)
 
 - EBS (/) : 모델 가중치, 영구 데이터 → 절대 잃으면 안 되는 것
 - 인스턴스 스토어 (/mnt/nvme ) : KV 캐시, 임시 빌드, swap, 추론 로그 → 잃어도 되는 것
+---
+
 ## NVME 설정
 
 - NVME 는 Cloud 환경에서는 일반 물리서버와 다르게 아래와 같은 특성이 있음
@@ -186,3 +145,57 @@ Filesystem      Size  Used Avail Use% Mounted on
 - 모델 다운로드
 - vllm 설정
 - 모델 설정
+## 기본 패키지 설치
+
+```shell
+> pip install -U "huggingface_hub[cli]" hf_transfer 
+```
+
+```shell
+# 다운로드 가속 (멀티스레드)
+export HF_XET_HIGH_PERFORMANCE=1
+
+# 저장 위치 - 둘 중 선택
+export HF_HOME=/mnt/nvme/hf-cache      # 빠르지만 stop 시 소실
+# export HF_HOME=/root/hf-cache        # 또는 EBS (영구)
+```
+
+## 모델 다운로드
+
+- 모델을 로컬 디렉토리에 다운로드
+```shell
+> hf download Qwen/Qwen3.5-122B-A10B-GPTQ-Int4 \
+  --local-dir /stg/models/Qwen3.5-122B-A10B-GPTQ-Int4 \
+  --max-workers 16  
+> ls -al /stg/models
+total 16
+drwxr-xr-x. 5 root root    93 May 19 08:30 .
+drwxr-xr-x. 3 root root    20 May 19 07:56 ..
+-rw-r--r--. 1 root root     0 May 19 08:25 .check_for_update_done
+drwxr-xr-x. 3 root root 16384 May 19 08:30 Qwen3.5-122B-A10B-GPTQ-Int4
+drwxr-xr-x. 3 root root    55 May 19 08:28 hub
+drwxr-xr-x. 4 root root    59 May 19 08:28 xet
+>   
+```
+
+## VLLM 설치
+
+vllm 은 패키지 의존성을 많이 요구하기 때문에 uv 환경에서 격리 하여 패키지 설치를 권장 함
+
+### uv 설치
+
+```shell
+> curl -LsSf https://astral.sh/uv/install.sh | sh
+downloading uv 0.11.15 x86_64-unknown-linux-gnu
+installing to /root/.local/bin
+  uv
+  uvx
+everything's installed!
+> source ~/.bashrc
+> uv --version
+uv 0.11.15 (x86_64-unknown-linux-gnu)
+>
+```
+
+### vllm 전용 프로젝트 생성 및 설치
+
