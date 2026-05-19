@@ -44,7 +44,7 @@ sidebar_position: 1
 
 **점수 해석**
 
-- Capacity 점수(g7e.12xl, 1~10) = AWS **Spot Placement Score** (1=매우 부족 / 10=매우 여유). On-Demand 가용성과도 강한 상관관계
+- Capacity 점수(g7e.12xl, 1\~10) = AWS **Spot Placement Score** (1=매우 부족 / 10=매우 여유). On-Demand 가용성과도 강한 상관관계
 
 - G7e 제공 6개 리전 모두 점수가 낮은 편 (신형 GPU 공통 현상) → 그중 **점수 3이 현 시점 최선**
 
@@ -76,7 +76,7 @@ aws ec2 get-spot-placement-scores \
 
 **(2) 응답시간 측면**
 
-- LLM 서빙은 모델 자체의 첫 토큰 생성에 200~500 ms 소요 → 네트워크 +150~200 ms는 실사용자 체감 차이가 거의 없는 수준
+- LLM 서빙은 모델 자체의 첫 토큰 생성에 200\~500 ms 소요 → 네트워크 +150\~200 ms는 실사용자 체감 차이가 거의 없는 수준
 
 - 한국 인접 우선이라면 도쿄가 sweet spot이지만 capacity 제약이 큼
 
@@ -140,9 +140,9 @@ G4dn, G5, G6, Gr6, G6e, P4d, P4de, P5, P5e, P5en, P6-B200, P6-B300
 
 **4xlarge 선택 근거**
 
-- Qwen3-Coder-30B-A3B / Qwen3.6-35B-A3B 등 MoE 30~35B 모델은 bf16에서 ~70GB VRAM → 96GB 1장에 KV 캐시까지 여유
+- Qwen3-Coder-30B-A3B / Qwen3.6-35B-A3B 등 MoE 30\~35B 모델은 bf16에서 \~70GB VRAM → 96GB 1장에 KV 캐시까지 여유
 
-- FP8/FP4 양자화 시 더 큰 모델(80~120B)도 가능
+- FP8/FP4 양자화 시 더 큰 모델(80\~120B)도 가능
 
 - 우선 1 GPU로 검증 후 확장 필요 시 12xlarge 이상으로 변경
 
@@ -152,8 +152,8 @@ G4dn, G5, G6, Gr6, G6e, P4d, P4de, P5, P5e, P5en, P6-B200, P6-B300
 
 | 모델 | 총/활성 파라미터 | 정밀도 | 가중치 VRAM | KV 캐시 (32k×1) | 총 VRAM |
 | --- | --- | --- | --- | --- | --- |
-| Qwen3.5-122B-A10B-GPTQ-Int4 | 122B / 10B (MoE) | Int4 (GPTQ) | ~63 GB | ~3 GB | ~69 GB |
-| Qwen3.6-27B-FP8 | 27B (Dense) | FP8 (block 128) | ~29 GB | ~8 GB | ~40 GB |
+| Qwen3.5-122B-A10B-GPTQ-Int4 | 122B / 10B (MoE) | Int4 (GPTQ) | \~63 GB | \~3 GB | \~69 GB |
+| Qwen3.6-27B-FP8 | 27B (Dense) | FP8 (block 128) | \~29 GB | \~8 GB | \~40 GB |
 
 ---
 
@@ -264,8 +264,8 @@ Filesystem      Size  Used Avail Use% Mounted on
 
 | 모델명 | 모델 가중치 크기 | 실제 GPU | KV 캐시 가용 (90% 활용 기준) |
 | --- | --- | --- | --- |
-| Qwen3.5-122B-A10B-GPTQ-Int4 | 62GB | 65~70GB | **~18GB** |
-| Qwen3.6-27B-FP8 | 31GB | 33~35GB | ~52GB |
+| Qwen3.5-122B-A10B-GPTQ-Int4 | 62GB | 65\~70GB | **\~18GB** |
+| Qwen3.6-27B-FP8 | 31GB | 33\~35GB | \~52GB |
 
 - 기본 패키지 설치
 
@@ -345,7 +345,7 @@ installing to /root/.local/bin
   uv
   uvx
 everything's installed!
-> source ~/.bashrc
+> source \~/.bashrc
 > uv --version
 uv 0.11.15 (x86_64-unknown-linux-gnu)
 >

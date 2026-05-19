@@ -282,10 +282,17 @@ def escape_mdx_angle_brackets(text):
     return re.sub(r'<([^>]*[^\x00-\x7F][^>]*)>', r'&lt;\1&gt;', text)
 
 
+def escape_single_tildes(text):
+    """단독 ~ (범위 표기 등)를 remark-gfm single-tilde strikethrough로 오해하지 않도록 이스케이프.
+    ~~...~~ (double-tilde strikethrough)는 그대로 유지."""
+    return re.sub(r'(?<!~)~(?!~)', r'\\~', text)
+
+
 def blocks_to_markdown(blocks, slug):
     image_counter = [0]
     body = "".join(block_to_markdown(b, slug, image_counter) for b in blocks)
-    return escape_mdx_angle_brackets(body)
+    body = escape_mdx_angle_brackets(body)
+    return escape_single_tildes(body)
 
 
 def slugify(title):
