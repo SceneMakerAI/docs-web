@@ -86,7 +86,7 @@ const config: Config = {
     },
     tableOfContents: {
       minHeadingLevel: 2,
-      maxHeadingLevel: 4,
+      maxHeadingLevel: 5,
     },
     navbar: {
       title: 'SceneMakerAI',

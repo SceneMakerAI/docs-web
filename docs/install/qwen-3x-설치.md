@@ -279,11 +279,15 @@ Filesystem      Size  Used Avail Use% Mounted on
 
 ### 기본 패키지 설치
 
+##### huggingface-cli 설치
+
 ```shell
 > pip install -U "huggingface_hub[cli]" hf_transfer 
 ```
 
 <br />
+
+##### 환경 변수 설정
 
 ```shell
 # 다운로드 가속 (멀티스레드)
@@ -367,6 +371,8 @@ Activate with: source .venv/bin/activate
 <br />
 
 <br />
+
+##### 테스트
 
 ```shell
 (vllm-svc) > vllm serve /stg/models/Qwen3.5-122B-A10B-GPTQ-Int4 \

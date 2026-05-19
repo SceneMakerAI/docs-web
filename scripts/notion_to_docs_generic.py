@@ -205,7 +205,7 @@ def block_to_markdown(block, slug, image_counter):
         return render_children()
 
     elif b_type in (
-        "paragraph", "heading_1", "heading_2", "heading_3",
+        "paragraph", "heading_1", "heading_2", "heading_3", "heading_4",
         "bulleted_list_item", "numbered_list_item", "to_do",
         "toggle", "quote", "callout",
     ):
@@ -220,6 +220,8 @@ def block_to_markdown(block, slug, image_counter):
             return f"### {content}\n\n" + child_md
         elif b_type == "heading_3":
             return f"#### {content}\n\n" + child_md
+        elif b_type == "heading_4":
+            return f"##### {content}\n\n" + child_md
         elif b_type == "bulleted_list_item":
             return f"- {content}\n\n" + child_md
         elif b_type == "numbered_list_item":
