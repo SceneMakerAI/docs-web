@@ -101,3 +101,4 @@ static/img/og-candidates/
 .history/
 .tmp/
 *.orig
+__pycache__/
