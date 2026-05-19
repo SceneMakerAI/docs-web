@@ -309,7 +309,9 @@ def save_as_blog_post(page, date_str, existing_map):
     page_id = page["id"]
     title = read_title_plain(page["properties"], NOTION_PROPERTY_TITLE) or "제목없음"
     slug = slugify(title)
-    new_filename = f"{SAVE_DIR_ROOT}/{date_str}-{slug}.mdx"
+    # 파일명은 ASCII-only(page ID 앞 8자리)로 — 한글 파일명은 webpack 경로 인코딩 충돌 유발
+    short_id = page_id.replace("-", "")[:8]
+    new_filename = f"{SAVE_DIR_ROOT}/{date_str}-{short_id}.mdx"
 
     old_filename = existing_map.get(page_id)
     if old_filename and old_filename != new_filename:
