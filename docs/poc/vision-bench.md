@@ -2,7 +2,7 @@
 id: vision-bench
 title: vision-bench
 sidebar_position: 3
-slug: /vision-bench
+slug: /poc/vision-bench
 ---
 
 # Vision-Bench

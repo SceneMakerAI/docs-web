@@ -2,7 +2,7 @@
 id: audio-bench
 title: audio-bench
 sidebar_position: 2
-slug: /audio-bench
+slug: /poc/audio-bench
 ---
 
 # audio-bench
