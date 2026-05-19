@@ -12,13 +12,31 @@ sidebar_position: 1
 
 ### 기본 정보 (요약)
 
+| 카테고리 | 선택 |
+| --- | --- |
+| 리전 | us-west-2 (오레곤) |
+| 애플리케이션 및 OS 이미지 | Deep Learning Base AMI with Single CUDA (Amazon Linux 2023) |
+| 인스턴스 유형 | g7e.4xlarge (GPU 1장, VRAM 96 GB) |
+| 스토리지 | EBS 2 TB (gp3) + 인스턴스 스토어 1.7 TB (NVMe) |
+
 리전 선택 근거
 
 신형 GPU 인스턴스(G7e, P5, P6 등)는 공급이 수요를 못 따라잡는 상태 입니다. 리전·시간대에 따라 InsufficientInstanceCapacity 에러로 인스턴스 프로비저닝이 실패하는 일이 자주 발생합니다.
 
 이런 이유로 리전 선택은 단순히 "가까운 리전"이 아니라, 다음 두 축을 함께 따져야 합니다.
 
+1. Capacity 점유 가능성 — 원할 때 실제로 띄울 수 있는가
+1. 한국 응답시간 — 사용자가 체감할 네트워크 지연 
 G7e 제공 리전 비교 (2026-05-19 측정)
+
+| 리전 | Capacity 점수 | 한국 TCP RTT | 종합 |
+| --- | --- | --- | --- |
+| us-west-2 (오레곤) ⭐ | 3 | 180 ms | 🟢 균형 (capacity 3점 가용영역 2개) |
+| us-east-1 (버지니아) | 3 | 208 ms | 🟢 안정 (capacity 3점 가용영역 2개) |
+| us-east-2 (오하이오) | 3 | 213 ms | 🟢 안정 |
+| ap-northeast-1 (도쿄) | 1 | 46 ms | 🟠 가깝지만 점유 어려움 |
+| ap-northeast-2 (서울) | 1 | 18 ms | 🔴 점유 매우 어려움 |
+| eu-west-2 (런던) | 1 | 301 ms | 🔴 멀고 점유 어려움 |
 
 점수 해석
 
@@ -50,11 +68,20 @@ aws ec2 get-spot-placement-scores \
 - 한국 인접 우선이라면 도쿄가 sweet spot이지만 capacity 제약이 큼
 > 결론
 
+- 점유 안정성 을 우선 고려해 us-west-2(오레곤) 선택
+- 한국 사용자 인터랙티브 서빙으로 확장 시 ap-northeast-1(도쿄) 멀티리전 또는 Capacity Block for ML / Capacity Reservation 예약 검토
 ---
 
 ### 1. 애플리케이션 및 OS 이미지 (Amazon Machine Image)
 
 선택한 AMI
+
+| 항목 | 값 |
+| --- | --- |
+| 이름 | Deep Learning Base AMI with Single CUDA (Amazon Linux 2023) 20260512 |
+| OS | Amazon Linux 2023 (커널 6.1.170) |
+| Owner | Amazon |
+| 아키텍처 | x86_64 |
 
 참고: AMI 설명상 지원 인스턴스 목록
 
@@ -70,7 +97,26 @@ G4dn, G5, G6, Gr6, G6e, P4d, P4de, P5, P5e, P5en, P6-B200, P6-B300
 
 선택한 인스턴스 : g7e.4xlarge
 
+| 항목 | 값 |
+| --- | --- |
+| vCPU | 16 |
+| RAM | 128 GB |
+| GPU | NVIDIA RTX PRO 6000 Blackwell Server Edition × 1 |
+| VRAM | 96 GB (97,887 MiB 실측) |
+| GPU 아키텍처 | Blackwell (sm_120, FP4 네이티브 지원) |
+| Network | 50 Gbps |
+| 인스턴스 스토어 | NVMe SSD 1.9 TB (nvme1n1 ) — 인스턴스 유형에 기본 포함 |
+
 - g7e 패밀리 비교 (참고)
+| Type | vCPU | RAM | GPU 수 | VRAM 총량 | Network |
+| --- | --- | --- | --- | --- | --- |
+| g7e.2xlarge | 8 | 64 GB | 1 | 96 GB | 50 Gbps |
+| g7e.4xlarge ⭐ | 16 | 128 GB | 1 | 96 GB | 50 Gbps |
+| g7e.8xlarge | 32 | 256 GB | 1 | 96 GB | 100 Gbps |
+| g7e.12xlarge | 48 | 512 GB | 2 | 192 GB | 400 Gbps |
+| g7e.24xlarge | 96 | 1 TB | 4 | 384 GB | 800 Gbps |
+| g7e.48xlarge | 192 | 2 TB | 8 | 768 GB | 1600 Gbps |
+
 4xlarge 선택 근거
 
 - Qwen3-Coder-30B-A3B / Qwen3.6-35B-A3B 등 MoE 30~35B 모델은 bf16에서 ~70GB VRAM → 96GB 1장에 KV 캐시까지 여유
@@ -80,17 +126,46 @@ G4dn, G5, G6, Gr6, G6e, P4d, P4de, P5, P5e, P5en, P6-B200, P6-B300
 
 32k 컨텍스트, 단일 시퀀스 기준. vLLM은 paged KV 캐시를 동적 할당하므로 실제 사용량은 워크로드에 따라 달라집니다.
 
+| 모델 | 총/활성 파라미터 | 정밀도 | 가중치 VRAM | KV 캐시 (32k×1) | 총 VRAM |
+| --- | --- | --- | --- | --- | --- |
+| Qwen3.5-122B-A10B-GPTQ-Int4 | 122B / 10B (MoE) | Int4 (GPTQ) | ~63 GB | ~3 GB | ~69 GB |
+| Qwen3.6-27B-FP8 | 27B (Dense) | FP8 (block 128) | ~29 GB | ~8 GB | ~40 GB |
+
 ---
 
 ### 3. 스토리지 구성
 
 1) 루트 EBS 볼륨 (영구 스토리지)
 
+| 항목 | 값 |
+| --- | --- |
+| 크기 | 2,048 GiB (2 TB) |
+| 타입 | gp3 |
+| IOPS | 16,000 |
+| Throughput | 1,000 MB/s |
+| 암호화 | 미적용(운영 전환 시 암호화 권장) |
+| 디바이스 | nvme0n1 |
+| 마운트 | / (루트) |
+
 용도 : 모델 가중치(영구 보관), Docker 이미지, OS 등
 
 2) 인스턴스 스토어 (임시 스토리지 — g7e.4xlarge 기본 포함)
 
+| 항목 | 값 |
+| --- | --- |
+| 디바이스 | nvme1n1 |
+| 크기 | 1.7 TB |
+| 타입 | NVMe SSD (인스턴스 로컬) |
+| 마운트 | /mnt/nvme (XFS, 수동 마운트 필요 — 아래 NVME 설정 참고) |
+
 > 인스턴스 스토어 데이터 영속성
+
+| 작업 | 데이터 |
+| --- | --- |
+| Reboot (재부팅) | 유지 |
+| Stop / Start | 삭제 |
+| Terminate | 삭제 |
+| 하드웨어 장애 | 삭제 |
 
 용도 분리 권장
 
@@ -101,6 +176,8 @@ G4dn, G5, G6, Gr6, G6e, P4d, P4de, P5, P5e, P5en, P6-B200, P6-B300
 ## NVME 설정
 
 - NVME 는 Cloud 환경에서는 일반 물리서버와 다르게 아래와 같은 특성이 있음
+- 재부팅시 데이터 유지
+- Instance stop→start, terminator 시 데이터 소멸 됨
 ### 1. NVME Device 확인
 
 ```shell
@@ -145,6 +222,10 @@ Filesystem      Size  Used Avail Use% Mounted on
 ## 모델 설치
 
 현실적으로 A100 이나 H100 장비 대여가 쉽지 않은 상황에서 1장으로 운영 가능한 GPU 에서 돌릴 수 있는 서버에서 아래 2개의 모델을 비교 한다. (비교 문서는 추후 배포)
+
+| 모델명 | 모델 가중치 크기 | 실제 GPU | KV 캐시 가용 (90% 활용 기준) |
+| Qwen3.5-122B-A10B-GPTQ-Int4 | 62GB | 65~70GB | ~18GB |
+| Qwen3.6-27B-FP8 | 31GB | 33~35GB | ~52GB |
 
 - 기본 패키지 설치
 - 모델 다운로드

@@ -118,7 +118,11 @@ def get_page_blocks(page_id):
     params = {}
     while True:
         data = requests.get(url, headers=headers, params=params).json()
-        blocks.extend(data.get("results", []))
+        results = data.get("results", [])
+        for block in results:
+            if block.get("has_children"):
+                block["_children"] = get_page_blocks(block["id"])
+        blocks.extend(results)
         if not data.get("has_more"):
             break
         params = {"start_cursor": data["next_cursor"]}
@@ -162,36 +166,61 @@ def download_image(url: str, slug: str, index: int) -> str:
 
 def block_to_markdown(block, slug, image_counter):
     b_type = block["type"]
-    if b_type in (
+    children = block.get("_children", [])
+
+    def render_children():
+        return "".join(block_to_markdown(c, slug, image_counter) for c in children)
+
+    if b_type == "table":
+        if not children:
+            return ""
+        has_col_header = block.get("table", {}).get("has_column_header", False)
+        lines = []
+        for i, row in enumerate(children):
+            cells = row.get("table_row", {}).get("cells", [])
+            row_text = " | ".join(extract_text_from_rich_text(cell) for cell in cells)
+            lines.append(f"| {row_text} |")
+            if i == 0 and has_col_header:
+                sep = " | ".join("---" for _ in cells)
+                lines.append(f"| {sep} |")
+        return "\n".join(lines) + "\n\n"
+
+    elif b_type in ("column_list", "column"):
+        return render_children()
+
+    elif b_type in (
         "paragraph", "heading_1", "heading_2", "heading_3",
         "bulleted_list_item", "numbered_list_item", "to_do",
         "toggle", "quote", "callout",
     ):
         rich_text = block[b_type].get("rich_text", [])
         content = extract_text_from_rich_text(rich_text)
+        child_md = render_children()
         if b_type == "paragraph":
-            return content + "\n\n" if content else ""
+            return (content + "\n\n" if content else "") + child_md
         elif b_type == "heading_1":
-            return f"## {content}\n\n"
+            return f"## {content}\n\n" + child_md
         elif b_type == "heading_2":
-            return f"## {content}\n\n"
+            return f"## {content}\n\n" + child_md
         elif b_type == "heading_3":
-            return f"### {content}\n\n"
+            return f"### {content}\n\n" + child_md
         elif b_type == "bulleted_list_item":
-            return f"- {content}\n"
+            return f"- {content}\n" + child_md
         elif b_type == "numbered_list_item":
-            return f"1. {content}\n"
+            return f"1. {content}\n" + child_md
         elif b_type == "to_do":
             checked = "[x]" if block["to_do"]["checked"] else "[ ]"
-            return f"- {checked} {content}\n"
+            return f"- {checked} {content}\n" + child_md
         elif b_type in ("quote", "callout"):
-            return f"> {content}\n\n"
+            return f"> {content}\n\n" + child_md
         elif b_type == "toggle":
-            return f"- {content}\n"
+            return f"- {content}\n" + child_md
+
     elif b_type == "code":
         language = block["code"].get("language", "text")
         content = extract_text_from_rich_text(block["code"].get("rich_text", []))
         return f"```{language}\n{content}\n```\n\n"
+
     elif b_type == "image":
         url = (
             block["image"].get("file", {}).get("url")
@@ -207,8 +236,10 @@ def block_to_markdown(block, slug, image_counter):
         except Exception as e:
             log(f"WARN: 이미지 다운로드 실패 ({url[:60]}...): {e}")
             return f"![image]({url})\n\n"
+
     elif b_type == "divider":
         return "---\n\n"
+
     return ""
 
 
