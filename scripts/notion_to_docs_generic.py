@@ -190,13 +190,12 @@ def block_to_markdown(block, slug, image_counter):
     if b_type == "table":
         if not children:
             return ""
-        has_col_header = block.get("table", {}).get("has_column_header", False)
         lines = []
         for i, row in enumerate(children):
             cells = row.get("table_row", {}).get("cells", [])
             row_text = " | ".join(extract_text_from_rich_text(cell) for cell in cells)
             lines.append(f"| {row_text} |")
-            if i == 0 and has_col_header:
+            if i == 0:
                 sep = " | ".join("---" for _ in cells)
                 lines.append(f"| {sep} |")
         return "\n".join(lines) + "\n\n"
