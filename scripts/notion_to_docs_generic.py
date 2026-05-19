@@ -212,7 +212,18 @@ def block_to_markdown(block, slug, image_counter):
             checked = "[x]" if block["to_do"]["checked"] else "[ ]"
             return f"- {checked} {content}\n\n" + child_md
         elif b_type in ("quote", "callout"):
-            return f"> {content}\n\n" + child_md
+            icon = ""
+            if b_type == "callout":
+                icon_data = block.get("callout", {}).get("icon", {})
+                icon = icon_data.get("emoji", "")
+            prefix = f"{icon} " if icon else ""
+            if child_md:
+                child_quoted = "\n".join(
+                    f"> {line}" if line.strip() else ">"
+                    for line in child_md.rstrip("\n").splitlines()
+                )
+                return f"> {prefix}{content}\n>\n{child_quoted}\n\n"
+            return f"> {prefix}{content}\n\n"
         elif b_type == "toggle":
             if child_md:
                 return f"<details>\n<summary>{content}</summary>\n\n{child_md}\n</details>\n\n"
