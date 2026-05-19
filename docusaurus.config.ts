@@ -60,43 +60,7 @@ const config: Config = {
     },
   },
 
-  plugins: [
-    function fixDocsWebpackScope(context) {
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
-      const nodePath = require('path') as typeof import('path');
-      return {
-        name: 'fix-docs-webpack-scope',
-        configureWebpack(config) {
-          const docsDir = nodePath.resolve(context.siteDir, 'docs');
-          const blogDir = nodePath.resolve(docsDir, 'blog');
-          (config.module?.rules ?? []).forEach((rule: unknown) => {
-            if (!rule || typeof rule !== 'object') return;
-            const r = rule as Record<string, unknown>;
-            const includes: unknown[] = Array.isArray(r['include'])
-              ? r['include']
-              : r['include']
-              ? [r['include']]
-              : [];
-            const matchesDocs = includes.some(
-              (inc) =>
-                typeof inc === 'string' &&
-                (inc === docsDir ||
-                  inc === docsDir + '/' ||
-                  inc === docsDir + nodePath.sep),
-            );
-            if (!matchesDocs) return;
-            const existing: unknown[] = Array.isArray(r['exclude'])
-              ? r['exclude']
-              : r['exclude']
-              ? [r['exclude']]
-              : [];
-            r['exclude'] = [...existing, blogDir];
-          });
-          return {};
-        },
-      };
-    },
-  ],
+  plugins: [],
 
   presets: [
     [
@@ -106,19 +70,7 @@ const config: Config = {
           sidebarPath: './sidebars.ts',
           editUrl: 'https://github.com/SceneMakerAI/docs-web/edit/main/',
         },
-        blog: {
-          path: 'docs/blog',
-          showReadingTime: true,
-          feedOptions: {
-            type: ['rss', 'atom'],
-            xslt: true,
-          },
-          editUrl: 'https://github.com/SceneMakerAI/docs-web/edit/main/',
-          // Useful options to enforce blogging best practices
-          onInlineTags: 'warn',
-          onInlineAuthors: 'warn',
-          onUntruncatedBlogPosts: 'warn',
-        },
+        blog: false,
         theme: {
           customCss: './src/css/custom.css',
         },
@@ -165,7 +117,7 @@ const config: Config = {
           position: 'left',
           label: '문서',
         },
-        {to: '/blog', label: '블로그', position: 'left'},
+        {type: 'docSidebar', sidebarId: 'blogSidebar', position: 'left', label: '블로그'},
         {
           type: 'docSidebar',
           sidebarId: 'contributeSidebar',
@@ -231,7 +183,7 @@ const config: Config = {
           items: [
             {
               label: '블로그',
-              to: '/blog',
+              to: '/docs/blog',
             },
             {
               label: 'GitHub',

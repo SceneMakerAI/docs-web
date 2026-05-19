@@ -22,7 +22,8 @@ pids=()
 # Blog
 BLOG_DB="${NOTION_BLOG:-$NOTION_DATABASE_ID}"
 if [ -n "$BLOG_DB" ]; then
-  NOTION_DATABASE_ID="$BLOG_DB" FETCH_MODE="$FETCH_MODE" python scripts/notion_to_blog.py &
+  NOTION_DATABASE_ID="$BLOG_DB" SAVE_DIR=docs/blog FETCH_MODE="$FETCH_MODE" \
+    python scripts/notion_to_docs_generic.py &
   pids+=($!)
 fi
 

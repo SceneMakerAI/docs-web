@@ -49,7 +49,8 @@ jobs:
           pids=()
 
           if [ -n "$_BLOG_DB" ]; then
-            NOTION_DATABASE_ID="$_BLOG_DB" python scripts/notion_to_blog.py &
+            NOTION_DATABASE_ID="$_BLOG_DB" SAVE_DIR=docs/blog FETCH_MODE=ALL \
+              python scripts/notion_to_docs_generic.py &
             pids+=($!)
           fi
 

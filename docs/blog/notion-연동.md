@@ -1,14 +1,10 @@
 ---
-slug: notion-연동
+id: notion-연동
 title: "Notion 연동"
-authors: [minsung]
-tags: []
-date: 2026-05-20
+sidebar_position: 1
 ---
 
 테스트
-
-{/* truncate */}
 
 ![image](/img/blog/notion-연동/img-00.png)
 
