@@ -29,7 +29,8 @@ fi
 # Contribute
 CONTRIBUTE_DB="${NOTION_CONTRIBUTE:-$NOTION_CONTRIBUTE_DATABASE_ID}"
 if [ -n "$CONTRIBUTE_DB" ]; then
-  NOTION_CONTRIBUTE_DATABASE_ID="$CONTRIBUTE_DB" python scripts/notion_to_contribute.py &
+  NOTION_DATABASE_ID="$CONTRIBUTE_DB" SAVE_DIR=docs/contribute FETCH_MODE=ALL \
+    python scripts/notion_to_docs_generic.py &
   pids+=($!)
 fi
 
