@@ -6,11 +6,11 @@ sidebar_position: 1
 
 ## AWS 서버 셑팅
 
-## EC2 인스턴스 설정
+### EC2 인스턴스 설정
 
 ---
 
-### 기본 정보 (요약)
+#### 기본 정보 (요약)
 
 | 카테고리 | 선택 |
 | --- | --- |
@@ -72,7 +72,7 @@ aws ec2 get-spot-placement-scores \
 - 한국 사용자 인터랙티브 서빙으로 확장 시 ap-northeast-1(도쿄) 멀티리전 또는 Capacity Block for ML / Capacity Reservation 예약 검토
 ---
 
-### 1. 애플리케이션 및 OS 이미지 (Amazon Machine Image)
+#### 1. 애플리케이션 및 OS 이미지 (Amazon Machine Image)
 
 선택한 AMI
 
@@ -93,7 +93,7 @@ G4dn, G5, G6, Gr6, G6e, P4d, P4de, P5, P5e, P5en, P6-B200, P6-B300
 
 ---
 
-### 2. 인스턴스 유형
+#### 2. 인스턴스 유형
 
 선택한 인스턴스 : g7e.4xlarge
 
@@ -133,7 +133,7 @@ G4dn, G5, G6, Gr6, G6e, P4d, P4de, P5, P5e, P5en, P6-B200, P6-B300
 
 ---
 
-### 3. 스토리지 구성
+#### 3. 스토리지 구성
 
 1) 루트 EBS 볼륨 (영구 스토리지)
 
@@ -173,12 +173,12 @@ G4dn, G5, G6, Gr6, G6e, P4d, P4de, P5, P5e, P5en, P6-B200, P6-B300
 - 인스턴스 스토어 (/mnt/nvme ) : KV 캐시, 임시 빌드, swap, 추론 로그 → 잃어도 되는 것
 ---
 
-## NVME 설정
+### NVME 설정
 
 - NVME 는 Cloud 환경에서는 일반 물리서버와 다르게 아래와 같은 특성이 있음
 - 재부팅시 데이터 유지
 - Instance stop→start, terminator 시 데이터 소멸 됨
-### 1. NVME Device 확인
+#### 1. NVME Device 확인
 
 ```shell
 > lsblk
@@ -191,7 +191,7 @@ nvme1n1       259:1    0  1.7T  0 disk
 > 
 ```
 
-### 2. 디스크 포멧 및 마운트
+#### 2. 디스크 포멧 및 마운트
 
 ```shell
 > sudo mkfs.xfs -f /dev/nvme1n1
@@ -231,7 +231,7 @@ Filesystem      Size  Used Avail Use% Mounted on
 - 모델 다운로드
 - vllm 설정
 - 모델 설정
-## 기본 패키지 설치
+### 기본 패키지 설치
 
 ```shell
 > pip install -U "huggingface_hub[cli]" hf_transfer 
@@ -246,7 +246,7 @@ export HF_HOME=/mnt/nvme/hf-cache      # 빠르지만 stop 시 소실
 # export HF_HOME=/root/hf-cache        # 또는 EBS (영구)
 ```
 
-## 모델 다운로드
+### 모델 다운로드
 
 - 모델을 로컬 디렉토리에 다운로드
 ```shell
@@ -271,11 +271,11 @@ drwxr-xr-x. 4 root root    92 May 19 18:45 hub
 drwxr-xr-x. 4 root root    59 May 19 17:28 xet
 ```
 
-## VLLM 설치
+### VLLM 설치
 
 vllm 은 패키지 의존성을 많이 요구하기 때문에 uv 환경에서 격리 하여 패키지 설치를 권장 함
 
-### uv 설치
+#### uv 설치
 
 ```shell
 > curl -LsSf https://astral.sh/uv/install.sh | sh
@@ -290,7 +290,7 @@ uv 0.11.15 (x86_64-unknown-linux-gnu)
 >
 ```
 
-### vllm 전용 프로젝트 생성 및 설치
+#### vllm 전용 프로젝트 생성 및 설치
 
 ```shell
 > mkdir -p /usr/service/vllm-svc
@@ -332,7 +332,7 @@ Activate with: source .venv/bin/activate
 {"id":"chatcmpl-89cf9de14d6fdfd2","object":"chat.completion","created":1779181606,"prompt_routed_experts":null,"model":"qwen","choices":[{"index":0,"message":{"role":"assistant","content":"안녕하세요! 반갑습니다. 😊\n오늘 어떤 도움이 필요하신가요? 궁금한 점이 있거나 대화하고 싶은 주제가 있다면 언제든지 말씀해 주세요.","refusal":null,"annotations":null,"audio":null,"function_call":null,"tool_calls":[],"reasoning":null},"logprobs":null,"finish_reason":"stop","stop_reason":null,"token_ids":null,"routed_experts":null}],"service_tier":null,"system_fingerprint":"vllm-0.21.0-2426ae93","usage":{"prompt_tokens":14,"total_tokens":49,"completion_tokens":35,"prompt_tokens_details":null},"prompt_logprobs":null,"prompt_token_ids":null,"prompt_text":null,"kv_transfer_params":null}[root@ip-172-31-22-41 models]#
 ```
 
-### Service 등록
+#### Service 등록
 
 실행시 /stg/models/Qwen3.5-122B-A10B-GPTQ-Int ⇒ /mnt/nvme/models/Qwen3.5-122B-A10B-GPTQ-Int4 로 모델을 옮기고 nvme 에 있는 모델을 로드 한다.
 

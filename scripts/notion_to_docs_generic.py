@@ -201,9 +201,9 @@ def block_to_markdown(block, slug, image_counter):
         elif b_type == "heading_1":
             return f"## {content}\n\n" + child_md
         elif b_type == "heading_2":
-            return f"## {content}\n\n" + child_md
-        elif b_type == "heading_3":
             return f"### {content}\n\n" + child_md
+        elif b_type == "heading_3":
+            return f"#### {content}\n\n" + child_md
         elif b_type == "bulleted_list_item":
             return f"- {content}\n" + child_md
         elif b_type == "numbered_list_item":
@@ -215,6 +215,9 @@ def block_to_markdown(block, slug, image_counter):
             return f"> {content}\n\n" + child_md
         elif b_type == "toggle":
             return f"- {content}\n" + child_md
+
+    elif b_type == "table_row":
+        return ""  # table 블록 내부에서만 처리
 
     elif b_type == "code":
         language = block["code"].get("language", "text")
