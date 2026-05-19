@@ -1,10 +1,6 @@
 ---
 id: vision-bench
-title: vision-bench
-sidebar_position: 3
-slug: /poc/vision-bench
+title: "Vision-bench"
+sidebar_position: 1
 ---
 
-# Vision-Bench
-
-> 상세 설명은 추후 추가됩니다.
