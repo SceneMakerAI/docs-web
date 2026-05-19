@@ -21,7 +21,16 @@ jobs:
   sync:
     runs-on: ubuntu-latest
     env:
-      NOTION_CONTRIBUTE_DATABASE_ID: ${{ secrets.NOTION_CONTRIBUTE_DATABASE_ID }}
+      NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
+      FETCH_MODE: ${{ github.event.inputs.fetch_mode || 'DAILY' }}
+      # 신규 시크릿명 우선, 구 이름 fallback
+      _BLOG_DB:         ${{ secrets.NOTION_BLOG || secrets.NOTION_DATABASE_ID }}
+      _CONTRIBUTE_DB:   ${{ secrets.NOTION_CONTRIBUTE || secrets.NOTION_CONTRIBUTE_DATABASE_ID }}
+      _ABOUT_DB:        ${{ secrets.NOTION_ABOUT }}
+      _ARCHITECTURE_DB: ${{ secrets.NOTION_ARCHITECTURE }}
+      _POC_DB:          ${{ secrets.NOTION_POC }}
+      _DOCS_DB:         ${{ secrets.NOTION_DOCS }}
+      _RELEASE_DB:      ${{ secrets.NOTION_RELEASE }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -34,27 +43,68 @@ jobs:
       - name: Install dependencies
         run: pip install requests
 
-      - name: Sync blog
-        env:
-          NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
-          NOTION_DATABASE_ID: ${{ secrets.NOTION_DATABASE_ID }}
-          FETCH_MODE: ${{ github.event.inputs.fetch_mode || 'DAILY' }}
-        run: python scripts/notion_to_blog.py
+      - name: Sync all databases in parallel
+        run: |
+          pids=()
 
-      - name: Sync contribute (NOTION_CONTRIBUTE_DATABASE_ID 설정 시)
-        if: ${{ env.NOTION_CONTRIBUTE_DATABASE_ID != '' }}
-        env:
-          NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
-          FETCH_MODE: ${{ github.event.inputs.fetch_mode || 'ALL' }}
-        run: python scripts/notion_to_contribute.py
+          if [ -n "$_BLOG_DB" ]; then
+            NOTION_DATABASE_ID="$_BLOG_DB" python scripts/notion_to_blog.py &
+            pids+=($!)
+          fi
+
+          if [ -n "$_CONTRIBUTE_DB" ]; then
+            NOTION_CONTRIBUTE_DATABASE_ID="$_CONTRIBUTE_DB" python scripts/notion_to_contribute.py &
+            pids+=($!)
+          fi
+
+          if [ -n "$_ABOUT_DB" ]; then
+            NOTION_DATABASE_ID="$_ABOUT_DB" SAVE_DIR=docs/about FETCH_MODE=ALL \
+              python scripts/notion_to_docs_generic.py &
+            pids+=($!)
+          fi
+
+          if [ -n "$_ARCHITECTURE_DB" ]; then
+            NOTION_DATABASE_ID="$_ARCHITECTURE_DB" SAVE_DIR=docs/architecture FETCH_MODE=ALL \
+              python scripts/notion_to_docs_generic.py &
+            pids+=($!)
+          fi
+
+          if [ -n "$_POC_DB" ]; then
+            NOTION_DATABASE_ID="$_POC_DB" SAVE_DIR=docs/poc FETCH_MODE=ALL \
+              python scripts/notion_to_docs_generic.py &
+            pids+=($!)
+          fi
+
+          if [ -n "$_DOCS_DB" ]; then
+            NOTION_DATABASE_ID="$_DOCS_DB" SAVE_DIR=docs/guide FETCH_MODE=ALL \
+              python scripts/notion_to_docs_generic.py &
+            pids+=($!)
+          fi
+
+          if [ -n "$_RELEASE_DB" ]; then
+            NOTION_DATABASE_ID="$_RELEASE_DB" SAVE_DIR=docs/release-notes FETCH_MODE=ALL \
+              python scripts/notion_to_docs_generic.py &
+            pids+=($!)
+          fi
+
+          if [ ${#pids[@]} -eq 0 ]; then
+            echo "동기화할 DB가 없습니다. GitHub Secrets에 NOTION_* 변수를 설정하세요."
+            exit 0
+          fi
+
+          failed=0
+          for pid in "${pids[@]}"; do
+            wait "$pid" || { echo "ERROR: pid $pid failed"; failed=1; }
+          done
+          exit $failed
 
       - name: Commit and push if changed
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add docs/blog/ static/img/blog/ docs/contribute/ static/img/contribute/ 2>/dev/null || git add docs/blog/
+          git add docs/ static/img/
           if ! git diff --staged --quiet; then
-            git commit -m "chore: Notion 자동 동기화 $(date +'%Y-%m-%d')"
+            git commit -m "chore: Notion 동기화 $(date +'%Y-%m-%d')"
             git pull --rebase origin main
             git push
           fi
