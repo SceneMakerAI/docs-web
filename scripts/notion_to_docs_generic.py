@@ -181,6 +181,11 @@ def download_image(url: str, slug: str, index: int) -> str:
     return f"/img/{_last_seg}/{slug}/{filename}"
 
 
+def indent_md(text, prefix="  "):
+    lines = text.rstrip("\n").splitlines()
+    return "\n".join(prefix + line if line.strip() else line for line in lines) + "\n"
+
+
 def block_to_markdown(block, slug, image_counter):
     b_type = block["type"]
     children = block.get("_children", [])
@@ -223,9 +228,13 @@ def block_to_markdown(block, slug, image_counter):
         elif b_type == "heading_4":
             return f"##### {content}\n\n" + child_md
         elif b_type == "bulleted_list_item":
-            return f"- {content}\n\n" + child_md
+            if child_md:
+                return f"- {content}\n{indent_md(child_md)}\n"
+            return f"- {content}\n\n"
         elif b_type == "numbered_list_item":
-            return f"1. {content}\n\n" + child_md
+            if child_md:
+                return f"1. {content}\n{indent_md(child_md, '   ')}\n"
+            return f"1. {content}\n\n"
         elif b_type == "to_do":
             checked = "[x]" if block["to_do"]["checked"] else "[ ]"
             return f"- {checked} {content}\n\n" + child_md

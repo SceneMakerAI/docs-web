@@ -204,10 +204,9 @@ G4dn, G5, G6, Gr6, G6e, P4d, P4de, P5, P5e, P5en, P6-B200, P6-B300
 ### NVME 설정
 
 - NVME 는 Cloud 환경에서는 일반 물리서버와 다르게 아래와 같은 특성이 있음
+  - 재부팅시 데이터 유지
 
-- 재부팅시 데이터 유지
-
-- Instance stop→start, terminator 시 데이터 소멸 됨
+  - Instance stop→start, terminator 시 데이터 소멸 됨
 
 #### 1. NVME Device 확인
 
