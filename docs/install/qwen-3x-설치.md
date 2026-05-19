@@ -107,7 +107,9 @@ G4dn, G5, G6, Gr6, G6e, P4d, P4de, P5, P5e, P5en, P6-B200, P6-B300
 | Network | 50 Gbps |
 | 인스턴스 스토어 | NVMe SSD 1.9 TB (nvme1n1 ) — 인스턴스 유형에 기본 포함 |
 
-- g7e 패밀리 비교 (참고)
+<details>
+<summary>g7e 패밀리 비교 (참고)</summary>
+
 | Type | vCPU | RAM | GPU 수 | VRAM 총량 | Network |
 | --- | --- | --- | --- | --- | --- |
 | g7e.2xlarge | 8 | 64 GB | 1 | 96 GB | 50 Gbps |
@@ -116,6 +118,9 @@ G4dn, G5, G6, Gr6, G6e, P4d, P4de, P5, P5e, P5en, P6-B200, P6-B300
 | g7e.12xlarge | 48 | 512 GB | 2 | 192 GB | 400 Gbps |
 | g7e.24xlarge | 96 | 1 TB | 4 | 384 GB | 800 Gbps |
 | g7e.48xlarge | 192 | 2 TB | 8 | 768 GB | 1600 Gbps |
+
+
+</details>
 
 4xlarge 선택 근거
 
@@ -176,6 +181,7 @@ G4dn, G5, G6, Gr6, G6e, P4d, P4de, P5, P5e, P5en, P6-B200, P6-B300
 ### NVME 설정
 
 - NVME 는 Cloud 환경에서는 일반 물리서버와 다르게 아래와 같은 특성이 있음
+
 - 재부팅시 데이터 유지
 - Instance stop→start, terminator 시 데이터 소멸 됨
 #### 1. NVME Device 확인

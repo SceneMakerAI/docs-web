@@ -205,16 +205,21 @@ def block_to_markdown(block, slug, image_counter):
         elif b_type == "heading_3":
             return f"#### {content}\n\n" + child_md
         elif b_type == "bulleted_list_item":
-            return f"- {content}\n" + child_md
+            sep = "\n\n" if child_md else "\n"
+            return f"- {content}{sep}" + child_md
         elif b_type == "numbered_list_item":
-            return f"1. {content}\n" + child_md
+            sep = "\n\n" if child_md else "\n"
+            return f"1. {content}{sep}" + child_md
         elif b_type == "to_do":
             checked = "[x]" if block["to_do"]["checked"] else "[ ]"
-            return f"- {checked} {content}\n" + child_md
+            sep = "\n\n" if child_md else "\n"
+            return f"- {checked} {content}{sep}" + child_md
         elif b_type in ("quote", "callout"):
             return f"> {content}\n\n" + child_md
         elif b_type == "toggle":
-            return f"- {content}\n" + child_md
+            if child_md:
+                return f"<details>\n<summary>{content}</summary>\n\n{child_md}\n</details>\n\n"
+            return f"- {content}\n"
 
     elif b_type == "table_row":
         return ""  # table 블록 내부에서만 처리
