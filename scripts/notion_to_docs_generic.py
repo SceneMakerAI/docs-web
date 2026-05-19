@@ -264,7 +264,9 @@ def save_doc_page(page, position, existing_map):
     return title, new_filename
 
 
-def remove_orphans(synced_files):
+def remove_orphans(synced_files, previously_tracked):
+    """이전 sync에서 Notion이 만든 파일 중 이번에 사라진 것만 삭제.
+    수동 작성 파일(sync map에 없던 파일)은 건드리지 않는다."""
     if not os.path.isdir(SAVE_DIR):
         return
     for fname in os.listdir(SAVE_DIR):
@@ -273,7 +275,7 @@ def remove_orphans(synced_files):
         if not (fname.endswith(".md") or fname.endswith(".mdx")):
             continue
         fpath = os.path.join(SAVE_DIR, fname)
-        if fpath not in synced_files:
+        if fpath in previously_tracked and fpath not in synced_files:
             os.remove(fpath)
             log(f"미추적 파일 삭제: {fpath}")
 
@@ -328,12 +330,10 @@ def main():
         has_more = data.get("has_more", False)
         next_cursor = data.get("next_cursor")
 
-    if FETCH_MODE != "DAILY" and saved > 0:
-        # saved == 0 이면 Notion DB가 비어있는 것 → 기존 파일 보호
-        remove_orphans(synced_files)
+    if FETCH_MODE != "DAILY":
+        previously_tracked = set(existing_map.values())
+        remove_orphans(synced_files, previously_tracked)
         existing_map = {k: v for k, v in existing_map.items() if v in synced_files}
-    elif saved == 0:
-        log("WARN: 동기화된 페이지 없음 — 기존 파일 보호를 위해 orphan 삭제 건너뜀")
 
     save_sync_map(existing_map)
     log(f"완료: {saved}개 저장")
