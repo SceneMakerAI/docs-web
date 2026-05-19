@@ -20,6 +20,8 @@ permissions:
 jobs:
   sync:
     runs-on: ubuntu-latest
+    env:
+      NOTION_CONTRIBUTE_DATABASE_ID: ${{ secrets.NOTION_CONTRIBUTE_DATABASE_ID }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -40,10 +42,9 @@ jobs:
         run: python scripts/notion_to_blog.py
 
       - name: Sync contribute (NOTION_CONTRIBUTE_DATABASE_ID 설정 시)
-        if: ${{ secrets.NOTION_CONTRIBUTE_DATABASE_ID != '' }}
+        if: ${{ env.NOTION_CONTRIBUTE_DATABASE_ID != '' }}
         env:
           NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
-          NOTION_CONTRIBUTE_DATABASE_ID: ${{ secrets.NOTION_CONTRIBUTE_DATABASE_ID }}
           FETCH_MODE: ${{ github.event.inputs.fetch_mode || 'ALL' }}
         run: python scripts/notion_to_contribute.py
 
