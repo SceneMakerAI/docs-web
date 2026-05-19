@@ -1,0 +1,8 @@
+{
+  "label": "poc",
+  "position": 2,
+  "link": {
+    "type": "generated-index",
+    "description": "SceneMakerAI audio-bench, vision-bench 를 조사합니다."
+  }
+}

@@ -110,6 +110,12 @@ const config: Config = {
         },
         {
           type: 'docSidebar',
+          sidebarId: 'pocSidebar',
+          position: 'left',
+          label: 'PoC',
+        },
+        {
+          type: 'docSidebar',
           sidebarId: 'docsSidebar',
           position: 'left',
           label: '문서',
