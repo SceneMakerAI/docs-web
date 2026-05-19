@@ -328,9 +328,12 @@ def main():
         has_more = data.get("has_more", False)
         next_cursor = data.get("next_cursor")
 
-    if FETCH_MODE != "DAILY":
+    if FETCH_MODE != "DAILY" and saved > 0:
+        # saved == 0 이면 Notion DB가 비어있는 것 → 기존 파일 보호
         remove_orphans(synced_files)
         existing_map = {k: v for k, v in existing_map.items() if v in synced_files}
+    elif saved == 0:
+        log("WARN: 동기화된 페이지 없음 — 기존 파일 보호를 위해 orphan 삭제 건너뜀")
 
     save_sync_map(existing_map)
     log(f"완료: {saved}개 저장")
