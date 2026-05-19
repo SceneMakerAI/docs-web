@@ -5,7 +5,7 @@ import requests
 from urllib.parse import urlparse
 from datetime import datetime, timezone, timedelta
 
-SAVE_DIR_ROOT = "blog"
+SAVE_DIR_ROOT = "docs/blog"
 STATIC_IMG_DIR = "static/img/blog"
 NOTION_PROPERTY_TITLE = os.environ.get("NOTION_PROPERTY_TITLE", "제목")
 NOTION_PROPERTY_DATE = os.environ.get("NOTION_PROPERTY_DATE", "날짜")

@@ -60,6 +60,44 @@ const config: Config = {
     },
   },
 
+  plugins: [
+    function fixDocsWebpackScope(context) {
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      const nodePath = require('path') as typeof import('path');
+      return {
+        name: 'fix-docs-webpack-scope',
+        configureWebpack(config) {
+          const docsDir = nodePath.resolve(context.siteDir, 'docs');
+          const blogDir = nodePath.resolve(docsDir, 'blog');
+          (config.module?.rules ?? []).forEach((rule: unknown) => {
+            if (!rule || typeof rule !== 'object') return;
+            const r = rule as Record<string, unknown>;
+            const includes: unknown[] = Array.isArray(r['include'])
+              ? r['include']
+              : r['include']
+              ? [r['include']]
+              : [];
+            const matchesDocs = includes.some(
+              (inc) =>
+                typeof inc === 'string' &&
+                (inc === docsDir ||
+                  inc === docsDir + '/' ||
+                  inc === docsDir + nodePath.sep),
+            );
+            if (!matchesDocs) return;
+            const existing: unknown[] = Array.isArray(r['exclude'])
+              ? r['exclude']
+              : r['exclude']
+              ? [r['exclude']]
+              : [];
+            r['exclude'] = [...existing, blogDir];
+          });
+          return {};
+        },
+      };
+    },
+  ],
+
   presets: [
     [
       'classic',
@@ -69,6 +107,7 @@ const config: Config = {
           editUrl: 'https://github.com/SceneMakerAI/docs-web/edit/main/',
         },
         blog: {
+          path: 'docs/blog',
           showReadingTime: true,
           feedOptions: {
             type: ['rss', 'atom'],
@@ -101,7 +140,7 @@ const config: Config = {
         srcDark: 'img/logo-dark.svg',
       },
       items: [
-        {to: '/about', label: '프로젝트 소개', position: 'left'},
+        {to: '/docs/about', label: '프로젝트 소개', position: 'left'},
         {
           type: 'docSidebar',
           sidebarId: 'architectureSidebar',
