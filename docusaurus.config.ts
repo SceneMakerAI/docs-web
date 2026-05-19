@@ -140,7 +140,7 @@ const config: Config = {
         srcDark: 'img/logo-dark.svg',
       },
       items: [
-        {to: '/about', label: '프로젝트 소개', position: 'left'},
+        {type: 'docSidebar', sidebarId: 'aboutSidebar', label: '프로젝트 소개', position: 'left'},
         {
           type: 'docSidebar',
           sidebarId: 'architectureSidebar',
