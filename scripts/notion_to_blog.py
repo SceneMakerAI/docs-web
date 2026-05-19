@@ -1,6 +1,7 @@
 import os
 import re
 import sys
+import time
 import requests
 from urllib.parse import urlparse
 from datetime import datetime, timezone, timedelta
@@ -118,7 +119,16 @@ def read_tags(props, prop_name):
 
 def get_page_blocks(page_id):
     url = f"https://api.notion.com/v1/blocks/{page_id}/children"
-    return requests.get(url, headers=headers).json().get("results", [])
+    for attempt in range(3):
+        resp = requests.get(url, headers=headers)
+        if resp.status_code == 429:
+            time.sleep(2 ** attempt)
+            continue
+        if not resp.text.strip():
+            time.sleep(1)
+            continue
+        return resp.json().get("results", [])
+    return []
 
 
 def extract_text_from_rich_text(rich_text_list):
