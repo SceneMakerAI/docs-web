@@ -205,15 +205,12 @@ def block_to_markdown(block, slug, image_counter):
         elif b_type == "heading_3":
             return f"#### {content}\n\n" + child_md
         elif b_type == "bulleted_list_item":
-            sep = "\n\n" if child_md else "\n"
-            return f"- {content}{sep}" + child_md
+            return f"- {content}\n\n" + child_md
         elif b_type == "numbered_list_item":
-            sep = "\n\n" if child_md else "\n"
-            return f"1. {content}{sep}" + child_md
+            return f"1. {content}\n\n" + child_md
         elif b_type == "to_do":
             checked = "[x]" if block["to_do"]["checked"] else "[ ]"
-            sep = "\n\n" if child_md else "\n"
-            return f"- {checked} {content}{sep}" + child_md
+            return f"- {checked} {content}\n\n" + child_md
         elif b_type in ("quote", "callout"):
             return f"> {content}\n\n" + child_md
         elif b_type == "toggle":

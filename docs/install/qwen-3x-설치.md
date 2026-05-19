@@ -26,7 +26,9 @@ sidebar_position: 1
 이런 이유로 리전 선택은 단순히 "가까운 리전"이 아니라, 다음 두 축을 함께 따져야 합니다.
 
 1. Capacity 점유 가능성 — 원할 때 실제로 띄울 수 있는가
+
 1. 한국 응답시간 — 사용자가 체감할 네트워크 지연 
+
 G7e 제공 리전 비교 (2026-05-19 측정)
 
 | 리전 | Capacity 점수 | 한국 TCP RTT | 종합 |
@@ -41,8 +43,11 @@ G7e 제공 리전 비교 (2026-05-19 측정)
 점수 해석
 
 - Capacity 점수(g7e.12xl, 1~10) = AWS Spot Placement Score (1=매우 부족 / 10=매우 여유). On-Demand 가용성과도 강한 상관관계
+
 - G7e 제공 6개 리전 모두 점수가 낮은 편 (신형 GPU 공통 현상) → 그중 점수 3이 현 시점 최선
+
 - 시간대·요일에 따라 점수가 바뀜 → 운영 전 직접 재측정 권장
+
 Spot Placement Score 직접 조회
 
 ```bash
@@ -56,20 +61,29 @@ aws ec2 get-spot-placement-scores \
 ```
 
 - 필요 권한: ec2:GetSpotPlacementScores
+
 - 비용: 무료, 평가 기간: 향후 1시간
+
 (1) Capacity 측면
 
 - 한·일 리전(서울·도쿄)은 점수 1 → 평일 업무시간 기준 잦은 프로비저닝 실패 예상
+
 - 미국 리전 3곳(us-east-1 / us-east-2 / us-west-2)은 점수 3
+
 - 그중 us-west-2와 us-east-1은 점수 3인 가용영역이 2개 (usw2-az1·az3 / use1-az2·az6) → 한 가용영역의 capacity가 소진되어도 다른 가용영역으로 폴백 가능
+
 (2) 응답시간 측면
 
 - LLM 서빙은 모델 자체의 첫 토큰 생성에 200~500 ms 소요 → 네트워크 +150~200 ms는 실사용자 체감 차이가 거의 없는 수준
+
 - 한국 인접 우선이라면 도쿄가 sweet spot이지만 capacity 제약이 큼
+
 > 결론
 
 - 점유 안정성 을 우선 고려해 us-west-2(오레곤) 선택
+
 - 한국 사용자 인터랙티브 서빙으로 확장 시 ap-northeast-1(도쿄) 멀티리전 또는 Capacity Block for ML / Capacity Reservation 예약 검토
+
 ---
 
 #### 1. 애플리케이션 및 OS 이미지 (Amazon Machine Image)
@@ -125,8 +139,11 @@ G4dn, G5, G6, Gr6, G6e, P4d, P4de, P5, P5e, P5en, P6-B200, P6-B300
 4xlarge 선택 근거
 
 - Qwen3-Coder-30B-A3B / Qwen3.6-35B-A3B 등 MoE 30~35B 모델은 bf16에서 ~70GB VRAM → 96GB 1장에 KV 캐시까지 여유
+
 - FP8/FP4 양자화 시 더 큰 모델(80~120B)도 가능
+
 - 우선 1 GPU로 검증 후 확장 필요 시 12xlarge 이상으로 변경
+
 모델별 VRAM 요구량
 
 32k 컨텍스트, 단일 시퀀스 기준. vLLM은 paged KV 캐시를 동적 할당하므로 실제 사용량은 워크로드에 따라 달라집니다.
@@ -175,7 +192,9 @@ G4dn, G5, G6, Gr6, G6e, P4d, P4de, P5, P5e, P5en, P6-B200, P6-B300
 용도 분리 권장
 
 - EBS (/) : 모델 가중치, 영구 데이터 → 절대 잃으면 안 되는 것
+
 - 인스턴스 스토어 (/mnt/nvme ) : KV 캐시, 임시 빌드, swap, 추론 로그 → 잃어도 되는 것
+
 ---
 
 ### NVME 설정
@@ -183,7 +202,9 @@ G4dn, G5, G6, Gr6, G6e, P4d, P4de, P5, P5e, P5en, P6-B200, P6-B300
 - NVME 는 Cloud 환경에서는 일반 물리서버와 다르게 아래와 같은 특성이 있음
 
 - 재부팅시 데이터 유지
+
 - Instance stop→start, terminator 시 데이터 소멸 됨
+
 #### 1. NVME Device 확인
 
 ```shell
@@ -234,9 +255,13 @@ Filesystem      Size  Used Avail Use% Mounted on
 | Qwen3.6-27B-FP8 | 31GB | 33~35GB | ~52GB |
 
 - 기본 패키지 설치
+
 - 모델 다운로드
+
 - vllm 설정
+
 - 모델 설정
+
 ### 기본 패키지 설치
 
 ```shell
@@ -255,6 +280,7 @@ export HF_HOME=/mnt/nvme/hf-cache      # 빠르지만 stop 시 소실
 ### 모델 다운로드
 
 - 모델을 로컬 디렉토리에 다운로드
+
 ```shell
 ## 첫번째 모델 다운로드
 > hf download Qwen/Qwen3.5-122B-A10B-GPTQ-Int4 \
@@ -343,6 +369,7 @@ Activate with: source .venv/bin/activate
 실행시 /stg/models/Qwen3.5-122B-A10B-GPTQ-Int ⇒ /mnt/nvme/models/Qwen3.5-122B-A10B-GPTQ-Int4 로 모델을 옮기고 nvme 에 있는 모델을 로드 한다.
 
 - Qwen3.5-122B-A10B-GPTQ-Int4 
+
 ```shell
 [Unit]
 Description=vLLM Qwen3.5-122B-A10B-GPTQ-Int4 Service
@@ -398,6 +425,7 @@ WantedBy=multi-user.target
 ```
 
 - Qwen3.6-27B-FP8
+
 ```shell
 [Unit]
 Description=vLLM Qwen3.6-27B-FP8 Service
