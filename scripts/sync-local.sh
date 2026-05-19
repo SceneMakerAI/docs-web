@@ -75,4 +75,14 @@ for pid in "${pids[@]}"; do
 done
 
 echo ">> 동기화 완료"
-exit $failed
+[ $failed -ne 0 ] && exit $failed
+
+# 변경사항이 있으면 커밋 후 푸시
+if ! git diff --quiet || ! git diff --cached --quiet || [ -n "$(git ls-files --others --exclude-standard docs/ static/img/)" ]; then
+  git add docs/ static/img/
+  git commit -m "chore: Notion 동기화 $(date +%Y-%m-%d)"
+  git push origin main
+  echo ">> 푸시 완료"
+else
+  echo ">> 변경사항 없음"
+fi
