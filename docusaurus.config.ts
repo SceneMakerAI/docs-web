@@ -153,7 +153,7 @@ const config: Config = {
           items: [
             {
               label: '시작하기',
-              to: '/docs/intro',
+              to: '/docs/guide/scenemakerai-문서',
             },
             {
               label: '아키텍처',
