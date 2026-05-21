@@ -1,0 +1,8 @@
+{
+  "label": "Proof of Concept",
+  "position": 2,
+  "link": {
+    "type": "generated-index",
+    "description": "Benchmark results and proof-of-concept experiments for SceneMakerAI."
+  }
+}
