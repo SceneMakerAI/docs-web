@@ -4,7 +4,7 @@ on:
   schedule:
   # 한국 시간(KST) 오전 9시 ~ 오후 7시 사이, 매시 0분과 30분에 실행
   # UTC 기준: 오전 0시 ~ 오전 10시
-    - cron: '0,30 0-12 * * 1-5' 
+    - cron: '0,30 * * * *' 
   workflow_dispatch:
     inputs:
       fetch_mode:
