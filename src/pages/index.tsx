@@ -25,7 +25,7 @@ function HomepageHero() {
             솔박스 사내 프로젝트 — 4대 서비스 · 오픈소스 기여 30+건 목표.
           </p>
           <div className={styles.ctaGroup}>
-            <Link className={styles.ctaPrimary} to="/docs/intro">
+            <Link className={styles.ctaPrimary} to="/docs/guide/scenemakerai-문서">
               문서 시작하기
             </Link>
             <Link

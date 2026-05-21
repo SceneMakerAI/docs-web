@@ -7,7 +7,7 @@ from datetime import datetime, timezone, timedelta
 
 SAVE_DIR = "docs/contribute"
 STATIC_IMG_DIR = "static/img/contribute"
-SKIP_FILES = {"index.md", "_category_.json", ".contribute-sync.json"}
+SKIP_FILES = {"_category_.json", ".contribute-sync.json"}
 
 NOTION_PROPERTY_TITLE = os.environ.get("NOTION_PROPERTY_TITLE", "제목")
 NOTION_PROPERTY_DATE = os.environ.get("NOTION_PROPERTY_DATE", "날짜")
