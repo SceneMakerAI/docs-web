@@ -339,9 +339,7 @@ def save_doc_page(page, position, existing_map):
     last_edited = page.get("last_edited_time", "")
     props = page.get("properties", {})
     title = read_title_plain(props, NOTION_PROPERTY_TITLE) or "제목없음"
-    order = read_number(props, NOTION_PROPERTY_ORDER)
-    if order is None:
-        order = position  # Notion DB 순서를 그대로 사용
+    order = position  # created_time 오름차순 정렬 기반 위치
 
     slug = slugify(title)
     new_filename = f"{SAVE_DIR}/{slug}.md"
@@ -444,9 +442,10 @@ def main():
     has_more = True
     next_cursor = None
     saved = 0
-    position = 1
     synced_files = set()
 
+    # 전체 페이지 수집
+    all_pages = []
     while has_more:
         if next_cursor:
             payload["start_cursor"] = next_cursor
@@ -456,24 +455,26 @@ def main():
             log(f"ERROR: {data.get('message', data)}")
             sys.exit(1)
 
-        pages = data.get("results", [])
-        log(f"페이지 수: {len(pages)}")
-
-        for page in pages:
-            title, filepath, last_edited, content_hash, page_order = save_doc_page(page, position, existing_map)
-            existing_map[page["id"]] = {
-                "file": filepath,
-                "last_edited": last_edited,
-                "content_hash": content_hash,
-                "order": page_order,
-            }
-            synced_files.add(filepath)
-            log(f"저장: {filepath} ({title})")
-            saved += 1
-            position += 1
-
+        all_pages.extend(data.get("results", []))
         has_more = data.get("has_more", False)
         next_cursor = data.get("next_cursor")
+
+    # FETCH_MODE=ALL: created_time 오름차순 정렬 후 position 배정
+    if FETCH_MODE != "DAILY":
+        all_pages.sort(key=lambda p: p.get("created_time", ""))
+        log(f"총 {len(all_pages)}개 페이지, created_time 오름차순 정렬")
+
+    for position, page in enumerate(all_pages, start=1):
+        title, filepath, last_edited, content_hash, page_order = save_doc_page(page, position, existing_map)
+        existing_map[page["id"]] = {
+            "file": filepath,
+            "last_edited": last_edited,
+            "content_hash": content_hash,
+            "order": page_order,
+        }
+        synced_files.add(filepath)
+        log(f"저장: {filepath} ({title})")
+        saved += 1
 
     if FETCH_MODE != "DAILY":
         previously_tracked = {
