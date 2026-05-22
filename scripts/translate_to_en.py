@@ -116,6 +116,27 @@ def get_changed_docs_files():
     return files
 
 
+def get_incomplete_en_files():
+    """EN 파일이 없거나 body가 비어있는 docs/ .md 파일 목록 반환.
+    git-changed 감지에서 누락된 기커밋 파일 보완용."""
+    result = []
+    for dirpath, _dirs, filenames in os.walk("docs/"):
+        for fname in sorted(filenames):
+            if not fname.endswith(".md"):
+                continue
+            kr_path = os.path.join(dirpath, fname).replace("\\", "/")
+            en_path = "docs_en/" + kr_path[len("docs/"):]
+            if not os.path.exists(en_path):
+                result.append(kr_path)
+                continue
+            with open(en_path, encoding="utf-8") as f:
+                en_content = f.read()
+            en_m = re.match(r"^(---\n.*?\n---\n\n)(.*)", en_content, re.DOTALL)
+            if not en_m or not en_m.group(2).strip():
+                result.append(kr_path)
+    return result
+
+
 def get_deleted_docs_files():
     """working tree 기준으로 docs/ 에서 삭제된 .md 파일 목록 반환."""
     r = subprocess.run(
@@ -174,7 +195,7 @@ def translate_file(kr_path, hashes):
         with open(en_path, encoding="utf-8") as f:
             existing_en = f.read()
         en_match = re.match(r"^(---\n.*?\n---\n\n)(.*)", existing_en, re.DOTALL)
-        if en_match:
+        if en_match and en_match.group(2).strip():
             # 기존 EN 제목(이미 번역됨) 보존, slug/sidebar_position 교체
             kr_title_m = re.search(r'^title: "(.+)"', en_frontmatter, re.MULTILINE)
             en_title_m = re.search(r'^title: "(.+)"', en_match.group(1), re.MULTILINE)
@@ -188,6 +209,7 @@ def translate_file(kr_path, hashes):
             hashes[kr_path] = {"body_hash": body_hash, "slug": slug, "sidebar_position": pos}
             log(f"frontmatter 동기화 (본문 동일): {kr_path} → {en_path}")
             return
+        # EN body가 비어있으면 전체 재번역으로 fall-through
 
     # body 변경 → 전체 번역
     title_match = re.search(r'^title: "(.+)"', en_frontmatter, re.MULTILINE)
@@ -219,6 +241,12 @@ def main():
     hashes = load_hashes()
     deleted = get_deleted_docs_files()
     changed = get_changed_docs_files()
+
+    # 이미 커밋된 파일 중 EN 누락·body 비어있는 파일 보완
+    for path in get_incomplete_en_files():
+        if path not in changed:
+            changed.append(path)
+            log(f"EN 누락/불완전, 번역 대상 추가: {path}")
 
     if not changed and not deleted:
         log("번역할 변경 파일 없음")
