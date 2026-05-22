@@ -76,20 +76,20 @@ Save to `predictions/{category}/{original_name}/{clip_id}.json`. Perform qualita
 
 <br />
 
-#### **2.2. Input Method: ** `from_video` ** (single MP4 input) vs ** `from_frames_audio` ** (separate inputs)**
+#### **2.2. Input Method:** `from_video` **(single MP4 input) vs** `from_frames_audio` **(separate inputs)**
 
 - **Conclusion:** Adopted the `from_video` method, which passes a single 6-second MP4 file as a single `video_url` (base64 data URI) component. Separate input (`from_frames_audio`) is **on hold**.
 
 - **Reason:** Since the vLLM video pipeline decodes video and audio simultaneously, there is zero additional cost for separation. The separate input method is currently inoperable because the `vllm[audio]` decoders (`av` / `soundfile` / `librosa`) are not installed in the server vLLM venv. — The output (frames + audio.wav in `data/derived/`) is preserved, allowing immediate resumption once server dependencies are strengthened.
 
-| **Comparison Items** | `from_video` ** (Adopted)** | `from_frames_audio` ** (On Hold)** |
+| **Comparison Items** | `from_video` **(Adopted)** | `from_frames_audio` **(On Hold)** |
 | --- | --- | --- |
 | **Input Configuration** | 1 mp4 file → 1 component `video_url` (data URI) | 3 keyframe JPGs + 1 WAV file → 4 components |
 | **Timing Alignment** | Video and audio automatically synchronized within the container | Separate alignment must be ensured on the client side |
 | **Server-side dependencies** | Uses only the default vLLM video pipeline | Requires separate installation of `vllm[audio]` (`av` / `soundfile` / `librosa`) |
 | **Preprocessing Output Size** | 6-second MP4 (~1–3 MB per clip) | 3 JPG frames + WAV (~hundreds of KB per clip) |
 | **Hallucination Impact** | Natural preservation of video/audio alignment and context | Potential loss of motion between keyframes |
-| **PoC Final Status** | **Main Pipeline Finalized** | Resuming after strengthening server dependencies (preserving `data/derived/`) |####
+| **PoC Final Status** | **Main Pipeline Finalized** | Resuming after strengthening server dependencies (preserving `data/derived/`) |
 
 <br />
 
