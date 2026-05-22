@@ -1,8 +1,10 @@
 """
 translate_to_en.py — 변경된 docs/ 파일을 DeepL로 번역하여 docs_en/ 저장
 
-마지막 번역 시점의 git commit hash를 .notion-translate-ref 에 저장하고,
-다음 실행 시 그 시점부터 HEAD까지 diff하여 누적 변경을 모두 반영한다.
+git diff HEAD 기준으로 working tree 변경분을 감지하므로,
+커밋 전에 실행해야 한다 (server-sync.sh 에서 Notion sync 직후 호출).
+body SHA-256 해시를 .notion-translate-hashes.json 에 캐시해
+내용이 동일한 파일은 DeepL 호출 없이 스킵한다.
 
 Env vars:
   DEEPL_API_KEY   DeepL API 키 (Free: :fx 로 끝남, Pro: 일반 키)
@@ -18,7 +20,6 @@ import requests
 
 
 DEEPL_API_KEY = os.environ.get("DEEPL_API_KEY", "")
-REF_FILE = ".notion-translate-ref"
 HASH_FILE = ".notion-translate-hashes.json"
 
 
@@ -57,30 +58,14 @@ def save_hashes(hashes):
         json.dump(hashes, f, ensure_ascii=False, indent=2)
 
 
-def load_translate_ref():
-    if os.path.exists(REF_FILE):
-        ref = open(REF_FILE).read().strip()
-        return ref or None
-    return None
-
-
-def save_translate_ref():
-    r = subprocess.run(["git", "rev-parse", "HEAD"], capture_output=True, text=True)
-    with open(REF_FILE, "w") as f:
-        f.write(r.stdout.strip())
-
-
-def get_changed_docs_files(base_ref=None):
-    """base_ref 이후 docs/ 에서 변경·추가된 .md 파일 목록 반환.
-    base_ref 없으면 docs/ 전체를 반환 (최초 실행)."""
-    if base_ref:
-        r1 = subprocess.run(
-            ["git", "diff", "--name-only", "--diff-filter=ACM", f"{base_ref}..HEAD", "--", "docs/"],
-            capture_output=True, text=True,
-        )
-    else:
-        r1 = subprocess.run(["git", "ls-files", "docs/"], capture_output=True, text=True)
-
+def get_changed_docs_files():
+    """working tree 기준으로 docs/ 에서 변경·추가된 .md 파일 목록 반환."""
+    # 추적 중인 파일 중 변경·추가된 것 (커밋 전 상태)
+    r1 = subprocess.run(
+        ["git", "diff", "--name-only", "--diff-filter=ACM", "HEAD", "--", "docs/"],
+        capture_output=True, text=True,
+    )
+    # 미추적 신규 파일
     r2 = subprocess.run(
         ["git", "ls-files", "--others", "--exclude-standard", "docs/"],
         capture_output=True, text=True,
@@ -93,12 +78,10 @@ def get_changed_docs_files(base_ref=None):
     return files
 
 
-def get_deleted_docs_files(base_ref=None):
-    """base_ref 이후 docs/ 에서 삭제된 .md 파일 목록 반환."""
-    if not base_ref:
-        return []
+def get_deleted_docs_files():
+    """working tree 기준으로 docs/ 에서 삭제된 .md 파일 목록 반환."""
     r = subprocess.run(
-        ["git", "diff", "--name-only", "--diff-filter=D", f"{base_ref}..HEAD", "--", "docs/"],
+        ["git", "diff", "--name-only", "--diff-filter=D", "HEAD", "--", "docs/"],
         capture_output=True, text=True,
     )
     return [
@@ -167,20 +150,12 @@ def main():
         log("DEEPL_API_KEY 없음, 번역 건너뜀")
         sys.exit(0)
 
-    base_ref = load_translate_ref()
-    if base_ref:
-        log(f"마지막 번역 ref: {base_ref[:8]}")
-    else:
-        log("초기 실행 — docs/ 전체 스캔 (해시 비교로 실제 변경만 번역)")
-
     hashes = load_hashes()
-
-    deleted = get_deleted_docs_files(base_ref)
-    changed = get_changed_docs_files(base_ref)
+    deleted = get_deleted_docs_files()
+    changed = get_changed_docs_files()
 
     if not changed and not deleted:
         log("번역할 변경 파일 없음")
-        save_translate_ref()
         sys.exit(0)
 
     if deleted:
@@ -195,7 +170,6 @@ def main():
             translate_file(path, hashes)
 
     save_hashes(hashes)
-    save_translate_ref()
 
 
 if __name__ == "__main__":
