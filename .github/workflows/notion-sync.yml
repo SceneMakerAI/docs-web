@@ -1,10 +1,6 @@
 name: Notion Sync
 
 on:
-  schedule:
-  # 한국 시간(KST) 오전 9시 ~ 오후 7시 사이, 15분마다 실행
-  # UTC 기준: 오전 0시 ~ 오전 10시
-    - cron: '*/15 * * * *'
   workflow_dispatch:
     inputs:
       fetch_mode:
