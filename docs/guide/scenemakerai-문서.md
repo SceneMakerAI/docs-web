@@ -2,6 +2,7 @@
 id: scenemakerai-문서
 title: "SceneMakerAI 문서"
 sidebar_position: 1
+slug: "1"
 ---
 
 SceneMakerAI 는 오픈소스 AI 로 방송 콘텐츠를 재가공하기 위한 솔박스 사내 프로젝트입니다. 이 문서 사이트는 프로젝트의 개념, 아키텍처, 그리고 오픈소스 생태계 기여 방식을 정리합니다.

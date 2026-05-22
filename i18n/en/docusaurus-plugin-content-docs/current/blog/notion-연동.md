@@ -2,6 +2,7 @@
 id: notion-연동
 title: "Notion Integration"
 sidebar_position: 1
+slug: "1"
 ---
 
 Test

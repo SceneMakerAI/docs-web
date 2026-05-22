@@ -2,6 +2,7 @@
 id: qwen-3x-설치
 title: "Qwen 3.x 설치"
 sidebar_position: 1
+slug: "1"
 ---
 
 ## AWS 서버 셑팅
