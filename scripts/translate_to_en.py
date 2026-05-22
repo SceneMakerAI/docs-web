@@ -26,12 +26,11 @@ def translate_with_deepl(text):
         if DEEPL_API_KEY.endswith(":fx")
         else "https://api.deepl.com/v2/translate"
     )
-    resp = requests.post(endpoint, data={
-        "auth_key": DEEPL_API_KEY,
-        "text": text,
-        "source_lang": "KO",
-        "target_lang": "EN-US",
-    })
+    resp = requests.post(
+        endpoint,
+        headers={"Authorization": f"DeepL-Auth-Key {DEEPL_API_KEY}"},
+        json={"text": [text], "source_lang": "KO", "target_lang": "EN-US"},
+    )
     if resp.status_code != 200:
         log(f"DeepL 오류 {resp.status_code}: {resp.text[:200]}")
         return text
