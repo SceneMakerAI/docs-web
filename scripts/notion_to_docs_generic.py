@@ -314,7 +314,15 @@ def load_sync_map():
     if not os.path.exists(SYNC_MAP_FILE):
         return {}
     with open(SYNC_MAP_FILE, encoding="utf-8") as f:
-        return json.load(f)
+        raw = json.load(f)
+    # 구 포맷 {id: "filepath"} → 신 포맷 {id: {"file": ..., "last_edited": ...}} 자동 변환
+    result = {}
+    for pid, val in raw.items():
+        if isinstance(val, str):
+            result[pid] = {"file": val, "last_edited": ""}
+        else:
+            result[pid] = val
+    return result
 
 
 def save_sync_map(mapping):
@@ -325,6 +333,7 @@ def save_sync_map(mapping):
 
 def save_doc_page(page, position, existing_map):
     page_id = page["id"]
+    last_edited = page.get("last_edited_time", "")
     props = page.get("properties", {})
     title = read_title_plain(props, NOTION_PROPERTY_TITLE) or "제목없음"
     order = read_number(props, NOTION_PROPERTY_ORDER)
@@ -334,7 +343,23 @@ def save_doc_page(page, position, existing_map):
     slug = slugify(title)
     new_filename = f"{SAVE_DIR}/{slug}.md"
 
-    old_filename = existing_map.get(page_id)
+    existing_entry = existing_map.get(page_id)
+    if isinstance(existing_entry, dict):
+        old_filename = existing_entry.get("file")
+        stored_last_edited = existing_entry.get("last_edited", "")
+    elif isinstance(existing_entry, str):
+        old_filename = existing_entry
+        stored_last_edited = ""
+    else:
+        old_filename = None
+        stored_last_edited = ""
+
+    if (last_edited and stored_last_edited == last_edited
+            and old_filename == new_filename
+            and os.path.exists(new_filename)):
+        log(f"변경 없음, 스킵: {title}")
+        return title, new_filename, last_edited
+
     if old_filename and old_filename != new_filename:
         for candidate in [old_filename, old_filename.replace(".md", ".mdx")]:
             if os.path.exists(candidate):
@@ -358,7 +383,7 @@ def save_doc_page(page, position, existing_map):
     with open(new_filename, "w", encoding="utf-8") as f:
         f.write(frontmatter + body)
 
-    return title, new_filename
+    return title, new_filename, last_edited
 
 
 def remove_orphans(synced_files, previously_tracked):
@@ -417,8 +442,8 @@ def main():
         log(f"페이지 수: {len(pages)}")
 
         for page in pages:
-            title, filepath = save_doc_page(page, position, existing_map)
-            existing_map[page["id"]] = filepath
+            title, filepath, last_edited = save_doc_page(page, position, existing_map)
+            existing_map[page["id"]] = {"file": filepath, "last_edited": last_edited}
             synced_files.add(filepath)
             log(f"저장: {filepath} ({title})")
             saved += 1
@@ -428,9 +453,15 @@ def main():
         next_cursor = data.get("next_cursor")
 
     if FETCH_MODE != "DAILY":
-        previously_tracked = set(existing_map.values())
+        previously_tracked = {
+            (v["file"] if isinstance(v, dict) else v)
+            for v in existing_map.values()
+        }
         remove_orphans(synced_files, previously_tracked)
-        existing_map = {k: v for k, v in existing_map.items() if v in synced_files}
+        existing_map = {
+            k: v for k, v in existing_map.items()
+            if (v["file"] if isinstance(v, dict) else v) in synced_files
+        }
 
     save_sync_map(existing_map)
     log(f"완료: {saved}개 저장")
