@@ -400,8 +400,10 @@ def save_doc_page(page, position, existing_map):
 def remove_orphans(synced_files, previously_tracked):
     """이전 sync에서 Notion이 만든 파일 중 이번에 사라진 것만 삭제.
     수동 작성 파일(sync map에 없던 파일)은 건드리지 않는다."""
+    import shutil
     if not os.path.isdir(SAVE_DIR):
         return
+    section = SAVE_DIR.rstrip("/").split("/")[-1]
     for fname in os.listdir(SAVE_DIR):
         if fname in SKIP_FILES or fname.startswith("."):
             continue
@@ -411,6 +413,11 @@ def remove_orphans(synced_files, previously_tracked):
         if fpath in previously_tracked and fpath not in synced_files:
             os.remove(fpath)
             log(f"미추적 파일 삭제: {fpath}")
+            slug = os.path.splitext(fname)[0]
+            img_dir = f"static/img/{section}/{slug}"
+            if os.path.isdir(img_dir):
+                shutil.rmtree(img_dir)
+                log(f"연관 이미지 삭제: {img_dir}")
 
 
 def main():

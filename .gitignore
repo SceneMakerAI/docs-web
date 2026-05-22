@@ -103,3 +103,4 @@ static/img/og-candidates/
 *.orig
 __pycache__/
 .notion-translate-ref
+.notion-translate-hashes.json

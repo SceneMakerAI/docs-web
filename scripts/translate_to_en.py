@@ -7,6 +7,8 @@ translate_to_en.py — 변경된 docs/ 파일을 DeepL로 번역하여 docs_en/ 
 Env vars:
   DEEPL_API_KEY   DeepL API 키 (Free: :fx 로 끝남, Pro: 일반 키)
 """
+import hashlib
+import json
 import os
 import re
 import sys
@@ -16,6 +18,7 @@ import requests
 
 DEEPL_API_KEY = os.environ.get("DEEPL_API_KEY", "")
 REF_FILE = ".notion-translate-ref"
+HASH_FILE = ".notion-translate-hashes.json"
 
 
 def log(msg):
@@ -39,6 +42,18 @@ def translate_with_deepl(text):
         log(f"DeepL 오류 {resp.status_code}: {resp.text[:200]}")
         return text
     return resp.json()["translations"][0]["text"]
+
+
+def load_hashes():
+    if os.path.exists(HASH_FILE):
+        with open(HASH_FILE, encoding="utf-8") as f:
+            return json.load(f)
+    return {}
+
+
+def save_hashes(hashes):
+    with open(HASH_FILE, "w", encoding="utf-8") as f:
+        json.dump(hashes, f, ensure_ascii=False, indent=2)
 
 
 def load_translate_ref():
@@ -100,7 +115,7 @@ def delete_en_file(kr_path):
         log(f"EN 파일 없음, 스킵: {en_path}")
 
 
-def translate_file(kr_path):
+def translate_file(kr_path, hashes):
     with open(kr_path, encoding="utf-8") as f:
         content = f.read()
 
@@ -113,7 +128,13 @@ def translate_file(kr_path):
     frontmatter = match.group(1)
     body = match.group(2)
 
-    # EN frontmatter에서 id 제거 (파일 경로로 locale 매칭, id 불필요)
+    # body 해시 비교 — 내용이 동일하면 DeepL 호출 건너뜀
+    body_hash = hashlib.sha256(body.encode()).hexdigest()
+    if hashes.get(kr_path) == body_hash:
+        log(f"내용 동일, 번역 스킵: {kr_path}")
+        return
+
+    # EN frontmatter에서 id 제거 (파일 경로로 locale 매칭)
     frontmatter = re.sub(r'^id: .+\n', '', frontmatter, count=1, flags=re.MULTILINE)
 
     # title 번역
@@ -135,6 +156,7 @@ def translate_file(kr_path):
     with open(en_path, "w", encoding="utf-8") as f:
         f.write(frontmatter + en_body)
 
+    hashes[kr_path] = body_hash
     log(f"{kr_path} → {en_path}")
 
 
@@ -147,7 +169,9 @@ def main():
     if base_ref:
         log(f"마지막 번역 ref: {base_ref[:8]}")
     else:
-        log("초기 실행 — docs/ 전체 번역")
+        log("초기 실행 — docs/ 전체 스캔 (해시 비교로 실제 변경만 번역)")
+
+    hashes = load_hashes()
 
     deleted = get_deleted_docs_files(base_ref)
     changed = get_changed_docs_files(base_ref)
@@ -161,12 +185,14 @@ def main():
         log(f"EN 삭제 대상 {len(deleted)}개: {deleted}")
         for path in deleted:
             delete_en_file(path)
+            hashes.pop(path, None)
 
     if changed:
-        log(f"번역 대상 {len(changed)}개: {changed}")
+        log(f"번역 후보 {len(changed)}개 (해시 동일 시 스킵)")
         for path in changed:
-            translate_file(path)
+            translate_file(path, hashes)
 
+    save_hashes(hashes)
     save_translate_ref()
 
 
