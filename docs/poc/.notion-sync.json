@@ -36,9 +36,9 @@
     "order": 4
   },
   "368e15b4-0359-811c-8282-caf32a8f473d": {
-    "file": "docs/poc/qwen3-omni-baseline-news-stt-없이.md",
-    "last_edited": "2026-05-22T09:32:00.000Z",
-    "content_hash": "e23df2cd765388193ce6fe5f4870ef8e434cd3b1c0d09682e503bbbb2e17fa62",
+    "file": "docs/poc/qwen3-omni-baseline-news-stt-없이-30fps-vs-05fps.md",
+    "last_edited": "2026-05-22T09:45:00.000Z",
+    "content_hash": "afee6602e7460b45ebc24b5f04a4d1886a030871ce96a73b3c63e6cb65ab10c7",
     "order": 5
   }
 }
