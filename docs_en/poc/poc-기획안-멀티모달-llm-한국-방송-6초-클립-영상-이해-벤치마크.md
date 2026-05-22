@@ -117,7 +117,7 @@ Save to `predictions/{category}/{original_name}/{clip_id}.json`. Perform qualita
 
 ### 3.1. Testing Method
 
-- **Analysis Unit:** 6-second MP4 clip (the original `00:10:00 \~ 00:20:00` segment divided into 100 equal parts; same window as our internal benchmark)
+- **Analysis Unit:** 6-second MP4 clip (the original `00:10:00 ~ 00:20:00` segment divided into 100 equal parts; same window as our internal benchmark)
 
 - **Analysis API:** Internal FastAPI server `POST /analyze/by-clip-path` — Submit `clip_path` + `script_prev/curr/next` via form → Response envelope `{result: {summary, objects, actions}, meta: {model, elapsed_ms, usage}}`
 

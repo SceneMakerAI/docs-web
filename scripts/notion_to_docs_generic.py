@@ -382,9 +382,16 @@ def escape_mdx_angle_brackets(text):
 
 
 def escape_single_tildes(text):
-    """단독 ~ (범위 표기 등)를 remark-gfm single-tilde strikethrough로 오해하지 않도록 이스케이프.
-    ~~...~~ (double-tilde strikethrough)는 그대로 유지."""
-    return re.sub(r'(?<!~)~(?!~)', r'\\~', text)
+    """단독 ~ 를 \~ 로 이스케이프. 백틱 인라인 코드·코드 블록 내부는 제외.
+    코드 스팬 안에서 \~ 는 리터럴로 렌더링되므로 이스케이프하면 안 된다."""
+    parts = re.split(r'(```[\s\S]*?```|`[^`\n]+`)', text)
+    result = []
+    for i, part in enumerate(parts):
+        if i % 2 == 1:  # 백틱 코드 스팬/블록 — 그대로 유지
+            result.append(part)
+        else:
+            result.append(re.sub(r'(?<!~)~(?!~)', r'\\~', part))
+    return ''.join(result)
 
 
 def blocks_to_markdown(blocks, slug):
