@@ -57,6 +57,29 @@ def get_changed_docs_files():
     return files
 
 
+def get_deleted_docs_files():
+    """git diff 기준으로 docs/ 에서 삭제된 .md 파일 목록 반환"""
+    r = subprocess.run(
+        ["git", "diff", "--name-only", "--diff-filter=D", "HEAD", "--", "docs/"],
+        capture_output=True, text=True,
+    )
+    files = []
+    for line in r.stdout.splitlines():
+        line = line.strip()
+        if line.endswith(".md") and line.startswith("docs/"):
+            files.append(line)
+    return files
+
+
+def delete_en_file(kr_path):
+    en_path = "docs_en/" + kr_path[len("docs/"):]
+    if os.path.exists(en_path):
+        os.remove(en_path)
+        log(f"EN 파일 삭제: {en_path}")
+    else:
+        log(f"EN 파일 없음, 스킵: {en_path}")
+
+
 def translate_file(kr_path):
     with open(kr_path, encoding="utf-8") as f:
         content = f.read()
@@ -94,14 +117,22 @@ def main():
         log("DEEPL_API_KEY 없음, 번역 건너뜀")
         sys.exit(0)
 
+    deleted = get_deleted_docs_files()
     changed = get_changed_docs_files()
-    if not changed:
+
+    if not changed and not deleted:
         log("번역할 변경 파일 없음")
         sys.exit(0)
 
-    log(f"번역 대상 {len(changed)}개: {changed}")
-    for path in changed:
-        translate_file(path)
+    if deleted:
+        log(f"EN 삭제 대상 {len(deleted)}개: {deleted}")
+        for path in deleted:
+            delete_en_file(path)
+
+    if changed:
+        log(f"번역 대상 {len(changed)}개: {changed}")
+        for path in changed:
+            translate_file(path)
 
 
 if __name__ == "__main__":
