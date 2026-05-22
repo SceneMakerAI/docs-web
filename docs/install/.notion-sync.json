@@ -2,11 +2,13 @@
   "365e15b4-0359-80e5-a007-ee0cc393ef9e": {
     "file": "docs/install/qwen-3x-설치.md",
     "last_edited": "2026-05-22T05:44:00.000Z",
-    "content_hash": "7fd15eb62bb39bbf7baffd2c8150bd452f98fba4b6564d932f99ade76f6796fc"
+    "content_hash": "7fd15eb62bb39bbf7baffd2c8150bd452f98fba4b6564d932f99ade76f6796fc",
+    "order": 1
   },
   "365e15b4-0359-8037-a12a-c947c2d9a972": {
     "file": "docs/install/llm-설치.md",
     "last_edited": "2026-05-19T08:39:00.000Z",
-    "content_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    "content_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "order": 2
   }
 }
