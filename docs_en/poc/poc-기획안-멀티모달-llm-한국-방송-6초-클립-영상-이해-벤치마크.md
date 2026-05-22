@@ -109,7 +109,11 @@ Save to `predictions/{category}/{original_name}/{clip_id}.json`. Perform qualita
 
 <br />
 
-|---## 3. Testing
+---
+
+<br />
+
+## 3. Testing
 
 ### 3.1. Testing Method
 

@@ -103,7 +103,10 @@ def translate_file(kr_path):
         en_title = translate_with_deepl(kr_title)
         frontmatter = frontmatter.replace(f'title: "{kr_title}"', f'title: "{en_title}"', 1)
 
-    en_body = translate_with_deepl(body) if body.strip() else body
+    # --- (수평선) 을 DeepL 이 테이블 구분자로 오인하지 않도록 보호
+    body_protected = re.sub(r'(?m)^---$', '<hr/>', body)
+    translated = translate_with_deepl(body_protected) if body.strip() else body_protected
+    en_body = re.sub(r'<hr/>', '---', translated)
 
     # docs/section/file.md → docs_en/section/file.md
     en_path = "docs_en/" + kr_path[len("docs/"):]
