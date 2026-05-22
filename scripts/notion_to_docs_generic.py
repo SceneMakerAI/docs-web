@@ -22,6 +22,17 @@ import requests
 from urllib.parse import urlparse
 from datetime import datetime, timezone, timedelta
 
+_NOTION_LANG_MAP = {
+    "plain text":    "text",
+    "c++":           "cpp",
+    "c#":            "csharp",
+    "f#":            "fsharp",
+    "objective-c":   "objectivec",
+    "vb.net":        "vbnet",
+    "visual basic":  "vbnet",
+    "java/c/c++/c#": "java",
+}
+
 NOTION_TOKEN = os.environ["NOTION_TOKEN"]
 DATABASE_ID_RAW = os.environ["NOTION_DATABASE_ID"]
 SAVE_DIR = os.environ.get("SAVE_DIR", "docs/guide")
@@ -270,7 +281,8 @@ def block_to_markdown(block, slug, image_counter):
         return ""  # table 블록 내부에서만 처리
 
     elif b_type == "code":
-        language = block["code"].get("language", "text")
+        raw_lang = block["code"].get("language", "text")
+        language = _NOTION_LANG_MAP.get(raw_lang.lower(), raw_lang)
         content = extract_text_from_rich_text(block["code"].get("rich_text", []))
         return f"```{language}\n{content}\n```\n\n"
 
