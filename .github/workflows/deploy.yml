@@ -1,29 +1,19 @@
 name: Deploy to GitHub Pages
 
 on:
-  # main에 push될 때마다 자동 배포
   push:
     branches: [main]
-
-  # Notion Sync 완료 시 자동 배포 (bot push는 push 이벤트를 트리거하지 않음)
-  workflow_run:
-    workflows: ["Notion Sync"]
-    types: [completed]
-    branches: [main]
-
-  # Actions 탭에서 수동 실행 허용 (롤백/재배포에 유용)
   workflow_dispatch:
 
-# GITHUB_TOKEN에 필요한 권한 부여 (Pages 배포용)
 permissions:
   contents: read
   pages: write
   id-token: write
 
-# 새 배포가 시작되면 이전 대기 중인 배포는 취소
+# 진행 중인 배포는 완료, 대기 중인 것은 최신 1개만 유지
 concurrency:
   group: pages
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   build:
