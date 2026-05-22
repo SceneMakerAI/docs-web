@@ -49,10 +49,11 @@
   --smk-font-display: 'Geist', 'Inter Display', 'General Sans', system-ui, -apple-system, sans-serif;
   --smk-font-body: 'Inter', system-ui, -apple-system, sans-serif;
 
-  /* ─────────── Heading sizes (Infima 기본 H4=1rem 은 본문과 구분 안 됨) ─────────── */
+  /* ─────────── Heading sizes (Infima 기본 H4=1rem 은 본문과 구분 안 됨, H5=0.875rem 은 본문보다 작음) ─────────── */
   --ifm-h2-font-size: 1.5rem;
   --ifm-h3-font-size: 1.25rem;
   --ifm-h4-font-size: 1.05rem;
+  --ifm-h5-font-size: 1rem;
 
   /* ─────────── Radius ─────────── */
   --smk-r-sm: 8px;
