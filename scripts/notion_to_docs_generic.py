@@ -33,8 +33,6 @@ NOTION_PROPERTY_DATE = os.environ.get("NOTION_PROPERTY_DATE", "날짜")
 FETCH_MODE = os.environ.get("FETCH_MODE", "ALL")
 TIMEZONE_HOURS = 9
 
-DEEPL_API_KEY = os.environ.get("DEEPL_API_KEY", "")
-EN_SAVE_DIR = "docs_en/" + SAVE_DIR.split("/", 1)[1] if "/" in SAVE_DIR else ""
 
 SYNC_MAP_FILE = f"{SAVE_DIR}/.notion-sync.json"
 # 수동 작성 구조 파일 — sync가 절대 삭제하지 않음
@@ -335,25 +333,6 @@ def save_sync_map(mapping):
         json.dump(mapping, f, ensure_ascii=False, indent=2)
 
 
-def translate_with_deepl(text):
-    if not DEEPL_API_KEY or not text.strip():
-        return text
-    endpoint = (
-        "https://api-free.deepl.com/v2/translate"
-        if DEEPL_API_KEY.endswith(":fx")
-        else "https://api.deepl.com/v2/translate"
-    )
-    resp = requests.post(endpoint, data={
-        "auth_key": DEEPL_API_KEY,
-        "text": text,
-        "source_lang": "KO",
-        "target_lang": "EN-US",
-    })
-    if resp.status_code != 200:
-        log(f"DeepL 오류 {resp.status_code}: {resp.text[:200]}")
-        return text
-    return resp.json()["translations"][0]["text"]
-
 
 def save_doc_page(page, position, existing_map):
     page_id = page["id"]
@@ -410,30 +389,6 @@ def save_doc_page(page, position, existing_map):
     os.makedirs(SAVE_DIR, exist_ok=True)
     with open(new_filename, "w", encoding="utf-8") as f:
         f.write(frontmatter + body)
-
-    # EN 번역: body 해시가 바뀐 경우에만 DeepL 호출
-    if EN_SAVE_DIR and DEEPL_API_KEY:
-        if content_hash != stored_hash:
-            en_title = translate_with_deepl(title)
-            en_body = translate_with_deepl(body)
-            safe_en_title = en_title.replace('"', '\\"')
-            en_frontmatter = (
-                f"---\n"
-                f"id: {slug}\n"
-                f'title: "{safe_en_title}"\n'
-                f"sidebar_position: {order}\n"
-                f'slug: "{order}"\n'
-                f"---\n\n"
-            )
-            en_filename = f"{EN_SAVE_DIR}/{slug}.md"
-            os.makedirs(EN_SAVE_DIR, exist_ok=True)
-            with open(en_filename, "w", encoding="utf-8") as f:
-                f.write(en_frontmatter + en_body)
-            log(f"EN 번역 저장: {en_filename}")
-        else:
-            log(f"내용 동일, EN 번역 스킵: {title}")
-    elif not DEEPL_API_KEY:
-        log("DEEPL_API_KEY 없음, EN 번역 건너뜀")
 
     return title, new_filename, last_edited, content_hash
 

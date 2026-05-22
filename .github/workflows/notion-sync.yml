@@ -110,6 +110,9 @@ jobs:
           done
           exit $failed
 
+      - name: Translate changed docs to EN
+        run: python scripts/translate_to_en.py
+
       - name: Commit and push if changed
         run: |
           git config user.name "github-actions[bot]"
