@@ -195,6 +195,50 @@
   padding: 0 16px;
 }
 
+/* ─────────── Details/Summary: Notion 토글 스타일 ─────────── */
+/* Infima 기본 파란색 테두리·배경 제거, Notion-style minimal toggle */
+.markdown details {
+  border: none;
+  border-left: 2px solid var(--ifm-table-border-color);
+  background: transparent;
+  padding: 0 0 0 12px;
+  margin-bottom: 0.75rem;
+  border-radius: 0;
+}
+
+.markdown details summary {
+  background: transparent;
+  color: inherit;
+  font-weight: 500;
+  padding: 4px 0;
+  cursor: pointer;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.markdown details summary::before {
+  content: '▶';
+  font-size: 0.65em;
+  transition: transform 0.15s;
+  color: var(--ifm-color-content-secondary);
+  flex-shrink: 0;
+}
+
+.markdown details[open] > summary::before {
+  transform: rotate(90deg);
+}
+
+/* WebKit의 기본 disclosure triangle 숨김 */
+.markdown details summary::-webkit-details-marker {
+  display: none;
+}
+
+.markdown details[open] > summary {
+  margin-bottom: 0.5rem;
+}
+
 /* Navbar 로고: sample.pen 의 워드마크 18px Geist 옆에 맞춰 24×24 */
 .navbar__logo {
   height: 24px;
