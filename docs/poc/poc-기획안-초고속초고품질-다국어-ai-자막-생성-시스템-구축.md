@@ -144,9 +144,12 @@ NVIDIA RTX 4090 (24GB) 1장 기반 기본 가속 환경
     - WhisperX 와 DeepFilterNet 은 내부적으로 Mono 로 처리 한다. (스테레오가 들어오면 Mono로 변환 함)
 
   - -ar 48000 : DeepFilterNet 의 native 샘플레이트는 48KHz
+    - 만약 16KHz 가 들어오면 내부적으로 업샘플을 거치는데 이때 정보 손실이 발생한다.
+
+  - -c:a pcm_s16le : 음성 압축 없이 원본 그대로 출력
 
 ```yaml
-ffmpeg -y -i input.mp4 -vn -ac 1 -ar 48000 -c:a pcm_s16le audio.wav
+ffmpeg -y -i <input.mp4> -vn -ac 1 -ar 48000 -c:a pcm_s16le <audio.wav>
 ```
 
 <br />
