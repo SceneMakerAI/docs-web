@@ -5,7 +5,7 @@ sidebar_position: 1
 slug: "1"
 ---
 
-## AWS 서버 팅
+## AWS 서버 세팅
 
 ### EC2 인스턴스 설정
 
