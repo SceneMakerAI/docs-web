@@ -2,6 +2,7 @@
 id: github에서-참여하기
 title: "GitHub에서 참여하기"
 sidebar_position: 2
+slug: "2"
 ---
 
 SceneMakerAI의 오픈소스 저장소는 GitHub에서 확인할 수 있습니다.

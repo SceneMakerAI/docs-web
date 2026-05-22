@@ -2,6 +2,7 @@
 id: how-to-contribute
 title: "How to contribute"
 sidebar_position: 1
+slug: "1"
 ---
 
 This section describes the detailed process for submitting contributions.

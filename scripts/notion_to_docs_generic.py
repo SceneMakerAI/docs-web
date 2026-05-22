@@ -350,6 +350,7 @@ def save_doc_page(page, position, existing_map):
         f"id: {slug}\n"
         f'title: "{safe_title}"\n'
         f"sidebar_position: {order}\n"
+        f"slug: \"{order}\"\n"
         f"---\n\n"
     )
 

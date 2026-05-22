@@ -2,6 +2,7 @@
 id: scenemakerai-문서
 title: "SceneMakerAI Docs"
 sidebar_position: 1
+slug: "1"
 ---
 
 SceneMakerAI is an internal Solbox project for reprocessing broadcast content using open-source AI. This documentation site covers the project's concepts, architecture, and how we contribute to the open-source ecosystem.
