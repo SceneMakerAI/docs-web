@@ -23,9 +23,41 @@ import requests
 DEEPL_API_KEY = os.environ.get("DEEPL_API_KEY", "")
 HASH_FILE = ".notion-translate-hashes.json"
 
+# 번역에서 보호할 프로그래밍 언어 목록 (코드가 번역되면 깨짐)
+# smalltalk, text 등 자연어 텍스트 블록은 목록에서 제외 → 번역 허용
+_PROG_LANG_PROTECT = {
+    'bash', 'sh', 'shell', 'python', 'py', 'javascript', 'js',
+    'typescript', 'ts', 'yaml', 'yml', 'json', 'toml', 'ini',
+    'sql', 'css', 'scss', 'html', 'xml', 'java', 'cpp', 'c',
+    'csharp', 'go', 'rust', 'ruby', 'php', 'swift', 'kotlin',
+    'r', 'diff', 'dockerfile', 'makefile',
+}
+
 
 def log(msg):
     print(f"[translate] {msg}", flush=True)
+
+
+def _protect_code_blocks(body):
+    """프로그래밍 언어 코드 블록을 __CODE0__ 플레이스홀더로 교체 (번역 보호)."""
+    store = {}
+
+    def replacer(m):
+        lang = m.group(1).strip().lower()
+        if lang in _PROG_LANG_PROTECT:
+            key = f'__CODE{len(store)}__'
+            store[key] = m.group(0)
+            return key
+        return m.group(0)
+
+    protected = re.sub(r'```(\w*)\n[\s\S]*?```', replacer, body)
+    return protected, store
+
+
+def _restore_code_blocks(body, store):
+    for key, val in store.items():
+        body = body.replace(key, val)
+    return body
 
 
 def translate_with_deepl(text):
@@ -164,10 +196,13 @@ def translate_file(kr_path, hashes):
         en_title = translate_with_deepl(kr_title)
         en_frontmatter = en_frontmatter.replace(f'title: "{kr_title}"', f'title: "{en_title}"', 1)
 
+    # 프로그래밍 언어 코드 블록 보호 (bash/yaml/python 등 번역 방지)
+    body_no_code, code_store = _protect_code_blocks(body)
     # --- (수평선) 을 DeepL 이 테이블 구분자로 오인하지 않도록 보호
-    body_protected = re.sub(r'(?m)^---$', '<hr/>', body)
-    translated = translate_with_deepl(body_protected) if body.strip() else body_protected
+    body_protected = re.sub(r'(?m)^---$', '<hr/>', body_no_code)
+    translated = translate_with_deepl(body_protected) if body_no_code.strip() else body_protected
     en_body = html.unescape(re.sub(r'<hr/>', '---', translated))
+    en_body = _restore_code_blocks(en_body, code_store)
 
     with open(en_path, "w", encoding="utf-8") as f:
         f.write(en_frontmatter + en_body)
