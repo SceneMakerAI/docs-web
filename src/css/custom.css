@@ -151,6 +151,27 @@
   color: rgba(255, 255, 255, 0.6);
 }
 
+/* ─────────── Notion 테이블 셀 배경색 ─────────── */
+[data-notion-bg="gray_background"]   { background: #f1f1ef; }
+[data-notion-bg="brown_background"]  { background: #f4eeee; }
+[data-notion-bg="orange_background"] { background: #fbecdd; }
+[data-notion-bg="yellow_background"] { background: #fbf3db; }
+[data-notion-bg="green_background"]  { background: #ecf3ec; }
+[data-notion-bg="blue_background"]   { background: #e7f3f8; }
+[data-notion-bg="purple_background"] { background: #f6f3f9; }
+[data-notion-bg="pink_background"]   { background: #f9e8f0; }
+[data-notion-bg="red_background"]    { background: #fce4e4; }
+
+[data-theme='dark'] [data-notion-bg="gray_background"]   { background: #2e2e2e; }
+[data-theme='dark'] [data-notion-bg="brown_background"]  { background: #3a2c2c; }
+[data-theme='dark'] [data-notion-bg="orange_background"] { background: #3a2a1a; }
+[data-theme='dark'] [data-notion-bg="yellow_background"] { background: #36301a; }
+[data-theme='dark'] [data-notion-bg="green_background"]  { background: #1c331e; }
+[data-theme='dark'] [data-notion-bg="blue_background"]   { background: #1a2b38; }
+[data-theme='dark'] [data-notion-bg="purple_background"] { background: #2a1e3a; }
+[data-theme='dark'] [data-notion-bg="pink_background"]   { background: #381a28; }
+[data-theme='dark'] [data-notion-bg="red_background"]    { background: #361a1a; }
+
 /* ─────────── Code block: Notion 스타일 ─────────── */
 /* 라이트/다크 모두 vsDark 배경 사용 → 흰 배경 오버라이드 불필요 */
 .theme-code-block {

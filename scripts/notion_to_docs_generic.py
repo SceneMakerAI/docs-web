@@ -14,6 +14,7 @@ Env vars (선택):
   FETCH_MODE            ALL | DAILY (기본: ALL)
 """
 import hashlib
+import html as _html
 import os
 import re
 import sys
@@ -32,6 +33,47 @@ _NOTION_LANG_MAP = {
     "visual basic":  "vbnet",
     "java/c/c++/c#": "java",
 }
+
+_NOTION_BG_COLOR_NAMES = {
+    "gray_background", "brown_background", "orange_background",
+    "yellow_background", "green_background", "blue_background",
+    "purple_background", "pink_background", "red_background",
+}
+
+
+def _get_cell_bg(cell_rich_text):
+    """셀 rich_text 목록에서 Notion 배경색 이름 반환. 없으면 None."""
+    for rt in cell_rich_text:
+        color = rt.get("annotations", {}).get("color", "default")
+        if color in _NOTION_BG_COLOR_NAMES:
+            return color
+    return None
+
+
+def _rich_text_to_html(rich_text_list):
+    """rich_text 목록 → HTML 문자열 변환 (HTML 테이블 셀 내용용)."""
+    parts = []
+    for text in rich_text_list:
+        plain = text["plain_text"]
+        ann = text.get("annotations", {})
+        href = text.get("href")
+        escaped = _html.escape(plain)
+        if ann.get("code"):
+            content = f"<code>{escaped}</code>"
+        else:
+            content = escaped
+            if ann.get("bold") and ann.get("italic"):
+                content = f"<strong><em>{content}</em></strong>"
+            elif ann.get("bold"):
+                content = f"<strong>{content}</strong>"
+            elif ann.get("italic"):
+                content = f"<em>{content}</em>"
+            if ann.get("strikethrough"):
+                content = f"<del>{content}</del>"
+        if href:
+            content = f'<a href="{_html.escape(href)}">{content}</a>'
+        parts.append(content)
+    return "".join(parts)
 
 NOTION_TOKEN = os.environ["NOTION_TOKEN"]
 DATABASE_ID_RAW = os.environ["NOTION_DATABASE_ID"]
@@ -214,6 +256,30 @@ def block_to_markdown(block, slug, image_counter):
     if b_type == "table":
         if not children:
             return ""
+        has_color = any(
+            _get_cell_bg(cell)
+            for row in children
+            for cell in row.get("table_row", {}).get("cells", [])
+        )
+        if has_color:
+            lines = ["<table>"]
+            for i, row in enumerate(children):
+                cells = row.get("table_row", {}).get("cells", [])
+                tag = "th" if i == 0 else "td"
+                if i == 0:
+                    lines.append("<thead><tr>")
+                else:
+                    if i == 1:
+                        lines.append("<tbody>")
+                    lines.append("<tr>")
+                for cell in cells:
+                    bg = _get_cell_bg(cell)
+                    text = _rich_text_to_html(cell)
+                    attr = f' data-notion-bg="{bg}"' if bg else ""
+                    lines.append(f"<{tag}{attr}>{text}</{tag}>")
+                lines.append("</tr></thead>" if i == 0 else "</tr>")
+            lines.append("</tbody></table>")
+            return "\n".join(lines) + "\n\n"
         lines = []
         for i, row in enumerate(children):
             cells = row.get("table_row", {}).get("cells", [])
