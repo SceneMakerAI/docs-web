@@ -8,6 +8,7 @@ Env vars:
   DEEPL_API_KEY   DeepL API 키 (Free: :fx 로 끝남, Pro: 일반 키)
 """
 import hashlib
+import html
 import json
 import os
 import re
@@ -147,7 +148,8 @@ def translate_file(kr_path, hashes):
     # --- (수평선) 을 DeepL 이 테이블 구분자로 오인하지 않도록 보호
     body_protected = re.sub(r'(?m)^---$', '<hr/>', body)
     translated = translate_with_deepl(body_protected) if body.strip() else body_protected
-    en_body = re.sub(r'<hr/>', '---', translated)
+    # <hr/> 복원 후 tag_handling=html 로 인해 인코딩된 HTML entity 디코딩
+    en_body = html.unescape(re.sub(r'<hr/>', '---', translated))
 
     # docs/section/file.md → docs_en/section/file.md
     en_path = "docs_en/" + kr_path[len("docs/"):]

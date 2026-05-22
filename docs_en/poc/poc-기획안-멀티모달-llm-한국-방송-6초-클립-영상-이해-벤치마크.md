@@ -25,7 +25,7 @@ vLLM serving on 1 AWS EC2 GPU (us-west-2) / Qwen3-Omni-30B-A3B-Instruct (OpenAI-
 - **Scope of PoC Validation:** Limited to multimodal LLM invocation, enforced structured responses, and result evaluation. **Video segmentation (ffmpeg) and dialogue script collection were performed separately as preliminary preparation steps** (segmentation was pre-generated using an in-house ffmpeg script; scripts were written manually) — automation is planned for the future through integration with the SceneMaker main pipeline and external subtitle/STT systems.
 
 - **Key Objectives:**
-  1. Eliminate post-processing and refinement stages by enforcing JSON Schema (vLLM guided decoding + pydantic `extra=&quot;forbid&quot;`)
+  1. Eliminate post-processing and refinement stages by enforcing JSON Schema (vLLM guided decoding + pydantic `extra="forbid"`)
 
   1. Suppress hallucinations (mixing descriptions of preceding or subsequent scenes) by using a pattern that includes a 6-second context (6 seconds before, during, and after the target clip)
 
@@ -45,7 +45,7 @@ vLLM serving on 1 AWS EC2 GPU (us-west-2) / Qwen3-Omni-30B-A3B-Instruct (OpenAI-
 
 (B) Dialogue Script  — scripts.json, manually created
   Groups dialogue from the previous 6 seconds, current 6 seconds, and next 6 seconds into three segments to provide context to the model.
-  Specifies in the prompt that the analysis is limited to the &#x27;current&#x27; 6 seconds, while the preceding and following segments are for context.
+  Specifies in the prompt that the analysis is limited to the 'current' 6 seconds, while the preceding and following segments are for context.
   ※ Planned for automatic retrieval via integration with external subtitle and STT systems in the future.
 
 ───── Scope of this PoC Validation ─────
@@ -95,9 +95,9 @@ Save to `predictions/{category}/{original_name}/{clip_id}.json`. Perform qualita
 
 **2.3. Output Schema / Hallucination Guard**
 
-- **Conclusion:** Responses are strictly fixed to the **3 fields**: `{summary, objects, actions}`. Double enforcement via vLLM `response_format=json_schema(strict=True)` + pydantic `extra=&quot;forbid&quot;`.
+- **Conclusion:** Responses are strictly fixed to the **3 fields**: `{summary, objects, actions}`. Double enforcement via vLLM `response_format=json_schema(strict=True)` + pydantic `extra="forbid"`.
 
-- **Reason:** Can be stored and consumed as-is without post-processing (parsing, cleaning, adding/removing fields) code. Analysis is limited to a 6-second &#x27;current&#x27; clip, with preceding, current, and following dialogue attached; however, the prompt explicitly states, &quot;The preceding and following dialogue are for context only; do not incorporate them into the description.&quot; The two defects discovered during the `from_video` validation phase (summary copying vision text verbatim / prompt rule text mixed into the audio field) have been addressed through field-specific guidelines.
+- **Reason:** Can be stored and consumed as-is without post-processing (parsing, cleaning, adding/removing fields) code. Analysis is limited to a 6-second 'current' clip, with preceding, current, and following dialogue attached; however, the prompt explicitly states, "The preceding and following dialogue are for context only; do not incorporate them into the description." The two defects discovered during the `from_video` validation phase (summary copying vision text verbatim / prompt rule text mixed into the audio field) have been addressed through field-specific guidelines.
 
 | **Field** | **Definition and Guidelines** |
 | --- | --- |
@@ -138,7 +138,7 @@ Save to `predictions/{category}/{original_name}/{clip_id}.json`. Perform qualita
 | `baseball` | Baseball Broadcast | 100 | Commentator + Crowd Cheers + Scoreboard UI |
 | `entertain` | Variety Show | 100 | Group Conversation + Subtitle Effects |
 | `drama` | Modern Drama | 100 | Character Dialogue + BGM |
-| `hist_drama` | Historical Drama | 100 | Period Costumes &amp; Props + Formal Dialogue |
+| `hist_drama` | Historical Drama | 100 | Period Costumes & Props + Formal Dialogue |
 | `lol` | Esports | 100 | Game UI overlay + Commentator + Game sounds |
 | **Total** | — | **700** | 7 original videos (1 per genre, 10-minute window divided into 100 segments) |
 
