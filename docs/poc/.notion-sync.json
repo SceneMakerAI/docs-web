@@ -13,14 +13,14 @@
   },
   "367e15b4-0359-80c9-885a-ea288010356f": {
     "file": "docs/poc/poc-기획안-초고속초고품질-다국어-ai-자막-생성-시스템-구축.md",
-    "last_edited": "",
-    "content_hash": "",
+    "last_edited": "2026-05-22T06:58:00.000Z",
+    "content_hash": "2e1d9c0e4ec21a587ae73a106df6da6492afd43ab28f6bd60fd283e6ec86fcc0",
     "order": 3
   },
   "368e15b4-0359-81cb-9b9b-d555dbfd19e3": {
     "file": "docs/poc/poc-기획안-멀티모달-llm-한국-방송-6초-클립-영상-이해-벤치마크.md",
-    "last_edited": "",
-    "content_hash": "",
+    "last_edited": "2026-05-22T08:03:00.000Z",
+    "content_hash": "7a568aeaa58f3e6cc98e47143975a05fde03b373e1462624fc2e35c0f73da0f6",
     "order": 4
   }
 }
