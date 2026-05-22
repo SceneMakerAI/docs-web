@@ -140,9 +140,10 @@ NVIDIA RTX 4090 (24GB) 1장 기반 기본 가속 환경
 - 음성은 압축이 되지 않는 wav 파일 형태로 받고 Noise 제거를 위해서 아래 옵션은 중요함
   - -vn : 비디오 제외(Video No)
 
-  - -ac 1 : Audio Channel 수 (2: 스테리오, 1: Mono) ⇒ 2
+  - -ac 1 : Audio Channel 수 (2: 스테레오, 1: Mono)
+    - WhisperX 와 DeepFilterNet 은 내부적으로 Mono 로 처리 한다. (스테레오가 들어오면 Mono로 변환 함)
 
-  - -ar 48000 : 
+  - -ar 48000 : DeepFilterNet 의 native 샘플레이트는 48KHz
 
 ```yaml
 ffmpeg -y -i input.mp4 -vn -ac 1 -ar 48000 -c:a pcm_s16le audio.wav
