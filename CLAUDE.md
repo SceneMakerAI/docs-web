@@ -97,6 +97,10 @@ i18n/en/docusaurus-plugin-content-docs/current  →  ../../../docs_en
 1. `docs/section/filename.md`에 KR 파일이 있으면 → `docs_en/section/filename.md` 에 EN 번역 추가
 2. EN 파일 frontmatter에 `slug: "N"` 반드시 포함 (KR과 동일한 값)
 3. `id:`, `sidebar_position:` 도 KR과 동일하게
+4. **`docs_en/` 파일명은 KR 파일명과 반드시 동일해야 한다** — Docusaurus가 파일 경로 기준으로 KR/EN 페이지를 매칭하므로 이름이 다르면 로케일 스위처가 깨짐
+   - KR: `docs/poc/poc-기획안-멀티모달-llm.md` → EN: `docs_en/poc/poc-기획안-멀티모달-llm.md` (동일 파일명 필수)
+   - Notion 동기화로 KR 파일명이 변경되면 EN 파일명도 반드시 함께 변경할 것
+   - `translate_to_en.py`가 자동으로 처리하지만, 수동으로 EN 파일 생성 시에도 동일하게 적용
 
 ---
 
