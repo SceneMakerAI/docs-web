@@ -125,11 +125,11 @@ Save to `predictions/{category}/{original_name}/{clip_id}.json`. Perform qualita
 
 - **Storage:** Results are saved to `predictions/{category}/{original_name}/{clip_id}.json`, followed by qualitative comparison using random samples per category
 
-- **Request Tracking:** The response header `X-Request-Id` (8-character hex) is embedded identically to the log line prefix for 1:1 trace matching###
+- **Request Tracking:** The response header `X-Request-Id` (8-character hex) is embedded identically to the log line prefix for 1:1 trace matching
 
 <br />
 
-3.2. Test Data
+### 3.2. Test Data
 
 | **Category Key** | **Genre** | **Number of Clips** | **Remarks** |
 | --- | --- | --- | --- |
