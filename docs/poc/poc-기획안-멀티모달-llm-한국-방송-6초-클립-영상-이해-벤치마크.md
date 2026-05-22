@@ -1,8 +1,8 @@
 ---
 id: poc-기획안-멀티모달-llm-한국-방송-6초-클립-영상-이해-벤치마크
 title: "[PoC 기획안] 멀티모달 LLM 한국 방송 6초 클립 영상 이해 벤치마크"
-sidebar_position: 1
-slug: "1"
+sidebar_position: 4
+slug: "4"
 ---
 
 <br />
