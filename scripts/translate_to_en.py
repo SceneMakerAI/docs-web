@@ -29,7 +29,7 @@ def translate_with_deepl(text):
     resp = requests.post(
         endpoint,
         headers={"Authorization": f"DeepL-Auth-Key {DEEPL_API_KEY}"},
-        json={"text": [text], "source_lang": "KO", "target_lang": "EN-US"},
+        json={"text": [text], "source_lang": "KO", "target_lang": "EN-US", "tag_handling": "html"},
     )
     if resp.status_code != 200:
         log(f"DeepL 오류 {resp.status_code}: {resp.text[:200]}")
