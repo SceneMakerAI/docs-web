@@ -1,7 +1,7 @@
 ---
 title: "[PoC Proposal] Ultra-Fast, High-Quality Multilingual AI Subtitle Generation System"
-sidebar_position: 2
-slug: "2"
+sidebar_position: 3
+slug: "3"
 ---
 
 <br />

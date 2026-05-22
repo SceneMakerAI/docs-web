@@ -3,8 +3,9 @@ translate_to_en.py — 변경된 docs/ 파일을 DeepL로 번역하여 docs_en/ 
 
 git diff HEAD 기준으로 working tree 변경분을 감지하므로,
 커밋 전에 실행해야 한다 (server-sync.sh 에서 Notion sync 직후 호출).
-body SHA-256 해시를 .notion-translate-hashes.json 에 캐시해
+body SHA-256 해시와 slug/sidebar_position을 .notion-translate-hashes.json 에 캐시해
 내용이 동일한 파일은 DeepL 호출 없이 스킵한다.
+slug/sidebar_position만 바뀐 경우에는 DeepL 없이 frontmatter만 업데이트한다.
 
 Env vars:
   DEEPL_API_KEY   DeepL API 키 (Free: :fx 로 끝남, Pro: 일반 키)
@@ -58,14 +59,19 @@ def save_hashes(hashes):
         json.dump(hashes, f, ensure_ascii=False, indent=2)
 
 
+def _normalize_cached(cached):
+    """구 포맷 str → 신 포맷 dict 마이그레이션."""
+    if isinstance(cached, str):
+        return {"body_hash": cached, "slug": None, "sidebar_position": None}
+    return cached if isinstance(cached, dict) else {}
+
+
 def get_changed_docs_files():
     """working tree 기준으로 docs/ 에서 변경·추가된 .md 파일 목록 반환."""
-    # 추적 중인 파일 중 변경·추가된 것 (커밋 전 상태)
     r1 = subprocess.run(
         ["git", "diff", "--name-only", "--diff-filter=ACM", "HEAD", "--", "docs/"],
         capture_output=True, text=True,
     )
-    # 미추적 신규 파일
     r2 = subprocess.run(
         ["git", "ls-files", "--others", "--exclude-standard", "docs/"],
         capture_output=True, text=True,
@@ -103,7 +109,6 @@ def translate_file(kr_path, hashes):
     with open(kr_path, encoding="utf-8") as f:
         content = f.read()
 
-    # frontmatter + body 분리
     match = re.match(r"^(---\n.*?\n---\n\n)(.*)", content, re.DOTALL)
     if not match:
         log(f"frontmatter 없음, 스킵: {kr_path}")
@@ -112,36 +117,62 @@ def translate_file(kr_path, hashes):
     frontmatter = match.group(1)
     body = match.group(2)
 
-    # body 해시 비교 — 내용이 동일하면 DeepL 호출 건너뜀
     body_hash = hashlib.sha256(body.encode()).hexdigest()
-    if hashes.get(kr_path) == body_hash:
-        log(f"내용 동일, 번역 스킵: {kr_path}")
+
+    slug_m = re.search(r'^slug:\s*"(.+)"', frontmatter, re.MULTILINE)
+    pos_m  = re.search(r'^sidebar_position:\s*(\d+)', frontmatter, re.MULTILINE)
+    slug = slug_m.group(1) if slug_m else ""
+    pos  = pos_m.group(1)  if pos_m  else ""
+
+    cached   = _normalize_cached(hashes.get(kr_path, {}))
+    body_same = (cached.get("body_hash") == body_hash)
+    meta_same = (cached.get("slug") == slug and cached.get("sidebar_position") == pos)
+
+    if body_same and meta_same:
+        log(f"변경 없음, 스킵: {kr_path}")
         return
 
     # EN frontmatter에서 id 제거 (파일 경로로 locale 매칭)
-    frontmatter = re.sub(r'^id: .+\n', '', frontmatter, count=1, flags=re.MULTILINE)
+    en_frontmatter = re.sub(r'^id: .+\n', '', frontmatter, count=1, flags=re.MULTILINE)
+    en_path = "docs_en/" + kr_path[len("docs/"):]
+    os.makedirs(os.path.dirname(en_path), exist_ok=True)
 
-    # title 번역
-    title_match = re.search(r'^title: "(.+)"', frontmatter, re.MULTILINE)
+    if body_same and os.path.exists(en_path):
+        # slug/sidebar_position만 바뀐 경우 — DeepL 불필요, frontmatter만 동기화
+        with open(en_path, encoding="utf-8") as f:
+            existing_en = f.read()
+        en_match = re.match(r"^(---\n.*?\n---\n\n)(.*)", existing_en, re.DOTALL)
+        if en_match:
+            # 기존 EN 제목(이미 번역됨) 보존, slug/sidebar_position 교체
+            kr_title_m = re.search(r'^title: "(.+)"', en_frontmatter, re.MULTILINE)
+            en_title_m = re.search(r'^title: "(.+)"', en_match.group(1), re.MULTILINE)
+            if kr_title_m and en_title_m:
+                en_frontmatter = en_frontmatter.replace(
+                    f'title: "{kr_title_m.group(1)}"',
+                    f'title: "{en_title_m.group(1)}"', 1
+                )
+            with open(en_path, "w", encoding="utf-8") as f:
+                f.write(en_frontmatter + en_match.group(2))
+            hashes[kr_path] = {"body_hash": body_hash, "slug": slug, "sidebar_position": pos}
+            log(f"frontmatter 동기화 (본문 동일): {kr_path} → {en_path}")
+            return
+
+    # body 변경 → 전체 번역
+    title_match = re.search(r'^title: "(.+)"', en_frontmatter, re.MULTILINE)
     if title_match:
         kr_title = title_match.group(1)
         en_title = translate_with_deepl(kr_title)
-        frontmatter = frontmatter.replace(f'title: "{kr_title}"', f'title: "{en_title}"', 1)
+        en_frontmatter = en_frontmatter.replace(f'title: "{kr_title}"', f'title: "{en_title}"', 1)
 
     # --- (수평선) 을 DeepL 이 테이블 구분자로 오인하지 않도록 보호
     body_protected = re.sub(r'(?m)^---$', '<hr/>', body)
     translated = translate_with_deepl(body_protected) if body.strip() else body_protected
-    # <hr/> 복원 후 tag_handling=html 로 인해 인코딩된 HTML entity 디코딩
     en_body = html.unescape(re.sub(r'<hr/>', '---', translated))
 
-    # docs/section/file.md → docs_en/section/file.md
-    en_path = "docs_en/" + kr_path[len("docs/"):]
-    os.makedirs(os.path.dirname(en_path), exist_ok=True)
-
     with open(en_path, "w", encoding="utf-8") as f:
-        f.write(frontmatter + en_body)
+        f.write(en_frontmatter + en_body)
 
-    hashes[kr_path] = body_hash
+    hashes[kr_path] = {"body_hash": body_hash, "slug": slug, "sidebar_position": pos}
     log(f"{kr_path} → {en_path}")
 
 

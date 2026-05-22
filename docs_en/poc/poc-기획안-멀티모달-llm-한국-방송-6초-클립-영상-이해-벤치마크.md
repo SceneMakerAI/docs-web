@@ -1,7 +1,7 @@
 ---
 title: "[PoC Proposal] Benchmark for Multimodal LLM Understanding of 6-Second Clips from Korean Broadcasts"
-sidebar_position: 1
-slug: "1"
+sidebar_position: 4
+slug: "4"
 ---
 
 <br />
