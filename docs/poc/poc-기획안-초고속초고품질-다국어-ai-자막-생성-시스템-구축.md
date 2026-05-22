@@ -109,6 +109,8 @@ NVIDIA RTX 4090 (24GB) 1장 기반 기본 가속 환경
 
 ### 3.2 테스트 데이터
 
+테스트 데이터는 아래와 같다. 가능한 실제 방송 영상과 비슷한 50분\~2시간 사이로 영상
+
 | 방송 | 재생시간 | URL |
 | --- | --- | --- |
 | KBS 9 뉴스 | 48:30 | [https://www.youtube.com/watch?v=rX1P-jOoNmM](https://www.youtube.com/watch?v=rX1P-jOoNmM) |
@@ -118,7 +120,16 @@ NVIDIA RTX 4090 (24GB) 1장 기반 기본 가속 환경
 | 출장십오야 X 스타쉽 전국체전 풀버전 | 1:00:06 | [https://www.youtube.com/watch?v=6wJGpi1nkCg](https://www.youtube.com/watch?v=6wJGpi1nkCg) |
 | 2009 프로야구 한국시리즈 7차전 | 1:55:22 | [https://www.youtube.com/watch?v=fP1QEs1Uj5U](https://www.youtube.com/watch?v=fP1QEs1Uj5U) |
 
-<br />
+#### 3.2.1 영상 다운로드 및 포멧 변환
+
+- 영상은 720p 사이즈로 받는다.
+  - 너무 클 경우: 분석시 시간이 오래 걸림
+
+  - 너무 작은 경우: 이미지 분석에 정밀도가 ㄸ
+
+```yaml
+> yt-dlp -f "bv*[height<=720]+ba/b[height<=720]" "<URL">
+```
 
 <br />
 
