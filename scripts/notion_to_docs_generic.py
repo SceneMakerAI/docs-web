@@ -201,7 +201,10 @@ def block_to_markdown(block, slug, image_counter):
         lines = []
         for i, row in enumerate(children):
             cells = row.get("table_row", {}).get("cells", [])
-            row_text = " | ".join(extract_text_from_rich_text(cell) for cell in cells)
+            row_text = " | ".join(
+                extract_text_from_rich_text(cell).replace("\n", " ")
+                for cell in cells
+            )
             lines.append(f"| {row_text} |")
             if i == 0:
                 sep = " | ".join("---" for _ in cells)
