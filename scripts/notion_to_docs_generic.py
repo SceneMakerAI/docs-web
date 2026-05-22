@@ -315,9 +315,11 @@ def block_to_markdown(block, slug, image_counter):
         elif b_type == "heading_4":
             return f"##### {content}\n\n" + child_md
         elif b_type == "bulleted_list_item":
+            # "2. 내용" 같이 숫자+점으로 시작하면 GFM이 nested ordered list로 파싱 — 이스케이프
+            safe = re.sub(r'^(\d+)\. ', r'\1\\. ', content)
             if child_md:
-                return f"- {content}\n{indent_md(child_md)}\n"
-            return f"- {content}\n\n"
+                return f"- {safe}\n{indent_md(child_md)}\n"
+            return f"- {safe}\n\n"
         elif b_type == "numbered_list_item":
             if child_md:
                 return f"1. {content}\n{indent_md(child_md, '   ')}\n"

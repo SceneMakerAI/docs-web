@@ -25,7 +25,7 @@ Single NVIDIA RTX 4090 (24 GB) baseline GPU environment.
 - **Core goals:**
   - Minimize Word Error Rate (WER) through Speech Enhancement
 
-  - 2. Implement real-time multilingual code-switching recognition and silence handling at the sentence/segment level
+  - 2\. Implement real-time multilingual code-switching recognition and silence handling at the sentence/segment level
 
   - Final context-aware correction of proper nouns and custom typos via LLM
 
