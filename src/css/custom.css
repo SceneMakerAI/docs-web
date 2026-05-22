@@ -193,6 +193,7 @@
 
 /* ─────────── Details/Summary: Notion 토글 스타일 ─────────── */
 /* Infima 기본 파란색 테두리·배경 제거, Notion-style minimal toggle */
+/* Docusaurus Details 컴포넌트가 alert--info 클래스를 자동 추가 → 하늘색(#4cb3d4) 및 틸 텍스트 색상 재정의 */
 .markdown details {
   border: none;
   border-left: 2px solid var(--ifm-table-border-color);
@@ -200,11 +201,13 @@
   padding: 0 0 0 12px;
   margin-bottom: 0.75rem;
   border-radius: 0;
+  color: var(--ifm-color-content);
+  --docusaurus-details-decoration-color: var(--ifm-color-content-secondary);
 }
 
 .markdown details summary {
   background: transparent;
-  color: inherit;
+  color: var(--ifm-color-content);
   font-weight: 500;
   padding: 4px 0;
   cursor: pointer;
