@@ -3,8 +3,36 @@
     "message": "Next",
     "description": "The label for version current"
   },
-  "sidebar.docsSidebar.category.가이드": {
-    "message": "Guide",
-    "description": "The label for category '가이드' in sidebar 'docsSidebar'"
+  "sidebar.docsSidebar.category.문서": {
+    "message": "Docs",
+    "description": "The label for category '문서' in sidebar 'docsSidebar'"
+  },
+  "sidebar.aboutSidebar.category.프로젝트 소개": {
+    "message": "About",
+    "description": "The label for category '프로젝트 소개' in sidebar 'aboutSidebar'"
+  },
+  "sidebar.architectureSidebar.category.아키텍처": {
+    "message": "Architecture",
+    "description": "The label for category '아키텍처' in sidebar 'architectureSidebar'"
+  },
+  "sidebar.installSidebar.category.설치": {
+    "message": "Installation",
+    "description": "The label for category '설치' in sidebar 'installSidebar'"
+  },
+  "sidebar.pocSidebar.category.PoC": {
+    "message": "PoC",
+    "description": "The label for category 'PoC' in sidebar 'pocSidebar'"
+  },
+  "sidebar.blogSidebar.category.블로그": {
+    "message": "Blog",
+    "description": "The label for category '블로그' in sidebar 'blogSidebar'"
+  },
+  "sidebar.contributeSidebar.category.오픈소스 기여": {
+    "message": "Open Source Contributions",
+    "description": "The label for category '오픈소스 기여' in sidebar 'contributeSidebar'"
+  },
+  "sidebar.releaseNotesSidebar.category.릴리즈 노트": {
+    "message": "Release Notes",
+    "description": "The label for category '릴리즈 노트' in sidebar 'releaseNotesSidebar'"
   }
 }
