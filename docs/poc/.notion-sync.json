@@ -1,5 +1,22 @@
 {
-  "365e15b4-0359-804b-87c8-f1acee149564": "docs/poc/vision-bench.md",
-  "365e15b4-0359-80d4-8f38-d8a5c80ae5d0": "docs/poc/audio-bench.md",
-  "367e15b4-0359-80c9-885a-ea288010356f": "docs/poc/poc-기획안-초고속초고품질-다국어-ai-자막-생성-시스템-구축.md"
+  "365e15b4-0359-804b-87c8-f1acee149564": {
+    "file": "docs/poc/vision-bench.md",
+    "last_edited": "2026-05-19T08:35:00.000Z",
+    "content_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "365e15b4-0359-80d4-8f38-d8a5c80ae5d0": {
+    "file": "docs/poc/audio-bench.md",
+    "last_edited": "2026-05-19T08:35:00.000Z",
+    "content_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "367e15b4-0359-80c9-885a-ea288010356f": {
+    "file": "docs/poc/poc-기획안-초고속초고품질-다국어-ai-자막-생성-시스템-구축.md",
+    "last_edited": "2026-05-21T11:58:00.000Z",
+    "content_hash": "5e037d5fda3936194cbdc2316d0bf5fe44544af65243ac214ecd2dbf421b3904"
+  },
+  "368e15b4-0359-81cb-9b9b-d555dbfd19e3": {
+    "file": "docs/poc/poc-기획안-멀티모달-llm-한국-방송-6초-클립-영상-이해-벤치마크.md",
+    "last_edited": "2026-05-22T04:40:00.000Z",
+    "content_hash": "aa8911042cdd8c26292c655a0f0c3af1decb81a06a16ecfa256d5e620b8c7a74"
+  }
 }
