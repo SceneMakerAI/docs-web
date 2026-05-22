@@ -143,14 +143,19 @@ def extract_text_from_rich_text(rich_text_list):
         else:
             formatted = plain
             if plain.strip():
+                # 선행/후행 공백은 마커 밖으로 — '** text **' 방지
+                leading = plain[:len(plain) - len(plain.lstrip())]
+                trailing = plain[len(plain.rstrip()):]
+                core = plain.strip()
                 if ann.get("bold") and ann.get("italic"):
-                    formatted = f"***{formatted}***"
+                    core = f"***{core}***"
                 elif ann.get("bold"):
-                    formatted = f"**{formatted}**"
+                    core = f"**{core}**"
                 elif ann.get("italic"):
-                    formatted = f"*{formatted}*"
+                    core = f"*{core}*"
                 if ann.get("strikethrough"):
-                    formatted = f"~~{formatted}~~"
+                    core = f"~~{core}~~"
+                formatted = leading + core + trailing
 
         parts.append(f"[{formatted}]({href})" if href else formatted)
 

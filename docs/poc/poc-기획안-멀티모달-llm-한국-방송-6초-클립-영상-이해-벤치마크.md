@@ -96,7 +96,7 @@ predictions/{category}/{원본명}/{clip_id}.json 에 저장. 카테고리별 �
 
 #### **2.3. 출력 스키마 / 환각 가드**
 
-- **결론:** 응답은 **정확히 ** `{summary, objects, actions}` ** 3 필드** 로 고정. vLLM `response_format=json_schema(strict=True)` + pydantic `extra="forbid"` 이중 강제.
+- **결론:** 응답은 **정확히** `{summary, objects, actions}` **3 필드** 로 고정. vLLM `response_format=json_schema(strict=True)` + pydantic `extra="forbid"` 이중 강제.
 
 - **이유:** 후처리(파싱·정제·필드 추가/삭제) 코드 없이 그대로 저장·소비 가능. 분석 대상은 6초 '현재' 클립으로 한정하고 전·현·후 대사를 함께 첨부하되, 프롬프트에 "전후는 맥락용, 묘사에 끌어들이지 말 것"을 명시. `from_video` 검증 단계에서 발견한 두 결함(summary 가 vision 텍스트를 그대로 복사 / audio 필드에 프롬프트 규칙 텍스트 혼입)은 필드별 가이드로 반영 완료.
 
