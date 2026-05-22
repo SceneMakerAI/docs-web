@@ -56,13 +56,10 @@ for pid in "${pids[@]}"; do
 done
 [ $failed -ne 0 ] && exit 1
 
-# 변경된 docs/ 파일 EN 번역
-python3 scripts/translate_to_en.py
-
-# 변경사항 커밋 & 푸시
+# 변경사항 커밋 & 푸시 (KR 원문만)
 git config user.name "server-cron"
 git config user.email "sbin@solbox.com"
-git add docs/ docs_en/ static/img/
+git add docs/ static/img/
 if ! git diff --staged --quiet; then
   git commit -m "chore: Notion 동기화 $(date +'%Y-%m-%d %H:%M')"
   git push origin main

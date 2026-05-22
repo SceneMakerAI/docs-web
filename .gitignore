@@ -102,3 +102,4 @@ static/img/og-candidates/
 .tmp/
 *.orig
 __pycache__/
+.notion-translate-ref
