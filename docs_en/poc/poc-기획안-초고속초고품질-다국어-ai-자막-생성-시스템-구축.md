@@ -95,9 +95,60 @@ and outputs a standardized final SRT subtitle file.
 
 <br />
 
+## 3. Testing
+
+### 3.1 Testing Method
+
 <br />
 
 <br />
+
+### 3.2 Test Data
+
+Test data is as follows. Videos should be between 50 minutes and 2 hours, similar to actual broadcast footage.
+
+| Broadcast | Duration | URL |
+| --- | --- | --- |
+| KBS 9 News | 48:30 | [https://www.youtube.com/watch?v=rX1P-jOoNmM](https://www.youtube.com/watch?v=rX1P-jOoNmM) |
+| Super Fish Part 1 | 58:40 | [https://www.youtube.com/watch?v=iNbWqC1iqKw](https://www.youtube.com/watch?v=iNbWqC1iqKw) |
+| KBS Winter Sonata | 1:04:52 | [https://www.youtube.com/watch?v=irVKEhb9g8M](https://www.youtube.com/watch?v=irVKEhb9g8M) |
+| Taejo Wang Geon | 54:10 | [https://www.youtube.com/watch?v=nmlE2iPWLGM](https://www.youtube.com/watch?v=nmlE2iPWLGM) |
+| Chuljangsimoyya × Starship Nationwide Sports Day Full | 1:00:06 | [https://www.youtube.com/watch?v=6wJGpi1nkCg](https://www.youtube.com/watch?v=6wJGpi1nkCg) |
+| 2009 Korean Series Game 7 | 1:55:22 | [https://www.youtube.com/watch?v=fP1QEs1Uj5U](https://www.youtube.com/watch?v=fP1QEs1Uj5U) |
+
+#### 3.2.1 Video Download and Format Conversion
+
+##### Video Download
+
+- Download videos at 720p.
+  - Too large: analysis takes longer
+
+  - Too small: reduced precision in image analysis
+
+```yaml
+> yt-dlp -f "bv*[height<=720]+ba/b[height<=720]" "<URL">
+```
+
+<br />
+
+##### Video Conversion
+
+- Extract audio only from the downloaded video.
+
+- Audio is received in uncompressed WAV format; the following options are important for noise removal:
+  - `-vn` : Exclude video (Video No)
+
+  - `-ac 1` : Audio channel count (2: Stereo, 1: Mono)
+    - WhisperX and DeepFilterNet process internally as Mono. (Stereo input is converted to Mono)
+
+  - `-ar 48000` : DeepFilterNet's native sample rate is 48 kHz
+    - If 16 kHz is input, internal upsampling occurs, resulting in information loss.
+
+  - `-c:a pcm_s16le` : Output original audio without compression
+
+```yaml
+ffmpeg -y -i <input.mp4> -vn -ac 1 -ar 48000 -c:a pcm_s16le <audio.wav>
+```
 
 <br />
 
