@@ -136,7 +136,6 @@
   background: var(--ifm-table-head-background);
   font-weight: 600;
   letter-spacing: 0.01em;
-  color: var(--ifm-color-content-secondary);
   border-bottom: 1px solid var(--ifm-table-border-color);
 }
 
@@ -147,9 +146,6 @@
   --ifm-table-stripe-background: rgba(255, 255, 255, 0.02);
 }
 
-[data-theme='dark'] .markdown table th {
-  color: rgba(255, 255, 255, 0.6);
-}
 
 /* ─────────── Notion 테이블 셀 배경색 ─────────── */
 [data-notion-bg="gray_background"]   { background: #f1f1ef; }
