@@ -93,6 +93,9 @@ def translate_file(kr_path):
     frontmatter = match.group(1)
     body = match.group(2)
 
+    # EN frontmatter에서 id 제거 (파일 경로로 locale 매칭, id 불필요)
+    frontmatter = re.sub(r'^id: .+\n', '', frontmatter, count=1, flags=re.MULTILINE)
+
     # title 번역
     title_match = re.search(r'^title: "(.+)"', frontmatter, re.MULTILINE)
     if title_match:

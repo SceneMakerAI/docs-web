@@ -1,5 +1,4 @@
 ---
-id: qwen-3x-설치
 title: "Qwen 3.x Installation"
 sidebar_position: 1
 slug: "1"

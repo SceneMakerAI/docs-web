@@ -1,5 +1,4 @@
 ---
-id: poc-기획안-초고속초고품질-다국어-ai-자막-생성-시스템-구축
 title: "[PoC Proposal] Ultra-Fast, High-Quality Multilingual AI Subtitle Generation System"
 sidebar_position: 2
 slug: "2"

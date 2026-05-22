@@ -351,20 +351,24 @@ def save_doc_page(page, position, existing_map):
         old_filename = existing_entry.get("file")
         stored_last_edited = existing_entry.get("last_edited", "")
         stored_hash = existing_entry.get("content_hash", "")
+        stored_order = existing_entry.get("order")
     elif isinstance(existing_entry, str):
         old_filename = existing_entry
         stored_last_edited = ""
         stored_hash = ""
+        stored_order = None
     else:
         old_filename = None
         stored_last_edited = ""
         stored_hash = ""
+        stored_order = None
 
     if (last_edited and stored_last_edited == last_edited
             and old_filename == new_filename
-            and os.path.exists(new_filename)):
+            and os.path.exists(new_filename)
+            and stored_order == order):
         log(f"변경 없음, 스킵: {title}")
-        return title, new_filename, last_edited, stored_hash
+        return title, new_filename, last_edited, stored_hash, order
 
     if old_filename and old_filename != new_filename:
         for candidate in [old_filename, old_filename.replace(".md", ".mdx")]:
@@ -390,7 +394,7 @@ def save_doc_page(page, position, existing_map):
     with open(new_filename, "w", encoding="utf-8") as f:
         f.write(frontmatter + body)
 
-    return title, new_filename, last_edited, content_hash
+    return title, new_filename, last_edited, content_hash, order
 
 
 def remove_orphans(synced_files, previously_tracked):
@@ -449,11 +453,12 @@ def main():
         log(f"페이지 수: {len(pages)}")
 
         for page in pages:
-            title, filepath, last_edited, content_hash = save_doc_page(page, position, existing_map)
+            title, filepath, last_edited, content_hash, page_order = save_doc_page(page, position, existing_map)
             existing_map[page["id"]] = {
                 "file": filepath,
                 "last_edited": last_edited,
                 "content_hash": content_hash,
+                "order": page_order,
             }
             synced_files.add(filepath)
             log(f"저장: {filepath} ({title})")

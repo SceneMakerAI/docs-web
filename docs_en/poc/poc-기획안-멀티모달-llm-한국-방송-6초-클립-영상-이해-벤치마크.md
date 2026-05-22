@@ -1,5 +1,4 @@
 ---
-id: poc-기획안-멀티모달-llm-한국-방송-6초-클립-영상-이해-벤치마크
 title: "[PoC Proposal] Benchmark for Multimodal LLM Understanding of 6-Second Clips from Korean Broadcasts"
 sidebar_position: 1
 slug: "1"

@@ -1,5 +1,4 @@
 ---
-id: scenemakerai-문서
 title: "SceneMakerAI Docs"
 sidebar_position: 1
 slug: "1"

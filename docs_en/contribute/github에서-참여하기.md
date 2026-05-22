@@ -1,5 +1,4 @@
 ---
-id: github에서-참여하기
 title: "Contribute on GitHub"
 sidebar_position: 2
 slug: "2"
