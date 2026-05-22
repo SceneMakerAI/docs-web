@@ -13,6 +13,7 @@ Env vars (선택):
   NOTION_PROPERTY_DATE  날짜 속성명, DAILY 모드용 (기본: 날짜)
   FETCH_MODE            ALL | DAILY (기본: ALL)
 """
+import hashlib
 import os
 import re
 import sys
@@ -31,6 +32,9 @@ NOTION_PROPERTY_ORDER = os.environ.get("NOTION_PROPERTY_ORDER", "순서")
 NOTION_PROPERTY_DATE = os.environ.get("NOTION_PROPERTY_DATE", "날짜")
 FETCH_MODE = os.environ.get("FETCH_MODE", "ALL")
 TIMEZONE_HOURS = 9
+
+DEEPL_API_KEY = os.environ.get("DEEPL_API_KEY", "")
+EN_SAVE_DIR = "docs_en/" + SAVE_DIR.split("/", 1)[1] if "/" in SAVE_DIR else ""
 
 SYNC_MAP_FILE = f"{SAVE_DIR}/.notion-sync.json"
 # 수동 작성 구조 파일 — sync가 절대 삭제하지 않음
@@ -331,6 +335,26 @@ def save_sync_map(mapping):
         json.dump(mapping, f, ensure_ascii=False, indent=2)
 
 
+def translate_with_deepl(text):
+    if not DEEPL_API_KEY or not text.strip():
+        return text
+    endpoint = (
+        "https://api-free.deepl.com/v2/translate"
+        if DEEPL_API_KEY.endswith(":fx")
+        else "https://api.deepl.com/v2/translate"
+    )
+    resp = requests.post(endpoint, data={
+        "auth_key": DEEPL_API_KEY,
+        "text": text,
+        "source_lang": "KO",
+        "target_lang": "EN-US",
+    })
+    if resp.status_code != 200:
+        log(f"DeepL 오류 {resp.status_code}: {resp.text[:200]}")
+        return text
+    return resp.json()["translations"][0]["text"]
+
+
 def save_doc_page(page, position, existing_map):
     page_id = page["id"]
     last_edited = page.get("last_edited_time", "")
@@ -347,18 +371,21 @@ def save_doc_page(page, position, existing_map):
     if isinstance(existing_entry, dict):
         old_filename = existing_entry.get("file")
         stored_last_edited = existing_entry.get("last_edited", "")
+        stored_hash = existing_entry.get("content_hash", "")
     elif isinstance(existing_entry, str):
         old_filename = existing_entry
         stored_last_edited = ""
+        stored_hash = ""
     else:
         old_filename = None
         stored_last_edited = ""
+        stored_hash = ""
 
     if (last_edited and stored_last_edited == last_edited
             and old_filename == new_filename
             and os.path.exists(new_filename)):
         log(f"변경 없음, 스킵: {title}")
-        return title, new_filename, last_edited
+        return title, new_filename, last_edited, stored_hash
 
     if old_filename and old_filename != new_filename:
         for candidate in [old_filename, old_filename.replace(".md", ".mdx")]:
@@ -368,6 +395,7 @@ def save_doc_page(page, position, existing_map):
 
     blocks = get_page_blocks(page_id)
     body = blocks_to_markdown(blocks, slug)
+    content_hash = hashlib.sha256(body.encode()).hexdigest()
 
     safe_title = title.replace('"', '\\"')
     frontmatter = (
@@ -383,7 +411,31 @@ def save_doc_page(page, position, existing_map):
     with open(new_filename, "w", encoding="utf-8") as f:
         f.write(frontmatter + body)
 
-    return title, new_filename, last_edited
+    # EN 번역: body 해시가 바뀐 경우에만 DeepL 호출
+    if EN_SAVE_DIR and DEEPL_API_KEY:
+        if content_hash != stored_hash:
+            en_title = translate_with_deepl(title)
+            en_body = translate_with_deepl(body)
+            safe_en_title = en_title.replace('"', '\\"')
+            en_frontmatter = (
+                f"---\n"
+                f"id: {slug}\n"
+                f'title: "{safe_en_title}"\n'
+                f"sidebar_position: {order}\n"
+                f'slug: "{order}"\n'
+                f"---\n\n"
+            )
+            en_filename = f"{EN_SAVE_DIR}/{slug}.md"
+            os.makedirs(EN_SAVE_DIR, exist_ok=True)
+            with open(en_filename, "w", encoding="utf-8") as f:
+                f.write(en_frontmatter + en_body)
+            log(f"EN 번역 저장: {en_filename}")
+        else:
+            log(f"내용 동일, EN 번역 스킵: {title}")
+    elif not DEEPL_API_KEY:
+        log("DEEPL_API_KEY 없음, EN 번역 건너뜀")
+
+    return title, new_filename, last_edited, content_hash
 
 
 def remove_orphans(synced_files, previously_tracked):
@@ -442,8 +494,12 @@ def main():
         log(f"페이지 수: {len(pages)}")
 
         for page in pages:
-            title, filepath, last_edited = save_doc_page(page, position, existing_map)
-            existing_map[page["id"]] = {"file": filepath, "last_edited": last_edited}
+            title, filepath, last_edited, content_hash = save_doc_page(page, position, existing_map)
+            existing_map[page["id"]] = {
+                "file": filepath,
+                "last_edited": last_edited,
+                "content_hash": content_hash,
+            }
             synced_files.add(filepath)
             log(f"저장: {filepath} ({title})")
             saved += 1

@@ -24,6 +24,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
+      DEEPL_API_KEY: ${{ secrets.DEEPL_API_KEY }}
       FETCH_MODE: ${{ github.event.inputs.fetch_mode || 'DAILY' }}
       # 신규 시크릿명 우선, 구 이름 fallback
       _BLOG_DB:         ${{ secrets.NOTION_BLOG || secrets.NOTION_DATABASE_ID }}
@@ -113,7 +114,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add docs/ static/img/
+          git add docs/ docs_en/ static/img/
           if ! git diff --staged --quiet; then
             git commit -m "chore: Notion 동기화 $(date +'%Y-%m-%d')"
             git pull --rebase origin main
