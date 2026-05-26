@@ -1,8 +1,8 @@
 ---
 id: qwen3-omni-baseline-news-stt-없이-30fps-vs-05fps
 title: "Qwen3-Omni baseline — news (STT 없이, 30fps vs 0.5fps)"
-sidebar_position: 5
-slug: "5"
+sidebar_position: 2
+slug: "2"
 ---
 
 > **news 카테고리 100 클립** 을 STT(Speech-to-Text) 컨텍스트 없이 Qwen3-Omni 로 분석한 baseline.
