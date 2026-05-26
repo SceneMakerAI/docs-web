@@ -35,8 +35,8 @@
     "parent_id": null
   },
   "368e15b4-0359-81cb-9b9b-d555dbfd19e3": {
-    "file": "docs/poc/vision-bench/poc-기획안-멀티모달-llm-한국-방송-6초-클립-영상-이해-벤치마크.md",
-    "last_edited": "2026-05-22T09:26:00.000Z",
+    "file": "docs/poc/vision-bench/멀티모달-llm-한국-방송-6초-클립-영상-이해-벤치마크.md",
+    "last_edited": "2026-05-26T01:19:00.000Z",
     "content_hash": "72f4c96e752bb07e12486f8d446438c97bd87031a2f292dd107033f35e4f747c",
     "order": 1,
     "parent_id": "vision-bench"
