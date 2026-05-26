@@ -179,7 +179,7 @@ def read_relation(props, prop_name):
 
 def generate_category_json(dir_path, label, position):
     slug = os.path.basename(dir_path)
-    link_id = f"{_last_seg}/{slug}/{slug}"  # id frontmatter = slug, 경로 prefix 포함
+    link_id = f"{_last_seg}/{slug}/index"  # id 없는 index.md → 파일경로 기반 ID
     data = {"label": label, "position": position,
             "link": {"type": "doc", "id": link_id}}
     os.makedirs(dir_path, exist_ok=True)
@@ -523,14 +523,25 @@ def save_doc_page(page, position, existing_map, parent_slug=None, is_parent=Fals
     content_hash = hashlib.sha256(body.encode()).hexdigest()
 
     safe_title = title.replace('"', '\\"')
-    frontmatter = (
-        f"---\n"
-        f"id: {slug}\n"
-        f'title: "{safe_title}"\n'
-        f"sidebar_position: {order}\n"
-        f'slug: "{url_slug}"\n'
-        f"---\n\n"
-    )
+    # 부모 index.md는 id를 생략 → Docusaurus가 파일경로 기반으로 ID 부여 (section/slug/index)
+    # 자식·평면 페이지는 id를 명시 (section 내 고유 식별자)
+    if is_parent:
+        frontmatter = (
+            f"---\n"
+            f'title: "{safe_title}"\n'
+            f"sidebar_position: {order}\n"
+            f'slug: "{url_slug}"\n'
+            f"---\n\n"
+        )
+    else:
+        frontmatter = (
+            f"---\n"
+            f"id: {slug}\n"
+            f'title: "{safe_title}"\n'
+            f"sidebar_position: {order}\n"
+            f'slug: "{url_slug}"\n'
+            f"---\n\n"
+        )
 
     os.makedirs(os.path.dirname(new_filename) if os.path.dirname(new_filename) else SAVE_DIR, exist_ok=True)
     with open(new_filename, "w", encoding="utf-8") as f:
