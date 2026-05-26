@@ -15,7 +15,7 @@ slug: "1"
 
 **검증 환경:**
 
-클라우드 GPU 인스턴스 1장 기반 vLLM 서빙 / Qwen3-Omni-30B-A3B-Instruct (OpenAI 호환 엔드포인트)
+AWS g7e.4xlarge(클라우드 GPU 인스턴스 1장) vLLM 서빙 / Qwen3-Omni-30B-A3B-Instruct (OpenAI 호환 엔드포인트)
 
 <br />
 
