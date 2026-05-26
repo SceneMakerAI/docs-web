@@ -5,12 +5,5 @@
     "content_hash": "89a5758fba4e98a35fc15d20af929b0025a736d3b4ea6a1306cc04d89c11cedc",
     "order": 1,
     "parent_id": null
-  },
-  "368e15b4-0359-8094-9770-f486ca88e0ca": {
-    "file": "docs/architecture/추가-테스트.md",
-    "last_edited": "2026-05-22T05:25:00.000Z",
-    "content_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-    "order": 2,
-    "parent_id": null
   }
 }
