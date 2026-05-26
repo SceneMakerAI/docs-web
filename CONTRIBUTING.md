@@ -17,34 +17,35 @@
 
 | 글의 성격 | 위치 | 예시 |
 | --- | --- | --- |
-| **시점이 있는 회고/실험/공지** (날짜에 의미가 있다) | `blog/` | "Qwen3.5 VLM 방송 도메인 적용기", "1Q 리뷰" |
+| **시점이 있는 회고/실험/공지** (날짜에 의미가 있다) | `docs/blog/` | "Qwen3.5 VLM 방송 도메인 적용기", "1Q 리뷰" |
 | **변하지 않는 사용/운영 방법** | `docs/guide/` | "SceneMakerAI 시작하기", "장애 대응 매뉴얼" |
 | **시스템 설계·데이터 흐름·기술 의사결정** | `docs/architecture/` | "vLLM 클러스터 토폴로지", "LangGraph 워크플로우" |
 | **외부 OSS 기여 인덱스·관련 저장소 링크** | `docs/contribute/` | Qwen에 올린 PR 링크, 데이터셋 공개 |
 | **릴리즈 노트** (4대 서비스 버전 단위 변경) | `docs/release-notes/` | `v0.1.0.md`, `v0.2.0-aurora.md` |
 | **사이트 자체 페이지** (정보 구조의 일부, 사이드바 밖) | `src/pages/` | `/about`, `/` 랜딩 |
 
-판단이 안 서면 **`blog/`** 가 기본값입니다. 가치 있는 글이 docs에 안 가는 것보다, blog에 올라가서 발견되는 편이 낫습니다. 시간이 지나 "이건 docs로 옮기는 게 맞다"고 판단되면 그때 이관합니다.
+판단이 안 서면 **`docs/blog/`** 가 기본값입니다. 가치 있는 글이 docs에 안 가는 것보다, blog에 올라가서 발견되는 편이 낫습니다. 시간이 지나 "이건 docs로 옮기는 게 맞다"고 판단되면 그때 이관합니다.
 
 ---
 
 ## 2. 문서(`docs/`) 룰
 
 ### 파일 위치 · 명명
-- `docs/{guide,architecture,contribute}/` 중 하나의 하위에 `.md` 또는 `.mdx`로 둡니다.
-- 파일명은 **kebab-case** (`vllm-cluster.md`), 한글 파일명 금지.
-- 한 폴더가 5개를 넘으면 하위 카테고리(`docs/architecture/inference/...`)로 분리하고 `_category_.json`을 추가합니다.
+- `docs/` 하위 8개 섹션(`about`·`architecture`·`install`·`poc`·`guide`·`blog`·`contribute`·`release-notes`) 중 하나에 `.md`/`.mdx`로 둡니다.
+- **Notion 동기화 파일은 한글 파일명이 정상입니다** — `notion_to_docs_generic.py`의 slugify가 한글 제목을 보존하고, URL은 frontmatter `slug: "숫자"`로 따로 잡힙니다. **수동 추가 문서만 kebab-case**(`vllm-cluster.md`)를 권장합니다.
+- 폴더가 커지면 Notion "하위 항목" relation으로 계층을 만들면 sync가 서브디렉토리 + `_category_.json`을 자동 생성합니다.
 
 ### 필수 frontmatter
+> **Notion 동기화 파일**은 sync 스크립트가 frontmatter를 자동 생성합니다(`slug: "숫자"` 형식). 아래는 **수동 추가 문서** 기준입니다.
 ```yaml
 ---
 id: <파일명과 동일한 슬러그>
 title: <한국어 문서 제목>
 sidebar_position: <폴더 내 정렬, 1부터>
-slug: /<섹션>/<id>           # 예: /architecture/vllm-cluster
-description: <한 줄 SEO 설명>
+slug: "<섹션 내 상대 슬러그>"   # 섹션 내 상대경로. /<섹션>/... 전체경로는 금지
 ---
 ```
+`description`은 SEO상 권장이나 Notion 동기화 파일엔 없으므로 강제하지 않습니다.
 
 ### 새 카테고리 추가
 - 폴더 생성 시 `_category_.json`을 함께 둡니다 (`docs/architecture/_category_.json` 참고).
@@ -58,7 +59,9 @@ description: <한 줄 SEO 설명>
 
 ---
 
-## 3. 블로그(`blog/`) 룰
+## 3. 블로그(`docs/blog/`) 룰
+
+> **현행**: 블로그는 별도 blog 플러그인이 아니라 **`docs/blog/` 섹션(docs 플러그인)**으로 운영됩니다(`docusaurus.config.ts`의 `blog: false`). 글은 Notion에서 자동 동기화되며 **일반 docs 문서 규칙(§2)을 따릅니다.** 따라서 아래의 `authors.yml`·`tags.yml`·`<!-- truncate -->`·`onInlineAuthors/Tags` 게이트는 **현재 비활성**입니다(향후 blog 플러그인으로 전환할 경우의 참고용으로 남겨둡니다).
 
 ### 게시 주기 (KPI 직결)
 - 과제 목표: **블로그 누적 20+건**, **월 2건 이상**. 최소 격주 게시를 권장합니다.
@@ -110,7 +113,9 @@ description: <한 줄 요약, 미리보기·OG·RSS 공통 사용>
 
 ## 4. i18n 룰
 
-기본 정책은 README의 i18n 섹션에 정리되어 있습니다 — 룰 측면에서의 결정 사항만 정리합니다.
+> **현행 구조**: EN 번역본의 실파일은 **`docs_en/`**에 있고, `i18n/en/docusaurus-plugin-content-docs/current`가 그곳을 가리키는 **symlink**입니다. EN 파일명은 KR과 동일해야 하며(로케일 매칭), `translate_to_en.py`가 DeepL로 자동 번역합니다. 상세는 [dev-docs/i18n.md](./dev-docs/i18n.md) 참조.
+
+룰 측면의 결정 사항만 정리합니다.
 
 - **한국어가 원본**입니다. 한국어를 먼저 쓰고, 영어는 뒤따라옵니다.
 - **영어 번역은 선택적**입니다. 번역이 없는 콘텐츠는 자동으로 한국어 원본으로 fallback됩니다.
@@ -120,8 +125,6 @@ description: <한 줄 요약, 미리보기·OG·RSS 공통 사용>
   3. KPI에 직결되는 핵심 블로그 글 (오픈소스 커뮤니티에 외부 인용될 가능성이 있는 글)
   4. 나머지
 - 영어 번역을 추가했다면 PR 설명에 *"i18n: ko 추가/수정에 대응하는 en 번역 포함"* 또는 *"i18n: en 번역 보류(추후 일괄)"* 중 하나를 명시합니다. 빠뜨림과 의도적 미작성을 구분하기 위함입니다.
-
-명령어·디렉토리 구조는 [README — i18n 워크플로우](./README.md#-i18n-워크플로우) 참조.
 
 ---
 
@@ -143,11 +146,23 @@ description: <한 줄 요약, 미리보기·OG·RSS 공통 사용>
 
 ## 6. 브랜치 · 커밋 · PR 룰
 
-### 브랜치
-- `main` 외 모든 작업은 별도 브랜치에서 진행합니다.
-- 명명: **`type/short-kebab-desc`**
-  - `feat/blog-qwen-vlm`, `docs/architecture-vllm-cluster`, `chore/template-cleanup`, `fix/broken-intro-link`
-- type은 커밋 컨벤션과 동일한 prefix를 씁니다.
+### 브랜치 전략 (main / develop)
+코드 작업과 콘텐츠 자동 동기화를 분리합니다.
+
+- **main** — 배포 브랜치. `deploy.yml`이 push마다 배포하고, **서버 crontab이 2분마다 콘텐츠(`docs/`·`docs_en/`·`static/img/`)를 자동 commit/push**합니다. 사람이 직접 작업하지 않습니다.
+- **develop** — 상시 통합 브랜치. 모든 기능개선·버그픽스가 모입니다. 배포되지 않으므로 검증은 로컬 `npm run build && npm run serve`.
+
+```
+[기능]   feature/* ──PR+CI(squash)──▶ develop ──PR+CI(merge)──▶ main ──▶ 배포
+[핫픽스] hotfix/*  ──────PR+CI───────────────────────────────▶ main ──▶ 배포
+                                                                  └─(백머지)─▶ develop
+[흡수]   main ──(sync-develop.yml 매일)──▶ develop
+```
+
+- **명명**: `feature/<kebab>`, `hotfix/<kebab>`, `chore/<kebab>` (커밋 type prefix와 동일)
+- **머지 전략**: `feature→develop` = Squash, `develop→main` = Merge commit, `hotfix→main` = Squash(작으면)
+- **hotfix는 develop을 거치지 않습니다** — develop의 미완성 기능이 동반 배포되는 것을 막기 위해 main에 직접 PR하고, 머지 후 develop으로 백머지합니다.
+- 모든 PR은 `pr-build.yml`(`npm run build`)을 통과해야 머지합니다. **GitHub Settings → Branches에서 main·develop에 "Require status checks(pr-build) 통과 필수" 보호 규칙을 켜야** 강제됩니다. main 머지 직전엔 `git pull --rebase origin main`(서버 자동 push 레이스 방지).
 
 ### 커밋 메시지 (Conventional Commits, 한국어)
 현재 리포의 관행을 룰화합니다.
@@ -196,8 +211,10 @@ description: <한 줄 요약, 미리보기·OG·RSS 공통 사용>
 - [ ] PR 본문의 4개 섹션이 채워졌는가
 
 ### CI
-- `.github/workflows/`의 GitHub Actions가 `main` push 시 자동 빌드·배포합니다.
-- **빌드가 실패하면 사이트는 갱신되지 않습니다.** 이전 배포가 그대로 유지되므로 운영 중단은 아니지만, 의도한 변경은 반영되지 않습니다. CI 빨간불 = 즉시 처리.
+- **PR 게이트**: `pr-build.yml`이 main·develop 대상 PR에서 `npm run build`를 돌립니다. 통과해야 머지(브랜치 보호 규칙으로 강제).
+- **배포**: `deploy.yml`이 `main` push 시 자동 빌드·배포합니다.
+- **콘텐츠 흡수**: `sync-develop.yml`이 매일 main→develop을 머지합니다.
+- **빌드가 실패하면 사이트는 갱신되지 않습니다.** 이전 배포가 유지되므로 운영 중단은 아니지만, 의도한 변경은 반영되지 않습니다. CI 빨간불 = 즉시 처리.
 
 ---
 

@@ -1,0 +1,37 @@
+name: PR Build Check
+
+# main·develop 으로 향하는 모든 PR에서 프로덕션 빌드를 강제한다.
+# onBrokenLinks: 'throw' 이므로 깨진 내부 링크·MDX 오류가 여기서 차단된다.
+# (배포는 하지 않는다 — 배포는 main push 시 deploy.yml 이 담당)
+#
+# ⚠️ 이 파일만으로는 머지 게이트가 되지 않는다. GitHub
+#    Settings → Branches → Branch protection rules 에서 main·develop 에
+#    "Require status checks to pass" 로 이 체크를 required 로 추가해야 강제된다.
+on:
+  pull_request:
+    branches: [main, develop]
+
+# 같은 PR에 새 푸시가 오면 진행 중인 빌드는 취소하고 최신 1개만 유지
+concurrency:
+  group: pr-build-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build (all locales)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build (production, all locales)
+        run: npm run build
