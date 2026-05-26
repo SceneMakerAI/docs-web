@@ -83,13 +83,16 @@ STATIC_IMG_DIR = os.environ.get("STATIC_IMG_DIR", f"static/img/{_last_seg}")
 NOTION_PROPERTY_TITLE = os.environ.get("NOTION_PROPERTY_TITLE", "제목")
 NOTION_PROPERTY_ORDER = os.environ.get("NOTION_PROPERTY_ORDER", "순서")
 NOTION_PROPERTY_DATE = os.environ.get("NOTION_PROPERTY_DATE", "날짜")
+NOTION_PROPERTY_SUBITEM = os.environ.get("NOTION_PROPERTY_SUBITEM", "하위 항목")
+NOTION_PROPERTY_PARENT = os.environ.get("NOTION_PROPERTY_PARENT", "상위 항목")
 FETCH_MODE = os.environ.get("FETCH_MODE", "ALL")
 TIMEZONE_HOURS = 9
 
 
 SYNC_MAP_FILE = f"{SAVE_DIR}/.notion-sync.json"
 # 수동 작성 구조 파일 — sync가 절대 삭제하지 않음
-SKIP_FILES = {"_category_.json", "overview.mdx"}
+# _category_.json은 section root(SAVE_DIR 직하)만 보존, 하위 subdirectory는 sync가 관리
+SKIP_FILES = {"overview.mdx"}
 
 
 def normalize_notion_database_id(raw):
@@ -165,6 +168,24 @@ def read_date_start(props, prop_name):
         return None
     start = inner.get("start", "")
     return start[:10] if len(start) >= 10 else None
+
+
+def read_relation(props, prop_name):
+    p = props.get(prop_name, {})
+    if p.get("type") != "relation":
+        return []
+    return [item["id"] for item in p.get("relation", [])]
+
+
+def generate_category_json(dir_path, label, position):
+    slug = os.path.basename(dir_path)
+    link_id = f"{_last_seg}/{slug}/index"
+    data = {"label": label, "position": position,
+            "link": {"type": "doc", "id": link_id}}
+    os.makedirs(dir_path, exist_ok=True)
+    with open(f"{dir_path}/_category_.json", "w", encoding="utf-8") as f:
+        json.dump(data, f, ensure_ascii=False, indent=2)
+    log(f"_category_.json 생성: {dir_path}/_category_.json")
 
 
 def get_page_blocks(page_id):
@@ -429,15 +450,32 @@ def save_sync_map(mapping):
 
 
 
-def save_doc_page(page, position, existing_map):
+def save_doc_page(page, position, existing_map, parent_slug=None, is_parent=False):
+    """Notion 페이지를 Markdown 파일로 저장한다.
+
+    - is_parent=True: 하위 항목을 가진 루트 페이지 →
+        {SAVE_DIR}/{slug}/index.md 저장 + _category_.json 생성
+    - parent_slug 있음: 자식 페이지 →
+        {SAVE_DIR}/{parent_slug}/{slug}.md 저장
+    - 둘 다 없음: 기존 동작 (루트 레벨 평면 저장)
+    """
     page_id = page["id"]
     last_edited = page.get("last_edited_time", "")
     props = page.get("properties", {})
     title = read_title_plain(props, NOTION_PROPERTY_TITLE) or "제목없음"
-    order = position  # created_time 오름차순 정렬 기반 위치
+    order = position
 
     slug = slugify(title)
-    new_filename = f"{SAVE_DIR}/{slug}.md"
+
+    if is_parent:
+        new_filename = f"{SAVE_DIR}/{slug}/index.md"
+        url_slug = "/"
+    elif parent_slug:
+        new_filename = f"{SAVE_DIR}/{parent_slug}/{slug}.md"
+        url_slug = str(order)
+    else:
+        new_filename = f"{SAVE_DIR}/{slug}.md"
+        url_slug = str(order)
 
     existing_entry = existing_map.get(page_id)
     if isinstance(existing_entry, dict):
@@ -445,22 +483,33 @@ def save_doc_page(page, position, existing_map):
         stored_last_edited = existing_entry.get("last_edited", "")
         stored_hash = existing_entry.get("content_hash", "")
         stored_order = existing_entry.get("order")
+        stored_parent = existing_entry.get("parent_id")
     elif isinstance(existing_entry, str):
         old_filename = existing_entry
         stored_last_edited = ""
         stored_hash = ""
         stored_order = None
+        stored_parent = None
     else:
         old_filename = None
         stored_last_edited = ""
         stored_hash = ""
         stored_order = None
+        stored_parent = None
+
+    current_parent_id = parent_slug  # 문자열 slug or None
 
     if (last_edited and stored_last_edited == last_edited
             and old_filename == new_filename
             and os.path.exists(new_filename)
-            and stored_order == order):
+            and stored_order == order
+            and stored_parent == current_parent_id):
         log(f"변경 없음, 스킵: {title}")
+        if is_parent:
+            # _category_.json이 없으면 재생성
+            cat_path = f"{SAVE_DIR}/{slug}/_category_.json"
+            if not os.path.exists(cat_path):
+                generate_category_json(f"{SAVE_DIR}/{slug}", title, order)
         return title, new_filename, last_edited, stored_hash, order
 
     if old_filename and old_filename != new_filename:
@@ -479,24 +528,30 @@ def save_doc_page(page, position, existing_map):
         f"id: {slug}\n"
         f'title: "{safe_title}"\n'
         f"sidebar_position: {order}\n"
-        f"slug: \"{order}\"\n"
+        f'slug: "{url_slug}"\n'
         f"---\n\n"
     )
 
-    os.makedirs(SAVE_DIR, exist_ok=True)
+    os.makedirs(os.path.dirname(new_filename) if os.path.dirname(new_filename) else SAVE_DIR, exist_ok=True)
     with open(new_filename, "w", encoding="utf-8") as f:
         f.write(frontmatter + body)
+
+    if is_parent:
+        generate_category_json(f"{SAVE_DIR}/{slug}", title, order)
 
     return title, new_filename, last_edited, content_hash, order
 
 
 def remove_orphans(synced_files, previously_tracked):
     """이전 sync에서 Notion이 만든 파일 중 이번에 사라진 것만 삭제.
-    수동 작성 파일(sync map에 없던 파일)은 건드리지 않는다."""
+    수동 작성 파일(sync map에 없던 파일)은 건드리지 않는다.
+    계층 구조로 생성된 서브디렉토리도 정리한다."""
     import shutil
     if not os.path.isdir(SAVE_DIR):
         return
     section = SAVE_DIR.rstrip("/").split("/")[-1]
+
+    # 루트 레벨 평면 파일 정리
     for fname in os.listdir(SAVE_DIR):
         if fname in SKIP_FILES or fname.startswith("."):
             continue
@@ -508,6 +563,27 @@ def remove_orphans(synced_files, previously_tracked):
             log(f"미추적 파일 삭제: {fpath}")
             slug = os.path.splitext(fname)[0]
             img_dir = f"static/img/{section}/{slug}"
+            if os.path.isdir(img_dir):
+                shutil.rmtree(img_dir)
+                log(f"연관 이미지 삭제: {img_dir}")
+
+    # 서브디렉토리(부모 페이지 디렉토리) 정리
+    for dname in os.listdir(SAVE_DIR):
+        if dname.startswith("."):
+            continue
+        dpath = os.path.join(SAVE_DIR, dname)
+        if not os.path.isdir(dpath):
+            continue
+        # 이 디렉토리가 sync가 만든 것인지 확인: index.md가 previously_tracked에 있었던 경우
+        index_path = os.path.join(dpath, "index.md")
+        if index_path not in previously_tracked:
+            continue  # sync가 만들지 않은 디렉토리는 건드리지 않음
+        # 해당 디렉토리의 모든 파일이 synced_files에서 제거됐는지 확인
+        remaining = [f for f in synced_files if f.startswith(dpath + os.sep)]
+        if not remaining:
+            shutil.rmtree(dpath)
+            log(f"빈 부모 디렉토리 삭제: {dpath}")
+            img_dir = f"static/img/{section}/{dname}"
             if os.path.isdir(img_dir):
                 shutil.rmtree(img_dir)
                 log(f"연관 이미지 삭제: {img_dir}")
@@ -559,17 +635,63 @@ def main():
         all_pages.sort(key=lambda p: p.get("created_time", ""))
         log(f"총 {len(all_pages)}개 페이지, created_time 오름차순 정렬")
 
-    for position, page in enumerate(all_pages, start=1):
-        title, filepath, last_edited, content_hash, page_order = save_doc_page(page, position, existing_map)
+    # 부모-자식 관계 구성
+    page_by_id = {p["id"]: p for p in all_pages}
+    children_map = {}  # {parent_id: [child_page_id, ...]}
+    for page in all_pages:
+        child_ids = read_relation(page.get("properties", {}), NOTION_PROPERTY_SUBITEM)
+        # DB 내에 존재하는 ID만 유효한 자식으로 인정
+        valid_children = [cid for cid in child_ids if cid in page_by_id]
+        if valid_children:
+            children_map[page["id"]] = valid_children
+
+    child_id_set = {cid for children in children_map.values() for cid in children}
+    root_pages = [p for p in all_pages if p["id"] not in child_id_set]
+
+    has_hierarchy = bool(children_map)
+    if has_hierarchy:
+        log(f"계층 구조 감지: {len(children_map)}개 부모, {len(child_id_set)}개 자식")
+    else:
+        log("계층 구조 없음, 평면 모드로 동작")
+
+    def process_page(page, position, parent_slug=None, is_parent=False):
+        title, filepath, last_edited, content_hash, page_order = save_doc_page(
+            page, position, existing_map,
+            parent_slug=parent_slug, is_parent=is_parent,
+        )
         existing_map[page["id"]] = {
             "file": filepath,
             "last_edited": last_edited,
             "content_hash": content_hash,
             "order": page_order,
+            "parent_id": parent_slug,
         }
         synced_files.add(filepath)
         log(f"저장: {filepath} ({title})")
-        saved += 1
+        return title, filepath
+
+    for root_position, page in enumerate(root_pages, start=1):
+        page_id = page["id"]
+        if page_id in children_map:
+            # 부모 페이지
+            parent_title, parent_filepath = process_page(
+                page, root_position, is_parent=True,
+            )
+            parent_slug = slugify(read_title_plain(page.get("properties", {}), NOTION_PROPERTY_TITLE) or "제목없음")
+            # 자식 페이지들 처리
+            child_pages = [
+                page_by_id[cid] for cid in children_map[page_id]
+                if cid in page_by_id
+            ]
+            child_pages.sort(key=lambda p: p.get("created_time", ""))
+            for child_position, child_page in enumerate(child_pages, start=1):
+                process_page(child_page, child_position, parent_slug=parent_slug)
+                saved += 1
+            saved += 1
+        else:
+            # 루트 레벨 평면 페이지
+            process_page(page, root_position)
+            saved += 1
 
     if FETCH_MODE != "DAILY":
         previously_tracked = {

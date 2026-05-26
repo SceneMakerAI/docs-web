@@ -233,6 +233,40 @@ def translate_file(kr_path, hashes):
     log(f"{kr_path} → {en_path}")
 
 
+def sync_category_jsons():
+    """docs/ 내 서브디렉토리 _category_.json을 docs_en/ 에 미러링.
+
+    section root(docs/{section}/_category_.json)는 수동 관리하므로 건드리지 않는다.
+    depth 2 이상(docs/{section}/{subdir}/_category_.json)만 처리한다.
+    label은 DeepL로 번역하며, label이 변경됐을 때만 덮어쓴다.
+    """
+    for dirpath, _dirs, filenames in os.walk("docs/"):
+        if "_category_.json" not in filenames:
+            continue
+        kr_path = os.path.join(dirpath, "_category_.json").replace("\\", "/")
+        rel = kr_path[len("docs/"):]  # e.g. "poc/vision-bench/_category_.json"
+        # section root는 스킵 (슬래시 하나만 있는 경우: "poc/_category_.json")
+        if rel.count("/") < 2:
+            continue
+        en_path = "docs_en/" + rel
+        with open(kr_path, encoding="utf-8") as f:
+            data = json.load(f)
+        kr_label = data.get("label", "")
+        en_label = translate_with_deepl(kr_label) if kr_label else kr_label
+        # 이미 동일한 내용이면 스킵
+        if os.path.exists(en_path):
+            with open(en_path, encoding="utf-8") as f:
+                existing = json.load(f)
+            if existing.get("label") == en_label:
+                continue
+        en_data = dict(data)
+        en_data["label"] = en_label
+        os.makedirs(os.path.dirname(en_path), exist_ok=True)
+        with open(en_path, "w", encoding="utf-8") as f:
+            json.dump(en_data, f, ensure_ascii=False, indent=2)
+        log(f"category json 미러: {en_path} (label: {en_label})")
+
+
 def main():
     if not DEEPL_API_KEY:
         log("DEEPL_API_KEY 없음, 번역 건너뜀")
@@ -247,6 +281,9 @@ def main():
         if path not in changed:
             changed.append(path)
             log(f"EN 누락/불완전, 번역 대상 추가: {path}")
+
+    # 서브디렉토리 _category_.json EN 미러링 (md 번역과 독립적으로 항상 실행)
+    sync_category_jsons()
 
     if not changed and not deleted:
         log("번역할 변경 파일 없음")
