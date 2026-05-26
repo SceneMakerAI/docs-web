@@ -179,7 +179,7 @@ def read_relation(props, prop_name):
 
 def generate_category_json(dir_path, label, position):
     slug = os.path.basename(dir_path)
-    link_id = f"{_last_seg}/{slug}/index"
+    link_id = f"{_last_seg}/{slug}/{slug}"  # id frontmatter = slug, 경로 prefix 포함
     data = {"label": label, "position": position,
             "link": {"type": "doc", "id": link_id}}
     os.makedirs(dir_path, exist_ok=True)
