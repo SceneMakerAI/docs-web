@@ -75,7 +75,7 @@ predictions/{category}/{원본명}/{clip_id}.json 에 저장. 카테고리별 �
 
 | 항목 | 값 |
 | --- | --- |
-|  |  |
+| 구조 | Thinker–Talker MoE (네이티브 옴니모달 end-to-end) |
 |  |  |
 |  |  |
 
