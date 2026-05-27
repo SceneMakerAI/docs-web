@@ -1,37 +1,30 @@
 {
   "365e15b4-0359-804b-87c8-f1acee149564": {
     "file": "docs/poc/vision-bench/index.md",
-    "last_edited": "2026-05-22T09:27:00.000Z",
+    "last_edited": "2026-05-27T05:07:00.000Z",
     "content_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-    "order": 1,
+    "order": 3,
     "parent_id": null
   },
   "365e15b4-0359-80d4-8f38-d8a5c80ae5d0": {
     "file": "docs/poc/audio-bench.md",
-    "last_edited": "2026-05-19T08:35:00.000Z",
+    "last_edited": "2026-05-27T05:07:00.000Z",
     "content_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-    "order": 2,
+    "order": 1,
     "parent_id": null
   },
   "367e15b4-0359-80c9-885a-ea288010356f": {
     "file": "docs/poc/poc-기획안-초고속초고품질-다국어-ai-자막-생성-시스템-구축.md",
-    "last_edited": "2026-05-26T04:29:00.000Z",
-    "content_hash": "f81b6f8074ce1f3ab0769f900c4ac48740b1c5cafd6b84dd7c835845d254e104",
-    "order": 3,
+    "last_edited": "2026-05-27T05:07:00.000Z",
+    "content_hash": "da1f0f4faa1c273672daf5149275ef980c1d5aa072394aae6f5f279d85a088fe",
+    "order": 2,
     "parent_id": null
   },
   "368e15b4-0359-81cb-9b9b-d555dbfd19e3": {
     "file": "docs/poc/vision-bench/멀티모달-llm-한국-방송-6초-클립-영상-이해-벤치마크.md",
-    "last_edited": "2026-05-26T01:52:00.000Z",
-    "content_hash": "4ee3b3216752016e3212ab6f7dc606c556cdb88423138788470918d1ef2767e9",
+    "last_edited": "2026-05-27T05:46:00.000Z",
+    "content_hash": "fe5ab67705d0787f6362f86f902207937920c507840ff126c0a815b86f0054f4",
     "order": 1,
-    "parent_id": "vision-bench"
-  },
-  "368e15b4-0359-811c-8282-caf32a8f473d": {
-    "file": "docs/poc/vision-bench/qwen3-omni-baseline-news-stt-없이-30fps-vs-05fps.md",
-    "last_edited": "2026-05-26T01:02:00.000Z",
-    "content_hash": "afee6602e7460b45ebc24b5f04a4d1886a030871ce96a73b3c63e6cb65ab10c7",
-    "order": 2,
     "parent_id": "vision-bench"
   }
 }
