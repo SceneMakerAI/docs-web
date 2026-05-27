@@ -19,35 +19,35 @@ pids=()
 
 [ -n "$NOTION_ABOUT" ] && \
   NOTION_DATABASE_ID="$NOTION_ABOUT" SAVE_DIR=docs/about FETCH_MODE=ALL \
-  python3 scripts/notion_to_docs_generic.py & pids+=($!)
+  python3 scripts/notion_to_md.py & pids+=($!)
 
 [ -n "$NOTION_ARCHITECTURE" ] && \
   NOTION_DATABASE_ID="$NOTION_ARCHITECTURE" SAVE_DIR=docs/architecture FETCH_MODE=ALL \
-  python3 scripts/notion_to_docs_generic.py & pids+=($!)
+  python3 scripts/notion_to_md.py & pids+=($!)
 
 [ -n "$NOTION_BLOG" ] && \
   NOTION_DATABASE_ID="$NOTION_BLOG" SAVE_DIR=docs/blog FETCH_MODE=ALL \
-  python3 scripts/notion_to_docs_generic.py & pids+=($!)
+  python3 scripts/notion_to_md.py & pids+=($!)
 
 [ -n "$NOTION_CONTRIBUTE" ] && \
   NOTION_DATABASE_ID="$NOTION_CONTRIBUTE" SAVE_DIR=docs/contribute FETCH_MODE=ALL \
-  python3 scripts/notion_to_docs_generic.py & pids+=($!)
+  python3 scripts/notion_to_md.py & pids+=($!)
 
 [ -n "$NOTION_DOCS" ] && \
   NOTION_DATABASE_ID="$NOTION_DOCS" SAVE_DIR=docs/guide FETCH_MODE=ALL \
-  python3 scripts/notion_to_docs_generic.py & pids+=($!)
+  python3 scripts/notion_to_md.py & pids+=($!)
 
 [ -n "$NOTION_INSTALL" ] && \
   NOTION_DATABASE_ID="$NOTION_INSTALL" SAVE_DIR=docs/install FETCH_MODE=ALL \
-  python3 scripts/notion_to_docs_generic.py & pids+=($!)
+  python3 scripts/notion_to_md.py & pids+=($!)
 
 [ -n "$NOTION_POC" ] && \
   NOTION_DATABASE_ID="$NOTION_POC" SAVE_DIR=docs/poc FETCH_MODE=ALL \
-  python3 scripts/notion_to_docs_generic.py & pids+=($!)
+  python3 scripts/notion_to_md.py & pids+=($!)
 
 [ -n "$NOTION_RELEASE" ] && \
   NOTION_DATABASE_ID="$NOTION_RELEASE" SAVE_DIR=docs/release-notes FETCH_MODE=ALL \
-  python3 scripts/notion_to_docs_generic.py & pids+=($!)
+  python3 scripts/notion_to_md.py & pids+=($!)
 
 # 모든 동기화 완료 대기
 failed=0

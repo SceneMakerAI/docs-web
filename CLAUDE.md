@@ -56,7 +56,7 @@ docs-web/
 │   └── CNAME                      # doc.scenemaker.solbox.com
 │
 ├── scripts/
-│   ├── notion_to_docs_generic.py  # Notion DB → docs/ 범용 동기화 (계층 구조 지원)
+│   ├── notion_to_md.py  # Notion DB → docs/ 범용 동기화 (계층 구조 지원)
 │   ├── translate_to_en.py         # 변경된 docs/ → DeepL 번역 → docs_en/ 저장
 │   ├── notion_to_blog.py          # 블로그 전용 동기화 (레거시)
 │   └── notion_to_contribute.py    # 기여 전용 동기화 (레거시)
@@ -127,7 +127,7 @@ docs/poc/vision-bench/child.md  (slug: "1")  →  /docs/poc/vision-bench/1
 - 자식 파일은 `slug: "{child-order}"` (부모 디렉토리 기준 상대 슬러그)
 - **slug는 섹션 내 상대경로**. `"architecture/1"` 같은 전체 경로 쓰면 안 된다.
 - 새 파일은 섹션 내에서 `sidebar_position` 순서에 맞춰 다음 번호를 부여한다.
-- **Notion 동기화 파일**: `scripts/notion_to_docs_generic.py`가 `slug` 자동 생성. 수동 추가 파일만 직접 slug를 넣어야 한다.
+- **Notion 동기화 파일**: `scripts/notion_to_md.py`가 `slug` 자동 생성. 수동 추가 파일만 직접 slug를 넣어야 한다.
 
 ---
 
@@ -144,7 +144,7 @@ GitHub Actions가 아닌 **서버에서 직접 crontab으로 2분마다** 실행
 **`scripts/server-sync.sh` 흐름:**
 
 1. `git pull --rebase origin main` — 원격 최신 코드 반영
-2. 8개 Notion DB 병렬 동기화 (`notion_to_docs_generic.py`, `FETCH_MODE=ALL`)
+2. 8개 Notion DB 병렬 동기화 (`notion_to_md.py`, `FETCH_MODE=ALL`)
 3. `translate_to_en.py` — 변경된 KR 파일 DeepL 번역 → `docs_en/` 저장
 4. 변경사항 있으면 `git commit + push` → `deploy.yml` 트리거 → GH Pages 배포
 
@@ -174,7 +174,7 @@ tail -f /var/log/notion-sync.log
 | `NOTION_TOKEN` | API 인증 토큰 |
 | `DEEPL_API_KEY` | DeepL 번역 API 키 |
 
-### 동기화 내부 로직 (`notion_to_docs_generic.py`)
+### 동기화 내부 로직 (`notion_to_md.py`)
 
 Notion "하위 항목" relation을 읽어 자동으로 계층 구조를 결정한다.
 
@@ -190,7 +190,7 @@ Notion "하위 항목" relation을 읽어 자동으로 계층 구조를 결정�
 ### 수동 동기화 (단일 섹션)
 
 ```bash
-NOTION_TOKEN=... NOTION_DATABASE_ID=... SAVE_DIR=docs/guide python3 scripts/notion_to_docs_generic.py
+NOTION_TOKEN=... NOTION_DATABASE_ID=... SAVE_DIR=docs/guide python3 scripts/notion_to_md.py
 ```
 
 ---
@@ -262,6 +262,6 @@ NOTION_TOKEN=... NOTION_DATABASE_ID=... SAVE_DIR=docs/guide python3 scripts/noti
 - `.docusaurus/`, `build/`, `node_modules/` 커밋 금지
 - **`_category_.json` 수동 편집 시 주의**:
   - **섹션 루트** (`docs/{section}/_category_.json`): 수동 관리. `link.type: "doc"` 사용 시 실제 존재하는 doc ID인지 반드시 확인 (`npm run build` 로컬 통과 필수)
-  - **서브디렉토리** (`docs/{section}/{subdir}/_category_.json`): `notion_to_docs_generic.py`가 자동 생성·관리. 직접 수정하면 다음 sync에 덮어씌워짐
+  - **서브디렉토리** (`docs/{section}/{subdir}/_category_.json`): `notion_to_md.py`가 자동 생성·관리. 직접 수정하면 다음 sync에 덮어씌워짐
   - 부모 `index.md`에 `id:` 필드 추가 금지 — `_category_.json`의 `link.id`가 파일 경로 기반 ID(`{section}/{slug}/index`)로 고정되어 있어 충돌 발생
 - **KR 파일이 이동(rename)된 경우** 대응하는 stale EN 파일을 수동 삭제해야 함 — `translate_to_en.py`는 git diff 삭제 감지만 하므로 rename은 자동 처리 안 됨
