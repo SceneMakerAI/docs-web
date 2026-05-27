@@ -12,6 +12,7 @@ permissions:
 jobs:
   sync:
     runs-on: ubuntu-latest
+    if: github.event.head_commit.author.name != 'server-cron'
     env:
       NOTION_TOKEN:        ${{ secrets.NOTION_TOKEN }}
       NOTION_ABOUT:        ${{ secrets.NOTION_ABOUT }}
@@ -27,7 +28,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          fetch-depth: 2
+          fetch-depth: 0
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -39,6 +40,9 @@ jobs:
 
       - name: Sync docs to Notion
         run: python3 scripts/md_to_notion.py
+        env:
+          GIT_BEFORE: ${{ github.event.before }}
+          GIT_AFTER:  ${{ github.sha }}
 
       - name: Commit updated sync maps
         run: |
