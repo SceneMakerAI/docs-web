@@ -1,5 +1,5 @@
 """
-notion_to_docs_generic.py — Notion DB → Docusaurus docs 섹션 동기화
+notion_to_md.py — Notion DB → Docusaurus docs 섹션 동기화
 
 Env vars (필수):
   NOTION_TOKEN          Notion API 토큰

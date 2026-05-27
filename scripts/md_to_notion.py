@@ -11,7 +11,6 @@ Env vars (선택):
   source .env && python3 scripts/md_to_notion.py
   source .env && SAVE_DIR=docs/about python3 scripts/md_to_notion.py
 """
-import hashlib
 import json
 import os
 import re
@@ -265,6 +264,11 @@ def append_blocks(page_id: str, blocks: list):
         _api("patch", f"/blocks/{page_id}/children", json={"children": chunk})
 
 
+def get_page_last_edited(page_id: str) -> str:
+    r = _api("get", f"/pages/{page_id}")
+    return r.json().get("last_edited_time", "")
+
+
 def update_page_content(page_id: str, blocks: list):
     """기존 블록 전체 삭제 후 새 블록 추가."""
     for bid in get_child_block_ids(page_id):
@@ -314,10 +318,6 @@ def file_to_page_id(sync_map: dict, filepath: str) -> str | None:
         if entry.get("file") == filepath:
             return page_id
     return None
-
-
-def content_hash(text: str) -> str:
-    return hashlib.sha256(text.encode()).hexdigest()
 
 
 # ── Git diff ──────────────────────────────────────────────────────────────────
@@ -376,7 +376,7 @@ def process_section(section_dir: str):
         blocks = md_body_to_blocks(body)
         log(f"  [수정] {filepath} → {len(blocks)}개 블록 업로드 중...")
         update_page_content(page_id, blocks)
-        sync_map[page_id]["content_hash"] = content_hash(body)
+        sync_map[page_id]["last_edited"] = get_page_last_edited(page_id)
         sync_dirty = True
         log(f"  [수정] 완료: {filepath}")
 
@@ -396,8 +396,7 @@ def process_section(section_dir: str):
         if page_id:
             sync_map[page_id] = {
                 "file": filepath,
-                "last_edited": "",
-                "content_hash": content_hash(body),
+                "last_edited": get_page_last_edited(page_id),
                 "order": order,
                 "parent_id": None,
             }

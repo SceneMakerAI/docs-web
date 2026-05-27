@@ -23,7 +23,7 @@ pids=()
 BLOG_DB="${NOTION_BLOG:-$NOTION_DATABASE_ID}"
 if [ -n "$BLOG_DB" ]; then
   NOTION_DATABASE_ID="$BLOG_DB" SAVE_DIR=docs/blog FETCH_MODE="$FETCH_MODE" \
-    python scripts/notion_to_docs_generic.py &
+    python scripts/notion_to_md.py &
   pids+=($!)
 fi
 
@@ -31,44 +31,44 @@ fi
 CONTRIBUTE_DB="${NOTION_CONTRIBUTE:-$NOTION_CONTRIBUTE_DATABASE_ID}"
 if [ -n "$CONTRIBUTE_DB" ]; then
   NOTION_DATABASE_ID="$CONTRIBUTE_DB" SAVE_DIR=docs/contribute FETCH_MODE=ALL \
-    python scripts/notion_to_docs_generic.py &
+    python scripts/notion_to_md.py &
   pids+=($!)
 fi
 
 # Generic docs sections
 if [ -n "$NOTION_ABOUT" ]; then
   NOTION_DATABASE_ID="$NOTION_ABOUT" SAVE_DIR=docs/about FETCH_MODE=ALL \
-    python scripts/notion_to_docs_generic.py &
+    python scripts/notion_to_md.py &
   pids+=($!)
 fi
 
 if [ -n "$NOTION_ARCHITECTURE" ]; then
   NOTION_DATABASE_ID="$NOTION_ARCHITECTURE" SAVE_DIR=docs/architecture FETCH_MODE=ALL \
-    python scripts/notion_to_docs_generic.py &
+    python scripts/notion_to_md.py &
   pids+=($!)
 fi
 
 if [ -n "$NOTION_POC" ]; then
   NOTION_DATABASE_ID="$NOTION_POC" SAVE_DIR=docs/poc FETCH_MODE=ALL \
-    python scripts/notion_to_docs_generic.py &
+    python scripts/notion_to_md.py &
   pids+=($!)
 fi
 
 if [ -n "$NOTION_DOCS" ]; then
   NOTION_DATABASE_ID="$NOTION_DOCS" SAVE_DIR=docs/guide FETCH_MODE=ALL \
-    python scripts/notion_to_docs_generic.py &
+    python scripts/notion_to_md.py &
   pids+=($!)
 fi
 
 if [ -n "$NOTION_RELEASE" ]; then
   NOTION_DATABASE_ID="$NOTION_RELEASE" SAVE_DIR=docs/release-notes FETCH_MODE=ALL \
-    python scripts/notion_to_docs_generic.py &
+    python scripts/notion_to_md.py &
   pids+=($!)
 fi
 
 if [ -n "$NOTION_INSTALL" ]; then
   NOTION_DATABASE_ID="$NOTION_INSTALL" SAVE_DIR=docs/install FETCH_MODE=ALL \
-    python scripts/notion_to_docs_generic.py &
+    python scripts/notion_to_md.py &
   pids+=($!)
 fi
 
