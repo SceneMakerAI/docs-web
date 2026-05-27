@@ -82,7 +82,7 @@ predictions/{category}/{원본명}/{clip_id}.json 에 저장. 카테고리별 �
 | 입력 | 텍스트 · 이미지 · 오디오 · 비디오 |
 | 출력 | 텍스트(+음성) — 본 PoC는 텍스트만 사용 (Talker 미사용) |
 | 컨텍스트 | 네이티브 32,768 토큰 (실서빙은 16,384 운용 → 3.1 참조) |
-| 언어 | 텍스트 119개 / 음성입력 19개 / 음성출력 10개 → 한국어 모두 지원 |
+| 다국어 지원 | 텍스트 119개 / 음성입력 19개 / 음성출력 10개 → 한국어 모두 지원 |
 | 라이선스 | Apache 2.0 (상용 가능) |
 
 **VRAM / 실서빙 설정 (g7e.4xlarge · 1 GPU)**
@@ -100,7 +100,7 @@ predictions/{category}/{원본명}/{clip_id}.json 에 저장. 카테고리별 �
 
 - **결론:** 6초 mp4 한 덩어리를 `video_url` (base64 data URI) 한 컴포넌트로 그대로 넘기는 `from_video` 방식 채택. 분리 입력(`from_frames_audio` )은 **보류** .
 
-- **이유:** vLLM video pipeline 이 영상·오디오를 동시 디코딩하므로 추가 분리 비용 0. 분리 입력 방식은 서버 vLLM venv 에 `vllm[audio]` 디코더 (`av` / `soundfile` / `librosa` ) 가 설치되어 있지 않아 현재 구동 불가 — 산출물 (`data/derived/` 의 frames + audio.wav) 은 보존하여 서버 의존성 보강 후 즉시 재개 가능.
+- **이유:** Qwen3-Omni 는 use_audio_in_video 로 영상+오디오 통합 이해를 네이티브 지원하므로, mp4 한 덩어리를 그대로 넘기는 from_video가 모델 권장 입력 방식이자 파이프라인이 가장 단순하다. 분리 입력은 컴포넌트가 4개로 늘고 키프레임 사이 동작 누락·정렬 부담이 있어 보류.
 
 | **비교 항목** | `from_video` **(채택)** | `from_frames_audio` **(보류)** |
 | --- | --- | --- |
