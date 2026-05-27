@@ -114,9 +114,9 @@ predictions/{category}/{원본명}/{clip_id}.json 에 저장. 카테고리별 �
 
 ### 3.1. 테스트 방법
 
-- **분석 단위:** 6초 mp4 클립 (원본의 `00:10:00 ~ 00:20:00` 구간을 100 등분, 사내 자매 벤치마크와 동일 윈도우)
+- **분석 단위:** 6초 mp4 클립 (원본의 `00:10:00 ~ 00:20:00` 구간을 100 등분하여 클립 데이터 파일을 준비한다.
 
-- **분석 API:** 사내 FastAPI 서버 `POST /analyze/by-clip-path` — form 으로 `clip_path` + `script_prev/curr/next` 전송 → 응답 envelope `{result: {summary, objects, actions}, meta: {model, elapsed_ms, usage}}`
+- **분석 API:** 
 
 - **동시성 / 백프레셔:** `VLLM_CONCURRENCY=4` (`asyncio.Semaphore` ) — 초과 요청은 거부 없이 대기 (큐잉)
 
@@ -140,6 +140,8 @@ predictions/{category}/{원본명}/{clip_id}.json 에 저장. 카테고리별 �
 | 2009 프로야구 한국시리즈 7차전 | 1:55:22 | [https://www.youtube.com/watch?v=fP1QEs1Uj5U](https://www.youtube.com/watch?v=fP1QEs1Uj5U) |
 | **2024 LCK SUMMER 결승전 GEN vs HLE** | 2:11:23 | [https://www.youtube.com/watch?v=_A_I75nJMF8](https://www.youtube.com/watch?v=_A_I75nJMF8) |
 
+<br />
+
 | **카테고리 키** | **장르** | **클립 수** | **비고** |
 | --- | --- | --- | --- |
 | `news` | 뉴스 | 100 | 자막·앵커 멘트 비중 높음 |
@@ -150,6 +152,8 @@ predictions/{category}/{원본명}/{clip_id}.json 에 저장. 카테고리별 �
 | `hist_drama` | 사극 | 100 | 시대 의상·소품 + 문어체 대사 |
 | `lol` | e스포츠 | 100 | 게임 UI 오버레이 + 캐스터 + 게임음 |
 | **합계** | — | **700** | 원본 영상 7편 (장르당 1편, 10분 윈도우 100 등분) |
+
+<br />
 
 <br />
 
