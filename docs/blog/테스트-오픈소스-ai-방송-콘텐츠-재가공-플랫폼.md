@@ -1,6 +1,6 @@
 ---
-id: scenemakerai-오픈소스-ai-방송-콘텐츠-재가공-플랫폼
-title: "SceneMakerAI — 오픈소스 AI 방송 콘텐츠 재가공 플랫폼"
+id: 테스트-오픈소스-ai-방송-콘텐츠-재가공-플랫폼
+title: "테스트_오픈소스 AI 방송 콘텐츠 재가공 플랫폼"
 sidebar_position: 1
 slug: "1"
 ---
