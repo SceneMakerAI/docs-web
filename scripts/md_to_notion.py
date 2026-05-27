@@ -269,6 +269,12 @@ def get_page_last_edited(page_id: str) -> str:
     return r.json().get("last_edited_time", "")
 
 
+def update_page_title(page_id: str, title: str):
+    _api("patch", f"/pages/{page_id}", json={
+        "properties": {"제목": {"title": [{"text": {"content": title}}]}}
+    })
+
+
 def update_page_content(page_id: str, blocks: list):
     """기존 블록 전체 삭제 후 새 블록 추가."""
     for bid in get_child_block_ids(page_id):
@@ -324,10 +330,14 @@ def file_to_page_id(sync_map: dict, filepath: str) -> str | None:
 
 def get_changed_files(section_dir: str) -> dict[str, list[str]]:
     result = {"modified": [], "added": [], "deleted": []}
+    before = os.environ.get("GIT_BEFORE", "")
+    after  = os.environ.get("GIT_AFTER", "HEAD")
+    if not before or before == "0" * 40:
+        before = "HEAD~1"
     try:
         out = subprocess.check_output(
             ["git", "-c", "core.quotepath=false", "diff", "--name-status",
-             "HEAD~1", "HEAD", "--", section_dir],
+             before, after, "--", section_dir],
             cwd=REPO_DIR, text=True,
         )
     except subprocess.CalledProcessError:
@@ -372,9 +382,11 @@ def process_section(section_dir: str):
             log(f"  [수정] {filepath} → sync_map 미등록, 스킵")
             continue
         text = (REPO_DIR / filepath).read_text(encoding="utf-8")
-        _, body = parse_frontmatter(text)
+        fm, body = parse_frontmatter(text)
+        title = fm.get("title", Path(filepath).stem)
         blocks = md_body_to_blocks(body)
         log(f"  [수정] {filepath} → {len(blocks)}개 블록 업로드 중...")
+        update_page_title(page_id, title)
         update_page_content(page_id, blocks)
         sync_map[page_id]["last_edited"] = get_page_last_edited(page_id)
         sync_dirty = True
