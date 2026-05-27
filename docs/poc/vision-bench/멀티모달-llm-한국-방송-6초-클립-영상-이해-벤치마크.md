@@ -71,21 +71,37 @@ predictions/{category}/{원본명}/{clip_id}.json 에 저장. 카테고리별 �
 
 - **결론:** 6초 멀티모달 클립의 단일 호출 통합 분석을 위해 `Qwen3-Omni-30B-A3B-Instruct` 채택.
 
-- **이유:** Image / Video / Audio / Text 4 모달리티를 단일 모델로 처리하며 OpenAI 호환 vLLM 서빙이 가능한 거의 유일한 오픈소스 옵션. MoE 구조(총 30B / 활성 3B)로 단일 GPU 추론 가능, vLLM guided decoding 으로 JSON Schema 강제 응답이 그대로 받힘.
+- **이유:** Image / Video / Audio / Text 4 모달리티를 단일 모델로 처리하며 OpenAI 호환 vLLM 서빙이 가능한 거의 유일한 오픈소스 옵션. **Thinker–Talker MoE** 구조 — 추론 코어(Thinker)가 총 30B / 활성 3B, Talker(음성)·오디오/비전 인코더 포함 전체 체크포인트 ≈ **35B** (본 PoC는 텍스트 출력만 사용 → Talker 미사용). 단일 GPU 추론 가능, vLLM guided decoding 으로 JSON Schema 강제 응답이 그대로 받힘.
+
+**모델 스펙**
 
 | 항목 | 값 |
 | --- | --- |
 | 구조 | Thinker–Talker MoE (네이티브 옴니모달 end-to-end) |
-|  |  |
-|  |  |
+| 파라미터 | 추론 코어(Thinker) 총 30B / 활성 3B · Talker·인코더 포함 전체 ≈ 35B |
+| 입력 | 텍스트 · 이미지 · 오디오 · 비디오 |
+| 출력 | 텍스트(+음성) — 본 PoC는 텍스트만 사용 (Talker 미사용) |
+| 컨텍스트 | 네이티브 32,768 토큰 (실서빙은 16,384 운용 → 3.1 참조) |
+| 한국어 | 텍스트 119개 / 음성입력 19개 / 음성출력 10개 모두 지원 |
+| 라이선스 | Apache 2.0 (상용 가능) |
+| 변형 | -Thinking(CoT) · -Captioner(오디오 캡션) · AWQ 4/8bit 양자화 |
+
+**VRAM / 실서빙 설정 (g7e.4xlarge · 1 GPU)**
+
+| **항목** | **값** | **메모** |
+| --- | --- | --- |
+| GPU | NVIDIA RTX PRO 6000 Blackwell × 1 (96 GB) | 오레곤 us-west-2 |
+| BF16 메모리(공식 카드) | 15초 78.85 GB / 30초 88.52 / 60초 107.74 | 6초 클립이라 96 GB에 충분 |
+| `--dtype` | bfloat16 | 원본 정밀도(양자화 아님, 66 GiB 풀 체크포인트) |
+| `--gpu-memory-utilization` | 0.85 (≈ 81.6 GB 할당) |  |
+| `--tensor-parallel-size` | 1 | 단일 GPU |
+| `--max-num-seqs` | 8 | 앱 동시성(4)보다 커서 여유 |
 
 #### **2.2. 입력 방식:** `from_video` **(mp4 단일 입력) vs** `from_frames_audio` **(분리 입력)**
 
 - **결론:** 6초 mp4 한 덩어리를 `video_url` (base64 data URI) 한 컴포넌트로 그대로 넘기는 `from_video` 방식 채택. 분리 입력(`from_frames_audio` )은 **보류** .
 
 - **이유:** vLLM video pipeline 이 영상·오디오를 동시 디코딩하므로 추가 분리 비용 0. 분리 입력 방식은 서버 vLLM venv 에 `vllm[audio]` 디코더 (`av` / `soundfile` / `librosa` ) 가 설치되어 있지 않아 현재 구동 불가 — 산출물 (`data/derived/` 의 frames + audio.wav) 은 보존하여 서버 의존성 보강 후 즉시 재개 가능.
-
-모델 스펙
 
 | **비교 항목** | `from_video` **(채택)** | `from_frames_audio` **(보류)** |
 | --- | --- | --- |
@@ -132,6 +148,15 @@ predictions/{category}/{원본명}/{clip_id}.json 에 저장. 카테고리별 �
 
 <br />
 
+**서빙 컨텍스트 한계**
+
+| **항목** | **값** | **영향** |
+| --- | --- | --- |
+| 실서빙 `--max-model-len` | **16,384** (네이티브 32,768의 절반) | 컨텍스트 예산 제한 |
+| 관측 `prompt_tokens` | ≈ 11,887 (약 73% 소진) | 이미 상당 부분 사용 |
+| 리스크 | 고fps 시 비디오 토큰 급증 → 16k 천장 초과 | 30fps 실험 시 주의 |
+| 대응 | `--max-model-len` 상향(KV캐시 VRAM 트레이드오프) 또는 fps 제약 | — |
+
 ### 3.2. 테스트 데이터
 
 테스트에 사용된 원본 데이터는 아래와 같다. 가능한 실제 방송 영상과 비슷한 50분\~2시간 사이로 영상.
@@ -140,11 +165,11 @@ predictions/{category}/{원본명}/{clip_id}.json 에 저장. 카테고리별 �
 | --- | --- | --- |
 | KBS 9 뉴스 | 48:30 | [https://www.youtube.com/watch?v=rX1P-jOoNmM](https://www.youtube.com/watch?v=rX1P-jOoNmM) |
 | 슈퍼피쉬 1부 | 58:40 | [https://www.youtube.com/watch?v=iNbWqC1iqKw](https://www.youtube.com/watch?v=iNbWqC1iqKw) |
-| KBS 겨울 연가 | 1:04:52 | [https://www.youtube.com/watch?v=irVKEhb9g8M](https://www.youtube.com/watch?v=irVKEhb9g8M) |
+| KBS 겨울 연가 | 1 :04:52 | [https://www.youtube.com/watch?v=irVKEhb9g8M](https://www.youtube.com/watch?v=irVKEhb9g8M) |
 | 태조 왕건 | 54:10 | [https://www.youtube.com/watch?v=nmlE2iPWLGM](https://www.youtube.com/watch?v=nmlE2iPWLGM) |
-| 출장십오야 X 스타쉽 전국체전 풀버전 | 1:00:06 | [https://www.youtube.com/watch?v=6wJGpi1nkCg](https://www.youtube.com/watch?v=6wJGpi1nkCg) |
-| 2009 프로야구 한국시리즈 7차전 | 1:55:22 | [https://www.youtube.com/watch?v=fP1QEs1Uj5U](https://www.youtube.com/watch?v=fP1QEs1Uj5U) |
-| **2024 LCK SUMMER 결승전 GEN vs HLE** | 2:11:23 | [https://www.youtube.com/watch?v=_A_I75nJMF8](https://www.youtube.com/watch?v=_A_I75nJMF8) |
+| 출장십오야 X 스타쉽 전국체전 풀버전 | 1 :00:06 | [https://www.youtube.com/watch?v=6wJGpi1nkCg](https://www.youtube.com/watch?v=6wJGpi1nkCg) |
+| 2009 프로야구 한국시리즈 7차전 | 1 :55:22 | [https://www.youtube.com/watch?v=fP1QEs1Uj5U](https://www.youtube.com/watch?v=fP1QEs1Uj5U) |
+| **2024 LCK SUMMER 결승전 GEN vs HLE** | 2 :11:23 | [https://www.youtube.com/watch?v=_A_I75nJMF8](https://www.youtube.com/watch?v=_A_I75nJMF8) |
 
 <br />
 
