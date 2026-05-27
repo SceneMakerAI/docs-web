@@ -216,9 +216,3 @@ predictions/{category}/{원본명}/{clip_id}.json 에 저장. 카테고리별 �
 
 - [Qwen3-Omni vLLM 서빙 가이드](https://docs.vllm.ai/projects/vllm-omni/en/latest/user_guide/examples/online_serving/qwen3_omni/) — `vllm serve` 옵션 (`--max-model-len` 등)
 
-**연관 사내 문서 (Notion)**
-
-- [Qwen3-Omni baseline — news (STT 없이, 30fps vs 0.5fps)](https://www.notion.so/368e15b40359811c8282caf32a8f473d) — 벤치마크 결과 페이지
-
-- [Qwen 3.x 설치](https://www.notion.so/365e15b4035980e5a007ee0cc393ef9e) — 서버 환경·설치 절차
-
