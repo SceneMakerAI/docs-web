@@ -22,8 +22,8 @@
   },
   "368e15b4-0359-81cb-9b9b-d555dbfd19e3": {
     "file": "docs/poc/vision-bench/멀티모달-llm-한국-방송-6초-클립-영상-이해-벤치마크.md",
-    "last_edited": "2026-05-27T07:57:00.000Z",
-    "content_hash": "1048b812b473cd1d6444daa354ae4573c8f2bc3911fc0d6c5c98abd8b3fe3836",
+    "last_edited": "2026-05-27T08:06:00.000Z",
+    "content_hash": "df0976b11c8b8ef8ce7f3155210cc44326a3abb81d8daca5b05c369e354eb15b",
     "order": 1,
     "parent_id": "vision-bench"
   },
