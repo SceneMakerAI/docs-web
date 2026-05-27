@@ -1,0 +1,33 @@
+name: Sync main → develop
+
+# 서버 crontab(2분 주기 Notion 동기화)이 main 에 쌓는 콘텐츠
+# (docs/ · docs_en/ · static/img/)를 develop 으로 정기 흡수한다.
+# develop 이 오래된 문서를 들고 있지 않도록 유지하는 역방향 흐름.
+#
+# 충돌이 나면 job 이 실패한다 = 알림. 자동 우회(-X ours/theirs 등)는
+# 쓰지 않는다 — 콘텐츠 손실을 막기 위해 수동 개입을 강제한다.
+on:
+  schedule:
+    - cron: '0 18 * * *'   # 매일 UTC 18:00 = KST 03:00
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout develop (full history)
+        uses: actions/checkout@v4
+        with:
+          ref: develop
+          fetch-depth: 0
+
+      - name: Merge main into develop
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git fetch origin main
+          git merge origin/main --no-edit
+          git push origin develop
