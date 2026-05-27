@@ -84,7 +84,6 @@ predictions/{category}/{원본명}/{clip_id}.json 에 저장. 카테고리별 �
 | 컨텍스트 | 네이티브 32,768 토큰 (실서빙은 16,384 운용 → 3.1 참조) |
 | 한국어 | 텍스트 119개 / 음성입력 19개 / 음성출력 10개 모두 지원 |
 | 라이선스 | Apache 2.0 (상용 가능) |
-| 변형 | -Thinking(CoT) · -Captioner(오디오 캡션) · AWQ 4/8bit 양자화 |
 
 **VRAM / 실서빙 설정 (g7e.4xlarge · 1 GPU)**
 
