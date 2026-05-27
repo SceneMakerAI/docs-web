@@ -5,5 +5,5 @@ sidebar_position: 1
 slug: "1"
 ---
 
-sbin
+sbin 이 2026-05-27 14:19 에 수정
 
