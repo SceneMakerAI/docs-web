@@ -1,8 +1,8 @@
 ---
 id: sbin
 title: "sbin"
-sidebar_position: 2
-slug: "2"
+sidebar_position: 1
+slug: "1"
 ---
 
 sbin 이 2026-05-27 14:19 에 수정
