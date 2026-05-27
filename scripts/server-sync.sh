@@ -16,11 +16,21 @@ LOCKFILE="/tmp/docs-web-sync.lock"
 exec 200>"$LOCKFILE"
 flock -n 200 || { echo "[$(date)] 이미 다른 sync가 실행 중, 스킵"; exit 0; }
 
-# 항상 main에서 실행 보장
-git checkout main --quiet 2>/dev/null || true
+# 진행 중인 rebase 중단 (이전 실행 충돌로 잠긴 경우 해제)
+git rebase --abort 2>/dev/null || true
 
-# 최신 코드 pull
-git pull --rebase origin main --quiet
+# 항상 main에서 실행 보장 (실패 시 즉시 종료)
+if ! git checkout main --quiet 2>/dev/null; then
+  echo "[$(date)] ERROR: main 브랜치 checkout 실패, 스킵"
+  exit 1
+fi
+
+# 최신 코드 pull (실패 시 rebase 중단 후 종료 — 다음 실행에서 재시도 가능)
+if ! git pull --rebase origin main --quiet; then
+  git rebase --abort 2>/dev/null || true
+  echo "[$(date)] ERROR: git pull --rebase 실패, 스킵"
+  exit 1
+fi
 
 # Notion DB 병렬 동기화
 pids=()

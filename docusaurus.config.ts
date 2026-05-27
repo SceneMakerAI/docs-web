@@ -132,18 +132,6 @@ const config: Config = {
         },
         {type: 'docSidebar', sidebarId: 'blogSidebar', position: 'left', label: '블로그'},
         {
-          type: 'docSidebar',
-          sidebarId: 'contributeSidebar',
-          position: 'left',
-          label: '오픈소스 기여',
-        },
-        {
-          type: 'docSidebar',
-          sidebarId: 'releaseNotesSidebar',
-          position: 'left',
-          label: '릴리즈 노트',
-        },
-        {
           type: 'localeDropdown',
           position: 'right',
         },
@@ -167,14 +155,6 @@ const config: Config = {
             {
               label: '아키텍처',
               to: '/docs/architecture',
-            },
-            {
-              label: '오픈소스 기여',
-              to: '/docs/contribute',
-            },
-            {
-              label: '릴리즈 노트',
-              to: '/docs/release-notes',
             },
           ],
         },
