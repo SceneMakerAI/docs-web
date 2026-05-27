@@ -5,12 +5,10 @@ sidebar_position: 2
 slug: "2"
 ---
 
----
-
-### 
-
 > **news 카테고리 100 클립** 을 STT(Speech-to-Text) 컨텍스트 없이 Qwen3-Omni 로 분석한 baseline.
 **30fps (원본) vs 0.5fps (저프레임 변환본)** 두 가지로 측정 — 영상 fps 가 분석 성능에 미치는 영향 비교.
+
+---
 
 #### 1. 실행 환경
 

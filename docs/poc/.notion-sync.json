@@ -29,8 +29,8 @@
   },
   "36de15b4-0359-80e0-a6fb-cfd55a5df8e6": {
     "file": "docs/poc/vision-bench/qwen3-omni-baseline-news-stt-없이-30fps-vs-05fps.md",
-    "last_edited": "2026-05-27T06:45:00.000Z",
-    "content_hash": "ae4db7b2d15e498e0b52861f9db22b9f9c8833393ef9eb94b8153f844f5b0f3b",
+    "last_edited": "2026-05-27T06:46:00.000Z",
+    "content_hash": "243104a2752a2cf9f1563ab52435fbfdfaf2d16110ded9a1d7d6064eaa03d241",
     "order": 2,
     "parent_id": "vision-bench"
   }
