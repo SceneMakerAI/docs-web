@@ -128,6 +128,8 @@ predictions/{category}/{원본명}/{clip_id}.json 에 저장. 카테고리별 �
 
 ### 3.2. 테스트 데이터
 
+테스트에 사용된 원본 데이터는 아래와 같다. 가능한 실제 방송 영상과 비슷한 50분\~2시간 사이로 영상.
+
 | **방송** | **재생시간** | **URL** |
 | --- | --- | --- |
 | KBS 9 뉴스 | 48:30 | [https://www.youtube.com/watch?v=rX1P-jOoNmM](https://www.youtube.com/watch?v=rX1P-jOoNmM) |
@@ -136,7 +138,7 @@ predictions/{category}/{원본명}/{clip_id}.json 에 저장. 카테고리별 �
 | 태조 왕건 | 54:10 | [https://www.youtube.com/watch?v=nmlE2iPWLGM](https://www.youtube.com/watch?v=nmlE2iPWLGM) |
 | 출장십오야 X 스타쉽 전국체전 풀버전 | 1:00:06 | [https://www.youtube.com/watch?v=6wJGpi1nkCg](https://www.youtube.com/watch?v=6wJGpi1nkCg) |
 | 2009 프로야구 한국시리즈 7차전 | 1:55:22 | [https://www.youtube.com/watch?v=fP1QEs1Uj5U](https://www.youtube.com/watch?v=fP1QEs1Uj5U) |
-|  | 2:11:23 | [https://www.youtube.com/watch?v=_A_I75nJMF8](https://www.youtube.com/watch?v=_A_I75nJMF8) |
+| **2024 LCK SUMMER 결승전 GEN vs HLE** | 2:11:23 | [https://www.youtube.com/watch?v=_A_I75nJMF8](https://www.youtube.com/watch?v=_A_I75nJMF8) |
 
 | **카테고리 키** | **장르** | **클립 수** | **비고** |
 | --- | --- | --- | --- |
@@ -148,6 +150,8 @@ predictions/{category}/{원본명}/{clip_id}.json 에 저장. 카테고리별 �
 | `hist_drama` | 사극 | 100 | 시대 의상·소품 + 문어체 대사 |
 | `lol` | e스포츠 | 100 | 게임 UI 오버레이 + 캐스터 + 게임음 |
 | **합계** | — | **700** | 원본 영상 7편 (장르당 1편, 10분 윈도우 100 등분) |
+
+<br />
 
 <br />
 
