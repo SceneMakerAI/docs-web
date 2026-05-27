@@ -11,6 +11,14 @@ set -a
 source .env
 set +a
 
+# 잠금: 동시 실행 방지 (sync-develop.sh 와 충돌 방지)
+LOCKFILE="/tmp/docs-web-sync.lock"
+exec 200>"$LOCKFILE"
+flock -n 200 || { echo "[$(date)] 이미 다른 sync가 실행 중, 스킵"; exit 0; }
+
+# 항상 main에서 실행 보장
+git checkout main --quiet 2>/dev/null || true
+
 # 최신 코드 pull
 git pull --rebase origin main --quiet
 
