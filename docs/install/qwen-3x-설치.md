@@ -345,7 +345,7 @@ installing to /root/.local/bin
   uv
   uvx
 everything's installed!
-> source \~/.bashrc
+> source ~/.bashrc
 > uv --version
 uv 0.11.15 (x86_64-unknown-linux-gnu)
 >
