@@ -54,7 +54,7 @@ SceneMakerAI 기술 문서 사이트의 작업 가이드이자 **문서 인덱�
 - `hotfix/*`는 develop을 거치지 않고 **main에 직접 PR** 후 develop으로 백머지(미완성 기능 동반 배포 방지).
 - 모든 PR은 `pr-build.yml`(빌드)을 통과해야 머지(브랜치 보호 규칙으로 강제).
 
-> **다이어그램·머지 전략·역방향 흡수 등 상세는 [CONTRIBUTING.md §6](./CONTRIBUTING.md#6-브랜치--커밋--pr-룰)**.
+> **다이어그램·머지 전략·역방향 흡수 등 상세는 [CONTRIBUTING.md §7](./CONTRIBUTING.md#7-코드사이트-기여-github-develop-플로우)**.
 
 ---
 

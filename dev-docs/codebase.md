@@ -131,4 +131,4 @@ docs/poc/vision-bench/child.md  (slug: "1")  →  /docs/poc/vision-bench/1
 
 1. `docs/section/filename.md` 생성 (slug, id, sidebar_position, title 포함)
 2. `docs_en/section/filename.md` 생성 (동일 frontmatter + 영어 내용)
-3. `npm run build` 통과 확인 후 `feature/*` 브랜치 → `develop` PR ([CONTRIBUTING.md](../CONTRIBUTING.md) §6 브랜치 전략 참조)
+3. `npm run build` 통과 확인 후 `feature/*` 브랜치 → `develop` PR ([CONTRIBUTING.md](../CONTRIBUTING.md) §7 브랜치 전략 참조)

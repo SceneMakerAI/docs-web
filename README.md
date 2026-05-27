@@ -115,7 +115,7 @@ Notion DB ──(notion_to_docs_generic.py)──▶ docs/ ──(translate_to_e
 - **main** — 배포 + Notion 자동 동기화 (사람이 직접 작업하지 않음)
 - **develop** — 상시 통합 브랜치. `feature/*` → develop → main 순으로 PR하며, `pr-build` 빌드를 통과해야 머지합니다. develop은 로컬 빌드로 검증합니다.
 
-**다이어그램·hotfix 경로·머지 전략 등 상세는 [CONTRIBUTING.md §6](./CONTRIBUTING.md#6-브랜치--커밋--pr-룰)**.
+**다이어그램·hotfix 경로·머지 전략 등 상세는 [CONTRIBUTING.md §7](./CONTRIBUTING.md#7-코드사이트-기여-github-develop-플로우)**.
 
 ---
 
