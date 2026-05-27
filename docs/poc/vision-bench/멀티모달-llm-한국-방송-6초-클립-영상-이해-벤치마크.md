@@ -71,7 +71,7 @@ predictions/{category}/{원본명}/{clip_id}.json 에 저장. 카테고리별 �
 
 - **결론:** 6초 멀티모달 클립의 단일 호출 통합 분석을 위해 `Qwen3-Omni-30B-A3B-Instruct` 채택.
 
-- **이유:** Image / Video / Audio / Text 4 모달리티를 단일 모델로 처리하며 OpenAI 호환 vLLM 서빙이 가능한 거의 유일한 오픈소스 옵션. **Thinker–Talker MoE** 구조 — 추론 코어(Thinker)가 총 30B / 활성 3B, Talker(음성)·오디오/비전 인코더 포함 전체 체크포인트 ≈ **35B** (본 PoC는 텍스트 출력만 사용 → Talker 미사용). 단일 GPU 추론 가능, vLLM guided decoding 으로 JSON Schema 강제 응답이 그대로 받힘.
+- **이유:** Image / Video / Audio / Text 4 모달리티를 단일 모델로 처리하며 OpenAI 호환 vLLM 서빙이 가능한 거의 유일한 오픈소스 옵션. **Thinker–Talker MoE** 구조. 추론 코어(Thinker)가 총 30B / 활성 3B, Talker(음성)·오디오/비전 인코더 포함 전체 체크포인트 ≈ **35B** (본 PoC는 텍스트 출력만 사용 → Talker 미사용).
 
 **모델 스펙**
 
@@ -191,4 +191,34 @@ predictions/{category}/{원본명}/{clip_id}.json 에 저장. 카테고리별 �
 <br />
 
 <br />
+
+---
+
+## 4. 참조 문서
+
+**모델 — Qwen3-Omni**
+
+- [Qwen3-Omni-30B-A3B-Instruct — Hugging Face 모델 카드](https://huggingface.co/Qwen/Qwen3-Omni-30B-A3B-Instruct) — 모달리티·컨텍스트·BF16 VRAM 표·라이선스·한국어 지원
+
+- [Qwen3-Omni Technical Report (arXiv:2509.17765)](https://arxiv.org/abs/2509.17765) — Thinker–Talker MoE 구조, 오디오·AV 36개 중 32개 오픈소스 SOTA
+
+- [QwenLM/Qwen3-Omni — GitHub](https://github.com/QwenLM/Qwen3-Omni) — 사용법, `use_audio_in_video` 영상·오디오 통합
+
+**하드웨어 — AWS g7e**
+
+- [Amazon EC2 G7e 인스턴스 (제품 페이지)](https://aws.amazon.com/ec2/instance-types/g7e/) — RTX PRO 6000 Blackwell, GPU당 96GB
+
+- [G7e 출시 발표 (AWS News Blog)](https://aws.amazon.com/blogs/aws/announcing-amazon-ec2-g7e-instances-accelerated-by-nvidia-rtx-pro-6000-blackwell-server-edition-gpus/) — 2026-01 GA
+
+- [g7e.4xlarge 스펙 — Vantage](https://instances.vantage.sh/aws/ec2/g7e.4xlarge) — 1 GPU / 96 GiB / 16 vCPU / 128 GiB
+
+**서빙 — vLLM**
+
+- [Qwen3-Omni vLLM 서빙 가이드](https://docs.vllm.ai/projects/vllm-omni/en/latest/user_guide/examples/online_serving/qwen3_omni/) — `vllm serve` 옵션 (`--max-model-len` 등)
+
+**연관 사내 문서 (Notion)**
+
+- [Qwen3-Omni baseline — news (STT 없이, 30fps vs 0.5fps)](https://www.notion.so/368e15b40359811c8282caf32a8f473d) — 벤치마크 결과 페이지
+
+- [Qwen 3.x 설치](https://www.notion.so/365e15b4035980e5a007ee0cc393ef9e) — 서버 환경·설치 절차
 
