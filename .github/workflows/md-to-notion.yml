@@ -2,7 +2,7 @@ name: MD to Notion Sync
 
 on:
   push:
-    branches: [main, develop, feat/md-to-notion-clean]
+    branches: [main, develop]
     paths:
       - 'docs/**/*.md'
 
