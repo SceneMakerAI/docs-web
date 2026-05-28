@@ -157,7 +157,7 @@ predictions/{category}/{원본명}/{clip_id}.json 에 저장. 카테고리별 �
 | **지표** | **설명** |
 | --- | --- |
 | 처리 성공률 | ok / fail (HTTP 에러 비율) |
-| 추론 평균 시간 | Qwen 추론 평균 · p95 (ms) |
+| 추론 평균 시간 | Qwen 추론 평균 (ms) |
 | 토큰 평균 사용량 | prompt / completion avg per clip |
 
 **⚠️ 주의:** 점수는 "정답"이 아니라 **기준 모델(Gemini)과의 일치도** . Gemini 자체 오류 가능성은 표본 사람 점검으로 보정.
