@@ -4,15 +4,15 @@
 
 set -e
 
-cd /root/docs-web
+cd /root/docs-web-develop
 
 # 환경 변수 로드
 set -a
-source .env
+. .env
 set +a
 
 # 최신 코드 pull
-git pull --rebase origin main --quiet
+git pull --rebase origin develop --quiet
 
 # Notion DB 병렬 동기화
 pids=()
@@ -65,7 +65,7 @@ git config user.email "sbin@solbox.com"
 git add docs/ docs_en/ static/img/
 if ! git diff --staged --quiet; then
   git commit -m "chore: Notion 동기화 $(date +'%Y-%m-%d %H:%M')"
-  git push origin main
+  git push origin develop
   echo "[$(date)] 동기화 완료 — 변경사항 push됨"
 else
   echo "[$(date)] 동기화 완료 — 변경사항 없음"
