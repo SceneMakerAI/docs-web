@@ -22,16 +22,9 @@
   },
   "368e15b4-0359-81cb-9b9b-d555dbfd19e3": {
     "file": "docs/poc/vision-bench/멀티모달-llm-한국-방송-6초-클립-영상-이해-벤치마크.md",
-    "last_edited": "2026-05-28T00:55:00.000Z",
-    "content_hash": "bbebef1b4aca17b330f7e958a0b18dbdaed3717c49298e5d03229c5702e3e1f9",
+    "last_edited": "2026-05-28T04:26:00.000Z",
+    "content_hash": "a43e533ad3443b8ad20311e0e1557545ae5b8599d4c5678bdb19932c9c86761a",
     "order": 1,
-    "parent_id": "vision-bench"
-  },
-  "36de15b4-0359-80e0-a6fb-cfd55a5df8e6": {
-    "file": "docs/poc/vision-bench/qwen3-omni-baseline-news-stt-없이-30fps-vs-05fps.md",
-    "last_edited": "2026-05-27T06:48:00.000Z",
-    "content_hash": "243104a2752a2cf9f1563ab52435fbfdfaf2d16110ded9a1d7d6064eaa03d241",
-    "order": 2,
     "parent_id": "vision-bench"
   },
   "36de15b4-0359-80e0-a6fb-cfd55a5df8e6": {

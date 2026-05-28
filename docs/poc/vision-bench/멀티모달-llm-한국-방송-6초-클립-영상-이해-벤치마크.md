@@ -182,6 +182,8 @@ predictions/{category}/{원본명}/{clip_id}.json 에 저장. 카테고리별 �
 
 1. **요약·평가** — 저장 결과를 사람이 보기 좋은 표로 정리하고 2.4 기준으로 품질 평가.
 
+<br />
+
 ### 3.1. 테스트 데이터
 
 테스트에 사용된 원본 데이터는 아래와 같다. 가능한 실제 방송 영상과 비슷한 50분\~2시간 사이로 영상.
@@ -196,16 +198,57 @@ predictions/{category}/{원본명}/{clip_id}.json 에 저장. 카테고리별 �
 | 2009 프로야구 한국시리즈 7차전 | 1 :55:22 | [https://www.youtube.com/watch?v=fP1QEs1Uj5U](https://www.youtube.com/watch?v=fP1QEs1Uj5U) |
 | **2024 LCK SUMMER 결승전 GEN vs HLE** | 2 :11:23 | [https://www.youtube.com/watch?v=_A_I75nJMF8](https://www.youtube.com/watch?v=_A_I75nJMF8) |
 
-| **카테고리 키** | **장르** | **클립 수** | **비고** |
-| --- | --- | --- | --- |
-| `news` | 뉴스 | 100 | 자막·앵커 멘트 비중 높음 |
-| `docu` | 다큐 | 100 | 내레이션 + 자연·현장음 혼합 |
-| `baseball` | 야구 중계 | 100 | 캐스터 + 관중 함성 + 전광판 UI |
-| `entertain` | 예능 | 100 | 다인 대화 + 자막 효과 |
-| `drama` | 현대 드라마 | 100 | 인물 대사 + BGM |
-| `hist_drama` | 사극 | 100 | 시대 의상·소품 + 문어체 대사 |
-| `lol` | e스포츠 | 100 | 게임 UI 오버레이 + 캐스터 + 게임음 |
-| **합계** | — | **700** | 원본 영상 7편 (장르당 1편, 10분 윈도우 100 등분) |
+**원본 다운로드 (재현 절차)**
+
+위 표의 원본은 아래 절차로 내려받아 `data/raw/{category}/` 에 보관한다 (내부 재현용).
+
+- **전제** : `uv` (→ `uvx` )·`ffmpeg` 설치 (ffmpeg는 영상+오디오 스트림 병합에 필요)
+
+- **① 원본 다운로드** — 표의 각 URL을 해당 카테고리 폴더로
+
+```bash
+uvx yt-dlp -f "bv*[ext=mp4]+ba[ext=m4a]/b[ext=mp4]/b" \
+--merge-output-format mp4 \
+-o "data/raw/&lt;영상 카테고리&gt;/%(title)s.%(ext)s" "&lt;테스트 대상 URL&gt;"
+```
+
+- `-f "bv*[ext=mp4]+ba[ext=m4a]/…"` : **H.264+AAC mp4 우선** (vLLM/ffmpeg 디코딩 호환). 해당 포맷 없으면 최고품질로 폴백(`/b` )
+
+- `--merge-output-format mp4` : mp4 컨테이너로 병합
+
+- **② 6초 클립 분할** (사전 준비) — `00:10:00~00:20:00` (원본 절대초 600\~1200s) 구간을 6초 100클립으로 분할. 파일명에 원본 절대초 인코딩 → `data/clips/{category}/{원본명}/{seq}_{start}-{end}.mp4`
+
+```bash
+CAT=&lt;카테고리&gt;; NAME=&lt;원본명&gt;
+SRC="data/raw/$CAT/$NAME.mp4"
+OUT="data/clips/$CAT/$NAME"; mkdir -p "$OUT"
+for i in $(seq 0 99); do
+  start=$((600 + i*6)); end=$((start + 6))  # 절대초 600,606,…,1194
+  name=$(printf "%04d_%04d-%04d" $((i+1)) "$start" "$end")  # 0001_0600-0606
+  ffmpeg -nostdin -ss "$start" -i "$SRC" -t 6 -c:v libopenh264 -b:v 1500k -c:a aac -movflags +faststart "$OUT/$name.mp4"
+done
+```
+
+- **인코더** : `libopenh264` (Cisco 무료 H.264, Fedora 기본 포함). `libx264` 빌드면 `-c:v libx264 -crf 20` 으로 동일 결과
+
+- **재인코딩 분할** — 클립마다 독립 키프레임 → 경계 정확·단독 디코딩 가능 (원본은 그대로, 클립만 생성)
+
+- **오디오 포함** (`-c:a aac` ) — vLLM이 mp4 안의 오디오를 함께 디코딩해야 하므로 필수
+
+<br />
+
+**최종 테스트 클립 데이터**
+
+| **카테고리 키** | **장르** | **클립 수** | **해상도** | **fps** | **평균 크기** | **비고** |
+| --- | --- | --- | --- | --- | --- | --- |
+| `news` | 뉴스 | 100 | 1280×720 | 30 | 1.12 MB | 자막·앵커 멘트 비중 높음 |
+| `docu` | 다큐 | 100 | 1280×720 | 30 | 1.18 MB | 내레이션 + 자연·현장음 혼합 |
+| `baseball` | 야구 중계 | 100 | 640×360 | 29.97 | 1.13 MB | 캐스터 + 관중 함성 + 전광판 UI |
+| `entertain` | 예능 | 100 | 1280×720 | 29.97 | 1.14 MB | 다인 대화 + 자막 효과 |
+| `drama` | 현대 드라마 | 100 | 720×480 | 29.97 | 1.08 MB | 인물 대사 + BGM |
+| `hist_drama` | 사극 | 100 | 1280×720 | 29.97 | 1.16 MB | 시대 의상·소품 + 문어체 대사 |
+| `lol` | e스포츠 | 100 | 1280×720 | **60** | 1.16 MB | 게임 UI 오버레이 + 캐스터 + 게임음 |
+| **합계** | — | **700** | — | — | ≈ 1.14 MB | 원본 영상 7편 (장르당 1편, 10분 윈도우 100 등분) |
 
 > 🔒 **데이터 취급 원칙**
 >
@@ -219,11 +262,7 @@ predictions/{category}/{원본명}/{clip_id}.json 에 저장. 카테고리별 �
 
 <br />
 
-<br />
-
-<br />
-
-<br />
+### 3.2. 현
 
 ---
 
