@@ -196,8 +196,6 @@ predictions/{category}/{원본명}/{clip_id}.json 에 저장. 카테고리별 �
 | 2009 프로야구 한국시리즈 7차전 | 1 :55:22 | [https://www.youtube.com/watch?v=fP1QEs1Uj5U](https://www.youtube.com/watch?v=fP1QEs1Uj5U) |
 | **2024 LCK SUMMER 결승전 GEN vs HLE** | 2 :11:23 | [https://www.youtube.com/watch?v=_A_I75nJMF8](https://www.youtube.com/watch?v=_A_I75nJMF8) |
 
-<br />
-
 | **카테고리 키** | **장르** | **클립 수** | **비고** |
 | --- | --- | --- | --- |
 | `news` | 뉴스 | 100 | 자막·앵커 멘트 비중 높음 |
