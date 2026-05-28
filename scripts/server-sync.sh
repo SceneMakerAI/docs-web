@@ -78,11 +78,10 @@ done
 python3 scripts/translate_to_en.py
 
 # 변경사항 커밋 & 푸시 (KR + EN 동시)
-git config user.name "server-cron"
-git config user.email "sbin@solbox.com"
 git add docs/ docs_en/ static/img/
 if ! git diff --staged --quiet; then
-  git commit -m "chore: Notion 동기화 $(date +'%Y-%m-%d %H:%M')"
+  git -c user.name="server-cron" -c user.email="sbin@solbox.com" \
+    commit -m "chore: Notion 동기화 $(date +'%Y-%m-%d %H:%M')"
   git push origin main
   echo "[$(date)] 동기화 완료 — 변경사항 push됨"
 else
