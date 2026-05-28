@@ -1,6 +1,6 @@
 ---
 title: "Audio-bench"
-sidebar_position: 2
-slug: "2"
+sidebar_position: 1
+slug: "1"
 ---
 

@@ -49,49 +49,49 @@ jobs:
 
           if [ -n "$_BLOG_DB" ]; then
             NOTION_DATABASE_ID="$_BLOG_DB" SAVE_DIR=docs/blog FETCH_MODE=ALL \
-              python scripts/notion_to_docs_generic.py &
+              python scripts/notion_to_md.py &
             pids+=($!)
           fi
 
           if [ -n "$_CONTRIBUTE_DB" ]; then
             NOTION_DATABASE_ID="$_CONTRIBUTE_DB" SAVE_DIR=docs/contribute FETCH_MODE=ALL \
-              python scripts/notion_to_docs_generic.py &
+              python scripts/notion_to_md.py &
             pids+=($!)
           fi
 
           if [ -n "$_ABOUT_DB" ]; then
             NOTION_DATABASE_ID="$_ABOUT_DB" SAVE_DIR=docs/about FETCH_MODE=ALL \
-              python scripts/notion_to_docs_generic.py &
+              python scripts/notion_to_md.py &
             pids+=($!)
           fi
 
           if [ -n "$_ARCHITECTURE_DB" ]; then
             NOTION_DATABASE_ID="$_ARCHITECTURE_DB" SAVE_DIR=docs/architecture FETCH_MODE=ALL \
-              python scripts/notion_to_docs_generic.py &
+              python scripts/notion_to_md.py &
             pids+=($!)
           fi
 
           if [ -n "$_POC_DB" ]; then
             NOTION_DATABASE_ID="$_POC_DB" SAVE_DIR=docs/poc FETCH_MODE=ALL \
-              python scripts/notion_to_docs_generic.py &
+              python scripts/notion_to_md.py &
             pids+=($!)
           fi
 
           if [ -n "$_DOCS_DB" ]; then
             NOTION_DATABASE_ID="$_DOCS_DB" SAVE_DIR=docs/guide FETCH_MODE=ALL \
-              python scripts/notion_to_docs_generic.py &
+              python scripts/notion_to_md.py &
             pids+=($!)
           fi
 
           if [ -n "$_RELEASE_DB" ]; then
             NOTION_DATABASE_ID="$_RELEASE_DB" SAVE_DIR=docs/release-notes FETCH_MODE=ALL \
-              python scripts/notion_to_docs_generic.py &
+              python scripts/notion_to_md.py &
             pids+=($!)
           fi
 
           if [ -n "$_INSTALL_DB" ]; then
             NOTION_DATABASE_ID="$_INSTALL_DB" SAVE_DIR=docs/install FETCH_MODE=ALL \
-              python scripts/notion_to_docs_generic.py &
+              python scripts/notion_to_md.py &
             pids+=($!)
           fi
 
