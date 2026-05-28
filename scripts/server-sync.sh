@@ -4,7 +4,7 @@
 
 set -e
 
-cd /root/docs-web-develop
+cd /root/docs-web
 
 # 환경 변수 로드
 set -a
@@ -83,7 +83,7 @@ git config user.email "sbin@solbox.com"
 git add docs/ docs_en/ static/img/
 if ! git diff --staged --quiet; then
   git commit -m "chore: Notion 동기화 $(date +'%Y-%m-%d %H:%M')"
-  git push origin develop
+  git push origin main
   echo "[$(date)] 동기화 완료 — 변경사항 push됨"
 else
   echo "[$(date)] 동기화 완료 — 변경사항 없음"
