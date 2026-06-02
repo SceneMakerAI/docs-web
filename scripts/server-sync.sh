@@ -44,7 +44,7 @@ pids=()
   python3 scripts/notion_to_md.py & pids+=($!)
 
 [ -n "$NOTION_BLOG" ] && \
-  NOTION_DATABASE_ID="$NOTION_BLOG" SAVE_DIR=docs/blog FETCH_MODE=ALL \
+  NOTION_DATABASE_ID="$NOTION_BLOG" SAVE_DIR=blog FETCH_MODE=ALL \
   python3 scripts/notion_to_md.py & pids+=($!)
 
 [ -n "$NOTION_CONTRIBUTE" ] && \
@@ -78,7 +78,7 @@ done
 python3 scripts/translate_to_en.py
 
 # 변경사항 커밋 & 푸시 (KR + EN 동시)
-git add docs/ docs_en/ static/img/
+git add docs/ docs_en/ blog/ static/img/
 if ! git diff --staged --quiet; then
   git -c user.name="server-cron" -c user.email="sbin@solbox.com" \
     commit -m "chore: Notion 동기화 $(date +'%Y-%m-%d %H:%M')"
