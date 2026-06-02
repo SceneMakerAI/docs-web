@@ -229,13 +229,17 @@ NOTION_TOKEN=... NOTION_DATABASE_ID=... SAVE_DIR=docs/guide python3 scripts/noti
 
 ```
 # 기능 변경 시
-git checkout develop        # 없으면 git checkout -b develop
+git checkout develop               # 없으면 git checkout -b develop
+git rebase origin/main             # 작업 전 반드시 main 최신 상태 반영
 # ... 작업 ...
 git push origin develop
 git checkout main
+git pull --rebase origin main      # merge 전 main 최신화
 git merge develop
 git push origin main
 ```
+
+> Notion 자동 동기화가 `main`에 직접 커밋하므로, `develop` 작업 시작 전 `rebase origin/main`을 생략하면 merge conflict가 발생한다.
 
 ---
 
