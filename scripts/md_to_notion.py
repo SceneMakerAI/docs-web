@@ -423,6 +423,13 @@ def process_section(section_dir: str):
         if not page_id:
             log(f"  [삭제] {filepath} → sync_map 미등록, 스킵")
             continue
+        # index.md가 삭제됐어도 해당 디렉토리가 여전히 존재하면 Notion 카테고리 페이지를 보존
+        # (슬러그 수정 등 로컬 구조 변경이 원인인 경우 Notion 페이지를 실수로 archive하는 것을 방지)
+        if Path(filepath).name == "index.md" and (REPO_DIR / Path(filepath).parent).is_dir():
+            log(f"  [삭제] {filepath} → 카테고리 디렉토리 존재, Notion 페이지 보존")
+            del sync_map[page_id]
+            sync_dirty = True
+            continue
         log(f"  [삭제] {filepath} → 아카이브 중...")
         archive_page(page_id)
         del sync_map[page_id]
