@@ -104,3 +104,8 @@ static/img/og-candidates/
 __pycache__/
 .notion-translate-ref
 .notion-translate-hashes.json
+
+# ──────────────────────────────────────────────────────────
+# 구 blog sync 경로 (blog/ 으로 이전됨)
+# ──────────────────────────────────────────────────────────
+docs/blog/

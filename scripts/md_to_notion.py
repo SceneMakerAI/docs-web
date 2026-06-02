@@ -43,7 +43,6 @@ HEADERS = {
 SECTION_DIRS = [
     "docs/about",
     "docs/architecture",
-    "docs/blog",
     "docs/contribute",
     "docs/guide",
     "docs/install",
@@ -54,7 +53,6 @@ SECTION_DIRS = [
 SECTION_DB_MAP = {
     "docs/about":         os.environ.get("NOTION_ABOUT", ""),
     "docs/architecture":  os.environ.get("NOTION_ARCHITECTURE", ""),
-    "docs/blog":          os.environ.get("NOTION_BLOG", ""),
     "docs/contribute":    os.environ.get("NOTION_CONTRIBUTE", ""),
     "docs/guide":         os.environ.get("NOTION_DOCS", ""),
     "docs/install":       os.environ.get("NOTION_INSTALL", ""),
