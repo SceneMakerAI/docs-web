@@ -1,18 +1,4 @@
 {
-  "365e15b4-0359-804b-87c8-f1acee149564": {
-    "file": "docs/poc/vision-bench/index.md",
-    "last_edited": "2026-06-02T07:08:00.000Z",
-    "content_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-    "order": 3,
-    "parent_id": null
-  },
-  "365e15b4-0359-80d4-8f38-d8a5c80ae5d0": {
-    "file": "docs/poc/audio-bench/index.md",
-    "last_edited": "2026-06-02T07:08:00.000Z",
-    "content_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-    "order": 1,
-    "parent_id": null
-  },
   "367e15b4-0359-80c9-885a-ea288010356f": {
     "file": "docs/poc/poc-기획안-초고속초고품질-다국어-ai-자막-생성-시스템-구축.md",
     "last_edited": "2026-05-28T10:32:00.000Z",
