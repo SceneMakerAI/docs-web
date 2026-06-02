@@ -14,7 +14,7 @@ SceneMakerAI 기술 문서 사이트의 작업 가이드. 코드 개발 저장�
 - 기술 스택: **Docusaurus 3.10.1** (React 19, TypeScript 6)
 - 기본 언어: 한국어(KR), 번역: 영어(EN)
 - 콘텐츠 원본: **Notion DB** → GitHub Actions로 자동 동기화
-
+- 참고 문서: https://docusaurus.io/ko/docs
 ---
 
 ## 디렉토리 구조
@@ -134,10 +134,10 @@ docs/poc/vision-bench/child.md  (slug: "1")  →  /docs/poc/vision-bench/1
 
 ### 실제 운영 방식 — 서버 crontab
 
-GitHub Actions가 아닌 **서버에서 직접 crontab으로 2분마다** 실행한다.
+GitHub Actions가 아닌 **서버에서 직접 crontab으로 30분마다** 실행한다.
 
 ```
-*/2 * * * * /root/docs-web/scripts/server-sync.sh >> /var/log/notion-sync.log 2>&1
+*/30 * * * * /root/docs-web/scripts/server-sync.sh >> /var/log/notion-sync.log 2>&1
 ```
 
 **`scripts/server-sync.sh` 흐름:**
