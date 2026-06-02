@@ -36,9 +36,16 @@
   },
   "36ee15b4-0359-80b6-97c6-f628f0347d36": {
     "file": "docs/poc/audio-bench/한국어-콘텐츠-lid-정확도-비교-whisper-vs-voxlingua107.md",
-    "last_edited": "2026-06-02T04:29:00.000Z",
-    "content_hash": "e3da63da676810ef5434a89ae21d77fa2ee19347540b293a2edadb056a708c77",
+    "last_edited": "2026-06-02T04:41:00.000Z",
+    "content_hash": "de8172d1e5d5cb20536649d3d498578a789c0af453a121d4782535545b6825d5",
     "order": 1,
     "parent_id": "audio-bench"
+  },
+  "373e15b4-0359-8150-88f3-eedc5ebd727b": {
+    "file": "docs/poc/vision-bench/추론-파라미터-튜닝-qwen3-omni-6초-클립-분석-ofat-스윕.md",
+    "last_edited": "2026-06-02T04:56:00.000Z",
+    "content_hash": "91ac91dadb1b140b5c0670b29a25d89fc584f43667bb1557fc5617e153db0c2e",
+    "order": 3,
+    "parent_id": "vision-bench"
   }
 }

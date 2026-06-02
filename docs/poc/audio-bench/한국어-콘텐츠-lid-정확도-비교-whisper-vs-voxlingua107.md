@@ -33,6 +33,16 @@ POC 검증 도구이므로 단순함을 우선했고, 비교 결과의 신뢰성
 
 - **LID 단계만** — diarize / ASR 호출 없음. 단일 GPU(cuda:0), 단일 audio 순차 처리.
 
+### 1.4 처리 흐름
+
+```javascript
+[Denoise 적용시]
+audio → VAD → 각 발화 구간 → denoise → [Whisper | VoxLingua] → LID
+
+[Denoise 미 적용시]
+audio → VAD → 각 발화 구간 → [Whisper | VoxLingua] → LID
+```
+
 <br />
 
 ---
