@@ -1,0 +1,68 @@
+name: develop → main 자동 머지
+
+# docs/ docs_en/ static/img/ 제외한 코드 변경이 develop에 있을 때만
+# npm run build 통과 후 main으로 머지한다.
+
+on:
+  schedule:
+    - cron: '0 2 * * *'   # 매일 UTC 02:00 = KST 11:00
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  merge:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout develop
+        uses: actions/checkout@v4
+        with:
+          ref: develop
+          fetch-depth: 0
+
+      - name: 코드 변경 감지 (docs/ 제외)
+        id: diff
+        run: |
+          git fetch origin main
+          DIFF=$(git diff origin/main..HEAD -- . \
+            ':(exclude)docs/' \
+            ':(exclude)docs_en/' \
+            ':(exclude)static/img/')
+          if [ -z "$DIFF" ]; then
+            echo "has_changes=false" >> $GITHUB_OUTPUT
+            echo "변경 없음 — 머지 스킵"
+          else
+            echo "has_changes=true" >> $GITHUB_OUTPUT
+            echo "코드 변경 감지 — 빌드 후 머지 진행"
+          fi
+
+      - name: Setup Node.js
+        if: steps.diff.outputs.has_changes == 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      - name: Install dependencies
+        if: steps.diff.outputs.has_changes == 'true'
+        run: npm ci
+
+      - name: Checkout docs/ from main (빌드용 콘텐츠)
+        if: steps.diff.outputs.has_changes == 'true'
+        run: git checkout origin/main -- docs/ docs_en/ static/img/
+
+      - name: Build gate
+        if: steps.diff.outputs.has_changes == 'true'
+        run: npm run build
+
+      - name: develop → main 머지
+        if: steps.diff.outputs.has_changes == 'true'
+        run: |
+          git stash
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git checkout main
+          git pull origin main
+          git merge develop --no-edit
+          git push origin main
