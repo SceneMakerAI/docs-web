@@ -23,6 +23,13 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Checkout docs/ from main (콘텐츠는 main에서 관리됨)
+        run: |
+          git fetch origin main
+          git checkout origin/main -- docs/ docs_en/ static/img/
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
