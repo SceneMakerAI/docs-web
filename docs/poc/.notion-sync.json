@@ -33,5 +33,23 @@
     "content_hash": "f73225ab94ca29de89bbd5751eff61d417f3760d0d0283fb6755efa636750d55",
     "order": 3,
     "parent_id": "vision-bench"
+  },
+  "373e15b4-0359-8145-8bdb-d21f01dc3619": {
+    "file": "docs/poc/audio-bench/한국어-콘텐츠-lid-정확도-비교-whisper-vs-voxlingua107.md",
+    "last_edited": "2026-06-02T07:52:00.000Z",
+    "order": 1,
+    "parent_id": null
+  },
+  "373e15b4-0359-8135-8c6a-eb85f0c2c6bd": {
+    "file": "docs/poc/vision-bench/1편-멀티모달-llm-한국-방송-6초-클립-영상-이해-벤치마크-파이프라인-구축.md",
+    "last_edited": "2026-06-02T07:52:00.000Z",
+    "order": 1,
+    "parent_id": null
+  },
+  "373e15b4-0359-8125-a0fa-ee77d53f4cc8": {
+    "file": "docs/poc/vision-bench/추론-파라미터-튜닝-qwen3-omni-6초-클립-분석-ofat-스윕.md",
+    "last_edited": "2026-06-02T07:52:00.000Z",
+    "order": 3,
+    "parent_id": null
   }
 }
