@@ -219,47 +219,34 @@ poc-lid-bench/
 
 ## 4. 결과
 
-### 4.1 일치율
+### 4.1 정확도
+
+모든 발화 구간의 언어를 구분하여 가장 정확하게 언어를 구분한 것들에 대한 결과는 아래 URL 에서 자세히 나와 있다.
+
+[https://docs.google.com/spreadsheets/d/1zARHI1l5UfJ_pU1VY61xOOtvmteHLZ-QPHjSbRIoZpI/edit?gid=759070170#gid=759070170](https://docs.google.com/spreadsheets/d/1zARHI1l5UfJ_pU1VY61xOOtvmteHLZ-QPHjSbRIoZpI/edit?gid=759070170#gid=759070170)
 
 <br />
 
-<br />
+간단하게 최종 결과를 이야기 하면
 
-### 4.2 처리 시간
+|  | Total | whisper_raw | voxlingua_raw | whisper_denoise | voxlingua_denoise |
+| --- | --- | --- | --- | --- | --- |
+| baseball.wav | 1092 | 1073 | 1026 | 1072 | 1020 |
+| docu.wav | 383 | 349 | 330 | 349 | 332 |
+| drama.wav | 314 | 282 | 256 | 279 | 251 |
+| entertain.wav | 502 | 464 | 398 | 438 | 366 |
+| hist_drama.wav | 437 | 411 | 382 | 386 | 363 |
+| news.wav | 387 | 385 | 377 | 384 | 379 |
+| Correct | 3115 | 2964 | 2769 | 2908 | 2711 |
+| Accuracy rate | 100 | **95.2** | 88.9 | 93.4 | 87.0 |
 
-<br />
+- 정확도는 (가장정확) Whisper raw > Whisper denoise > voxlingua raw > voxlingua denoise (가장 부정확) 순서로 나온다.
 
-<br />
-
-<br />
-
-### 4.3 콘텐츠 유형별 차이
-
-<br />
-
-<br />
-
-<br />
-
-### 4.4 불일치 케이스
+- **(중요) denoise 를 한다고 해서 언어 구분에서는 좋와 지는 것이 없다.**
 
 <br />
 
-<br />
-
-<br />
-
-<br />
-
-## 5. 결과
-
-### 5.1 정확도
-
-<br />
-
-<br />
-
-### 5.2 비용 (처리시간)
+### 4.2 비용 (처리시간)
 
 | file | duration | model | vad | denoise | lid | total | total_hour | 차이 |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -288,47 +275,9 @@ poc-lid-bench/
 |  |  | whisper | 7.81 | 8.13 | 20.84 | 36.77 | 45.48 |  |
 |  |  | voxlingua | 7.81 | 8.13 | 2.03 | 17.96 | 22.22 | 2.0 |
 
-- **voxlingua 을 사용할 경우 Whisper 로 언어 구분을 할 경우보다 약 2배 이상 빠르다.**
+- **처리속도 순위: (가장빠름) voxlingua raw > voxlingua denoise > Whisper raw > Whisper denoise (가장느림)**
 
 <br />
-
-### 5.3 denoise 가 LID 에 미치는 영향
-
-<br />
-
-<br />
-
-<br />
-
-<br />
-
-## 6. 결론 & 권장
-
-### 6.1 권장 LID 모델
-
-<br />
-
-<br />
-
-<br />
-
-### 6.2 denoise 적용 여부
-
-<br />
-
-<br />
-
-<br />
-
-### 6.3 ensemble (cross-check) 가능성
-
-<br />
-
-<br />
-
-<br />
-
-### 7. 후속 작업
 
 <br />
 
