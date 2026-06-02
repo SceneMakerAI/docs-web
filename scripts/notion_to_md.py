@@ -178,10 +178,9 @@ def read_relation(props, prop_name):
 
 
 def generate_category_json(dir_path, label, position):
-    slug = os.path.basename(dir_path)
-    link_id = f"{_last_seg}/{slug}/index"  # id 없는 index.md → 파일경로 기반 ID
+    # generated-index: slug "/" 절대경로 충돌(/docs/) 없이 자동 카테고리 인덱스 생성
     data = {"label": label, "position": position,
-            "link": {"type": "doc", "id": link_id}}
+            "link": {"type": "generated-index"}}
     os.makedirs(dir_path, exist_ok=True)
     with open(f"{dir_path}/_category_.json", "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
@@ -470,7 +469,7 @@ def save_doc_page(page, position, existing_map, parent_slug=None, is_parent=Fals
 
     if is_parent:
         new_filename = f"{SAVE_DIR}/{slug}/index.md"
-        url_slug = "/"
+        url_slug = slug  # "/"는 절대경로(/docs/)로 해석됨 → 디렉토리명 사용
     elif parent_slug:
         new_filename = f"{SAVE_DIR}/{parent_slug}/{slug}.md"
         url_slug = str(order)

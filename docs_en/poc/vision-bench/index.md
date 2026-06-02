@@ -1,6 +1,6 @@
 ---
 title: "Vision-bench"
 sidebar_position: 3
-slug: "/"
+slug: "vision-bench"
 ---
 

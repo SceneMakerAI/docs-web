@@ -2,7 +2,6 @@
   "label": "Vision-bench",
   "position": 3,
   "link": {
-    "type": "doc",
-    "id": "poc/vision-bench/index"
+    "type": "generated-index"
   }
 }

@@ -118,11 +118,14 @@ docs/install/llm-설치.md           (slug: "2")  →  /docs/install/2
 **계층 구조 페이지 (Notion 하위 항목이 있는 경우):**
 
 ```
-docs/poc/vision-bench/index.md  (slug: "/")  →  /docs/poc/vision-bench/
-docs/poc/vision-bench/child.md  (slug: "1")  →  /docs/poc/vision-bench/1
+docs/poc/vision-bench/index.md  (slug: "vision-bench")  →  /docs/poc/vision-bench
+docs/poc/vision-bench/child.md  (slug: "1")              →  /docs/poc/vision-bench/1
 ```
 
-- 부모 `index.md`는 `slug: "/"` (디렉토리 루트 URL), `id:` 필드 없음
+- 부모 `index.md`는 `slug: "{디렉토리명}"` (예: `"vision-bench"`), `id:` 필드 없음
+  - ⚠️ `slug: "/"` 사용 금지 — Docusaurus에서 절대경로(`/docs/`)로 해석되어 Duplicate routes 발생
+- `_category_.json`은 `"type": "generated-index"` 사용 (카테고리 인덱스 자동 생성)
+  - ⚠️ `"type": "doc"` + `"id": "..."` 조합은 slug 충돌 시 잘못된 URL로 이동
 - 자식 파일은 `slug: "{child-order}"` (부모 디렉토리 기준 상대 슬러그)
 - **slug는 섹션 내 상대경로**. `"architecture/1"` 같은 전체 경로 쓰면 안 된다.
 - 새 파일은 섹션 내에서 `sidebar_position` 순서에 맞춰 다음 번호를 부여한다.
