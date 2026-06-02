@@ -1,6 +1,0 @@
----
-title: "Vision-bench"
-sidebar_position: 3
-slug: "vision-bench"
----
-

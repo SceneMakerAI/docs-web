@@ -512,6 +512,11 @@ def save_doc_page(page, position, existing_map, parent_slug=None, is_parent=Fals
             cat_path = f"{SAVE_DIR}/{slug}/_category_.json"
             if not os.path.exists(cat_path):
                 generate_category_json(f"{SAVE_DIR}/{slug}", title, order)
+            # 빈 body index.md 삭제 (skip 경로에서도 정리)
+            _m = re.match(r'^---\n.*?\n---\n*$', open(new_filename, encoding='utf-8').read().strip(), re.DOTALL)
+            if _m:
+                os.remove(new_filename)
+                log(f"빈 부모 index.md 삭제 (스킵): {new_filename}")
         return title, new_filename, last_edited, stored_hash, order
 
     if old_filename and old_filename != new_filename:
