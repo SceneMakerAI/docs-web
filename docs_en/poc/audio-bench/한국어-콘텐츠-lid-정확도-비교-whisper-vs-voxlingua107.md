@@ -88,13 +88,7 @@ We record only the pure processing time per audio sample at each stage, excludin
 | `voxlingua_lid` | Sum of VoxLingua107 calls for all segments (raw+denoise) |
 | `total` | From entry into `run()` to completion |
 
-Output: `output/<stem>
-
-.csv`</stem>
-
-per segment<stem>
-
-+ `output/timings.csv` per file.
+Output: `output/<stem>.csv` per segment + `output/timings.csv` per file.
 
 ### 2.4 Dataset
 
@@ -149,7 +143,9 @@ poc-lid-bench/
     │   └── <stem>.wav        # denoise 결과 (48kHz int16) — 입력 wav 1개당 1개
     ├── <stem>.csv            # per-segment LID 결과 — 입력 wav 1개당 1개
     └── timings.csv           # 모든 입력 파일의 단계별 처리 시간 통합 1개
-```#### Notes on External Environment (for Git users)
+```
+
+#### Notes on External Environment (for Git users)
 
 - **Data Path** — `test_files` in `main.py` is hardcoded to an internal path
 (`/stg/vod/scenemaker/sound_full/*.wav`). When using externally, replace it with the WAV file path in your own environment.
@@ -341,5 +337,5 @@ Cross-Check)### 7. Future Work
 
 <br />
 
-<br /></stem>
+<br />
 
