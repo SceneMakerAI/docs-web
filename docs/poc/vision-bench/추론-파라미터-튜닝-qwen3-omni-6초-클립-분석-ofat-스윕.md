@@ -50,6 +50,17 @@ SceneMaker 의 6초 클립 분석은 영상·오디오·대사를 한 번에 보
 | `chat_template_kwargs.enable_thinking` | 사고(thinking) 토큰 생성 on/off | `true` / `false` | 고정 off |
 | `seed` | 재현성 (고정 시 동일 입력→동일 출력) | 정수 · `&lt;0` =비활성(매번 무작위) | 고정 -1 |
 
+### 2.3. 출력 스키마 / 환각 가드
+
+본 스윈은 아래 출력 계약을 **변경 없이 고정** 한 채 파라미터만 흔든다(프롬프트도 동일). 응답은 **정확히** `{summary, objects, actions, audio}` **4 필드** 로 고정한다 — vLLM `response_format=json_schema(strict=True)` + pydantic `extra="forbid"` 이중 강제라 후처리(파싱·정제·필드 추가/삭제) 코드 없이 그대로 저장·소비할 수 있다. `from_video` 검증에서 발견한 두 결함(summary 가 vision 텍스트를 그대로 복사 / audio 필드에 프롬프트 규칙 텍스트 혼입)은 필드별 가이드로 반영했다.
+
+| **필드** | **정의 및 가이드** |
+| --- | --- |
+| `summary` (string) | 시각 + 음향 정보를 합쳐 한국어 문장으로 요약. vision/audio 의 표현을 그대로 복사 금지. |
+| `objects` (array of string) | 영상에 등장하는 객체·인물·자막·로고 등 명사 키워드 (중복 없이, 각 항목 3 어절 이내). |
+| `actions` (array of string) | 영상에서 일어나는 행동·움직임·장면 전환 동사구 (중복 없이). |
+| `audio` (array of string) | 시각과 별개로 명확히 들리는 대사·효과음·배경음만 (각 독립 문자열 요소). 형식 `(대사)~` / `(효과음)~` / `(배경음)~` . |
+
 ## 3. 방법론
 
 ### 3.1. 표본과 설계

@@ -5,5 +5,12 @@
     "content_hash": "7c811edcdff1927ac5ed0cd27d9548bf26cd84a83d0da0347b76a20c6c216f06",
     "order": 1,
     "parent_id": null
+  },
+  "373e15b4-0359-8196-ad2e-f24bf86fb0b2": {
+    "file": "docs/release-notes/릴리즈-노트.md",
+    "last_edited": "2026-06-02T07:52:00.000Z",
+    "content_hash": "7c811edcdff1927ac5ed0cd27d9548bf26cd84a83d0da0347b76a20c6c216f06",
+    "order": 2,
+    "parent_id": null
   }
 }

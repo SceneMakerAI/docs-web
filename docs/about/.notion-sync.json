@@ -5,5 +5,12 @@
     "content_hash": "c2df13521a545070ef0dc9593f6666e3978498871e4322c14e6c8054c3f1fe96",
     "order": 1,
     "parent_id": null
+  },
+  "373e15b4-0359-8177-abf4-e85b6ac47f7c": {
+    "file": "docs/about/scenemakerai-소개.md",
+    "last_edited": "2026-06-02T07:49:00.000Z",
+    "content_hash": "c2df13521a545070ef0dc9593f6666e3978498871e4322c14e6c8054c3f1fe96",
+    "order": 2,
+    "parent_id": null
   }
 }
