@@ -222,6 +222,23 @@ NOTION_TOKEN=... NOTION_DATABASE_ID=... SAVE_DIR=docs/guide python3 scripts/noti
 
 ---
 
+## 브랜치 전략
+
+- **콘텐츠 변경** (Markdown 추가·수정, EN 번역): `main` 직접 커밋 허용 (Notion 자동 동기화 포함)
+- **기능 변경** (스크립트, 설정, 컴포넌트, 워크플로우 등 코드 수정): `develop` 브랜치에서 작업 후 `main`에 merge
+
+```
+# 기능 변경 시
+git checkout develop        # 없으면 git checkout -b develop
+# ... 작업 ...
+git push origin develop
+git checkout main
+git merge develop
+git push origin main
+```
+
+---
+
 ## 콘텐츠 추가 워크플로우
 
 ### 새 Notion 섹션 추가 시
