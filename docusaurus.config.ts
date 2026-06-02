@@ -131,6 +131,8 @@ const config: Config = {
           label: '문서',
         },
         {type: 'docSidebar', sidebarId: 'blogSidebar', position: 'left', label: '블로그'},
+        {type: 'docSidebar', sidebarId: 'contributeSidebar', position: 'left', label: '오픈소스 기여'},
+        {type: 'docSidebar', sidebarId: 'releaseNotesSidebar', position: 'left', label: '릴리즈 노트'},
         {
           type: 'localeDropdown',
           position: 'right',

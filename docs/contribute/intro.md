@@ -1,0 +1,9 @@
+---
+title: "오픈소스 기여"
+sidebar_position: 1
+slug: "intro"
+---
+
+SceneMakerAI 오픈소스 기여 가이드입니다.
+
+자세한 내용은 준비 중입니다.

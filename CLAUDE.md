@@ -235,6 +235,19 @@ NOTION_TOKEN=... NOTION_DATABASE_ID=... SAVE_DIR=docs/guide python3 scripts/noti
 2. `docs_en/section/filename.md` 생성 (동일 frontmatter + 영어 내용)
 3. `npm run build` 통과 확인 후 main에 push
 
+### 빈 섹션 navbar 등록 시 주의
+
+`type: 'docSidebar'` navbar 항목은 해당 섹션에 `.md` 파일이 하나 이상 있어야 빌드 통과.
+Notion 콘텐츠가 아직 없는 섹션을 navbar에 추가할 때는 반드시 플레이스홀더 파일을 먼저 생성할 것.
+
+```
+docs/{section}/intro.md        ← KR 플레이스홀더 (Notion sync가 삭제하지 않음)
+docs_en/{section}/intro.md     ← EN 플레이스홀더
+```
+
+플레이스홀더 frontmatter: `slug: "intro"`, `sidebar_position: 1` 사용.
+Notion에 실제 콘텐츠가 추가되면 자동 동기화되어 함께 표시된다.
+
 ---
 
 ## 사이드바 목록
