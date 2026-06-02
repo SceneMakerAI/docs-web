@@ -543,12 +543,18 @@ def save_doc_page(page, position, existing_map, parent_slug=None, is_parent=Fals
             f"---\n\n"
         )
 
+    if is_parent:
+        generate_category_json(f"{SAVE_DIR}/{slug}", title, order)
+        if not body.strip():
+            # body 없음 → index.md 불필요, 기존 파일 있으면 삭제
+            if os.path.exists(new_filename):
+                os.remove(new_filename)
+                log(f"빈 부모 index.md 삭제: {new_filename}")
+            return title, new_filename, last_edited, content_hash, order
+
     os.makedirs(os.path.dirname(new_filename) if os.path.dirname(new_filename) else SAVE_DIR, exist_ok=True)
     with open(new_filename, "w", encoding="utf-8") as f:
         f.write(frontmatter + body)
-
-    if is_parent:
-        generate_category_json(f"{SAVE_DIR}/{slug}", title, order)
 
     return title, new_filename, last_edited, content_hash, order
 
