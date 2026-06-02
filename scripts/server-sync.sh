@@ -1,6 +1,6 @@
 #!/bin/bash
 # Notion → docs/ 동기화 + DeepL EN 번역 → git push
-# 서버 crontab에서 2분마다 실행
+# 서버 crontab에서 30분마다 실행
 
 set -e
 

@@ -12,7 +12,9 @@ permissions:
 jobs:
   sync:
     runs-on: ubuntu-latest
-    if: github.event.head_commit.author.name != 'server-cron'
+    if: |
+      github.event.head_commit.author.name != 'server-cron' &&
+      !contains(github.event.head_commit.message, '[skip-notion]')
     env:
       NOTION_TOKEN:        ${{ secrets.NOTION_TOKEN }}
       NOTION_ABOUT:        ${{ secrets.NOTION_ABOUT }}
