@@ -21,7 +21,7 @@
     "parent_id": null
   },
   "368e15b4-0359-81cb-9b9b-d555dbfd19e3": {
-    "file": "docs/poc/vision-bench/멀티모달-llm-한국-방송-6초-클립-영상-이해-벤치마크.md",
+    "file": "docs/poc/vision-bench/1편-멀티모달-llm-한국-방송-6초-클립-영상-이해-벤치마크-파이프라인-구축.md",
     "last_edited": "2026-06-02T02:11:00.000Z",
     "content_hash": "358331bf551daed14c34a814c36d9b8d2bf3420d70eb93fae3e57f13275cec6d",
     "order": 1,
