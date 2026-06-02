@@ -7,23 +7,23 @@
     "parent_id": null
   },
   "365e15b4-0359-80d4-8f38-d8a5c80ae5d0": {
-    "file": "docs/poc/audio-bench.md",
-    "last_edited": "2026-05-27T05:07:00.000Z",
+    "file": "docs/poc/audio-bench/index.md",
+    "last_edited": "2026-05-28T10:03:00.000Z",
     "content_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "order": 1,
     "parent_id": null
   },
   "367e15b4-0359-80c9-885a-ea288010356f": {
     "file": "docs/poc/poc-기획안-초고속초고품질-다국어-ai-자막-생성-시스템-구축.md",
-    "last_edited": "2026-05-28T05:51:00.000Z",
+    "last_edited": "2026-05-28T10:32:00.000Z",
     "content_hash": "f81b6f8074ce1f3ab0769f900c4ac48740b1c5cafd6b84dd7c835845d254e104",
     "order": 2,
     "parent_id": null
   },
   "368e15b4-0359-81cb-9b9b-d555dbfd19e3": {
     "file": "docs/poc/vision-bench/멀티모달-llm-한국-방송-6초-클립-영상-이해-벤치마크.md",
-    "last_edited": "2026-05-28T04:26:00.000Z",
-    "content_hash": "a43e533ad3443b8ad20311e0e1557545ae5b8599d4c5678bdb19932c9c86761a",
+    "last_edited": "2026-06-02T02:11:00.000Z",
+    "content_hash": "358331bf551daed14c34a814c36d9b8d2bf3420d70eb93fae3e57f13275cec6d",
     "order": 1,
     "parent_id": "vision-bench"
   },
@@ -33,5 +33,12 @@
     "content_hash": "243104a2752a2cf9f1563ab52435fbfdfaf2d16110ded9a1d7d6064eaa03d241",
     "order": 2,
     "parent_id": "vision-bench"
+  },
+  "36ee15b4-0359-80b6-97c6-f628f0347d36": {
+    "file": "docs/poc/audio-bench/한국어-콘텐츠-lid-정확도-비교-whisper-vs-voxlingua107.md",
+    "last_edited": "2026-05-29T05:44:00.000Z",
+    "content_hash": "c3fcfd356e843dee9cbbf0bed6d2eb6278e28417c0c67bf03e2fb6cd3b6e4945",
+    "order": 1,
+    "parent_id": "audio-bench"
   }
 }

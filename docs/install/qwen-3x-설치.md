@@ -529,5 +529,83 @@ WantedBy=multi-user.target
 
 <br />
 
+---
+
+## Qwen3-Omni-30B-A3B-Instruct (멀티모달)
+
+앞의 텍스트 모델(Qwen3.5 / 3.6)과 달리 **영상·이미지·오디오를 함께 입력** 받는 옴니 모델. 6초 클립 영상 이해 벤치마크(vision-bench)에 사용한다. 설치 흐름은 위와 동일하되 **오디오 디코더 의존성** 과 **멀티모달 서빙 플래그** 가 추가된다. (vLLM 설치는 위 **VLLM 설치** 섹션과 **동일한 venv 를 재사용** 하며, 여기선 audio deps 만 추가한다.)
+
+### 모델 다운로드
+
+```shell
+> hf download Qwen/Qwen3-Omni-30B-A3B-Instruct \
+  --local-dir /stg/models/Qwen3-Omni-30B-A3B-Instruct \
+  --max-workers 16
+```
+
+<br />
+
+### 오디오 입력 지원 (필수)
+
+`uv pip install vllm` 기본 설치엔 오디오 디코더가 빠져 있어, 오디오 입력 요청 시 `400 "Invalid or unsupported audio file"` 가 발생한다 (비디오 단독 요청은 정상이라 증상이 헷갈림). 아래 3개를 venv 에 추가해야 한다.
+
+```shell
+(vllm-svc) > uv pip install soundfile librosa av
+```
+
+- `soundfile` (libsndfile 바인딩) · `librosa` (리샘플링) · `av` (PyAV, 컨테이너 demux) — 셋 다 필요
+
+- 설치 후 **서비스 재기동해야 적용** 된다 (`sudo systemctl restart vllm_omni_i` )
+
+- 클라이언트 요청 본문에 `mm_processor_kwargs: {"use_audio_in_video": true}` 를 넣어야 mp4 안 오디오가 함께 처리된다
+
+<br />
+
+### Service 등록
+
+**참고:** 오디오 입력을 쓰려면 `--limit-mm-per-prompt` 에 `audio` 가 포함돼야 하고, venv 엔 위 오디오 deps 가 설치돼 있어야 한다.
+
+```shell
+[Unit]
+Description=vLLM Qwen3-Omni-30B-A3B-Instruct Service
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/usr/service/vllm-svc
+Environment="PATH=/usr/service/vllm-svc/.venv/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin"
+
+ExecStart=/usr/service/vllm-svc/.venv/bin/vllm serve \
+    /stg/models/Qwen3-Omni-30B-A3B-Instruct \
+    --served-model-name qwen \
+    --port 8000 \
+    --host 0.0.0.0 \
+    --dtype bfloat16 \
+    --max-model-len 16384 \
+    --max-num-seqs 8 \
+    --gpu-memory-utilization 0.85 \
+    --limit-mm-per-prompt '{"image":3,"video":3,"audio":3}' \
+    --allowed-local-media-path / \
+    --tensor-parallel-size 1 \
+    --trust-remote-code
+
+StandardOutput=append:/usr/service/logs/vllm/qwen_omni.log
+StandardError=append:/usr/service/logs/vllm/qwen_omni.log
+TimeoutStartSec=900
+TimeoutStopSec=60
+Restart=on-failure
+RestartSec=10
+KillMode=mixed
+LimitNOFILE=1048576
+LimitNPROC=1048576
+
+[Install]
+WantedBy=multi-user.target
+```
+
+<br />
+
 감사합니다.
 
