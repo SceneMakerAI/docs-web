@@ -60,6 +60,56 @@ def _restore_code_blocks(body, store):
     return body
 
 
+def _protect_inline_code(body):
+    """인라인 코드 스팬(`...`)을 __INLINE0__ 플레이스홀더로 교체.
+
+    tag_handling=html 옵션 사용 시 DeepL이 <tag> 패턴을 HTML로 해석해
+    코드 스팬 내부 내용을 분리·재배치하는 문제 방지.
+    """
+    store = {}
+    result = []
+    i = 0
+    for m in re.finditer(r'``[^`]+``|`[^`\n]+`', body):
+        result.append(body[i:m.start()])
+        key = f'__INLINE{len(store)}__'
+        store[key] = m.group(0)
+        result.append(key)
+        i = m.end()
+    result.append(body[i:])
+    return ''.join(result), store
+
+
+def _restore_inline_code(body, store):
+    for key, val in store.items():
+        body = body.replace(key, val)
+    return body
+
+
+def _protect_inline_code(body):
+    """인라인 코드 스팬(`...`)을 __INLINE0__ 플레이스홀더로 교체.
+
+    tag_handling=html 옵션 사용 시 DeepL이 <tag> 패턴을 HTML로 해석해
+    코드 스팬 내부 내용을 분리·재배치하는 문제 방지.
+    """
+    store = {}
+    result = []
+    i = 0
+    for m in re.finditer(r'``[^`]+``|`[^`\n]+`', body):
+        result.append(body[i:m.start()])
+        key = f'__INLINE{len(store)}__'
+        store[key] = m.group(0)
+        result.append(key)
+        i = m.end()
+    result.append(body[i:])
+    return ''.join(result), store
+
+
+def _restore_inline_code(body, store):
+    for key, val in store.items():
+        body = body.replace(key, val)
+    return body
+
+
 def translate_with_deepl(text):
     if not text.strip():
         return text
@@ -220,10 +270,13 @@ def translate_file(kr_path, hashes):
 
     # 프로그래밍 언어 코드 블록 보호 (bash/yaml/python 등 번역 방지)
     body_no_code, code_store = _protect_code_blocks(body)
+    # 인라인 코드 스팬 보호 (`...`) — tag_handling=html 시 <tag> 오해석 방지
+    body_no_inline, inline_store = _protect_inline_code(body_no_code)
     # --- (수평선) 을 DeepL 이 테이블 구분자로 오인하지 않도록 보호
-    body_protected = re.sub(r'(?m)^---$', '<hr/>', body_no_code)
-    translated = translate_with_deepl(body_protected) if body_no_code.strip() else body_protected
+    body_protected = re.sub(r'(?m)^---$', '<hr/>', body_no_inline)
+    translated = translate_with_deepl(body_protected) if body_no_inline.strip() else body_protected
     en_body = html.unescape(re.sub(r'<hr/>', '---', translated))
+    en_body = _restore_inline_code(en_body, inline_store)
     en_body = _restore_code_blocks(en_body, code_store)
 
     with open(en_path, "w", encoding="utf-8") as f:
