@@ -2,6 +2,7 @@
   "label": "Vision-bench",
   "position": 3,
   "link": {
-    "type": "generated-index"
+    "type": "generated-index",
+    "slug": "/poc/vision-bench"
   }
 }

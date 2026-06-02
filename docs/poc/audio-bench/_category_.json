@@ -2,6 +2,7 @@
   "label": "Audio-bench",
   "position": 1,
   "link": {
-    "type": "generated-index"
+    "type": "generated-index",
+    "slug": "/poc/audio-bench"
   }
 }

@@ -178,9 +178,11 @@ def read_relation(props, prop_name):
 
 
 def generate_category_json(dir_path, label, position):
-    # generated-index: slug "/" 절대경로 충돌(/docs/) 없이 자동 카테고리 인덱스 생성
+    slug = os.path.basename(dir_path)
+    parent = os.path.basename(os.path.dirname(dir_path))
+    # generated-index + slug: /docs/{section}/{slug} URL 생성 (category/ 경로 방지)
     data = {"label": label, "position": position,
-            "link": {"type": "generated-index"}}
+            "link": {"type": "generated-index", "slug": f"/{parent}/{slug}"}}
     os.makedirs(dir_path, exist_ok=True)
     with open(f"{dir_path}/_category_.json", "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
