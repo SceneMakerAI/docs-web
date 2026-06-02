@@ -419,6 +419,7 @@ def blocks_to_markdown(blocks, slug):
     image_counter = [0]
     body = "".join(block_to_markdown(b, slug, image_counter) for b in blocks)
     body = escape_mdx_angle_brackets(body)
+    body = re.sub(r'(<[a-zA-Z][^>]*/)\s*&gt;', r'\1>', body)
     return escape_single_tildes(body)
 
 

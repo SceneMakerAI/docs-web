@@ -212,7 +212,7 @@ poc-lid-bench/
 본인 경로로 변경하거나 SpeechBrain 기본 캐시(`~/.cache/huggingface/` ) 사용으로
 코드 수정.
 
-<br /&gt;
+<br />
 
 ### 3.3 실행 방법
 
