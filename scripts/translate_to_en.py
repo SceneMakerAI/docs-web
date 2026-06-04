@@ -159,11 +159,11 @@ def _frontmatter_key(frontmatter_str):
 def get_changed_docs_files():
     """working tree 기준으로 docs/ 에서 변경·추가된 .md 파일 목록 반환."""
     r1 = subprocess.run(
-        ["git", "diff", "--name-only", "--diff-filter=ACM", "HEAD", "--", "docs/"],
+        ["git", "-c", "core.quotepath=false", "diff", "--name-only", "--diff-filter=ACM", "HEAD", "--", "docs/"],
         capture_output=True, text=True,
     )
     r2 = subprocess.run(
-        ["git", "ls-files", "--others", "--exclude-standard", "docs/"],
+        ["git", "-c", "core.quotepath=false", "ls-files", "--others", "--exclude-standard", "docs/"],
         capture_output=True, text=True,
     )
     files = []
@@ -198,7 +198,7 @@ def get_incomplete_en_files():
 def get_deleted_docs_files():
     """working tree 기준으로 docs/ 에서 삭제된 .md 파일 목록 반환."""
     r = subprocess.run(
-        ["git", "diff", "--name-only", "--diff-filter=D", "HEAD", "--", "docs/"],
+        ["git", "-c", "core.quotepath=false", "diff", "--name-only", "--diff-filter=D", "HEAD", "--", "docs/"],
         capture_output=True, text=True,
     )
     return [
