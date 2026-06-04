@@ -213,6 +213,28 @@ done
 
 - **오디오 포함** (`-c:a aac` ) — vLLM이 mp4 안의 오디오를 함께 디코딩해야 하므로 필수
 
+- **③ 화면 블랙아웃** (음성-전용 검증용) — 분할된 첫 클립의 화면만 검게 가리고 오디오는 그대로 둔 클립 1개 생성 → `data/blackout/{category}/{원본명}/`
+
+```bash
+FIRST=$(ls "$OUT"/*.mp4 | head -1)          # 분할된 첫 클립
+BLACK="data/blackout/$CAT/$NAME"; mkdir -p "$BLACK"
+ffmpeg -nostdin -i "$FIRST" \
+  -vf "drawbox=0:0:iw:ih:color=black:t=fill" \
+  -c:v libopenh264 -b:v 300k -c:a copy "$BLACK/$(basename "$FIRST")"
+```
+
+- `drawbox …:t=fill` : 전 프레임을 검게 덮어 시각 정보 0 · `-c:a copy` : 오디오는 재인코딩 없이 그대로
+
+- 화면 없이도 모델이 소리를 묘사하면 = 영상이 아니라 **오디오를 실제로 처리** 한다는 증거 (→ §3.3 ⓒ 음성-전용 테스트)
+
+> ⚡ **한 번에 실행** — 위 ①\~③ 을 자동화한 스크립트가 있다.
+>
+> `./script/prepare_data.sh &lt;카테고리&gt; &lt;파일명&gt; <URL>`
+>
+> - 원본이 이미 있으면 다운로드를 건너뛴다(원본 보호).
+>
+> - 분할 윈도우는 `WIN_START` ·`CLIP_LEN` ·`CLIP_COUNT` 환경변수로 override.
+
 <br />
 
 **최종 테스트 클립 데이터**
