@@ -79,6 +79,17 @@ const config: Config = {
     },
   },
 
+  plugins: [
+    function () {
+      return {
+        name: 'symlinks-webpack-fix',
+        configureWebpack() {
+          return { resolve: { symlinks: false } };
+        },
+      };
+    },
+  ],
+
   presets: [
     [
       'classic',
