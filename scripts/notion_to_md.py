@@ -98,6 +98,7 @@ NOTION_PROPERTY_TAGS             = os.environ.get("NOTION_PROPERTY_TAGS", "tags"
 NOTION_PROPERTY_SLUG             = os.environ.get("NOTION_PROPERTY_SLUG", "slug")
 # Docs mode 선택 속성 (없으면 frontmatter에서 생략)
 NOTION_PROPERTY_DOCS_LAST_EDITED = os.environ.get("NOTION_PROPERTY_DOCS_LAST_EDITED", "최종 편집 일시")
+NOTION_PROPERTY_KEYWORDS         = os.environ.get("NOTION_PROPERTY_KEYWORDS", "keywords")
 
 
 SYNC_MAP_FILE = f"{SAVE_DIR}/.notion-sync.json"
@@ -661,13 +662,17 @@ def save_doc_page(page, position, existing_map, parent_slug=None, is_parent=Fals
     elif is_parent:
         _desc = read_rich_text_plain(props, NOTION_PROPERTY_DESCRIPTION)
         _tags = read_multi_select(props, NOTION_PROPERTY_TAGS)
+        _kw   = read_rich_text_plain(props, NOTION_PROPERTY_KEYWORDS)
         _last_edit = read_last_edited_time_prop(props, NOTION_PROPERTY_DOCS_LAST_EDITED)
         _lines = ["---", f'title: "{safe_title}"', f"sidebar_position: {order}", f'slug: "{url_slug}"']
         if _desc:
             _lines.append(f'description: "{_desc.replace(chr(34), chr(92)+chr(34))}"')
         if _tags:
             _lines.append(f"tags: [{', '.join(_tags)}]")
-            _lines.append(f"keywords: [{', '.join(_tags)}]")
+        # keywords: Notion keywords 속성 우선, 없으면 tags에서 파생
+        _kw_list = [k.strip() for k in _kw.split(",")] if _kw else _tags
+        if _kw_list:
+            _lines.append(f"keywords: [{', '.join(_kw_list)}]")
         if _last_edit:
             _lines.extend(["last_update:", f"  date: {_last_edit}"])
         _lines.append("---\n")
@@ -675,13 +680,17 @@ def save_doc_page(page, position, existing_map, parent_slug=None, is_parent=Fals
     else:
         _desc = read_rich_text_plain(props, NOTION_PROPERTY_DESCRIPTION)
         _tags = read_multi_select(props, NOTION_PROPERTY_TAGS)
+        _kw   = read_rich_text_plain(props, NOTION_PROPERTY_KEYWORDS)
         _last_edit = read_last_edited_time_prop(props, NOTION_PROPERTY_DOCS_LAST_EDITED)
         _lines = ["---", f"id: {slug}", f'title: "{safe_title}"', f"sidebar_position: {order}", f'slug: "{url_slug}"']
         if _desc:
             _lines.append(f'description: "{_desc.replace(chr(34), chr(92)+chr(34))}"')
         if _tags:
             _lines.append(f"tags: [{', '.join(_tags)}]")
-            _lines.append(f"keywords: [{', '.join(_tags)}]")
+        # keywords: Notion keywords 속성 우선, 없으면 tags에서 파생
+        _kw_list = [k.strip() for k in _kw.split(",")] if _kw else _tags
+        if _kw_list:
+            _lines.append(f"keywords: [{', '.join(_kw_list)}]")
         if _last_edit:
             _lines.extend(["last_update:", f"  date: {_last_edit}"])
         _lines.append("---\n")
