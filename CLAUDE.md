@@ -184,7 +184,7 @@ tail -f /var/log/notion-sync.log
 |------------|-----------|------|
 | `NOTION_ABOUT` | `docs/about/` | docs 플러그인 |
 | `NOTION_ARCHITECTURE` | `docs/architecture/` | docs 플러그인 |
-| `NOTION_BLOG` | `blog/` | blog 플러그인 (frontmatter: date·authors·tags·description·image) |
+| `NOTION_BLOG` | `blog/` | blog 플러그인 (frontmatter: date·last_update·authors·tags·description·slug) |
 | `NOTION_CONTRIBUTE` | `docs/contribute/` | docs 플러그인 |
 | `NOTION_DOCS` | `docs/guide/` | docs 플러그인 |
 | `NOTION_INSTALL` | `docs/install/` | docs 플러그인 |
@@ -203,14 +203,36 @@ tail -f /var/log/notion-sync.log
 
 **blog 모드** (`SAVE_DIR=blog`): Notion 속성을 blog 플러그인 frontmatter로 변환한다.
 
-- 파일명 → `blog/{date}-{slug}.md`
-- frontmatter → `title`, `date`, `authors`, `description`, `tags`, `image` 자동 생성
-- Notion 속성명 기본값: `date`, `authors`, `description`, `tags`, `image` (env로 재정의 가능)
+- 파일명 → `blog/{생성일시}-{slug}.md`
+- frontmatter → `title`, `date`, `last_update`, `authors`, `description`, `tags`, `slug` 자동 생성
+- `title` 속성: 속성명과 무관하게 `title` 타입을 자동 탐색 (Blog DB는 영문 `title` 속성 사용)
+- `date`: `생성 일시`(created_time 타입) → 포스트 게시일
+- `last_update.date`: `최종 편집 일시`(last_edited_time 타입) → 포스트 최종수정일
+- `slug`: `slug` 속성(rich_text 타입) → ASCII URL. **Notion DB에 `slug` 속성 추가 필요**
+- `authors`: `authors` 속성 → **multi_select 타입 권장** (옵션을 authors.yml 키와 동일하게 설정). people 타입 사용 시 Notion 표시 이름이 authors.yml 키와 일치해야 함
+
+### Notion Blog DB 필수 속성
+
+| 속성명 | Notion 타입 | frontmatter 필드 | 비고 |
+|--------|------------|-----------------|------|
+| `title` | title | `title:` | 자동 탐색 — 속성명 무관 |
+| `생성 일시` | created_time | `date:` | 포스트 게시일 |
+| `최종 편집 일시` | last_edited_time | `last_update.date:` | 게시일과 다를 때만 출력 |
+| `authors` | **multi_select** | `authors:` | 옵션명 = `blog/authors.yml` 키 (`sbin`, `minsung`, `jplee`) |
+| `description` | rich_text | `description:` | 목록·RSS·SEO 요약 |
+| `tags` | multi_select | `tags:` | 자유 태그 |
+| `slug` | rich_text | `slug:` | (선택) ASCII URL 재정의. 없으면 파일명 기반 URL |
 
 | 환경변수 | 기본값 | 설명 |
 |---------|--------|------|
-| `NOTION_PROPERTY_SUBITEM` | `하위 항목` | Sub-items relation 속성명 |
-| `NOTION_PROPERTY_PARENT` | `상위 항목` | Parent item relation 속성명 |
+| `NOTION_PROPERTY_BLOG_CREATED` | `생성 일시` | created_time 속성명 |
+| `NOTION_PROPERTY_BLOG_LAST_EDITED` | `최종 편집 일시` | last_edited_time 속성명 |
+| `NOTION_PROPERTY_AUTHORS` | `authors` | 저자 속성명 |
+| `NOTION_PROPERTY_DESCRIPTION` | `description` | 설명 속성명 |
+| `NOTION_PROPERTY_TAGS` | `tags` | 태그 속성명 |
+| `NOTION_PROPERTY_SLUG` | `slug` | ASCII URL 슬러그 속성명 |
+| `NOTION_PROPERTY_SUBITEM` | `하위 항목` | Sub-items relation 속성명 (docs 모드) |
+| `NOTION_PROPERTY_PARENT` | `상위 항목` | Parent item relation 속성명 (docs 모드) |
 
 ### 수동 동기화 (단일 섹션)
 

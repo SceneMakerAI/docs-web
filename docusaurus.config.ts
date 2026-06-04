@@ -99,6 +99,8 @@ const config: Config = {
             language: 'ko',
             limit: false,
           },
+          onInlineTags: 'warn',
+          onInlineAuthors: 'warn',
         },
         theme: {
           customCss: './src/css/custom.css',
