@@ -92,7 +92,7 @@
   /* ─────────── Spacing ─────────── */
   --ifm-line-height-base: 1.5;
   --ifm-leading: 1rem;
-  --ifm-paragraph-margin-bottom: 0.5rem;  /* 0.25rem → 4px는 너무 타이트 */
+  --ifm-paragraph-margin-bottom: 0.75rem;  /* 8px → 12px */
   --ifm-heading-vertical-rhythm-bottom: 0.5;
   --ifm-list-margin: 0.5rem;
   --ifm-list-paragraph-margin: 0.25rem;
@@ -113,12 +113,16 @@
 
 /* Infima 변수가 markdown body에 미적용되는 경우 직접 선택자로 보완 */
 .markdown > p {
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.75rem;  /* 8px → 12px */
 }
 .markdown > ul,
 .markdown > ol {
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.75rem;  /* 8px → 12px */
 }
+/* 리스트 안 중첩 리스트·단락 간격 */
+.markdown li > p { margin-bottom: 0.25rem; }
+.markdown li > ul,
+.markdown li > ol { margin-top: 0.25rem; margin-bottom: 0.25rem; }
 
 /* ─────────── Inline code: Notion 스타일 ─────────── */
 /* Notion: 따뜻한 회색 배경 + 붉은빛 텍스트 */
@@ -151,7 +155,7 @@ article a:hover {
 .theme-code-block {
   border: 1px solid rgba(0, 0, 0, 0.1);
   border-radius: 6px;
-  margin-bottom: 0.75rem;
+  margin-bottom: 1.25rem;  /* 12px → 20px */
   box-shadow: none;
 }
 
@@ -167,7 +171,7 @@ article a:hover {
   display: table;
   width: 100%;
   border-collapse: collapse;
-  margin-bottom: 0.75rem;
+  margin-bottom: 1.5rem;  /* 12px → 24px */
   font-size: 0.9rem;
 }
 
@@ -241,7 +245,7 @@ article a:hover {
   border-left: 2px solid var(--ifm-table-border-color);
   background: transparent;
   padding: 0 0 0 12px;
-  margin-bottom: 0.75rem;
+  margin-bottom: 1rem;  /* 12px → 16px */
   border-radius: 0;
   color: var(--ifm-color-content);
   --docusaurus-details-decoration-color: var(--ifm-color-content-secondary);
