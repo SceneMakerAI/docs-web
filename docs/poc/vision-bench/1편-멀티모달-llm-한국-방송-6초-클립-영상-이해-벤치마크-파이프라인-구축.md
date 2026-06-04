@@ -185,23 +185,21 @@ graph LR
 1. **원본 다운로드** — 표의 각 URL을 해당 카테고리 폴더로
 
 ```bash
-cd "$(git rev-parse --show-toplevel)"   # 작업 루트(레포 최상위)로 이동 — 이후 상대경로 기준
+cd "$(git rev-parse --show-toplevel)"   # 작업 루트(레포 최상위)로 이동
 CAT=&lt;카테고리&gt;; NAME=&lt;원본명&gt;; URL=&lt;테스트 대상 URL&gt;
 uvx yt-dlp -f "bv*[ext=mp4]+ba[ext=m4a]/b[ext=mp4]/b" \
 --merge-output-format mp4 \
 -o "data/raw/$CAT/$NAME.%(ext)s" "$URL"
 ```
 
-- `-f "bv*[ext=mp4]+ba[ext=m4a]/…"` : **H.264+AAC mp4 우선** (vLLM/ffmpeg 디코딩 호환). 해당 포맷 없으면 최고품질로 폴백(`/b` )
+1. **6초 클립 분할** (사전 준비)
 
-- `--merge-output-format mp4` : mp4 컨테이너로 병합
+- `00:10:00~00:20:00` (원본 600\~1200s) 구간을 6초 100클립으로 분할. 파일명에 원본 절대초 인코딩
 
-<br />
-
-1. **6초 클립 분할** (사전 준비) — `00:10:00~00:20:00` (원본 절대초 600\~1200s) 구간을 6초 100클립으로 분할. 파일명에 원본 절대초 인코딩 → `data/clips/{category}/{원본명}/{seq}_{start}-{end}.mp4`
+- `data/clips/{category}/{원본명}/{seq}_{start}-{end}.mp4`
 
 ```bash
-cd "$(git rev-parse --show-toplevel)"   # 작업 루트(레포 최상위)로 이동
+cd "$(git rev-parse --show-toplevel)"
 CAT=&lt;카테고리&gt;; NAME=&lt;원본명&gt;
 SRC="data/raw/$CAT/$NAME.mp4"
 OUT="data/clips/$CAT/$NAME"; mkdir -p "$OUT"
@@ -212,31 +210,25 @@ for i in $(seq 0 99); do
 done
 ```
 
-- **인코더** : `libopenh264` . `libx264` 빌드면 `-c:v libx264 -crf 20` 으로 동일 결과
+1. **화면 블랙아웃** (음성-전용 검증용)
+   - 분할된 첫 클립의 화면만 검게 가리고 오디오는 그대로 둔 클립 1개 생성
 
-- **재인코딩 분할** — 클립마다 독립 키프레임 → 경계 정확·단독 디코딩 가능 (원본은 그대로, 클립만 생성)
-
-- **오디오 포함** (`-c:a aac` ) — vLLM이 mp4 안의 오디오를 함께 디코딩해야 하므로 필수
-
-<br />
-
-1. **화면 블랙아웃** (음성-전용 검증용) — 분할된 첫 클립의 화면만 검게 가리고 오디오는 그대로 둔 클립 1개 생성 → `data/blackout/{category}/{원본명}/`
+   - `data/blackout/{category}/{원본명}/`
 
 ```bash
-FIRST=$(ls "$OUT"/*.mp4 | head -1)          # 분할된 첫 클립
+cd "$(git rev-parse --show-toplevel)"
+CAT=&lt;카테고리&gt;; NAME=&lt;원본명&gt;
+OUT="data/clips/$CAT/$NAME"
+FIRST=$(ls "$OUT"/*.mp4 | head -1)          # 분할된 클립 한 개만
 BLACK="data/blackout/$CAT/$NAME"; mkdir -p "$BLACK"
 ffmpeg -nostdin -i "$FIRST" \
   -vf "drawbox=0:0:iw:ih:color=black:t=fill" \
   -c:v libopenh264 -b:v 300k -c:a copy "$BLACK/$(basename "$FIRST")"
 ```
 
-- `drawbox …:t=fill` : 전 프레임을 검게 덮어 시각 정보 0 · `-c:a copy` : 오디오는 재인코딩 없이 그대로
-
-- 화면 없이도 모델이 소리를 묘사하면 = 영상이 아니라 **오디오를 실제로 처리** 한다는 증거 (→ §3.3 ⓒ 음성-전용 테스트)
-
 > ⚡ **한 번에 실행** 
 >
-> - 위 ①\~③ 을 자동화한 스크립트
+> - 위  작업을 자동화한 스크립트
 >
 > `./script/prepare_data.sh &lt;카테고리&gt; &lt;파일명&gt; <URL>`
 >
