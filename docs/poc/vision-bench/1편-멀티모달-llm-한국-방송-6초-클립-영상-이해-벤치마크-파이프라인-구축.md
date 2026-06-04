@@ -137,7 +137,7 @@ graph LR
 클라이언트 → API 서버 → vLLM 의 **기본 동작** 을 아래 6단계로 확인한다. (분석 *품질* 평가는 편2·편3.)
 
 1. **샘플 데이터 준비**
-   - 짧은 원본 1편에서 10분 구간을 6초 클립 100개로 분할한다.
+   - 테스트 영상 데이터를 준비하고 10분 구간을 6초 클립 100개로 분할한다.
 
    - ffmpeg 으로 **오디오는 남기고 화면만 검게 가린** 클립을 만들어 둔다(음성-전용 분석 검증용).
 
@@ -178,25 +178,30 @@ graph LR
 
 **원본 다운로드 (재현 절차)**
 
-위 표의 원본은 아래 절차로 내려받아 `data/raw/{category}/` 에 보관한다 (내부 재현용).
+위 표의 원본은 아래 절차로 내려받아 `data/raw/{category}/` 에 위치.
 
 - **전제** : `uv` (→ `uvx` )·`ffmpeg` 설치 (ffmpeg는 영상+오디오 스트림 병합에 필요)
 
-- **① 원본 다운로드** — 표의 각 URL을 해당 카테고리 폴더로
+1. **원본 다운로드** — 표의 각 URL을 해당 카테고리 폴더로
 
 ```bash
+cd "$(git rev-parse --show-toplevel)"   # 작업 루트(레포 최상위)로 이동 — 이후 상대경로 기준
+CAT=&lt;카테고리&gt;; NAME=&lt;원본명&gt;; URL=&lt;테스트 대상 URL&gt;
 uvx yt-dlp -f "bv*[ext=mp4]+ba[ext=m4a]/b[ext=mp4]/b" \
 --merge-output-format mp4 \
--o "data/raw/&lt;영상 카테고리&gt;/%(title)s.%(ext)s" "&lt;테스트 대상 URL&gt;"
+-o "data/raw/$CAT/$NAME.%(ext)s" "$URL"
 ```
 
 - `-f "bv*[ext=mp4]+ba[ext=m4a]/…"` : **H.264+AAC mp4 우선** (vLLM/ffmpeg 디코딩 호환). 해당 포맷 없으면 최고품질로 폴백(`/b` )
 
 - `--merge-output-format mp4` : mp4 컨테이너로 병합
 
-- **② 6초 클립 분할** (사전 준비) — `00:10:00~00:20:00` (원본 절대초 600\~1200s) 구간을 6초 100클립으로 분할. 파일명에 원본 절대초 인코딩 → `data/clips/{category}/{원본명}/{seq}_{start}-{end}.mp4`
+<br />
+
+1. **6초 클립 분할** (사전 준비) — `00:10:00~00:20:00` (원본 절대초 600\~1200s) 구간을 6초 100클립으로 분할. 파일명에 원본 절대초 인코딩 → `data/clips/{category}/{원본명}/{seq}_{start}-{end}.mp4`
 
 ```bash
+cd "$(git rev-parse --show-toplevel)"   # 작업 루트(레포 최상위)로 이동
 CAT=&lt;카테고리&gt;; NAME=&lt;원본명&gt;
 SRC="data/raw/$CAT/$NAME.mp4"
 OUT="data/clips/$CAT/$NAME"; mkdir -p "$OUT"
@@ -213,7 +218,9 @@ done
 
 - **오디오 포함** (`-c:a aac` ) — vLLM이 mp4 안의 오디오를 함께 디코딩해야 하므로 필수
 
-- **③ 화면 블랙아웃** (음성-전용 검증용) — 분할된 첫 클립의 화면만 검게 가리고 오디오는 그대로 둔 클립 1개 생성 → `data/blackout/{category}/{원본명}/`
+<br />
+
+1. **화면 블랙아웃** (음성-전용 검증용) — 분할된 첫 클립의 화면만 검게 가리고 오디오는 그대로 둔 클립 1개 생성 → `data/blackout/{category}/{원본명}/`
 
 ```bash
 FIRST=$(ls "$OUT"/*.mp4 | head -1)          # 분할된 첫 클립
@@ -227,7 +234,9 @@ ffmpeg -nostdin -i "$FIRST" \
 
 - 화면 없이도 모델이 소리를 묘사하면 = 영상이 아니라 **오디오를 실제로 처리** 한다는 증거 (→ §3.3 ⓒ 음성-전용 테스트)
 
-> ⚡ **한 번에 실행** — 위 ①\~③ 을 자동화한 스크립트가 있다.
+> ⚡ **한 번에 실행** 
+>
+> - 위 ①\~③ 을 자동화한 스크립트
 >
 > `./script/prepare_data.sh &lt;카테고리&gt; &lt;파일명&gt; <URL>`
 >
