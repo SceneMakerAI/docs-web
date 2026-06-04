@@ -90,11 +90,11 @@ TIMEZONE_HOURS = 9
 
 # Blog mode: SAVE_DIR 가 'blog' 또는 'blog/'로 시작하면 blog 플러그인 frontmatter 생성
 BLOG_MODE = SAVE_DIR.rstrip("/") == "blog" or SAVE_DIR.rstrip("/").startswith("blog/")
-NOTION_PROPERTY_BLOG_DATE   = os.environ.get("NOTION_PROPERTY_BLOG_DATE", "date")
-NOTION_PROPERTY_AUTHORS     = os.environ.get("NOTION_PROPERTY_AUTHORS", "authors")
-NOTION_PROPERTY_DESCRIPTION = os.environ.get("NOTION_PROPERTY_DESCRIPTION", "description")
-NOTION_PROPERTY_TAGS        = os.environ.get("NOTION_PROPERTY_TAGS", "tags")
-NOTION_PROPERTY_IMAGE       = os.environ.get("NOTION_PROPERTY_IMAGE", "image")
+NOTION_PROPERTY_BLOG_CREATED     = os.environ.get("NOTION_PROPERTY_BLOG_CREATED", "생성 일시")
+NOTION_PROPERTY_BLOG_LAST_EDITED = os.environ.get("NOTION_PROPERTY_BLOG_LAST_EDITED", "최종 편집 일시")
+NOTION_PROPERTY_AUTHORS          = os.environ.get("NOTION_PROPERTY_AUTHORS", "authors")
+NOTION_PROPERTY_DESCRIPTION      = os.environ.get("NOTION_PROPERTY_DESCRIPTION", "description")
+NOTION_PROPERTY_TAGS             = os.environ.get("NOTION_PROPERTY_TAGS", "tags")
 
 
 SYNC_MAP_FILE = f"{SAVE_DIR}/.notion-sync.json"
@@ -218,6 +218,24 @@ def read_files_url(props, prop_name):
         return f.get("external", {}).get("url")
     if f.get("type") == "file":
         return f.get("file", {}).get("url")
+    return None
+
+
+def read_created_time_prop(props, name):
+    """Notion created_time 타입 속성 → YYYY-MM-DD"""
+    p = props.get(name, {})
+    if p.get("type") == "created_time":
+        val = p.get("created_time", "")
+        return val[:10] if val else None
+    return None
+
+
+def read_last_edited_time_prop(props, name):
+    """Notion last_edited_time 타입 속성 → YYYY-MM-DD"""
+    p = props.get(name, {})
+    if p.get("type") == "last_edited_time":
+        val = p.get("last_edited_time", "")
+        return val[:10] if val else None
     return None
 
 
@@ -507,6 +525,7 @@ def save_doc_page(page, position, existing_map, parent_slug=None, is_parent=Fals
     """
     page_id = page["id"]
     last_edited = page.get("last_edited_time", "")
+    created_time = page.get("created_time", "")
     props = page.get("properties", {})
     title = read_title_plain(props, NOTION_PROPERTY_TITLE) or "제목없음"
     order = position
@@ -514,8 +533,8 @@ def save_doc_page(page, position, existing_map, parent_slug=None, is_parent=Fals
     slug = slugify(title)
 
     if BLOG_MODE:
-        date_str = (read_date_start(props, NOTION_PROPERTY_BLOG_DATE)
-                    or (last_edited[:10] if last_edited else "1970-01-01"))
+        date_str = (read_created_time_prop(props, NOTION_PROPERTY_BLOG_CREATED)
+                    or (created_time[:10] if created_time else "1970-01-01"))
         new_filename = f"{SAVE_DIR}/{date_str}-{slug}.md"
         url_slug = None  # blog 플러그인이 파일명에서 자동 결정
     elif is_parent:
@@ -582,12 +601,23 @@ def save_doc_page(page, position, existing_map, parent_slug=None, is_parent=Fals
     safe_title = title.replace('"', '\\"')
 
     if BLOG_MODE:
+        # truncate 마커 삽입: Notion 구분선 우선, 없으면 첫 단락 뒤에 자동 삽입
+        if "\n---\n" in body:
+            body = body.replace("\n---\n", "\n\n<!--truncate-->\n\n", 1)
+        else:
+            stripped = body.lstrip("\n")
+            match = re.search(r"\n\n", stripped)
+            if match:
+                offset = len(body) - len(stripped)
+                pos = offset + match.end()
+                body = body[:pos] + "<!--truncate-->\n\n" + body[pos:]
+
         authors_list = read_multi_select(props, NOTION_PROPERTY_AUTHORS)
         if not authors_list:
             authors_list = read_people(props, NOTION_PROPERTY_AUTHORS)
         description = read_rich_text_plain(props, NOTION_PROPERTY_DESCRIPTION)
         tags = read_multi_select(props, NOTION_PROPERTY_TAGS)
-        image = read_files_url(props, NOTION_PROPERTY_IMAGE)
+        last_edited_date = read_last_edited_time_prop(props, NOTION_PROPERTY_BLOG_LAST_EDITED)
 
         lines = ["---", f'title: "{safe_title}"', f"date: {date_str}"]
         if authors_list:
@@ -597,8 +627,9 @@ def save_doc_page(page, position, existing_map, parent_slug=None, is_parent=Fals
             lines.append(f'description: "{safe_desc}"')
         if tags:
             lines.append(f"tags: [{', '.join(tags)}]")
-        if image:
-            lines.append(f"image: {image}")
+        if last_edited_date and last_edited_date != date_str:
+            lines.append(f"last_update:")
+            lines.append(f"  date: {last_edited_date}")
         lines.append("---\n")
         frontmatter = "\n".join(lines) + "\n"
     # 부모 index.md는 id를 생략 → Docusaurus가 파일경로 기반으로 ID 부여 (section/slug/index)
