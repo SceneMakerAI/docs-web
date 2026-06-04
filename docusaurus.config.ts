@@ -100,7 +100,7 @@ const config: Config = {
             return Math.max(1, Math.round(minutes));
           },
           feedOptions: {
-            type: ['rss', 'atom'],
+            type: ['rss', 'atom', 'json'],
             title: 'SceneMakerAI 블로그',
             description: 'SceneMakerAI 기술 블로그 — 오픈소스 AI로 방송 콘텐츠를 재가공하는 플랫폼 개발 이야기',
             copyright: `Copyright © ${new Date().getFullYear()} SceneMakerAI · Solbox Inc.`,
