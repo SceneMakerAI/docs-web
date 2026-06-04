@@ -86,9 +86,21 @@ const config: Config = {
         blog: {
           path: 'blog',
           routeBasePath: 'blog',
+          blogTitle: 'SceneMakerAI 블로그',
+          blogDescription: 'SceneMakerAI 기술 블로그 — 오픈소스 AI로 방송 콘텐츠를 재가공하는 플랫폼 개발 이야기',
           blogSidebarTitle: '전체 글',
           blogSidebarCount: 'ALL',
           showReadingTime: true,
+          feedOptions: {
+            type: ['rss', 'atom'],
+            title: 'SceneMakerAI 블로그',
+            description: 'SceneMakerAI 기술 블로그 — 오픈소스 AI로 방송 콘텐츠를 재가공하는 플랫폼 개발 이야기',
+            copyright: `Copyright © ${new Date().getFullYear()} SceneMakerAI · Solbox Inc.`,
+            language: 'ko',
+            limit: false,
+          },
+          onInlineTags: 'warn',
+          onInlineAuthors: 'warn',
         },
         theme: {
           customCss: './src/css/custom.css',
