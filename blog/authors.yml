@@ -14,7 +14,7 @@ sbin:
   title: SceneMakerAI 팀
   description: SceneMakerAI 프로젝트 리드 · 인프라·오픈소스 기여 담당
   url: https://github.com/sb
-  image_url: https://github.com/sbin.png
+  image_url: https://avatars.githubusercontent.com/u/219066026?v=4&size=64
   email: sbin@solbox.com
   page: true
   socials:
@@ -25,7 +25,7 @@ jplee:
   title: SceneMakerAI 팀
   description: SceneMakerAI 백엔드 개발자
   url: https://github.com/jp
-  image_url: https://github.com/jplee.png
+  image_url: https://avatars.githubusercontent.com/u/219066026?v=4&size=64
   email: jplee@solbox.com
   page: true
   socials:

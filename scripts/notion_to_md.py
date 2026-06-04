@@ -96,6 +96,9 @@ NOTION_PROPERTY_AUTHORS          = os.environ.get("NOTION_PROPERTY_AUTHORS", "au
 NOTION_PROPERTY_DESCRIPTION      = os.environ.get("NOTION_PROPERTY_DESCRIPTION", "description")
 NOTION_PROPERTY_TAGS             = os.environ.get("NOTION_PROPERTY_TAGS", "tags")
 NOTION_PROPERTY_SLUG             = os.environ.get("NOTION_PROPERTY_SLUG", "slug")
+# Docs mode 선택 속성 (없으면 frontmatter에서 생략)
+NOTION_PROPERTY_DOCS_LAST_EDITED = os.environ.get("NOTION_PROPERTY_DOCS_LAST_EDITED", "최종 편집 일시")
+NOTION_PROPERTY_KEYWORDS         = os.environ.get("NOTION_PROPERTY_KEYWORDS", "keywords")
 
 
 SYNC_MAP_FILE = f"{SAVE_DIR}/.notion-sync.json"
@@ -490,7 +493,18 @@ def blocks_to_markdown(blocks, slug):
     body = "".join(block_to_markdown(b, slug, image_counter) for b in blocks)
     body = escape_mdx_angle_brackets(body)
     body = re.sub(r'(<[a-zA-Z][^>]*/)\s*&gt;', r'\1>', body)
-    return escape_single_tildes(body)
+    body = escape_single_tildes(body)
+    # 연속된 리스트 항목 사이의 빈 줄 제거 (loose → tight list)
+    prev = None
+    while prev != body:
+        prev = body
+        body = re.sub(
+            r'(^(?:- (?:\[[ x]\] )?|\d+\. )[^\n]+)\n\n(?=(?:- (?:\[[ x]\] )?|\d+\. ))',
+            r'\1\n',
+            body,
+            flags=re.MULTILINE,
+        )
+    return body
 
 
 def slugify(title):
@@ -646,22 +660,41 @@ def save_doc_page(page, position, existing_map, parent_slug=None, is_parent=Fals
     # 부모 index.md는 id를 생략 → Docusaurus가 파일경로 기반으로 ID 부여 (section/slug/index)
     # 자식·평면 페이지는 id를 명시 (section 내 고유 식별자)
     elif is_parent:
-        frontmatter = (
-            f"---\n"
-            f'title: "{safe_title}"\n'
-            f"sidebar_position: {order}\n"
-            f'slug: "{url_slug}"\n'
-            f"---\n\n"
-        )
+        _desc = read_rich_text_plain(props, NOTION_PROPERTY_DESCRIPTION)
+        _tags = read_multi_select(props, NOTION_PROPERTY_TAGS)
+        _kw   = read_rich_text_plain(props, NOTION_PROPERTY_KEYWORDS)
+        _last_edit = read_last_edited_time_prop(props, NOTION_PROPERTY_DOCS_LAST_EDITED)
+        _lines = ["---", f'title: "{safe_title}"', f"sidebar_position: {order}", f'slug: "{url_slug}"']
+        if _desc:
+            _lines.append(f'description: "{_desc.replace(chr(34), chr(92)+chr(34))}"')
+        if _tags:
+            _lines.append(f"tags: [{', '.join(_tags)}]")
+        # keywords: Notion keywords 속성 우선, 없으면 tags에서 파생
+        _kw_list = [k.strip() for k in _kw.split(",")] if _kw else _tags
+        if _kw_list:
+            _lines.append(f"keywords: [{', '.join(_kw_list)}]")
+        if _last_edit:
+            _lines.extend(["last_update:", f"  date: {_last_edit}"])
+        _lines.append("---\n")
+        frontmatter = "\n".join(_lines) + "\n"
     else:
-        frontmatter = (
-            f"---\n"
-            f"id: {slug}\n"
-            f'title: "{safe_title}"\n'
-            f"sidebar_position: {order}\n"
-            f'slug: "{url_slug}"\n'
-            f"---\n\n"
-        )
+        _desc = read_rich_text_plain(props, NOTION_PROPERTY_DESCRIPTION)
+        _tags = read_multi_select(props, NOTION_PROPERTY_TAGS)
+        _kw   = read_rich_text_plain(props, NOTION_PROPERTY_KEYWORDS)
+        _last_edit = read_last_edited_time_prop(props, NOTION_PROPERTY_DOCS_LAST_EDITED)
+        _lines = ["---", f"id: {slug}", f'title: "{safe_title}"', f"sidebar_position: {order}", f'slug: "{url_slug}"']
+        if _desc:
+            _lines.append(f'description: "{_desc.replace(chr(34), chr(92)+chr(34))}"')
+        if _tags:
+            _lines.append(f"tags: [{', '.join(_tags)}]")
+        # keywords: Notion keywords 속성 우선, 없으면 tags에서 파생
+        _kw_list = [k.strip() for k in _kw.split(",")] if _kw else _tags
+        if _kw_list:
+            _lines.append(f"keywords: [{', '.join(_kw_list)}]")
+        if _last_edit:
+            _lines.extend(["last_update:", f"  date: {_last_edit}"])
+        _lines.append("---\n")
+        frontmatter = "\n".join(_lines) + "\n"
 
     if is_parent:
         generate_category_json(f"{SAVE_DIR}/{slug}", title, order)

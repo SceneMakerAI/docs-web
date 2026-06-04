@@ -320,12 +320,29 @@ def sync_category_jsons():
         log(f"category json 미러: {en_path} (label: {en_label})")
 
 
+def cleanup_stale_en_files():
+    """docs_en/ 에 있으나 docs/ 에 대응 KR 파일이 없는 스테일 파일 삭제."""
+    for dirpath, _dirs, filenames in os.walk("docs_en/"):
+        for fname in filenames:
+            if not fname.endswith(".md"):
+                continue
+            en_path = os.path.join(dirpath, fname).replace("\\", "/")
+            kr_path = "docs/" + en_path[len("docs_en/"):]
+            if not os.path.exists(kr_path):
+                os.remove(en_path)
+                log(f"스테일 EN 파일 삭제 (KR 없음): {en_path}")
+
+
 def main():
     if not DEEPL_API_KEY:
         log("DEEPL_API_KEY 없음, 번역 건너뜀")
         sys.exit(0)
 
     hashes = load_hashes()
+
+    # KR 없는 docs_en/ 스테일 파일 정리 (git 감지와 무관하게 항상 실행)
+    cleanup_stale_en_files()
+
     deleted = get_deleted_docs_files()
     changed = get_changed_docs_files()
 
