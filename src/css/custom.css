@@ -49,10 +49,10 @@
   --smk-font-display: 'Geist', 'Inter Display', 'General Sans', system-ui, -apple-system, sans-serif;
   --smk-font-body: 'Inter', system-ui, -apple-system, sans-serif;
 
-  /* ─────────── Heading sizes (Infima 기본 H4=1rem 은 본문과 구분 안 됨, H5=0.875rem 은 본문보다 작음) ─────────── */
+  /* ─────────── Heading sizes ─────────── */
   --ifm-h2-font-size: 1.5rem;
   --ifm-h3-font-size: 1.25rem;
-  --ifm-h4-font-size: 1.05rem;
+  --ifm-h4-font-size: 1.1rem;   /* 1.05rem → 본문(1rem)과 구분이 너무 안 됨 */
   --ifm-h5-font-size: 1rem;
 
   /* ─────────── Radius ─────────── */
@@ -89,10 +89,10 @@
   --ifm-code-font-size: 95%;
   --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.1);
 
-  /* ─────────── Notion 스타일 compact spacing ─────────── */
+  /* ─────────── Spacing ─────────── */
   --ifm-line-height-base: 1.5;
   --ifm-leading: 1rem;
-  --ifm-paragraph-margin-bottom: 0.25rem;
+  --ifm-paragraph-margin-bottom: 0.5rem;  /* 0.25rem → 4px는 너무 타이트 */
   --ifm-heading-vertical-rhythm-bottom: 0.5;
   --ifm-list-margin: 0.5rem;
   --ifm-list-paragraph-margin: 0.25rem;
@@ -107,12 +107,18 @@
 
 /* Infima 변수가 markdown body에 미적용되는 경우 직접 선택자로 보완 */
 .markdown > p {
-  margin-bottom: 0.25rem;
+  margin-bottom: 0.5rem;
 }
 .markdown > ul,
 .markdown > ol {
   margin-bottom: 0.5rem;
 }
+
+/* ─────────── OL 번호 스타일 — Notion 기준 ─────────── */
+/* Infima 기본 또는 브라우저 UA가 ul>li>ol을 lower-roman으로 처리하는 것 재정의 */
+.markdown ol                { list-style-type: decimal; }
+.markdown ol ol             { list-style-type: lower-alpha; }
+.markdown ol ol ol          { list-style-type: lower-roman; }
 
 /* ─────────── Table: Notion 스타일 직접 선택자 ─────────── */
 .markdown table {
