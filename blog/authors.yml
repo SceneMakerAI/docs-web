@@ -10,7 +10,7 @@ minsung:
 sbin:
   name: sbin
   title: SceneMakerAI 팀
-  url: https://github.com/sbin
+  url: https://github.com/sb
   image_url: https://github.com/sbin.png
   page: true
   socials:
@@ -19,7 +19,7 @@ sbin:
 jplee:
   name: jplee
   title: SceneMakerAI 팀
-  url: https://github.com/jplee
+  url: https://github.com/jp
   image_url: https://github.com/jplee.png
   page: true
   socials:
