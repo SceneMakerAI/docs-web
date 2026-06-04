@@ -110,6 +110,12 @@ const config: Config = {
   ],
 
   themeConfig: {
+    algolia: {
+      appId: 'RQYE3XDDN6',
+      apiKey: '50f3471fb257d8d62b9b8007efbf207f',
+      indexName: 'scenemakerai',
+      contextualSearch: true,
+    },
     // OpenGraph / Twitter card 공용 이미지 — sample.pen hero 톤, gemini-3-pro-image-preview 로 생성
     image: 'img/og.jpg',
     colorMode: {
