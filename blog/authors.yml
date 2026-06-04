@@ -3,6 +3,7 @@ minsung:
   title: SceneMakerAI 팀
   url: https://github.com/MinsungIM
   image_url: https://github.com/MinsungIM.png
+  email: minsung7336@solbox.com
   page: true
   socials:
     github: MinsungIM
@@ -12,6 +13,17 @@ sbin:
   title: SceneMakerAI 팀
   url: https://github.com/sbin
   image_url: https://github.com/sbin.png
+  email: sbin@solbox.com
   page: true
   socials:
     github: sbin
+
+jplee:
+  name: jplee
+  title: SceneMakerAI 팀
+  url: https://github.com/jplee
+  image_url: https://github.com/jplee.png
+  email: jplee@solbox.com
+  page: true
+  socials:
+    github: jplee
