@@ -15,3 +15,12 @@ sbin:
   page: true
   socials:
     github: sbin
+
+jplee:
+  name: jplee
+  title: SceneMakerAI 팀
+  url: https://github.com/jplee
+  image_url: https://github.com/jplee.png
+  page: true
+  socials:
+    github: jplee
