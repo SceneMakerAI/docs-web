@@ -1,11 +1,10 @@
 name: Sync main → develop
 
-# 서버 crontab(2분 주기 Notion 동기화)이 main 에 쌓는 콘텐츠
-# (docs/ · docs_en/ · static/img/)를 develop 으로 정기 흡수한다.
-# develop 이 오래된 문서를 들고 있지 않도록 유지하는 역방향 흐름.
+# 서버 crontab이 main 에 쌓는 콘텐츠(docs/ · docs_en/ · blog/ · static/img/)를
+# develop 으로 정기 흡수한다.
 #
-# 충돌이 나면 job 이 실패한다 = 알림. 자동 우회(-X ours/theirs 등)는
-# 쓰지 않는다 — 콘텐츠 손실을 막기 위해 수동 개입을 강제한다.
+# .notion-sync.json 충돌은 자동 해소 (main 버전 채택).
+# 그 외 파일 충돌은 실패 → 수동 개입 강제.
 on:
   schedule:
     - cron: '0 18 * * *'   # 매일 UTC 18:00 = KST 03:00
@@ -29,5 +28,24 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git fetch origin main
-          git merge origin/main -m "chore: main → develop 흡수 [skip-notion]"
+
+          if git merge origin/main -m "chore: main → develop 흡수 [skip-notion]"; then
+            git push origin develop
+            echo "머지 완료 (충돌 없음)"
+            exit 0
+          fi
+
+          # 충돌 발생 — .notion-sync.json 이외의 충돌 파일 확인
+          NON_SYNC=$(git diff --name-only --diff-filter=U | grep -v '\.notion-sync\.json$' || true)
+          if [ -n "$NON_SYNC" ]; then
+            echo "실제 충돌 감지 — 수동 해결 필요:"
+            echo "$NON_SYNC"
+            exit 1
+          fi
+
+          # .notion-sync.json 충돌만 존재 → main 버전으로 자동 해소
+          echo ".notion-sync.json 충돌 자동 해소 (main 버전 채택)"
+          git diff --name-only --diff-filter=U | xargs -r git checkout origin/main --
+          git add -A
+          git commit -m "chore: main → develop 흡수 (sync-json 충돌 자동 해소) [skip-notion]"
           git push origin develop

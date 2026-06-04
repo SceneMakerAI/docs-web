@@ -1,6 +1,6 @@
 name: develop → main 자동 머지
 
-# docs/ docs_en/ static/img/ 제외한 코드 변경이 develop에 있을 때만
+# docs/ docs_en/ blog/ static/img/ 제외한 코드 변경이 develop에 있을 때만
 # npm run build 통과 후 main으로 머지한다.
 
 on:
@@ -21,13 +21,14 @@ jobs:
           ref: develop
           fetch-depth: 0
 
-      - name: 코드 변경 감지 (docs/ 제외)
+      - name: 코드 변경 감지 (콘텐츠 디렉토리 제외)
         id: diff
         run: |
           git fetch origin main
           DIFF=$(git diff origin/main..HEAD -- . \
             ':(exclude)docs/' \
             ':(exclude)docs_en/' \
+            ':(exclude)blog/' \
             ':(exclude)static/img/')
           if [ -z "$DIFF" ]; then
             echo "has_changes=false" >> $GITHUB_OUTPUT
@@ -50,7 +51,7 @@ jobs:
 
       - name: Checkout docs/ from main (빌드용 콘텐츠)
         if: steps.diff.outputs.has_changes == 'true'
-        run: git checkout origin/main -- docs/ docs_en/ static/img/
+        run: git checkout origin/main -- docs/ docs_en/ blog/ static/img/
 
       - name: Build gate
         if: steps.diff.outputs.has_changes == 'true'
@@ -64,5 +65,24 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git checkout main
           git pull origin main
-          git merge develop --no-edit
+
+          if git merge develop --no-edit; then
+            git push origin main
+            echo "머지 완료 (충돌 없음)"
+            exit 0
+          fi
+
+          # 충돌 발생 — .notion-sync.json 이외의 충돌 파일 확인
+          NON_SYNC=$(git diff --name-only --diff-filter=U | grep -v '\.notion-sync\.json$' || true)
+          if [ -n "$NON_SYNC" ]; then
+            echo "실제 충돌 감지 — 수동 해결 필요:"
+            echo "$NON_SYNC"
+            exit 1
+          fi
+
+          # .notion-sync.json 충돌만 존재 → main 버전 유지
+          echo ".notion-sync.json 충돌 자동 해소 (main 버전 유지)"
+          git diff --name-only --diff-filter=U | xargs -r git checkout --ours --
+          git add -A
+          git commit --no-edit
           git push origin main
