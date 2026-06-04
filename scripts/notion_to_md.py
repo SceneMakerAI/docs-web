@@ -34,6 +34,22 @@ _NOTION_LANG_MAP = {
     "java/c/c++/c#": "java",
 }
 
+# code 블록에 표시할 언어 레이블 (title 탭). None이면 탭 없음
+_CODE_TITLE = {
+    'bash': 'Bash',  'shell': 'Bash',  'sh': 'Bash',
+    'json': 'JSON',
+    'python': 'Python',  'py': 'Python',
+    'javascript': 'JavaScript',  'js': 'JavaScript',
+    'typescript': 'TypeScript',  'ts': 'TypeScript',
+    'yaml': 'YAML',  'yml': 'YAML',
+    'sql': 'SQL',
+    'java': 'Java',
+    'cpp': 'C++',  'c': 'C',
+    'go': 'Go',
+    'rust': 'Rust',
+    'text': None,  'plain': None,  'mermaid': None,  'smalltalk': None,
+}
+
 _NOTION_BG_COLOR_NAMES = {
     "gray_background", "brown_background", "orange_background",
     "yellow_background", "green_background", "blue_background",
@@ -447,7 +463,9 @@ def block_to_markdown(block, slug, image_counter):
         language = _NOTION_LANG_MAP.get(raw_lang.lower(), raw_lang)
         raw = extract_text_from_rich_text(block["code"].get("rich_text", []))
         content = _html.unescape(raw)  # Notion이 &lt; &gt; 등을 반환할 때 코드 블록 내 이중 이스케이프 방지
-        return f"```{language}\n{content}\n```\n\n"
+        title = _CODE_TITLE.get(language.lower())
+        title_attr = f' title="{title}"' if title else ''
+        return f"```{language}{title_attr}\n{content}\n```\n\n"
 
     elif b_type == "image":
         url = (
