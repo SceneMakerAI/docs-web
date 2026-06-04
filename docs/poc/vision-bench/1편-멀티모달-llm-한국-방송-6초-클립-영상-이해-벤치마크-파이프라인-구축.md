@@ -7,6 +7,8 @@ last_update:
   date: 2026-06-04
 ---
 
+<br />
+
 **검증 환경:**
 
 AWS g7e.4xlarge(VRAM 96G) vLLM 서빙 / Qwen3-Omni-30B-A3B-Instruct(Qwen 멀티 모달 모델)
@@ -315,47 +317,121 @@ ffmpeg -nostdin -i "$FIRST" \
 
 - **제약:** `len(items) ≤ MAX_BATCH_ITEMS` (기본 128). 초과 시 즉시 **413** (NDJSON 시작 X, 단일 JSON 에러). 응답 헤더에 `X-Batch-Total` (받은 items 수) 동봉.
 
-#### 3.2.4. 클라이언트
+#### 3.2.4. 서버 실행
 
-API 서버는 passthrough이므로 요청 본문 전체(messages·schema·추론 파라미터)를 **클라이언트가 조립** 한다.
+게이트웨이는 `script/service.sh` 로 관리한다.
 
-| **항목** | **내용** |
-| --- | --- |
-| 비디오 인코딩 | mp4 → base64 data URI → `messages[0].content[0].video_url.url` |
-| 프롬프트 조립 | 텍스트 프롬프트(한국어/영어, 스크립트 사용 여부, A/B variant 등) |
-| 출력 스키마 강제 | `response_format.json_schema` 에 `AnalysisResult.model_json_schema()` (strict) |
-| vLLM 확장키 | `mm_processor_kwargs` (fps, use_audio_in_video), `chat_template_kwargs` (`enable_thinking: false` , 사고 토큰 비활성) — 본문 **top-level** |
-| 응답 검증 | `AnalysisResult.model_validate(...)` 로 4필드(`summary/objects/actions/audio` ) 강제 |
+```bash
+./script/service.sh start      # 백그라운드 기동 (healthz OK 까지 대기)
+./script/service.sh status     # PID·healthz·포트 확인
+./script/service.sh restart    # stop → start
+./script/service.sh stop
+```
 
-위 분석으로 정한 **잠정 입력 파라미터** (품질 목적함수 전 baseline · `02_baseline_no_script/run.py` 기본값에 반영):
+- 직접 실행: `PYTHONPATH=src uv run uvicorn app:app --host 0.0.0.0 --port 8001`
+- vLLM 연결·동시성은 `.env` (→ 3.2.2). 대화형 문서: `/docs` (Swagger)
 
-| **파라미터** | **값** | **근거** | **확정도** |
+#### 3.2.5. API 입출력 예시
+
+| **Method** | **Path** | **역할** | **비고** |
 | --- | --- | --- | --- |
-| `temperature` | **0.0** | 저온 최청정 + greedy=결정론(재현성) | ✅ 확정 |
-| `top_p` / `top_k` | 1.0 / -1 | temp=0 이라 inert → 중립값 | (무관) |
-| `frequency_penalty` | **0.0** | 반복은 dedup 이 처리 → 페널티로 recall 미리 깎지 않음 | ⚠️ 잠정 |
-| `repetition_penalty` | 1.0 (off) | freq 와 이중억제 회피 | ⚠️ 잠정 |
-| `max_tokens` | 512 | blast-radius 캡(정상 출력 max 약 335) | ✅ 확정 |
-| `fps` | 0.5 | 토큰 경제적(정확도-fps 는 품질평가에서 재검) | ⚠️ 잠정 |
-| **dedup (후처리)** | **ON** | 정규화 exact-중복 제거, 정보 손실 0 (`build_record` ) | ✅ 확정 |
+| GET | `/healthz` | 헬스체크 | lifespan 통과 후 항상 200. 업스트림 도달 여부는 검사 X |
+| POST | `/chat` | 단건 passthrough | vLLM body 그대로 → 응답 그대로. 업스트림 도달 불가 시 502 |
+| POST | `/chat/batch` | 다건 NDJSON 스트리밍 | 완료 순서로 라인별 흘림 (상세 3.2.3) |
 
-- **페널티를 0 에서 출발하는 이유:** freq 0.5 면 recall 이 크게 준다(actions 4.6→2.8). 그게 잉여 제거(좋음)인지 진짜 정보 삭제(나쁨)인지는 정답지 없이 구분 불가 → 측정 전에 정보를 미리 버리지 않는다. 반복은 이미 dedup 이 처리하므로 페널티의 추가 부담이 없다. 작은 페널티가 최종 유리할 가능성은 가설이며 품질 목적함수(F1)가 판정한다.
+1. `/healthz`
 
-**세부 튜닝(3.4)에서 할 일:** 페널티를 하나만(freq 0\~0.7 또는 rep 1.0\~1.2) Gemini F1 목적함수에 대고 1D 스윕해 크기를 확정. fps 는 정확도 관점으로 별도 검토.
+```json
+{"ok": true}
+```
 
-max_tokens 512 는 blast-radius 캡으로 유지한다.
+1. `/chat` (단건)
+- 입력: 클라가 조립한 vLLM body (base64 영상 + 프롬프트 + strict schema)
 
-> 🎯 **신뢰도 라벨 (게시 정직성)**
->
-> - **1단계에서 확정 (정답지 불필요)**
->   1. 명백한 exact-중복 → dedup
->
->   1. temperature 저온(0\~0.3, ≥0.7 금지)
->
->   1. 파라미터 순응 leverage 순위·방향. 효과가 크고 temp=0 결정론적이라 견고.
->
-> - **섹션 3.4에서 다룰 예정 (상위 모델의 정답지 라벨 필요)**
->   - 페널티 *크기* 최적값 · fps · 전반적 품질(완전·정확). 개수/순응 proxy 로는 recall 을 못 봐 1단계에선 결론 불가 — Gemini 목적함수가 있어야 함.
+```json
+{
+  "model": "qwen",
+  "messages": [{"role": "user", "content": [
+    {"type": "video_url", "video_url": {"url": "data:video/mp4;base64,<...>"}},
+    {"type": "text", "text": "&lt;프롬프트&gt;"}
+  ]}],
+  "temperature": 0.2, "max_tokens": 1024,
+  "response_format": {"type": "json_schema", "json_schema": {"name": "clip_analysis", "strict": true, "schema": "&lt;AnalysisResult 4필드&gt;"}},
+  "mm_processor_kwargs": {"fps": 2.0},
+  "chat_template_kwargs": {"enable_thinking": false}
+}
+```
+
+- 출력: vLLM 응답 그대로 — `choices[0].message.content` 에 strict JSON 문자열:
+
+```json
+{
+  "id": "chatcmpl-...",
+  "choices": [{"message": {"role": "assistant", "content": "&lt;아래 JSON&gt;"}, "finish_reason": "stop"}],
+  "usage": {"prompt_tokens": 11887, "completion_tokens": 190, "total_tokens": 12077}
+}
+```
+
+> 실행: `./script/curl_examples.sh chat`
+
+1. `/chat/batch` (다건) — 입력: `{items:[{id, body}, …]}` (각 body = ②와 동일)
+
+```json
+{"items": [
+  {"id": "0001_0600-0606", "body": {"&lt;②와 동일&gt;"}},
+  {"id": "0002_0606-0612", "body": {"..."}}
+]}
+```
+
+출력: `application/x-ndjson` — 완료 순서로 한 줄씩 (필드 상세 3.2.3):
+
+```javascript
+{"id":"0001_0600-0606","status":200,"elapsed_ms":3104,"body":{&lt;vLLM 응답&gt;}}
+{"id":"0002_0606-0612","status":500,"elapsed_ms":0,"error":"&lt;메시지&gt;"}
+```
+
+> 실행: `./script/curl_examples.sh batch`
+
+### 3.3. 테스트 실행 및 결과
+
+클라이언트 → API 서버 → vLLM 파이프라인을 §3.0 흐름대로 실제 호출해 확인한다. (재현: `experiments/01_pipeline/smoke.py` )
+
+#### 3.3.1. 상태 조회 (`GET /healthz` )
+
+게이트웨이 생존 확인. lifespan 통과 후 항상 200 (업스트림 vLLM 도달 여부는 검사하지 않음).
+
+```javascript
+$ curl -i http://localhost:8001/healthz
+HTTP/1.1 200 OK
+content-type: application/json
+x-request-id: 6da1b40a
+
+{"ok":true}
+```
+
+→ **PASS** — 서버 기동·라우팅 정상, 모든 응답에 `X-Request-Id` 부여 확인.
+
+#### 3.3.2. 단일 추론 (`POST /chat` )
+
+**ⓐ 텍스트만**
+
+*(결과 기입 예정)*
+
+**ⓑ 영상 + 프롬프트**
+
+*(결과 기입 예정)*
+
+**ⓒ 화면 검정 · 음성만**
+
+*(결과 기입 예정)*
+
+#### 3.3.3. 배치 추론 (`POST /chat/batch` )
+
+*(결과 기입 예정)*
+
+#### 3.3.4. 요약
+
+*(API별 PASS·소요시간 표 기입 예정)*
 
 ---
 
