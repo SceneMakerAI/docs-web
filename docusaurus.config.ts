@@ -91,6 +91,14 @@ const config: Config = {
           blogSidebarTitle: '전체 글',
           blogSidebarCount: 'ALL',
           showReadingTime: true,
+          readingTime: ({content}) => {
+            const koreanChars = (content.match(/[가-힯]/g) ?? []).length;
+            const englishWords = (
+              content.replace(/[가-힯ᄀ-ᇿ㄰-㆏]/g, ' ').match(/\S+/g) ?? []
+            ).length;
+            const minutes = koreanChars / 500 + englishWords / 200;
+            return Math.max(1, Math.round(minutes));
+          },
           feedOptions: {
             type: ['rss', 'atom'],
             title: 'SceneMakerAI 블로그',
