@@ -642,6 +642,13 @@ def save_doc_page(page, position, existing_map, parent_slug=None, is_parent=Fals
         raw_slug = read_rich_text_plain(props, NOTION_PROPERTY_SLUG)
         safe_slug = re.sub(r"[^a-z0-9-]", "", raw_slug.lower().replace(" ", "-")) if raw_slug else None
 
+        # Notion에 slug 속성이 없으면 기존 파일에 설정된 slug 보존
+        if not safe_slug and os.path.exists(new_filename):
+            with open(new_filename, encoding="utf-8") as _f:
+                _existing_slug_m = re.search(r"^slug:\s*(\S+)", _f.read(), re.MULTILINE)
+            if _existing_slug_m:
+                safe_slug = _existing_slug_m.group(1)
+
         lines = ["---", f'title: "{safe_title}"', f"date: {date_str}"]
         if safe_slug:
             lines.append(f"slug: {safe_slug}")
