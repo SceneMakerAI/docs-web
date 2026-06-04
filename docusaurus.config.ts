@@ -17,7 +17,10 @@ const config: Config = {
 
   markdown: {
     format: 'detect', // .md → 'md' (plain Markdown), .mdx → 'mdx'. blog 플러그인의 MDX ESM-strict 파싱 충돌 방지
+    mermaid: true,
   },
+
+  themes: ['@docusaurus/theme-mermaid'],
 
   // Set the production url of your site here
   url: 'https://doc.scenemaker.solbox.com',

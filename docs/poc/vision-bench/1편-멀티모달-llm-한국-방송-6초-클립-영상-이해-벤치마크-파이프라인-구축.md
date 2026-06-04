@@ -7,7 +7,6 @@ last_update:
   date: 2026-06-04
 ---
 
-<br />
 
 **검증 환경:**
 
@@ -122,7 +121,6 @@ graph LR
 | **전처리 산출물 용량** | 6초 mp4 (\~1\~3 MB / 클립) | frames JPG 3 장 + wav (\~수백 KB / 클립) |
 | **환각 영향** | 영상·오디오 정렬·맥락 자연 유지 | 키프레임 사이 동작 누락 가능성 |
 
-<br />
 
 ## 3. 테스트
 
@@ -154,7 +152,6 @@ graph LR
 1. **요약·평가**
    - 각 API 가 정상 동작했는지 한눈에 정리한다.
 
-<br />
 
 ### 3.1. 테스트 데이터
 
@@ -179,7 +176,7 @@ graph LR
 
 ```bash
 cd "$(git rev-parse --show-toplevel)"   # 작업 루트(레포 최상위)로 이동
-CAT=&lt;카테고리&gt;; NAME=&lt;원본명&gt;; URL=&lt;테스트 대상 URL&gt;
+CAT=<카테고리>; NAME=<원본명>; URL=<테스트 대상 URL>
 uvx yt-dlp -f "bv*[ext=mp4]+ba[ext=m4a]/b[ext=mp4]/b" \
 --merge-output-format mp4 \
 -o "data/raw/$CAT/$NAME.%(ext)s" "$URL"
@@ -191,7 +188,7 @@ uvx yt-dlp -f "bv*[ext=mp4]+ba[ext=m4a]/b[ext=mp4]/b" \
 
 ```bash
 cd "$(git rev-parse --show-toplevel)"
-CAT=&lt;카테고리&gt;; NAME=&lt;원본명&gt;
+CAT=<카테고리>; NAME=<원본명>
 SRC="data/raw/$CAT/$NAME.mp4"
 OUT="data/clips/$CAT/$NAME"; mkdir -p "$OUT"
 for i in $(seq 0 99); do
@@ -208,7 +205,7 @@ done
 
 ```bash
 cd "$(git rev-parse --show-toplevel)"
-CAT=&lt;카테고리&gt;; NAME=&lt;원본명&gt;
+CAT=<카테고리>; NAME=<원본명>
 OUT="data/clips/$CAT/$NAME"
 FIRST=$(ls "$OUT"/*.mp4 | head -1)          # 분할된 클립 한 개만
 BLACK="data/blackout/$CAT/$NAME"; mkdir -p "$BLACK"
@@ -225,7 +222,6 @@ ffmpeg -nostdin -i "$FIRST" \
 >
 > - 원본이 이미 있으면 다운로드를 건너뜀(원본 보호).
 
-<br />
 
 **최종 테스트 클립 데이터**
 
@@ -250,7 +246,6 @@ ffmpeg -nostdin -i "$FIRST" \
 >
 > - 평가 종료 후 로컬 영상·산출물은 보관기간 정책에 따라 **폐기** 한다.
 
-<br />
 
 ### 3.2. 분석 서버 (vLLM 앞단 API 게이트웨이)
 
@@ -296,7 +291,7 @@ ffmpeg -nostdin -i "$FIRST" \
 
 ```json
 {"items": [
-  {"id": "0001_0600-0606", "body": {&lt;vLLM chat.completions body — /chat 와 동일&gt;}},
+  {"id": "0001_0600-0606", "body": {<vLLM chat.completions body — /chat 와 동일>}},
   {"id": "0002_0606-0612", "body": {<...>}}
 ]}
 ```
@@ -304,8 +299,8 @@ ffmpeg -nostdin -i "$FIRST" \
 응답 (라인 1개 = JSON 객체 1개, 줄바꿈 구분):
 
 ```json
-{"id": "0001_0600-0606", "status": 200, "elapsed_ms": 3104, "body": {&lt;vLLM 응답&gt;}}
-{"id": "0002_0606-0612", "status": 500, "elapsed_ms": 0, "error": "&lt;메시지&gt;"}
+{"id": "0001_0600-0606", "status": 200, "elapsed_ms": 3104, "body": {<vLLM 응답>}}
+{"id": "0002_0606-0612", "status": 500, "elapsed_ms": 0, "error": "<메시지>"}
 ```
 
 | **필드** | **의미** |
@@ -353,10 +348,10 @@ ffmpeg -nostdin -i "$FIRST" \
   "model": "qwen",
   "messages": [{"role": "user", "content": [
     {"type": "video_url", "video_url": {"url": "data:video/mp4;base64,<...>"}},
-    {"type": "text", "text": "&lt;프롬프트&gt;"}
+    {"type": "text", "text": "<프롬프트>"}
   ]}],
   "temperature": 0.2, "max_tokens": 1024,
-  "response_format": {"type": "json_schema", "json_schema": {"name": "clip_analysis", "strict": true, "schema": "&lt;AnalysisResult 4필드&gt;"}},
+  "response_format": {"type": "json_schema", "json_schema": {"name": "clip_analysis", "strict": true, "schema": "<AnalysisResult 4필드>"}},
   "mm_processor_kwargs": {"fps": 2.0},
   "chat_template_kwargs": {"enable_thinking": false}
 }
@@ -367,7 +362,7 @@ ffmpeg -nostdin -i "$FIRST" \
 ```json
 {
   "id": "chatcmpl-...",
-  "choices": [{"message": {"role": "assistant", "content": "&lt;아래 JSON&gt;"}, "finish_reason": "stop"}],
+  "choices": [{"message": {"role": "assistant", "content": "<아래 JSON>"}, "finish_reason": "stop"}],
   "usage": {"prompt_tokens": 11887, "completion_tokens": 190, "total_tokens": 12077}
 }
 ```
@@ -378,7 +373,7 @@ ffmpeg -nostdin -i "$FIRST" \
 
 ```json
 {"items": [
-  {"id": "0001_0600-0606", "body": {"&lt;②와 동일&gt;"}},
+  {"id": "0001_0600-0606", "body": {"<②와 동일>"}},
   {"id": "0002_0606-0612", "body": {"..."}}
 ]}
 ```
@@ -386,8 +381,8 @@ ffmpeg -nostdin -i "$FIRST" \
 출력: `application/x-ndjson` — 완료 순서로 한 줄씩 (필드 상세 3.2.3):
 
 ```javascript
-{"id":"0001_0600-0606","status":200,"elapsed_ms":3104,"body":{&lt;vLLM 응답&gt;}}
-{"id":"0002_0606-0612","status":500,"elapsed_ms":0,"error":"&lt;메시지&gt;"}
+{"id":"0001_0600-0606","status":200,"elapsed_ms":3104,"body":{<vLLM 응답>}}
+{"id":"0002_0606-0612","status":500,"elapsed_ms":0,"error":"<메시지>"}
 ```
 
 > 실행: `./script/curl_examples.sh batch`
@@ -400,7 +395,7 @@ ffmpeg -nostdin -i "$FIRST" \
 
 게이트웨이 생존 확인. lifespan 통과 후 항상 200 (업스트림 vLLM 도달 여부는 검사하지 않음).
 
-```javascript
+```bash
 $ curl -i http://localhost:8001/healthz
 HTTP/1.1 200 OK
 content-type: application/json
@@ -413,13 +408,100 @@ x-request-id: 6da1b40a
 
 #### 3.3.2. 단일 추론 (`POST /chat` )
 
-**ⓐ 텍스트만**
+1. **텍스트추론**
+- 요청
 
-*(결과 기입 예정)*
+```bash
+curl -sS -X POST http://localhost:8001/chat \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "qwen",
+    "messages": [{"role": "user", "content": [
+      {"type": "text", "text": "한국어로 자기소개를 한 문장으로 해줘."}
+    ]}]
+  }' | jq
+```
 
-**ⓑ 영상 + 프롬프트**
+- 응답
 
-*(결과 기입 예정)*
+```json
+{
+  "id": "chatcmpl-bf2131310aa31d88",
+  "object": "chat.completion",
+  "created": 1780555306,
+  "prompt_routed_experts": null,
+  "model": "qwen",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "저는 열정적이며 책임감 있는 사람이며, 부여된 역할을 최선을 다해 성실히 수행합니다.",
+        "refusal": null,
+        "annotations": null,
+        "audio": null,
+        "function_call": null,
+        "tool_calls": [],
+        "reasoning": null
+      },
+      "logprobs": null,
+      "finish_reason": "stop",
+      "stop_reason": null,
+      "token_ids": null,
+      "routed_experts": null
+    }
+  ],
+  "service_tier": null,
+  "system_fingerprint": "vllm-0.21.0-4a8d85e0",
+  "usage": {
+    "prompt_tokens": 23,
+    "total_tokens": 55,
+    "completion_tokens": 32,
+    "prompt_tokens_details": null
+  },
+  "prompt_logprobs": null,
+  "prompt_token_ids": null,
+  "prompt_text": null,
+  "kv_transfer_params": null
+}
+```
+
+1. **영상 + 프롬프트**
+- 요청 — 영상 base64 가 커서 payload 를 파일로 빌드 후 전송(`--data-binary` ). 영상은 **저온(temperature 0)** 권장 — 고온 기본값은 이종문자 degeneration 유발(편2).
+
+```bash
+CLIP=data/clips/baseball/baseball/0001_0600-0606.mp4
+PYTHONPATH=src uv run python - "$CLIP" <<'PY'
+import base64, json, sys
+b = base64.b64encode(open(sys.argv[1],"rb").read()).decode()
+json.dump({"model":"qwen","messages":[{"role":"user","content":[
+    {"type":"video_url","video_url":{"url":"data:video/mp4;base64,"+b}},
+    {"type":"text","text":"이 영상의 장면을 한국어로 묘사해줘."}]}],
+  "temperature":0.0,
+  "mm_processor_kwargs":{"fps":0.5,"use_audio_in_video":True},
+  "chat_template_kwargs":{"enable_thinking":False}}, open("/tmp/req.json","w"), ensure_ascii=False)
+PY
+curl -sS -X POST http://localhost:8001/chat -H "Content-Type: application/json" --data-binary @/tmp/req.json | jq
+```
+
+- 응답 (주요 필드)
+
+```json
+{
+  "id": "chatcmpl-...",
+  "model": "qwen",
+  "choices": [{
+    "index": 0,
+    "message": {"role": "assistant", "content": "이 영상은 야구 경기의 한 장면을 보여줍니다. 경기장의 관중석에 앉아 있는 감독이 등장합니다. 그는 빨간색 모자와 선글라스를 착용하고 있으며, 흰색과 빨간색이 조화를 이루는 유니폼을 입고 있습니다. 감독은 팔짱을 끼고 경기를 집중적으로 관찰하고 있습니다. 배경에는 'Pocari Sweat'라는 광고판이 보입니다."},
+    "finish_reason": "stop"
+  }],
+  "usage": {"prompt_tokens": 3631, "completion_tokens": 240, "total_tokens": 3871}
+}
+```
+
+→ **PASS** — 영상을 실제로 읽어 한국어로 장면 묘사(감독·복장·광고판). 영상 토큰 prompt 3,631 (360p · fps 0.5).
+
+> ⚠️ 자유 생성(schema 미사용) 시 content 앞에 `assistant\n` role prefix 가 붙음(편2/3 strict JSON 경로에선 제거). `temperature` 미지정(고온 기본값)이면 이종문자 degeneration → 저온 고정 필요(편2).
 
 **ⓒ 화면 검정 · 음성만**
 

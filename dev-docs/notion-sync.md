@@ -61,3 +61,53 @@ Notion "하위 항목" relation을 읽어 자동으로 계층 구조를 결정�
 ```bash
 NOTION_TOKEN=... NOTION_DATABASE_ID=... SAVE_DIR=docs/guide python3 scripts/notion_to_md.py
 ```
+
+### 특정 페이지 강제 재취득 (캐시 무효화)
+
+`notion_to_md.py`는 `.notion-sync.json`에 `last_edited` 타임스탬프를 캐시해 변경 없으면 스킵한다.
+Notion 원복·강제 재sync 시 캐시를 초기화해야 한다:
+
+```bash
+python3 -c "
+import json
+path = 'docs/{section}/.notion-sync.json'
+with open(path) as f: d = json.load(f)
+for v in d.values():
+    if '원하는-파일명' in v.get('file', ''):
+        v['last_edited'] = ''
+        v['content_hash'] = ''
+with open(path, 'w') as f: json.dump(d, f, ensure_ascii=False, indent=2)
+"
+```
+
+---
+
+## 알려진 변환 문제 및 수정 이력
+
+Notion → Markdown 변환 과정에서 발생했던 버그들. **이미 수정됨** — 재발 방지를 위해 기록.
+
+| 문제 | 원인 | 수정 방법 | 수정 위치 |
+|------|------|---------|---------|
+| **Mermaid 다이어그램이 코드 텍스트로 표시** | `@docusaurus/theme-mermaid` 미설치 | 패키지 설치 + `docusaurus.config.ts`에 `markdown.mermaid: true` · `themes` 추가 | `docusaurus.config.ts` |
+| **코드 블록 안 `<한글>` 이 `&lt;한글&gt;`로 표시** | `escape_mdx_angle_brackets()`가 코드 블록 내부까지 이스케이프 | 코드 블록(` ``` `)을 분리 후 외부만 이스케이프 | `notion_to_md.py` `escape_mdx_angle_brackets()` |
+| **`<br />` 아티팩트** | Notion 빈 단락 블록 → `<br />`로 변환 | 빈 단락 → `\n` 처리 | `notion_to_md.py` `block_to_markdown()` paragraph 분기 |
+| **`<summary>**bold**` 토글 화살표 겹침** | MDX에서 `<summary>` 내 마크다운 미처리 | summary 내 `**bold**` → `<strong>bold</strong>` 변환 | `notion_to_md.py` toggle 분기 |
+
+### Mermaid 지원 설정 (현재 적용됨)
+
+`docusaurus.config.ts`:
+```ts
+markdown: {
+  format: 'detect',
+  mermaid: true,   // ← 추가됨
+},
+themes: ['@docusaurus/theme-mermaid'],  // ← 추가됨
+```
+
+Notion 코드 블록 언어를 `mermaid`로 설정하면 SVG 다이어그램으로 렌더링된다.
+
+### 코드 블록 안 꺾쇠 (`<`, `>`) 주의사항
+
+- Notion 코드 블록에 `<한글>` 같은 비ASCII 꺾쇠 패턴이 있으면 Docusaurus에서 정상 렌더링됨 (수정 후)
+- `<ASCII>` 패턴(예: `<URL>`, `<tag>`)은 이스케이프 없이 그대로 출력됨
+- 본문 일반 텍스트의 `<한글>` 은 MDX JSX 파싱 오류 방지를 위해 `&lt;한글&gt;`로 이스케이프됨 (정상 동작)

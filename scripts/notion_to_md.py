@@ -445,7 +445,8 @@ def block_to_markdown(block, slug, image_counter):
     elif b_type == "code":
         raw_lang = block["code"].get("language", "text")
         language = _NOTION_LANG_MAP.get(raw_lang.lower(), raw_lang)
-        content = extract_text_from_rich_text(block["code"].get("rich_text", []))
+        raw = extract_text_from_rich_text(block["code"].get("rich_text", []))
+        content = _html.unescape(raw)  # Notion이 &lt; &gt; 등을 반환할 때 코드 블록 내 이중 이스케이프 방지
         return f"```{language}\n{content}\n```\n\n"
 
     elif b_type == "image":
@@ -471,8 +472,16 @@ def block_to_markdown(block, slug, image_counter):
 
 
 def escape_mdx_angle_brackets(text):
-    """<한글> 같이 비 ASCII를 포함한 꺾쇠 패턴을 MDX가 태그로 해석하지 않도록 이스케이프."""
-    return re.sub(r'<([^>]*[^\x00-\x7F][^>]*)>', r'&lt;\1&gt;', text)
+    """<한글> 같이 비 ASCII를 포함한 꺾쇠 패턴을 MDX가 태그로 해석하지 않도록 이스케이프.
+    코드 블록(```...```) 내부는 건너뜀 — 코드에서는 < > 를 이스케이프하면 안 됨."""
+    parts = re.split(r'(```[\s\S]*?```)', text)
+    result = []
+    for i, part in enumerate(parts):
+        if i % 2 == 1:  # 코드 블록 — 그대로 유지
+            result.append(part)
+        else:
+            result.append(re.sub(r'<([^>]*[^\x00-\x7F][^>]*)>', r'&lt;\1&gt;', part))
+    return ''.join(result)
 
 
 def escape_single_tildes(text):
