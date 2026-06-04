@@ -249,8 +249,8 @@ const config: Config = {
       copyright: `Copyright © ${new Date().getFullYear()} SceneMakerAI · Solbox Inc. Built with Docusaurus.`,
     },
     prism: {
-      theme: prismThemes.vsDark,
-      darkTheme: prismThemes.vsDark,
+      theme: prismThemes.oneDark,
+      darkTheme: prismThemes.oneDark,
       additionalLanguages: ['bash', 'shell-session'],
     },
   } satisfies Preset.ThemeConfig,
