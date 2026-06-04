@@ -148,6 +148,14 @@ def _normalize_cached(cached):
     return cached if isinstance(cached, dict) else {}
 
 
+def _frontmatter_key(frontmatter_str):
+    """title/id 제외 frontmatter 해시 — description/tags/keywords/last_update 변경 감지."""
+    lines = frontmatter_str.split('\n')
+    key_lines = [l for l in lines if l and l not in ('---',)
+                 and not l.startswith('title:') and not l.startswith('id:')]
+    return hashlib.sha256('\n'.join(key_lines).encode()).hexdigest()
+
+
 def get_changed_docs_files():
     """working tree 기준으로 docs/ 에서 변경·추가된 .md 파일 목록 반환."""
     r1 = subprocess.run(
@@ -227,9 +235,12 @@ def translate_file(kr_path, hashes):
     slug = slug_m.group(1) if slug_m else ""
     pos  = pos_m.group(1)  if pos_m  else ""
 
-    cached   = _normalize_cached(hashes.get(kr_path, {}))
+    cached    = _normalize_cached(hashes.get(kr_path, {}))
+    fm_hash   = _frontmatter_key(frontmatter)
     body_same = (cached.get("body_hash") == body_hash)
-    meta_same = (cached.get("slug") == slug and cached.get("sidebar_position") == pos)
+    meta_same = (cached.get("slug") == slug
+                 and cached.get("sidebar_position") == pos
+                 and cached.get("frontmatter_hash", "") == fm_hash)
 
     if body_same and meta_same:
         log(f"변경 없음, 스킵: {kr_path}")
@@ -240,13 +251,16 @@ def translate_file(kr_path, hashes):
     en_path = "docs_en/" + kr_path[len("docs/"):]
     os.makedirs(os.path.dirname(en_path), exist_ok=True)
 
+    def _new_cache():
+        return {"body_hash": body_hash, "slug": slug, "sidebar_position": pos, "frontmatter_hash": fm_hash}
+
     if body_same and os.path.exists(en_path):
-        # slug/sidebar_position만 바뀐 경우 — DeepL 불필요, frontmatter만 동기화
+        # body 동일 — frontmatter만 동기화 (DeepL 최소 호출)
         with open(en_path, encoding="utf-8") as f:
             existing_en = f.read()
         en_match = re.match(r"^(---\n.*?\n---\n\n)(.*)", existing_en, re.DOTALL)
         if en_match and en_match.group(2).strip():
-            # 기존 EN 제목(이미 번역됨) 보존, slug/sidebar_position 교체
+            # 제목: 기존 EN 번역 보존
             kr_title_m = re.search(r'^title: "(.+)"', en_frontmatter, re.MULTILINE)
             en_title_m = re.search(r'^title: "(.+)"', en_match.group(1), re.MULTILINE)
             if kr_title_m and en_title_m:
@@ -254,12 +268,28 @@ def translate_file(kr_path, hashes):
                     f'title: "{kr_title_m.group(1)}"',
                     f'title: "{en_title_m.group(1)}"', 1
                 )
+            # description: EN에 이미 번역된 값 있으면 유지, 없거나 KR과 같으면 DeepL 번역
+            kr_desc_m = re.search(r'^description: "(.+)"', en_frontmatter, re.MULTILINE)
+            en_desc_m = re.search(r'^description: "(.+)"', en_match.group(1), re.MULTILINE)
+            if kr_desc_m:
+                if en_desc_m and en_desc_m.group(1) != kr_desc_m.group(1):
+                    en_frontmatter = en_frontmatter.replace(
+                        f'description: "{kr_desc_m.group(1)}"',
+                        f'description: "{en_desc_m.group(1)}"', 1
+                    )
+                else:
+                    en_desc = translate_with_deepl(kr_desc_m.group(1))
+                    en_frontmatter = en_frontmatter.replace(
+                        f'description: "{kr_desc_m.group(1)}"',
+                        f'description: "{en_desc}"', 1
+                    )
+            # tags / keywords / last_update: 번역 불필요, en_frontmatter에 KR값 그대로 유지
             with open(en_path, "w", encoding="utf-8") as f:
                 f.write(en_frontmatter + en_match.group(2))
-            hashes[kr_path] = {"body_hash": body_hash, "slug": slug, "sidebar_position": pos}
+            hashes[kr_path] = _new_cache()
             log(f"frontmatter 동기화 (본문 동일): {kr_path} → {en_path}")
             return
-        # EN body가 비어있으면 전체 재번역으로 fall-through
+        # EN body 비어있으면 전체 재번역으로 fall-through
 
     # body 변경 → 전체 번역
     title_match = re.search(r'^title: "(.+)"', en_frontmatter, re.MULTILINE)
@@ -267,6 +297,13 @@ def translate_file(kr_path, hashes):
         kr_title = title_match.group(1)
         en_title = translate_with_deepl(kr_title)
         en_frontmatter = en_frontmatter.replace(f'title: "{kr_title}"', f'title: "{en_title}"', 1)
+
+    # description 번역
+    desc_match = re.search(r'^description: "(.+)"', en_frontmatter, re.MULTILINE)
+    if desc_match:
+        kr_desc = desc_match.group(1)
+        en_desc = translate_with_deepl(kr_desc)
+        en_frontmatter = en_frontmatter.replace(f'description: "{kr_desc}"', f'description: "{en_desc}"', 1)
 
     # 프로그래밍 언어 코드 블록 보호 (bash/yaml/python 등 번역 방지)
     body_no_code, code_store = _protect_code_blocks(body)
@@ -282,7 +319,7 @@ def translate_file(kr_path, hashes):
     with open(en_path, "w", encoding="utf-8") as f:
         f.write(en_frontmatter + en_body)
 
-    hashes[kr_path] = {"body_hash": body_hash, "slug": slug, "sidebar_position": pos}
+    hashes[kr_path] = _new_cache()
     log(f"{kr_path} → {en_path}")
 
 
