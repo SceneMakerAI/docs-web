@@ -200,6 +200,27 @@ tail -f /var/log/notion-sync.log
 - 하위 항목 없는 페이지 → `docs/{section}/{slug}.md` (평면)
 - 하위 항목 있는 부모 → `docs/{section}/{slug}/index.md` + `_category_.json` 자동 생성
 - 자식 페이지 → `docs/{section}/{parent-slug}/{child-slug}.md`
+- frontmatter → `id`, `title`, `sidebar_position`, `slug` 필수. `description`, `tags`, `keywords`, `last_update` 선택 (Notion 속성 있을 때만 자동 삽입)
+
+### Notion Docs DB 권장 속성
+
+| 속성명 | Notion 타입 | frontmatter 필드 | 비고 |
+|--------|------------|-----------------|------|
+| `제목` | title | `title:` | 필수 (기본 속성) |
+| `순서` | number | `sidebar_position:` | 필수 — 사이드바 순서 |
+| `하위 항목` | relation | 계층 구조 | 필수 — 부모/자식 관계 |
+| `최종 편집 일시` | last_edited_time | `last_update.date:` | 이미 있음 → 자동 삽입 |
+| `description` | rich_text | `description:` | **추가 권장** — SEO meta description |
+| `tags` | multi_select | `tags:` + `keywords:` | **추가 권장** — 태그 및 SEO 키워드 |
+
+> `description`과 `tags` 속성을 Notion 각 Docs DB에 추가하면 다음 sync부터 frontmatter에 자동 반영된다.
+> 속성이 없거나 비어있으면 해당 필드는 frontmatter에서 생략된다 (하위 호환).
+
+| 환경변수 | 기본값 | 설명 |
+|---------|--------|------|
+| `NOTION_PROPERTY_DESCRIPTION` | `description` | 설명 속성명 |
+| `NOTION_PROPERTY_TAGS` | `tags` | 태그 속성명 |
+| `NOTION_PROPERTY_DOCS_LAST_EDITED` | `최종 편집 일시` | 최종수정일 속성명 |
 
 **blog 모드** (`SAVE_DIR=blog`): Notion 속성을 blog 플러그인 frontmatter로 변환한다.
 

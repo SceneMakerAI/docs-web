@@ -96,6 +96,8 @@ NOTION_PROPERTY_AUTHORS          = os.environ.get("NOTION_PROPERTY_AUTHORS", "au
 NOTION_PROPERTY_DESCRIPTION      = os.environ.get("NOTION_PROPERTY_DESCRIPTION", "description")
 NOTION_PROPERTY_TAGS             = os.environ.get("NOTION_PROPERTY_TAGS", "tags")
 NOTION_PROPERTY_SLUG             = os.environ.get("NOTION_PROPERTY_SLUG", "slug")
+# Docs mode 선택 속성 (없으면 frontmatter에서 생략)
+NOTION_PROPERTY_DOCS_LAST_EDITED = os.environ.get("NOTION_PROPERTY_DOCS_LAST_EDITED", "최종 편집 일시")
 
 
 SYNC_MAP_FILE = f"{SAVE_DIR}/.notion-sync.json"
@@ -657,22 +659,33 @@ def save_doc_page(page, position, existing_map, parent_slug=None, is_parent=Fals
     # 부모 index.md는 id를 생략 → Docusaurus가 파일경로 기반으로 ID 부여 (section/slug/index)
     # 자식·평면 페이지는 id를 명시 (section 내 고유 식별자)
     elif is_parent:
-        frontmatter = (
-            f"---\n"
-            f'title: "{safe_title}"\n'
-            f"sidebar_position: {order}\n"
-            f'slug: "{url_slug}"\n'
-            f"---\n\n"
-        )
+        _desc = read_rich_text_plain(props, NOTION_PROPERTY_DESCRIPTION)
+        _tags = read_multi_select(props, NOTION_PROPERTY_TAGS)
+        _last_edit = read_last_edited_time_prop(props, NOTION_PROPERTY_DOCS_LAST_EDITED)
+        _lines = ["---", f'title: "{safe_title}"', f"sidebar_position: {order}", f'slug: "{url_slug}"']
+        if _desc:
+            _lines.append(f'description: "{_desc.replace(chr(34), chr(92)+chr(34))}"')
+        if _tags:
+            _lines.append(f"tags: [{', '.join(_tags)}]")
+            _lines.append(f"keywords: [{', '.join(_tags)}]")
+        if _last_edit:
+            _lines.extend(["last_update:", f"  date: {_last_edit}"])
+        _lines.append("---\n")
+        frontmatter = "\n".join(_lines) + "\n"
     else:
-        frontmatter = (
-            f"---\n"
-            f"id: {slug}\n"
-            f'title: "{safe_title}"\n'
-            f"sidebar_position: {order}\n"
-            f'slug: "{url_slug}"\n'
-            f"---\n\n"
-        )
+        _desc = read_rich_text_plain(props, NOTION_PROPERTY_DESCRIPTION)
+        _tags = read_multi_select(props, NOTION_PROPERTY_TAGS)
+        _last_edit = read_last_edited_time_prop(props, NOTION_PROPERTY_DOCS_LAST_EDITED)
+        _lines = ["---", f"id: {slug}", f'title: "{safe_title}"', f"sidebar_position: {order}", f'slug: "{url_slug}"']
+        if _desc:
+            _lines.append(f'description: "{_desc.replace(chr(34), chr(92)+chr(34))}"')
+        if _tags:
+            _lines.append(f"tags: [{', '.join(_tags)}]")
+            _lines.append(f"keywords: [{', '.join(_tags)}]")
+        if _last_edit:
+            _lines.extend(["last_update:", f"  date: {_last_edit}"])
+        _lines.append("---\n")
+        frontmatter = "\n".join(_lines) + "\n"
 
     if is_parent:
         generate_category_json(f"{SAVE_DIR}/{slug}", title, order)
