@@ -174,7 +174,7 @@ graph LR
 - **전제** : `uv` (→ `uvx` )·`ffmpeg` 설치 (ffmpeg는 영상+오디오 스트림 병합에 필요)
 1. **원본 다운로드** — 표의 각 URL을 해당 카테고리 폴더로
 
-```bash title="Bash"
+```bash
 cd "$(git rev-parse --show-toplevel)"   # 작업 루트(레포 최상위)로 이동
 CAT=<카테고리>; NAME=<원본명>; URL=<테스트 대상 URL>
 uvx yt-dlp -f "bv*[ext=mp4]+ba[ext=m4a]/b[ext=mp4]/b" \
@@ -186,7 +186,7 @@ uvx yt-dlp -f "bv*[ext=mp4]+ba[ext=m4a]/b[ext=mp4]/b" \
 - `00:10:00~00:20:00` (원본 600\~1200s) 구간을 6초 100클립으로 분할. 파일명에 원본 절대초 인코딩
 - `data/clips/{category}/{원본명}/{seq}_{start}-{end}.mp4`
 
-```bash title="Bash"
+```bash
 cd "$(git rev-parse --show-toplevel)"
 CAT=<카테고리>; NAME=<원본명>
 SRC="data/raw/$CAT/$NAME.mp4"
@@ -203,7 +203,7 @@ done
 
    - `data/blackout/{category}/{원본명}/`
 
-```bash title="Bash"
+```bash
 cd "$(git rev-parse --show-toplevel)"
 CAT=<카테고리>; NAME=<원본명>
 OUT="data/clips/$CAT/$NAME"
@@ -289,7 +289,7 @@ ffmpeg -nostdin -i "$FIRST" \
 
 요청 본문:
 
-```json title="JSON"
+```json
 {"items": [
   {"id": "0001_0600-0606", "body": {<vLLM chat.completions body — /chat 와 동일>}},
   {"id": "0002_0606-0612", "body": {<...>}}
@@ -298,7 +298,7 @@ ffmpeg -nostdin -i "$FIRST" \
 
 응답 (라인 1개 = JSON 객체 1개, 줄바꿈 구분):
 
-```json title="JSON"
+```json
 {"id": "0001_0600-0606", "status": 200, "elapsed_ms": 3104, "body": {<vLLM 응답>}}
 {"id": "0002_0606-0612", "status": 500, "elapsed_ms": 0, "error": "<메시지>"}
 ```
@@ -316,7 +316,7 @@ ffmpeg -nostdin -i "$FIRST" \
 
 게이트웨이는 `script/service.sh` 로 관리한다.
 
-```bash title="Bash"
+```bash
 ./script/service.sh start      # 백그라운드 기동 (healthz OK 까지 대기)
 ./script/service.sh status     # PID·healthz·포트 확인
 ./script/service.sh restart    # stop → start
@@ -336,14 +336,14 @@ ffmpeg -nostdin -i "$FIRST" \
 
 1. `/healthz`
 
-```json title="JSON"
+```json
 {"ok": true}
 ```
 
 1. `/chat` (단건)
 - 입력: 클라가 조립한 vLLM body (base64 영상 + 프롬프트 + strict schema)
 
-```json title="JSON"
+```json
 {
   "model": "qwen",
   "messages": [{"role": "user", "content": [
@@ -359,7 +359,7 @@ ffmpeg -nostdin -i "$FIRST" \
 
 - 출력: vLLM 응답 그대로 — `choices[0].message.content` 에 strict JSON 문자열:
 
-```json title="JSON"
+```json
 {
   "id": "chatcmpl-...",
   "choices": [{"message": {"role": "assistant", "content": "<아래 JSON>"}, "finish_reason": "stop"}],
@@ -371,7 +371,7 @@ ffmpeg -nostdin -i "$FIRST" \
 
 1. `/chat/batch` (다건) — 입력: `{items:[{id, body}, …]}` (각 body = ②와 동일)
 
-```json title="JSON"
+```json
 {"items": [
   {"id": "0001_0600-0606", "body": {"<②와 동일>"}},
   {"id": "0002_0606-0612", "body": {"..."}}
@@ -380,7 +380,7 @@ ffmpeg -nostdin -i "$FIRST" \
 
 출력: `application/x-ndjson` — 완료 순서로 한 줄씩 (필드 상세 3.2.3):
 
-```javascript title="JavaScript"
+```javascript
 {"id":"0001_0600-0606","status":200,"elapsed_ms":3104,"body":{<vLLM 응답>}}
 {"id":"0002_0606-0612","status":500,"elapsed_ms":0,"error":"<메시지>"}
 ```
@@ -395,7 +395,7 @@ ffmpeg -nostdin -i "$FIRST" \
 
 게이트웨이 생존 확인. lifespan 통과 후 항상 200 (업스트림 vLLM 도달 여부는 검사하지 않음).
 
-```bash title="Bash"
+```bash
 $ curl -i http://localhost:8001/healthz
 HTTP/1.1 200 OK
 content-type: application/json
@@ -411,7 +411,7 @@ x-request-id: 6da1b40a
 1. **텍스트추론**
 - 요청
 
-```bash title="Bash"
+```bash
 curl -sS -X POST http://localhost:8001/chat \
   -H "Content-Type: application/json" \
   -d '{
@@ -424,7 +424,7 @@ curl -sS -X POST http://localhost:8001/chat \
 
 - 응답
 
-```json title="JSON"
+```json
 {
   "id": "chatcmpl-bf2131310aa31d88",
   "object": "chat.completion",
@@ -469,7 +469,7 @@ curl -sS -X POST http://localhost:8001/chat \
 1. **영상 + 프롬프트**
 - 요청 — 영상 base64 가 커서 payload 를 파일로 빌드 후 전송(`--data-binary` ). 영상은 **저온(temperature 0)** 권장 — 고온 기본값은 이종문자 degeneration 유발(편2).
 
-```bash title="Bash"
+```bash
 CLIP=data/clips/baseball/baseball/0001_0600-0606.mp4
 PYTHONPATH=src uv run python - "$CLIP" <<'PY'
 import base64, json, sys
@@ -486,7 +486,7 @@ curl -sS -X POST http://localhost:8001/chat -H "Content-Type: application/json" 
 
 - 응답 (주요 필드)
 
-```json title="JSON"
+```json
 {
   "id": "chatcmpl-...",
   "model": "qwen",
