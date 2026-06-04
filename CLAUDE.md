@@ -294,23 +294,46 @@ NOTION_TOKEN=... NOTION_DATABASE_ID=... SAVE_DIR=docs/guide python3 scripts/noti
 |----------|--------|------|
 | **콘텐츠 변경** (Markdown 추가·수정, EN 번역) | `main` 직접 커밋 | Notion 자동 동기화 포함 |
 | **버그픽스·CI 수정·설정 소폭 변경** | `main` 직접 커밋 | 영향 범위가 작고 명확한 경우 |
+| **UI 변경** (CSS·컴포넌트·디자인·레이아웃) | `design` 브랜치 | 작업 후 main에 merge |
 | **기능 추가** (새 기능·컴포넌트·스크립트 신규) | `feat/<이름>` 브랜치 | 작업 후 main에 merge, 브랜치 삭제 |
 
-```
-# 기능 추가 시
-git checkout -b feat/<이름>
+### UI 변경 — `design` 브랜치
+
+`src/css/`, `src/components/`, `src/pages/` 수정 및 디자인 토큰·레이아웃 변경은 반드시 `design` 브랜치에서 작업한다.
+
+```bash
+# design 브랜치 시작
+git checkout design 2>/dev/null || git checkout -b design
 git rebase origin/main             # 작업 전 반드시 main 최신 상태 반영
+# ... UI 작업 ...
+git push origin design
+
+# main으로 머지
+git checkout main
+git pull --rebase origin main
+git merge design
+git push origin main
+```
+
+> `design` 브랜치는 삭제하지 않고 유지한다 (UI 작업 전용 장기 브랜치).
+> Notion 자동 동기화가 `main`에 직접 커밋하므로, `design` 브랜치 작업 시작 전 `rebase origin/main`을 반드시 실행할 것.
+
+### 기능 추가 — `feat/<이름>` 브랜치
+
+```bash
+git checkout -b feat/<이름>
+git rebase origin/main
 # ... 작업 ...
 git push origin feat/<이름>
 git checkout main
-git pull --rebase origin main      # merge 전 main 최신화
+git pull --rebase origin main
 git merge feat/<이름>
 git push origin main
 git branch -d feat/<이름>          # 로컬 브랜치 정리
 git push origin --delete feat/<이름>  # 원격 브랜치 정리
 ```
 
-> Notion 자동 동기화가 `main`에 직접 커밋하므로, `feat/` 브랜치 작업 시작 전 `rebase origin/main`을 생략하면 merge conflict가 발생한다.
+> Notion 자동 동기화가 `main`에 직접 커밋하므로, 브랜치 작업 시작 전 `rebase origin/main`을 생략하면 merge conflict가 발생한다.
 
 **자동화 워크플로우 (수동 개입 불필요):**
 - `sync-develop.yml` — 매일 KST 03:00에 main 콘텐츠를 develop으로 자동 흡수 (`.notion-sync.json` 충돌 자동 해소)
