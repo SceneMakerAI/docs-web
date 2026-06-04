@@ -164,8 +164,8 @@ GitHub Actions가 아닌 **서버에서 직접 crontab으로 30분마다** 실�
 2. 8개 Notion DB 병렬 동기화 (`notion_to_md.py`, `FETCH_MODE=ALL`)
    - `docs/about|architecture|contribute|guide|install|poc|release-notes/` (7개) → docs 플러그인
    - `blog/` (1개) → blog 플러그인 frontmatter 형식 (`date`, `authors`, `tags` 등 자동 생성)
-3. `translate_to_en.py` — 변경된 KR 파일 DeepL 번역 → `docs_en/` 저장
-4. 변경사항 있으면 `git commit + push` → `deploy.yml` 트리거 → GH Pages 배포
+3. 변경사항 있으면 `git commit + push` → `deploy.yml` 트리거 → GH Pages 배포
+4. *(EN 번역은 Crowdin GitHub Actions 워크플로우가 별도 처리)*
 
 환경변수는 `/root/docs-web/.env` 파일에서 로드한다 (레포에 포함되지 않음).
 
@@ -174,7 +174,37 @@ GitHub Actions가 아닌 **서버에서 직접 crontab으로 30분마다** 실�
 tail -f /var/log/notion-sync.log
 ```
 
-> GitHub Actions 워크플로우: `sync-develop.yml`이 매일 KST 03:00에 main 콘텐츠를 develop으로 자동 흡수하고, `merge-develop.yml`이 매일 KST 11:00에 develop의 코드 변경을 main으로 자동 머지한다. 평소 콘텐츠 동기화는 서버 crontab이 담당한다.
+> GitHub Actions 워크플로우:
+> - `sync-develop.yml` — 매일 KST 03:00 main 콘텐츠를 develop으로 자동 흡수
+> - `merge-develop.yml` — 매일 KST 11:00 develop 코드 변경을 main으로 자동 머지
+> - `crowdin.yml` — docs/ 변경 시 Crowdin에 소스 업로드, 매주 월요일 번역 다운로드 → develop PR 생성
+> 
+> 평소 콘텐츠 동기화는 서버 crontab이 담당. EN 번역은 Crowdin 워크플로우가 담당.
+
+### EN 번역 파이프라인 (Crowdin)
+
+**번역 흐름:**
+```
+KR 문서 작성 (Notion → docs/)
+  ↓ docs/ 변경 push
+crowdin.yml GitHub Action → Crowdin 소스 업로드
+  ↓ Crowdin 대시보드에서 번역 (기계번역 초안 + 사람 검수)
+매주 월요일 자동
+  ↓ 번역 완료 파일 다운로드 → feat/crowdin-translations 브랜치
+  ↓ develop 향 PR 자동 생성 → 검토 후 merge
+develop → merge-develop.yml → main → 배포
+```
+
+**번역 파일 위치:**
+- EN docs: `i18n/en/docusaurus-plugin-content-docs/current/` (실제 디렉토리)
+- EN blog: `i18n/en/docusaurus-plugin-content-blog/`
+- EN UI: `i18n/en/docusaurus-theme-classic/navbar.json` 등
+
+**GitHub Secrets (Crowdin 연동에 필요):**
+- `CROWDIN_PROJECT_ID` — Crowdin 프로젝트 숫자 ID
+- `CROWDIN_PERSONAL_TOKEN` — Crowdin Personal Access Token
+
+> ⚠️ `docs_en/` 디렉토리 및 `scripts/translate_to_en.py`는 제거됨. EN 번역 파일을 직접 수정하려면 `i18n/en/docusaurus-plugin-content-docs/current/` 를 사용한다.
 
 ---
 
@@ -191,7 +221,6 @@ tail -f /var/log/notion-sync.log
 | `NOTION_POC` | `docs/poc/` | docs 플러그인 |
 | `NOTION_RELEASE` | `docs/release-notes/` | docs 플러그인 |
 | `NOTION_TOKEN` | — | API 인증 토큰 |
-| `DEEPL_API_KEY` | — | DeepL 번역 API 키 |
 
 ### 동기화 내부 로직 (`notion_to_md.py`)
 

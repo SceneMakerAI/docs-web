@@ -1,0 +1,46 @@
+name: Crowdin Translation Sync
+
+# docs/ 변경 시 소스 업로드, 매주 월요일 번역 다운로드 + PR 생성
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'docs/**/*.md'
+      - 'docs/**/_category_.json'
+      - 'blog/[0-9]*.md'
+  schedule:
+    - cron: '0 2 * * 1'  # 매주 월요일 UTC 02:00 (KST 11:00)
+  workflow_dispatch:
+
+jobs:
+  crowdin:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Crowdin 소스 업로드 (KR → Crowdin)
+        uses: crowdin/github-action@v2
+        with:
+          upload_sources: true
+          download_translations: false
+          config: crowdin.yml
+        env:
+          CROWDIN_PROJECT_ID: ${{ secrets.CROWDIN_PROJECT_ID }}
+          CROWDIN_PERSONAL_TOKEN: ${{ secrets.CROWDIN_PERSONAL_TOKEN }}
+
+      - name: Crowdin 번역 다운로드 → develop PR 생성
+        uses: crowdin/github-action@v2
+        with:
+          upload_sources: false
+          download_translations: true
+          create_pull_request: true
+          pull_request_title: 'chore(i18n): Crowdin 번역 업데이트 [skip-notion]'
+          pull_request_base_branch: develop
+          localization_branch_name: feat/crowdin-translations
+          skip_untranslated_files: true
+          push_translations: false
+        env:
+          CROWDIN_PROJECT_ID: ${{ secrets.CROWDIN_PROJECT_ID }}
+          CROWDIN_PERSONAL_TOKEN: ${{ secrets.CROWDIN_PERSONAL_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
