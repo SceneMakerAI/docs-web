@@ -8,8 +8,8 @@
   },
   "368e15b4-0359-81cb-9b9b-d555dbfd19e3": {
     "file": "docs/poc/vision-bench/1편-멀티모달-llm-한국-방송-6초-클립-영상-이해-벤치마크-파이프라인-구축.md",
-    "last_edited": "2026-06-02T08:29:00.000Z",
-    "content_hash": "365e5e1bff906c6fac9410ea819127965d7b91f78c7f99bcc42a23050c7b09ff",
+    "last_edited": "2026-06-04T01:19:00.000Z",
+    "content_hash": "9a95fb5db7c5e17c0f643910e9722ebb9d134c4678445d93ecf53d75e30b7fd6",
     "order": 1,
     "parent_id": "vision-bench"
   },
