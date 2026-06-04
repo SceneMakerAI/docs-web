@@ -15,6 +15,10 @@ const config: Config = {
     faster: false, // 네이티브 바이너리(Rspack/SWC/lightningcss)가 이 환경에서 SIGBUS 발생
   },
 
+  markdown: {
+    format: 'detect', // .md → 'md' (plain Markdown), .mdx → 'mdx'. blog 플러그인의 MDX ESM-strict 파싱 충돌 방지
+  },
+
   // Set the production url of your site here
   url: 'https://doc.scenemaker.solbox.com',
   // 커스텀 도메인 적용 후에는 호스트가 이 리포 전용이므로 서브패스 불필요
@@ -79,7 +83,13 @@ const config: Config = {
           sidebarPath: './sidebars.ts',
           editUrl: 'https://github.com/SceneMakerAI/docs-web/edit/main/',
         },
-        blog: false,
+        blog: {
+          path: 'blog',
+          routeBasePath: 'blog',
+          blogSidebarTitle: '전체 글',
+          blogSidebarCount: 'ALL',
+          showReadingTime: true,
+        },
         theme: {
           customCss: './src/css/custom.css',
         },
@@ -130,7 +140,7 @@ const config: Config = {
           position: 'left',
           label: '문서',
         },
-        {type: 'docSidebar', sidebarId: 'blogSidebar', position: 'left', label: '블로그'},
+        {to: '/blog', label: '블로그', position: 'left'},
         {type: 'docSidebar', sidebarId: 'contributeSidebar', position: 'left', label: '오픈소스 기여'},
         {type: 'docSidebar', sidebarId: 'releaseNotesSidebar', position: 'left', label: '릴리즈 노트'},
         {
@@ -178,7 +188,7 @@ const config: Config = {
           items: [
             {
               label: '블로그',
-              to: '/docs/blog',
+              to: '/blog',
             },
             {
               label: 'GitHub',

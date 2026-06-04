@@ -19,7 +19,6 @@ jobs:
       NOTION_TOKEN:        ${{ secrets.NOTION_TOKEN }}
       NOTION_ABOUT:        ${{ secrets.NOTION_ABOUT }}
       NOTION_ARCHITECTURE: ${{ secrets.NOTION_ARCHITECTURE }}
-      NOTION_BLOG:         ${{ secrets.NOTION_BLOG }}
       NOTION_CONTRIBUTE:   ${{ secrets.NOTION_CONTRIBUTE }}
       NOTION_DOCS:         ${{ secrets.NOTION_DOCS }}
       NOTION_INSTALL:      ${{ secrets.NOTION_INSTALL }}

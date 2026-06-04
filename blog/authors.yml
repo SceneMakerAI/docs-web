@@ -6,3 +6,12 @@ minsung:
   page: true
   socials:
     github: MinsungIM
+
+sbin:
+  name: sbin
+  title: SceneMakerAI 팀
+  url: https://github.com/sbin
+  image_url: https://github.com/sbin.png
+  page: true
+  socials:
+    github: sbin

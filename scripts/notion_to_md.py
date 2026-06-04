@@ -88,6 +88,14 @@ NOTION_PROPERTY_PARENT = os.environ.get("NOTION_PROPERTY_PARENT", "상위 항목
 FETCH_MODE = os.environ.get("FETCH_MODE", "ALL")
 TIMEZONE_HOURS = 9
 
+# Blog mode: SAVE_DIR 가 'blog' 또는 'blog/'로 시작하면 blog 플러그인 frontmatter 생성
+BLOG_MODE = SAVE_DIR.rstrip("/") == "blog" or SAVE_DIR.rstrip("/").startswith("blog/")
+NOTION_PROPERTY_BLOG_DATE   = os.environ.get("NOTION_PROPERTY_BLOG_DATE", "date")
+NOTION_PROPERTY_AUTHORS     = os.environ.get("NOTION_PROPERTY_AUTHORS", "authors")
+NOTION_PROPERTY_DESCRIPTION = os.environ.get("NOTION_PROPERTY_DESCRIPTION", "description")
+NOTION_PROPERTY_TAGS        = os.environ.get("NOTION_PROPERTY_TAGS", "tags")
+NOTION_PROPERTY_IMAGE       = os.environ.get("NOTION_PROPERTY_IMAGE", "image")
+
 
 SYNC_MAP_FILE = f"{SAVE_DIR}/.notion-sync.json"
 # 수동 작성 구조 파일 — sync가 절대 삭제하지 않음
@@ -175,6 +183,42 @@ def read_relation(props, prop_name):
     if p.get("type") != "relation":
         return []
     return [item["id"] for item in p.get("relation", [])]
+
+
+def read_multi_select(props, prop_name):
+    p = props.get(prop_name, {})
+    if p.get("type") != "multi_select":
+        return []
+    return [item["name"] for item in p.get("multi_select", [])]
+
+
+def read_people(props, prop_name):
+    p = props.get(prop_name, {})
+    if p.get("type") != "people":
+        return []
+    return [person.get("name", "") for person in p.get("people", []) if person.get("name")]
+
+
+def read_rich_text_plain(props, prop_name):
+    p = props.get(prop_name, {})
+    if p.get("type") != "rich_text":
+        return None
+    return "".join(t["plain_text"] for t in p.get("rich_text", [])) or None
+
+
+def read_files_url(props, prop_name):
+    p = props.get(prop_name, {})
+    if p.get("type") != "files":
+        return None
+    files = p.get("files", [])
+    if not files:
+        return None
+    f = files[0]
+    if f.get("type") == "external":
+        return f.get("external", {}).get("url")
+    if f.get("type") == "file":
+        return f.get("file", {}).get("url")
+    return None
 
 
 def generate_category_json(dir_path, label, position):
@@ -469,7 +513,12 @@ def save_doc_page(page, position, existing_map, parent_slug=None, is_parent=Fals
 
     slug = slugify(title)
 
-    if is_parent:
+    if BLOG_MODE:
+        date_str = (read_date_start(props, NOTION_PROPERTY_BLOG_DATE)
+                    or (last_edited[:10] if last_edited else "1970-01-01"))
+        new_filename = f"{SAVE_DIR}/{date_str}-{slug}.md"
+        url_slug = None  # blog 플러그인이 파일명에서 자동 결정
+    elif is_parent:
         new_filename = f"{SAVE_DIR}/{slug}/index.md"
         url_slug = slug  # "/"는 절대경로(/docs/)로 해석됨 → 디렉토리명 사용
     elif parent_slug:
@@ -501,13 +550,14 @@ def save_doc_page(page, position, existing_map, parent_slug=None, is_parent=Fals
 
     current_parent_id = parent_slug  # 문자열 slug or None
 
+    order_unchanged = BLOG_MODE or stored_order == order
     if (last_edited and stored_last_edited == last_edited
             and old_filename == new_filename
             and os.path.exists(new_filename)
-            and stored_order == order
+            and order_unchanged
             and stored_parent == current_parent_id):
         log(f"변경 없음, 스킵: {title}")
-        if is_parent:
+        if not BLOG_MODE and is_parent:
             # _category_.json이 없으면 재생성
             cat_path = f"{SAVE_DIR}/{slug}/_category_.json"
             if not os.path.exists(cat_path):
@@ -530,9 +580,30 @@ def save_doc_page(page, position, existing_map, parent_slug=None, is_parent=Fals
     content_hash = hashlib.sha256(body.encode()).hexdigest()
 
     safe_title = title.replace('"', '\\"')
+
+    if BLOG_MODE:
+        authors_list = read_multi_select(props, NOTION_PROPERTY_AUTHORS)
+        if not authors_list:
+            authors_list = read_people(props, NOTION_PROPERTY_AUTHORS)
+        description = read_rich_text_plain(props, NOTION_PROPERTY_DESCRIPTION)
+        tags = read_multi_select(props, NOTION_PROPERTY_TAGS)
+        image = read_files_url(props, NOTION_PROPERTY_IMAGE)
+
+        lines = ["---", f'title: "{safe_title}"', f"date: {date_str}"]
+        if authors_list:
+            lines.append(f"authors: [{', '.join(authors_list)}]")
+        if description:
+            safe_desc = description.replace('"', '\\"')
+            lines.append(f'description: "{safe_desc}"')
+        if tags:
+            lines.append(f"tags: [{', '.join(tags)}]")
+        if image:
+            lines.append(f"image: {image}")
+        lines.append("---\n")
+        frontmatter = "\n".join(lines) + "\n"
     # 부모 index.md는 id를 생략 → Docusaurus가 파일경로 기반으로 ID 부여 (section/slug/index)
     # 자식·평면 페이지는 id를 명시 (section 내 고유 식별자)
-    if is_parent:
+    elif is_parent:
         frontmatter = (
             f"---\n"
             f'title: "{safe_title}"\n'

@@ -1,8 +1,0 @@
-{
-  "label": "블로그",
-  "position": 6,
-  "link": {
-    "type": "generated-index",
-    "description": "SceneMakerAI 팀의 기술 블로그와 개발 이야기를 정리합니다."
-  }
-}

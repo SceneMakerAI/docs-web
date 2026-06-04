@@ -5,19 +5,24 @@ sidebar_position: 1
 slug: "1"
 ---
 
-## AWS 서버 세팅
+### AWS 서버 세팅
 
-### EC2 인스턴스 설정
+#### EC2 인스턴스 설정
 
 ---
 
 #### 기본 정보 (요약)
 
 | 카테고리 | 선택 |
+
 | --- | --- |
+
 | 리전 | **us-west-2 (오레곤)** |
+
 | 애플리케이션 및 OS 이미지 | Deep Learning Base AMI with Single CUDA (Amazon Linux 2023) |
+
 | 인스턴스 유형 | **g7e.4xlarge** (GPU 1장, VRAM 96 GB) |
+
 | 스토리지 | EBS 2 TB (gp3) + 인스턴스 스토어 1.7 TB (NVMe) |
 
 **리전 선택 근거**
@@ -35,17 +40,24 @@ slug: "1"
 **G7e 제공 리전 비교** (2026-05-19 측정)
 
 | 리전 | Capacity 점수 | 한국 TCP RTT | 종합 |
+
 | --- | --- | --- | --- |
+
 | **us-west-2** (오레곤) ⭐ | **3** | 180 ms | 🟢 균형 (capacity 3점 가용영역 2개) |
+
 | us-east-1 (버지니아) | 3 | 208 ms | 🟢 안정 (capacity 3점 가용영역 2개) |
+
 | us-east-2 (오하이오) | 3 | 213 ms | 🟢 안정 |
+
 | ap-northeast-1 (도쿄) | 1 | 46 ms | 🟠 가깝지만 점유 어려움 |
+
 | ap-northeast-2 (서울) | 1 | 18 ms | 🔴 점유 매우 어려움 |
+
 | eu-west-2 (런던) | 1 | 301 ms | 🔴 멀고 점유 어려움 |
 
 **점수 해석**
 
-- Capacity 점수(g7e.12xl, 1\~10) = AWS **Spot Placement Score** (1=매우 부족 / 10=매우 여유). On-Demand 가용성과도 강한 상관관계
+- Capacity 점수(g7e.12xl, 1\\~10) = AWS **Spot Placement Score** (1=매우 부족 / 10=매우 여유). On-Demand 가용성과도 강한 상관관계
 
 - G7e 제공 6개 리전 모두 점수가 낮은 편 (신형 GPU 공통 현상) → 그중 **점수 3이 현 시점 최선**
 
@@ -77,14 +89,18 @@ aws ec2 get-spot-placement-scores \
 
 **(2) 응답시간 측면**
 
-- LLM 서빙은 모델 자체의 첫 토큰 생성에 200\~500 ms 소요 → 네트워크 +150\~200 ms는 실사용자 체감 차이가 거의 없는 수준
+- LLM 서빙은 모델 자체의 첫 토큰 생성에 200\\~500 ms 소요 → 네트워크 +150\\~200 ms는 실사용자 체감 차이가 거의 없는 수준
 
 - 한국 인접 우선이라면 도쿄가 sweet spot이지만 capacity 제약이 큼
 
 > 🎯 **결론**
+
 >
+
 > - **점유 안정성** 을 우선 고려해 **us-west-2(오레곤) 선택**
+
 >
+
 > - 한국 사용자 인터랙티브 서빙으로 확장 시 ap-northeast-1(도쿄) 멀티리전 또는 **Capacity Block for ML / Capacity Reservation** 예약 검토
 
 ---
@@ -94,10 +110,15 @@ aws ec2 get-spot-placement-scores \
 **선택한 AMI**
 
 | 항목 | 값 |
+
 | --- | --- |
+
 | 이름 | Deep Learning Base AMI with Single CUDA (Amazon Linux 2023) 20260512 |
+
 | OS | Amazon Linux 2023 (커널 6.1.170) |
+
 | Owner | Amazon |
+
 | 아키텍처 | x86_64 |
 
 **참고: AMI 설명상 지원 인스턴스 목록**
@@ -115,35 +136,50 @@ G4dn, G5, G6, Gr6, G6e, P4d, P4de, P5, P5e, P5en, P6-B200, P6-B300
 **선택한 인스턴스** : `g7e.4xlarge`
 
 | 항목 | 값 |
+
 | --- | --- |
+
 | vCPU | 16 |
+
 | RAM | 128 GB |
+
 | GPU | NVIDIA RTX PRO 6000 Blackwell Server Edition × 1 |
+
 | VRAM | 96 GB (97,887 MiB 실측) |
+
 | GPU 아키텍처 | Blackwell (sm_120, FP4 네이티브 지원) |
+
 | Network | 50 Gbps |
+
 | 인스턴스 스토어 | NVMe SSD 1.9 TB (`nvme1n1` ) — 인스턴스 유형에 기본 포함 |
 
 <details>
-<summary>**g7e 패밀리 비교 (참고)**</summary>
+
+<summary>**g7e 패밀리 비교 (참고)** </summary>
 
 | Type | vCPU | RAM | GPU 수 | VRAM 총량 | Network |
-| --- | --- | --- | --- | --- | --- |
-| g7e.2xlarge | 8 | 64 GB | 1 | 96 GB | 50 Gbps |
-| **g7e.4xlarge** ⭐ | **16** | **128 GB** | **1** | **96 GB** | **50 Gbps** |
-| g7e.8xlarge | 32 | 256 GB | 1 | 96 GB | 100 Gbps |
-| g7e.12xlarge | 48 | 512 GB | 2 | 192 GB | 400 Gbps |
-| g7e.24xlarge | 96 | 1 TB | 4 | 384 GB | 800 Gbps |
-| g7e.48xlarge | 192 | 2 TB | 8 | 768 GB | 1600 Gbps |
 
+| --- | --- | --- | --- | --- | --- |
+
+| g7e.2xlarge | 8 | 64 GB | 1 | 96 GB | 50 Gbps |
+
+| **g7e.4xlarge** ⭐ | **16** | **128 GB** | **1** | **96 GB** | **50 Gbps** |
+
+| g7e.8xlarge | 32 | 256 GB | 1 | 96 GB | 100 Gbps |
+
+| g7e.12xlarge | 48 | 512 GB | 2 | 192 GB | 400 Gbps |
+
+| g7e.24xlarge | 96 | 1 TB | 4 | 384 GB | 800 Gbps |
+
+| g7e.48xlarge | 192 | 2 TB | 8 | 768 GB | 1600 Gbps |
 
 </details>
 
 **4xlarge 선택 근거**
 
-- Qwen3-Coder-30B-A3B / Qwen3.6-35B-A3B 등 MoE 30\~35B 모델은 bf16에서 \~70GB VRAM → 96GB 1장에 KV 캐시까지 여유
+- Qwen3-Coder-30B-A3B / Qwen3.6-35B-A3B 등 MoE 30\\~35B 모델은 bf16에서 \\~70GB VRAM → 96GB 1장에 KV 캐시까지 여유
 
-- FP8/FP4 양자화 시 더 큰 모델(80\~120B)도 가능
+- FP8/FP4 양자화 시 더 큰 모델(80\\~120B)도 가능
 
 - 우선 1 GPU로 검증 후 확장 필요 시 12xlarge 이상으로 변경
 
@@ -152,9 +188,12 @@ G4dn, G5, G6, Gr6, G6e, P4d, P4de, P5, P5e, P5en, P6-B200, P6-B300
 32k 컨텍스트, 단일 시퀀스 기준. vLLM은 paged KV 캐시를 동적 할당하므로 실제 사용량은 워크로드에 따라 달라집니다.
 
 | 모델 | 총/활성 파라미터 | 정밀도 | 가중치 VRAM | KV 캐시 (32k×1) | 총 VRAM |
+
 | --- | --- | --- | --- | --- | --- |
-| Qwen3.5-122B-A10B-GPTQ-Int4 | 122B / 10B (MoE) | Int4 (GPTQ) | \~63 GB | \~3 GB | \~69 GB |
-| Qwen3.6-27B-FP8 | 27B (Dense) | FP8 (block 128) | \~29 GB | \~8 GB | \~40 GB |
+
+| Qwen3.5-122B-A10B-GPTQ-Int4 | 122B / 10B (MoE) | Int4 (GPTQ) | \\~63 GB | \\~3 GB | \\~69 GB |
+
+| Qwen3.6-27B-FP8 | 27B (Dense) | FP8 (block 128) | \\~29 GB | \\~8 GB | \\~40 GB |
 
 ---
 
@@ -163,13 +202,21 @@ G4dn, G5, G6, Gr6, G6e, P4d, P4de, P5, P5e, P5en, P6-B200, P6-B300
 **1) 루트 EBS 볼륨 (영구 스토리지)**
 
 | 항목 | 값 |
+
 | --- | --- |
+
 | 크기 | 2,048 GiB (2 TB) |
+
 | 타입 | gp3 |
+
 | IOPS | 16,000 |
+
 | Throughput | 1,000 MB/s |
+
 | 암호화 | 미적용(운영 전환 시 암호화 권장) |
+
 | 디바이스 | `nvme0n1` |
+
 | 마운트 | `/` (루트) |
 
 **용도** : 모델 가중치(영구 보관), Docker 이미지, OS 등
@@ -177,19 +224,31 @@ G4dn, G5, G6, Gr6, G6e, P4d, P4de, P5, P5e, P5en, P6-B200, P6-B300
 **2) 인스턴스 스토어 (임시 스토리지 — g7e.4xlarge 기본 포함)**
 
 | 항목 | 값 |
+
 | --- | --- |
+
 | 디바이스 | `nvme1n1` |
+
 | 크기 | 1.7 TB |
+
 | 타입 | NVMe SSD (인스턴스 로컬) |
+
 | 마운트 | `/mnt/nvme` (XFS, 수동 마운트 필요 — 아래 NVME 설정 참고) |
 
 > ⚠️ **인스턴스 스토어 데이터 영속성**
+
 >
+
 > | 작업 | 데이터 |
+
 > | --- | --- |
+
 > | Reboot (재부팅) | 유지 |
+
 > | **Stop / Start** | **삭제** |
+
 > | Terminate | 삭제 |
+
 > | 하드웨어 장애 | 삭제 |
 
 **용도 분리 권장**
@@ -202,7 +261,7 @@ G4dn, G5, G6, Gr6, G6e, P4d, P4de, P5, P5e, P5en, P6-B200, P6-B300
 
 ---
 
-### NVME 설정
+#### NVME 설정
 
 - NVME 는 Cloud 환경에서는 일반 물리서버와 다르게 아래와 같은 특성이 있음
   - 재부팅시 데이터 유지
@@ -258,14 +317,17 @@ Filesystem      Size  Used Avail Use% Mounted on
 
 <br />
 
-## 모델 설치
+### 모델 설치
 
 현실적으로 A100 이나 H100 장비 대여가 쉽지 않은 상황에서 1장으로 운영 가능한 GPU 에서 돌릴 수 있는 서버에서 아래 2개의 모델을 비교 한다. (비교 문서는 추후 배포)
 
 | 모델명 | 모델 가중치 크기 | 실제 GPU | KV 캐시 가용 (90% 활용 기준) |
+
 | --- | --- | --- | --- |
-| Qwen3.5-122B-A10B-GPTQ-Int4 | 62GB | 65\~70GB | **\~18GB** |
-| Qwen3.6-27B-FP8 | 31GB | 33\~35GB | \~52GB |
+
+| Qwen3.5-122B-A10B-GPTQ-Int4 | 62GB | 65\\~70GB | **\\~18GB** |
+
+| Qwen3.6-27B-FP8 | 31GB | 33\\~35GB | \\~52GB |
 
 - 기본 패키지 설치
 
@@ -277,7 +339,7 @@ Filesystem      Size  Used Avail Use% Mounted on
 
 <br />
 
-### 기본 패키지 설치
+#### 기본 패키지 설치
 
 ##### huggingface-cli 설치
 
@@ -300,7 +362,7 @@ export HF_HOME=/mnt/nvme/hf-cache      # 빠르지만 stop 시 소실
 
 <br />
 
-### 모델 다운로드
+#### 모델 다운로드
 
 - 모델을 로컬 디렉토리에 다운로드
 
@@ -330,7 +392,7 @@ drwxr-xr-x. 4 root root    59 May 19 17:28 xet
 
 <br />
 
-### VLLM 설치
+#### VLLM 설치
 
 vllm 은 패키지 의존성을 많이 요구하기 때문에 uv 환경에서 격리 하여 패키지 설치를 권장 함
 
@@ -531,11 +593,11 @@ WantedBy=multi-user.target
 
 ---
 
-## Qwen3-Omni-30B-A3B-Instruct (멀티모달)
+### Qwen3-Omni-30B-A3B-Instruct (멀티모달)
 
 앞의 텍스트 모델(Qwen3.5 / 3.6)과 달리 **영상·이미지·오디오를 함께 입력** 받는 옴니 모델. 6초 클립 영상 이해 벤치마크(vision-bench)에 사용한다. 설치 흐름은 위와 동일하되 **오디오 디코더 의존성** 과 **멀티모달 서빙 플래그** 가 추가된다. (vLLM 설치는 위 **VLLM 설치** 섹션과 **동일한 venv 를 재사용** 하며, 여기선 audio deps 만 추가한다.)
 
-### 모델 다운로드
+#### 모델 다운로드
 
 ```shell
 > hf download Qwen/Qwen3-Omni-30B-A3B-Instruct \
@@ -545,7 +607,7 @@ WantedBy=multi-user.target
 
 <br />
 
-### 오디오 입력 지원 (필수)
+#### 오디오 입력 지원 (필수)
 
 `uv pip install vllm` 기본 설치엔 오디오 디코더가 빠져 있어, 오디오 입력 요청 시 `400 "Invalid or unsupported audio file"` 가 발생한다 (비디오 단독 요청은 정상이라 증상이 헷갈림). 아래 3개를 venv 에 추가해야 한다.
 
@@ -561,7 +623,7 @@ WantedBy=multi-user.target
 
 <br />
 
-### Service 등록
+#### Service 등록
 
 **참고:** 오디오 입력을 쓰려면 `--limit-mm-per-prompt` 에 `audio` 가 포함돼야 하고, venv 엔 위 오디오 deps 가 설치돼 있어야 한다.
 

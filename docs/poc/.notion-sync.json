@@ -8,8 +8,8 @@
   },
   "368e15b4-0359-81cb-9b9b-d555dbfd19e3": {
     "file": "docs/poc/vision-bench/1편-멀티모달-llm-한국-방송-6초-클립-영상-이해-벤치마크-파이프라인-구축.md",
-    "last_edited": "2026-06-02T06:39:00.000Z",
-    "content_hash": "45f78541dc72dcb114693f9dec14259b44509bd34733bf08c207bee61bbb89ea",
+    "last_edited": "2026-06-02T08:29:00.000Z",
+    "content_hash": "365e5e1bff906c6fac9410ea819127965d7b91f78c7f99bcc42a23050c7b09ff",
     "order": 1,
     "parent_id": "vision-bench"
   },
@@ -22,34 +22,37 @@
   },
   "36ee15b4-0359-80b6-97c6-f628f0347d36": {
     "file": "docs/poc/audio-bench/한국어-콘텐츠-lid-정확도-비교-whisper-vs-voxlingua107.md",
-    "last_edited": "2026-06-02T05:52:00.000Z",
-    "content_hash": "de8172d1e5d5cb20536649d3d498578a789c0af453a121d4782535545b6825d5",
+    "last_edited": "2026-06-02T07:57:00.000Z",
+    "content_hash": "f007938449d40a3a614d43704770c8e0fd691fdeb5a305eecb380e268605efcf",
     "order": 1,
     "parent_id": "audio-bench"
   },
   "373e15b4-0359-8150-88f3-eedc5ebd727b": {
     "file": "docs/poc/vision-bench/추론-파라미터-튜닝-qwen3-omni-6초-클립-분석-ofat-스윕.md",
-    "last_edited": "2026-06-02T05:05:00.000Z",
-    "content_hash": "f73225ab94ca29de89bbd5751eff61d417f3760d0d0283fb6755efa636750d55",
+    "last_edited": "2026-06-02T08:10:00.000Z",
+    "content_hash": "652e5ac309bb61dab6f4a2aace51c7a56b0b81f6fb62f52bc21ab442c46cc398",
     "order": 3,
     "parent_id": "vision-bench"
   },
-  "373e15b4-0359-8145-8bdb-d21f01dc3619": {
-    "file": "docs/poc/audio-bench/한국어-콘텐츠-lid-정확도-비교-whisper-vs-voxlingua107.md",
-    "last_edited": "2026-06-02T07:52:00.000Z",
+  "365e15b4-0359-80d4-8f38-d8a5c80ae5d0": {
+    "file": "docs/poc/audio-bench/index.md",
+    "last_edited": "2026-06-02T07:58:00.000Z",
+    "content_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "order": 1,
     "parent_id": null
   },
-  "373e15b4-0359-8135-8c6a-eb85f0c2c6bd": {
-    "file": "docs/poc/vision-bench/1편-멀티모달-llm-한국-방송-6초-클립-영상-이해-벤치마크-파이프라인-구축.md",
-    "last_edited": "2026-06-02T07:52:00.000Z",
-    "order": 1,
-    "parent_id": null
-  },
-  "373e15b4-0359-8125-a0fa-ee77d53f4cc8": {
-    "file": "docs/poc/vision-bench/추론-파라미터-튜닝-qwen3-omni-6초-클립-분석-ofat-스윕.md",
-    "last_edited": "2026-06-02T07:52:00.000Z",
+  "365e15b4-0359-804b-87c8-f1acee149564": {
+    "file": "docs/poc/vision-bench/index.md",
+    "last_edited": "2026-06-02T08:15:00.000Z",
+    "content_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "order": 3,
     "parent_id": null
+  },
+  "373e15b4-0359-813e-b9cb-fcd1ccefc0c4": {
+    "file": "docs/poc/vision-bench/3편-추론-파라미터-상세-조정-및-품질-평가.md",
+    "last_edited": "2026-06-02T08:14:00.000Z",
+    "content_hash": "1f2a2d5697e80e3b6167c150ef2fe77cdd18584c83787f00b048e1be7551ed96",
+    "order": 4,
+    "parent_id": "vision-bench"
   }
 }
