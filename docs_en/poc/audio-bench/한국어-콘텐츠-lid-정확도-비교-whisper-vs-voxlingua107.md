@@ -2,37 +2,43 @@
 title: "Comparison of LID Accuracy for Korean Content — Whisper vs. VoxLingua107"
 sidebar_position: 1
 slug: "1"
+last_update:
+  date: 2026-06-04
 ---
 
-<br />
 
 ## 1. Overview
 
-### 1.1 Background — Issues with the LID Stage in STT Pipelines
+### 1.1 Background — Issues with the LID Stage in the STT Pipeline
 
-While Whisper is commonly used for STT, hallucinations and errors are particularly prominent in videos containing a mix of languages. One cause is the “lock-in” effect in WhisperX: it determines the main language based on the first 30 seconds of the video and transcribes the entire clip in that language. Consequently, foreign language segments that appear later are forced into Korean mode, resulting in garbled output.
+While Whisper is commonly used for STT, hallucinations and errors are particularly noticeable in videos containing a mix of languages. One cause is the lock-in effect of WhisperX—it determines the main language based on the first 30 seconds of the video and transcribes the entire clip in that language, resulting in garbled output when foreign language segments appear later in the video because they are forced into Korean mode.
 
-If the exact language is provided in advance for each speech segment, the results improve significantly. To achieve this, a structure is needed where LID (Language Identification) is separated from the transcription process and executed as a separate step, which raises the following questions — **Which model should be used, and should the input be raw or denoised?** The content we handle—such as Korean dramas, variety shows, and news—always contains background music, sound effects, and cheering, so model evaluations based on standard clean audio do not apply directly. The starting point of this POC is a situation where we have no quantitative data and must rely on intuition to decide on both the model and whether to apply denoising.
+If the exact language is provided in advance for each speech segment, the results improve significantly. To achieve this, a structure is needed where LID (Language Identification) is separated from the transcription engine and executed as a separate step, which raises the following questions — **Which model should be used, and should the input be raw or denoised?** Since the content we handle—such as Korean dramas, variety shows, and news—always contains background music, sound effects, and cheering, standard model evaluations based on clean audio do not apply directly. The starting point of this POC is a situation where we have no choice but to decide on the model and whether to apply denoising based on intuition, without any quantitative data.
 
 ### 1.2 Purpose of the POC
 
-This document provides a quantitative comparison of how to identify and select speech from Korean videos containing background music. The comparison involves two LID models (Whisper LID, VoxLingua107) × two input types (raw, denoised) = a 4-way matrix. We simultaneously run all four combinations on the same sample to measure match rates and processing times.
+This document answers the question of how to identify and select languages in Korean videos mixed with BGM through quantitative comparison. The comparison involves two LID models (Whisper LID, VoxLingua107) × two input types (raw, denoise), forming a 4-way matrix. We simultaneously run all four combinations on the same sample to measure match rates and processing times.
 
 ### 1.3 Design Decisions
 
-As this is a POC validation tool, simplicity was prioritized, and variables were minimized to ensure the reliability of the comparison results.
+As this is a proof-of-concept (POC) validation tool, simplicity was prioritized, and variables were minimized to ensure the reliability of the comparison results.
 
-- **No Calibration Policy** — No post-processing such as script checks, overrides, or blacklists. The results from the four LID models are compared as-is.
+- **No Calibration Policy** — No post-processing such as script checks, overrides, or blacklists. The results from the four LID models were compared as-is.
+- **VAD Control** — Silero VAD is applied to the raw audio only once, and the same time interval is applied identically to the denoised audio. This ensures that the raw and denoised audio do not cover different time intervals.
+- **Model Preloading** — All four models were loaded first before starting the measurement. Model loading time was excluded from the processing time.
+- **Fixed Denoising Strength** — DeepFilterNet v3, `atten_lim_db=-30` (strength level 1). Strength comparisons are outside the scope of this POC.
+- **LID stage only** — No calls to diarize or ASR. Single GPU (cuda:0), sequential processing of a single audio stream.
 
-- **VAD Control** — Apply Silero VAD to the raw audio only once, and apply the same time interval to the denoised audio. This ensures that the raw and denoised audio do not cover different time intervals.
+### 1.4 Processing Flow
 
-- **Model Pre-loading** — Load all four models first before starting the measurement. Model loading time is excluded from the total processing time.
+```javascript
+[Denoise 적용시]
+audio → VAD → 각 발화 구간 → denoise → [Whisper | VoxLingua] → LID
 
-- **Fixed Denoise Intensity** — DeepFilterNet v3, `atten_lim_db=-30` (intensity level 1). Intensity comparison is outside the scope of this POC.
+[Denoise 미 적용시]
+audio → VAD → 각 발화 구간 → [Whisper | VoxLingua] → LID
+```
 
-- **LID Stage Only** — No calls to diarize or ASR. Single GPU (cuda:0), sequential processing of a single audio file.
-
-<br />
 
 ---## 2. Comparison Design
 
@@ -40,17 +46,17 @@ As this is a POC validation tool, simplicity was prioritized, and variables were
 
 The comparison targets are two LID models.
 
-**Whisper LID (baseline).** Calls `detect_language()` from faster-whisper large-v3-turbo
-(`mobiuslabsgmbh/faster-whisper-large-v3-turbo`). Whisper is a model trained for multilingual speech recognition, and LID is the language classification result for over 100 languages obtained as a byproduct. Only the first 30 seconds of the input audio are used. Since the upstream STT pipeline is already using it, we set it as the **baseline** for this POC.
+**Whisper LID (baseline).** Calls `detect_language()` from
+(`mobiuslabsgmbh/faster-whisper-large-v3-turbo`) calls `detect_language()`. Whisper is a model trained for multilingual speech recognition, and LID is the language classification result for over 100 languages obtained as a byproduct. Only the first 30 seconds of the input audio are used. Since it is already being used by the upper-level STT pipeline, we set it as the **baseline** for this POC.
 
-**VoxLingua107 (Experimental Group).**SpeechBrain ECAPA-TDNN-based LID **dedicated** model (`speechbrain/lang-id-voxlingua107-ecapa`). It is trained to classify 107 languages and is known for its strong ability to distinguish between language pairs with similar acoustic features (e.g., ko/ja, zh/ja, th/lo/km). It produces relatively stable confidence scores even with short utterances.
+**VoxLingua107 (experimental group).** A **dedicated** LID model based on SpeechBrain ECAPA-TDNN (`speechbrain/lang-id-voxlingua107-ecapa` ). It was trained to classify 107 languages and is known for its strong ability to distinguish between language pairs with similar acoustic features (e.g., ko/ja, zh/ja, th/lo/km). It produces relatively stable confidence scores even with short utterances.
 
-While there are several candidate LID-specific models (such as NeMo TitaNet and ECAPA forks), VoxLingua107 includes Korean in its training languages, can be immediately integrated into our environment (single GPU, HF cache), and offers abundant comparative data, making it easy to interpret results.
-Therefore, it was adopted as the alternative for this POC.
+Although there are several candidate LID-specific models (NeMo TitaNet, ECAPA fork, etc.), VoxLingua107 includes Korean in its training languages, can be immediately integrated into our environment (single GPU, HF cache), and has abundant comparison data, making it easy to interpret results.
+Therefore, we adopted it as the alternative for this POC.
 
 ### 2.2 Variables
 
-We examine both **raw** and **denoised** inputs. While denoising removes background music, sound effects, and cheering to make the speech stand out, the enhance model may introduce signal modifications not encountered during LID training, so its effect on LID accuracy cannot be definitively determined. While existing STT pipelines call LID using raw chunks under the empirical assumption that "denoise ruins LID," this POC aims to verify this assumption itself.
+We examine both **raw** and **denoise** as input variables. While denoise removes background music, sound effects, and cheering to make the speech stand out, the enhance model may introduce signal modifications not encountered during LID training, so its effect on LID accuracy cannot be definitively determined. While the top-level STT pipeline calls LID using raw chunks under the empirical assumption that "denoise ruins LID," this POC aims to verify this assumption itself.
 
 Therefore, the comparison matrix is **Model 2 × Input 2 = 4-way**.
 
@@ -59,11 +65,11 @@ Therefore, the comparison matrix is **Model 2 × Input 2 = 4-way**.
 | Whisper LID | W-raw | W-den |
 | VoxLingua107 | V-raw | V-den |
 
-We simultaneously generate the four results for the same speech segment and compare their matches and mismatches.
+We simultaneously generate the four results for the same speech segment and compare their agreement or disagreement.
 
 ### 2.3 Evaluation Metrics
 
-#### Match Rate (Accuracy Proxy)
+#### Agreement Rate (Accuracy Proxy)
 
 Since the content lacks ground truth labels, we cannot directly measure accuracy. Instead, we use the **degree of mutual agreement** among the four results (W-raw / V-raw / W-den / V-den) as a proxy. If all four match, the utterance is considered reliable; a discrepancy indicates that one of them is incorrect.
 
@@ -71,9 +77,7 @@ Since the content lacks ground truth labels, we cannot directly measure accuracy
 Calculated metrics:
 
 - **4-way agreement rate** — All four results match
-
-- **W-raw vs V-raw / W-den vs V-den** — Agreement between models on the same input
-
+- **W-raw vs V-raw / W-den vs V-den** — Agreement between models for the same input
 - **W-raw vs W-den / V-raw vs V-den** — The effect of denoising on each model
 
 #### Processing Time
@@ -84,9 +88,9 @@ We record only the pure processing time per audio sample at each stage, excludin
 | --- | --- |
 | `denoise` | DeepFilterNet call + 16k resampling |
 | `vad` | Silero VAD call |
-| `whisper_lid` | Sum of Whisper LID calls for all segments (raw+denoise) |
+| `whisper_lid` | Total Whisper LID calls for all segments (raw+denoise) |
 | `voxlingua_lid` | Sum of VoxLingua107 calls for all segments (raw+denoise) |
-| `total` | From entry into `run()` to completion |
+| `total` | From entry into run() to completion |
 
 Output: `output/<stem>.csv` per segment + `output/timings.csv` per file.
 
@@ -98,32 +102,25 @@ Although Korean is the primary language, the presence of foreign languages and b
 
 | Category | Broadcast | Duration | URL |
 | --- | --- | --- | --- |
-| News | KBS 9 News | 48:30 | [https://www.youtube.com/watch?v=rX1P-jOoNmM](https://www.youtube.com/watch?v=rX1P-jOoNmM) |
+| Category | Broadcast | Duration | URL | | --- | --- | --- | --- |
 | Documentary | Superfish Part 1 | 58:40 | [https://www.youtube.com/watch?v=iNbWqC1iqKw](https://www.youtube.com/watch?v=iNbWqC1iqKw) |
 | Drama | KBS Winter Sonata | 1:04:52 | [https://www.youtube.com/watch?v=irVKEhb9g8M](https://www.youtube.com/watch?v=irVKEhb9g8M) |
 | Historical Drama | Taejo Wang Geon | 54:10 | [https://www.youtube.com/watch?v=nmlE2iPWLGM](https://www.youtube.com/watch?v=nmlE2iPWLGM) |
-| Variety | 15 Days on the Road X Starship National Sports Festival Full Version | 1:00:06 | [https://www.youtube.com/watch?v=6wJGpi1nkCg](https://www.youtube.com/watch?v=6wJGpi1nkCg) |
+| Variety | Business Trip 15 Days X Starship National Sports Festival Full Version | 1:00:06 | [https://www.youtube.com/watch?v=6wJGpi1nkCg](https://www.youtube.com/watch?v=6wJGpi1nkCg) |
 | Sports | 2009 KBO League Korean Series Game 7 | 1:55:22 | [https://www.youtube.com/watch?v=fP1QEs1Uj5U](https://www.youtube.com/watch?v=fP1QEs1Uj5U) |
 
-I selected one video per genre to avoid conclusions biased toward a single genre and to observe patterns between content characteristics (BGM intensity, foreign language usage) and LID results.
+The reason for selecting one example per genre is to avoid conclusions biased toward a single genre and to observe patterns between content characteristics (BGM intensity, foreign language usage) and LID results.
 
-<br />
 
----
+---## 3. Implementation
 
-## 3. Implementation
-
-Refer to the URL below for the source code
+See the URL below for the source code
 
 - [https://github.com/SceneMakerAI/poc-lid-bench](https://github.com/SceneMakerAI/poc-lid-bench)
 
-### 3.1 Directories/Workflow
+### 3.1 Directories/Flow
 
 #### Directory Structure
-
-
-
-<br />
 
 ```javascript
 poc-lid-bench/
@@ -145,120 +142,94 @@ poc-lid-bench/
     └── timings.csv           # 모든 입력 파일의 단계별 처리 시간 통합 1개
 ```
 
-#### Notes on External Environment (for Git users)
 
-- **Data Path** — `test_files` in `main.py` is hardcoded to an internal path
+#### External Environment Notes (for Git users)
+
+- **Data Path** — The `test_files` in `main.py` is hardcoded to an internal path
 (`/stg/vod/scenemaker/sound_full/*.wav`). When using externally, replace it with the WAV file path in your own environment.
 
-- **Model Cache** — Whisper LID automatically uses the HF cache (`HF_HOME`), while VoxLingua107 automatically downloads SpeechBrain to the directory under `conf.MODEL_DIR` (`voxlingua107/`). No pre-download is required.
+- **Model Cache** — Whisper LID automatically uses the HF cache (`HF_HOME`), and VoxLingua107 automatically downloads SpeechBrain to the `conf.MODEL_DIR` subdirectory (`voxlingua107/`). No prior download is required.
+- **GPU** — Fixed to cuda:0. In multi-GPU environments, adjust the device specification in `whisper_lid.py` /`voxlingua_lid.py`.
 
-- **GPU** — Fixed to cuda:0. In a multi-GPU environment, adjust the device specification in `whisper_lid.py` / `voxlingua_lid.py`.
 
-<br />
-
-### 3.2 Environment / Models / Dependencies
+### 3.2 Environment / Model / Dependencies
 
 #### Environment
 
-- Python **3.11** (`>=3.11,<3.12` — The official DeepFilterNet package only provides stable support up to 3.11)
+- Python **3.11** (`>=3.11,&lt;3.12` — The official DeepFilterNet package only provides stable support up to 3.11)
+- Package manager **uv** (`.venv` + `uv.lock` )
+- GPU: **RTX 4090 24GB**, single-GPU configuration with CUDA:0
 
-- Package manager **uv** (`.venv` + `uv.lock`)
-
-- GPU **RTX 4090 24GB**, using a single cuda:0
-
-#### Dependencies (`pyproject.toml`)
+#### Dependencies (`pyproject.toml` )
 
 | Package | Version | Purpose |
 | --- | --- | --- |
-| `faster-whisper` | `>=1.0` | Whisper LID (`detect_language`) |
+| `faster-whisper` | `&gt;=1.0` | Whisper LID (`detect_language` ) |
 | `speechbrain` | `>=1.0` | VoxLingua107 LID |
 | `deepfilternet-py312` | `>=0.5.7` | DeepFilterNet v3 model |
 | `deepfilterlib` | `>=0.5.6` | DF runtime library |
-| `soundfile` | `>=0.13` | Load WAV files |
-| `torch` | `>=2.4,<2.9` | cu128 wheel; upper limit for DF compatibility |
-| `torchaudio` | `>=2.4,<2.9` | Same |
+| `soundfile` | `>=0.13` | WAV loading |
+| `torch` | `>=2.4,&lt;2.9` | cu128 wheel, upper limit is DF compatibility |
+| `torchaudio` | `&gt;=2.4,&lt;2.9` | Same |
 
-> The upper limit of `<2.9` for torch/torchaudio is to avoid an issue where `torchaudio.backend.common.AudioMetaData`
-is removed in 2.9, causing DF imports to fail. Verified combination:
-`torch==2.8.0+cu128`.
+> torch/torchaudio upper limit `&lt;2.9` is removed in `torchaudio.backend.common.AudioMetaData`
+will be removed in 2.9; this is to avoid issues with broken DF imports. Verified combination:
+`torch==2.8.0+cu128` .
 
 #### Models
 
 | Model | Download Location | Identifier |
 | --- | --- | --- |
-| Whisper LID (large-v3-turbo) | HF Cache (`HF_HOME`) | `mobiuslabsgmbh/faster-whisper-large-v3-turbo` |
+| Whisper LID (large-v3-turbo) | HF Cache (`HF_HOME` ) | `mobiuslabsgmbh/faster-whisper-large-v3-turbo` |
 | VoxLingua107 (ECAPA-TDNN) | `conf.MODEL_DIR/voxlingua107/` | `speechbrain/lang-id-voxlingua107-ecapa` |
-| DeepFilterNet v3 | Built into pip package | Automatic upon calling `init_df()` |
+| DeepFilterNet v3 | Built-in pip package | Automatic upon `init_df()` call |
 | Silero VAD | `~/.cache/torch/hub/` | `snakers4/silero-vad` (torch.hub) |
 
-All models are automatically downloaded upon first execution (network required); no preparation is needed.
+All models are automatically downloaded upon first execution (network required); no preparation required.
 
 #### Note for Git Users
 
-- If `HF_HOME` is not set, downloads will be made to the default location (`~/.cache/huggingface/`).
-
+- If `HF_HOME` is not set, the default (`~/.cache/huggingface/`) is downloaded.
 - `conf.MODEL_DIR` is set to the internal cache (`/stg/models`). In external environments,
-modify the code to use your own path or the SpeechBrain default cache (`~/.cache/huggingface/`).
+modify the code to change the path to your own or use the SpeechBrain default cache (`~/.cache/huggingface/`).
 
 
-<br />
-
-### 3.3 실행 방법
+### 3.3 How to Run
 
 ```javascript
 # log.py 에서 로그파일 위치 적절히 수정
-> .venv/bin/python main.py
+&gt; .venv/bin/python main.py
 ```
 
-<br />
 
-<br />
 
----
+---## 4. Results
 
-## 4. Results
+### 4.1 Accuracy
 
-### 4.1 Match Rate###
+Detailed results for the most accurate language classifications across all speech segments are available at the URL below.
 
-<br />
+[https://docs.google.com/spreadsheets/d/1zARHI1l5UfJ_pU1VY61xOOtvmteHLZ-QPHjSbRIoZpI/edit?gid=759070170#gid=759070170](https://docs.google.com/spreadsheets/d/1zARHI1l5UfJ_pU1VY61xOOtvmteHLZ-QPHjSbRIoZpI/edit?gid=759070170#gid=759070170)
 
-<br />
 
-4.2 Processing Time###
+To summarize the final results briefly
 
-<br />
+|  | Total | whisper_raw | voxlingua_raw | whisper_denoise | voxlingua_denoise |
+| --- | --- | --- | --- | --- | --- |
+| baseball.wav | 1092 | 1073 | 1026 | 1072 | 1020 |
+| docu.wav | 383 | 349 | 330 | 349 | 332 |
+| drama.wav | 314 | 282 | 256 | 279 | 251 |
+| entertain.wav | 502 | 464 | 398 | 438 | 366 |
+| hist_drama.wav | 437 | 411 | 382 | 386 | 363 |
+| news.wav | 387 | 385 | 377 | 384 | 379 |
+| Correct | 3115 | 2964 | 2769 | 2908 | 2711 |
+| Accuracy rate | 100 | **95.2** | 88.9 | 93.4 | 87.0 |
 
-<br />
+- Accuracy is highest for Whisper raw, followed by Whisper denoise, then Voxlingua raw, and lowest for Voxlingua denoise.
+- **(Important) Applying denoise does not improve language classification performance.**
 
-<br />
 
-4.3 Differences
-
-<br />
-
-<br />
-
-<br />
-
-by Content Type### 4.4 Mismatch Cases##
-
-<br />
-
-<br />
-
-<br />
-
-<br />
-
-5. Results
-
-### 5.1
-
-<br />
-
-<br />
-
-Accuracy### 5.2 Cost (Processing Time)
+### 4.2 Cost (Processing Time)
 
 | file | duration | model | vad | denoise | lid | total | total_hour | difference |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -287,55 +258,11 @@ Accuracy### 5.2 Cost (Processing Time)
 |  |  | whisper | 7.81 | 8.13 | 20.84 | 36.77 | 45.48 |  |
 |  |  | voxlingua | 7.81 | 8.13 | 2.03 | 17.96 | 22.22 | 2.0 |
 
-- **When using voxlingua, language classification is more than twice as fast compared to using Whisper.**###
+- **Processing Speed Ranking: (Fastest) voxlingua raw > voxlingua denoise > Whisper raw > Whisper denoise (Slowest)**
 
-<br />
 
-5.3 Effect of denoise
 
-<br />
 
-<br />
 
-<br />
 
-<br />
-
-on LID## 6. Conclusion & Recommendations
-
-### 6.1 Recommended LID Model###
-
-<br />
-
-<br />
-
-<br />
-
-6.2 Whether
-
-<br />
-
-<br />
-
-<br />
-
-to Apply denoise### 6.3 Possibility of Ensemble (
-
-<br />
-
-<br />
-
-<br />
-
-Cross-Check)### 7. Future Work
-
-<br />
-
-<br />
-
-<br />
-
-<br />
-
-<br />
 

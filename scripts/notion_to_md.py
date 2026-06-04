@@ -399,7 +399,7 @@ def block_to_markdown(block, slug, image_counter):
         content = extract_text_from_rich_text(rich_text)
         child_md = render_children()
         if b_type == "paragraph":
-            return (content + "\n\n" if content else "<br />\n\n") + child_md
+            return (content + "\n\n" if content else "\n") + child_md
         elif b_type == "heading_1":
             return f"## {content}\n\n" + child_md
         elif b_type == "heading_2":
