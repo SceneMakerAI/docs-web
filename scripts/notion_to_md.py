@@ -95,6 +95,7 @@ NOTION_PROPERTY_BLOG_LAST_EDITED = os.environ.get("NOTION_PROPERTY_BLOG_LAST_EDI
 NOTION_PROPERTY_AUTHORS          = os.environ.get("NOTION_PROPERTY_AUTHORS", "authors")
 NOTION_PROPERTY_DESCRIPTION      = os.environ.get("NOTION_PROPERTY_DESCRIPTION", "description")
 NOTION_PROPERTY_TAGS             = os.environ.get("NOTION_PROPERTY_TAGS", "tags")
+NOTION_PROPERTY_SLUG             = os.environ.get("NOTION_PROPERTY_SLUG", "slug")
 
 
 SYNC_MAP_FILE = f"{SAVE_DIR}/.notion-sync.json"
@@ -152,7 +153,13 @@ def verify_database_access():
 def read_title_plain(props, prop_name):
     p = props.get(prop_name, {})
     if p.get("type") != "title":
-        return None
+        # 속성명이 다른 DB에서도 동작하도록 title 타입 속성 자동 탐색
+        for val in props.values():
+            if val.get("type") == "title":
+                p = val
+                break
+        else:
+            return None
     inner = p.get("title", [])
     try:
         return inner[0]["plain_text"]
@@ -618,8 +625,12 @@ def save_doc_page(page, position, existing_map, parent_slug=None, is_parent=Fals
         description = read_rich_text_plain(props, NOTION_PROPERTY_DESCRIPTION)
         tags = read_multi_select(props, NOTION_PROPERTY_TAGS)
         last_edited_date = read_last_edited_time_prop(props, NOTION_PROPERTY_BLOG_LAST_EDITED)
+        raw_slug = read_rich_text_plain(props, NOTION_PROPERTY_SLUG)
+        safe_slug = re.sub(r"[^a-z0-9-]", "", raw_slug.lower().replace(" ", "-")) if raw_slug else None
 
         lines = ["---", f'title: "{safe_title}"', f"date: {date_str}"]
+        if safe_slug:
+            lines.append(f"slug: {safe_slug}")
         if authors_list:
             lines.append(f"authors: [{', '.join(authors_list)}]")
         if description:

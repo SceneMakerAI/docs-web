@@ -1,14 +1,14 @@
 {
   "title": {
-    "message": "Blog",
+    "message": "SceneMakerAI Blog",
     "description": "The title for the blog used in SEO"
   },
   "description": {
-    "message": "Blog",
+    "message": "SceneMakerAI Blog — AI-powered broadcast content reprocessing platform development",
     "description": "The description for the blog used in SEO"
   },
   "sidebar.title": {
-    "message": "Recent posts",
+    "message": "All posts",
     "description": "The label for the left sidebar"
   }
 }
