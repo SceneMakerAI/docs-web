@@ -268,12 +268,6 @@ ffmpeg -nostdin -i "$FIRST" \
 - 서버는 vLLM 보호(동시성 상한)와 다건 효율(fan-out 스트리밍)만 보장.
 - 업스트림 호출은 OpenAI SDK 가 아니라 raw `httpx` 로 그대로 vLLM 추론에 제공.
 
-| **Method** | **Path** | **역할** | **비고** |
-| --- | --- | --- | --- |
-| GET | `/healthz` | 헬스체크 | lifespan 통과 후 항상 200. **업스트림 vLLM 도달 여부는 검사 X** |
-| POST | `/chat` | 단건 passthrough | vLLM body 그대로 → vLLM 응답 그대로(envelope 없음). 업스트림 도달 불가 시 **502** |
-| POST | `/chat/batch` | 다건 NDJSON 스트리밍 | `{items:[{id, body}]}` → **완료 순서** 로 라인별 흘림 |
-
 #### 3.2.2. 동시성 · 백프레셔
 
 - vLLM 업스트림 호출은 `asyncio.Semaphore(VLLM_CONCURRENCY)` (기본 4개) 로 게이트한다. 초과 요청은 **거부하지 않고 대기** .
@@ -330,7 +324,7 @@ API 서버는 passthrough이므로 요청 본문 전체(messages·schema·추론
 | 비디오 인코딩 | mp4 → base64 data URI → `messages[0].content[0].video_url.url` |
 | 프롬프트 조립 | 텍스트 프롬프트(한국어/영어, 스크립트 사용 여부, A/B variant 등) |
 | 출력 스키마 강제 | `response_format.json_schema` 에 `AnalysisResult.model_json_schema()` (strict) |
-| vLLM 확장키 | `mm_processor_kwargs` (fps, use_audio_in_video), `chat_template_kwargs` (`enable_thinking: false` — 사고 토큰 비활성) — 본문 **top-level** |
+| vLLM 확장키 | `mm_processor_kwargs` (fps, use_audio_in_video), `chat_template_kwargs` (`enable_thinking: false` , 사고 토큰 비활성) — 본문 **top-level** |
 | 응답 검증 | `AnalysisResult.model_validate(...)` 로 4필드(`summary/objects/actions/audio` ) 강제 |
 
 위 분석으로 정한 **잠정 입력 파라미터** (품질 목적함수 전 baseline · `02_baseline_no_script/run.py` 기본값에 반영):
