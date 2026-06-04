@@ -490,7 +490,18 @@ def blocks_to_markdown(blocks, slug):
     body = "".join(block_to_markdown(b, slug, image_counter) for b in blocks)
     body = escape_mdx_angle_brackets(body)
     body = re.sub(r'(<[a-zA-Z][^>]*/)\s*&gt;', r'\1>', body)
-    return escape_single_tildes(body)
+    body = escape_single_tildes(body)
+    # 연속된 리스트 항목 사이의 빈 줄 제거 (loose → tight list)
+    prev = None
+    while prev != body:
+        prev = body
+        body = re.sub(
+            r'(^(?:- (?:\[[ x]\] )?|\d+\. )[^\n]+)\n\n(?=(?:- (?:\[[ x]\] )?|\d+\. ))',
+            r'\1\n',
+            body,
+            flags=re.MULTILINE,
+        )
+    return body
 
 
 def slugify(title):
