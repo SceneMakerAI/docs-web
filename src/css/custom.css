@@ -155,6 +155,55 @@ article a:hover {
   box-shadow: none;
 }
 
+/* ─────────── Code block language title tab 색상 ─────────── */
+/* :has() 로 내부 언어 클래스에 따라 title 탭 색상 결정 */
+
+/* Bash — teal */
+.theme-code-block:has(.language-bash) [class*="codeBlockTitle"] {
+  background: rgba(78, 201, 176, 0.10);
+  color: #4ec9b0;
+  border-bottom: 1px solid rgba(78, 201, 176, 0.25);
+  font-weight: 600;
+  letter-spacing: 0.03em;
+}
+
+/* JSON — golden */
+.theme-code-block:has(.language-json) [class*="codeBlockTitle"] {
+  background: rgba(220, 220, 170, 0.10);
+  color: #dcdcaa;
+  border-bottom: 1px solid rgba(220, 220, 170, 0.25);
+  font-weight: 600;
+  letter-spacing: 0.03em;
+}
+
+/* Python — blue */
+.theme-code-block:has(.language-python) [class*="codeBlockTitle"] {
+  background: rgba(86, 156, 214, 0.10);
+  color: #569cd6;
+  border-bottom: 1px solid rgba(86, 156, 214, 0.25);
+  font-weight: 600;
+  letter-spacing: 0.03em;
+}
+
+/* JavaScript / TypeScript — amber */
+.theme-code-block:has(.language-javascript) [class*="codeBlockTitle"],
+.theme-code-block:has(.language-typescript) [class*="codeBlockTitle"] {
+  background: rgba(229, 192, 123, 0.10);
+  color: #e5c07b;
+  border-bottom: 1px solid rgba(229, 192, 123, 0.25);
+  font-weight: 600;
+  letter-spacing: 0.03em;
+}
+
+/* YAML — purple */
+.theme-code-block:has(.language-yaml) [class*="codeBlockTitle"] {
+  background: rgba(197, 134, 192, 0.10);
+  color: #c586c0;
+  border-bottom: 1px solid rgba(197, 134, 192, 0.25);
+  font-weight: 600;
+  letter-spacing: 0.03em;
+}
+
 /* ─────────── OL 번호 스타일 — Notion 기준 ─────────── */
 /* Infima 기본 또는 브라우저 UA가 ul>li>ol을 lower-roman으로 처리하는 것 재정의 */
 .markdown ol                { list-style-type: decimal; }
