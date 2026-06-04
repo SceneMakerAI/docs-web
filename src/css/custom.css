@@ -98,11 +98,17 @@
   --ifm-list-paragraph-margin: 0.25rem;
 
   /* ─────────── Table: Notion 스타일 ─────────── */
-  --ifm-table-border-color: rgba(0, 0, 0, 0.09);
+  --ifm-table-border-color: rgba(0, 0, 0, 0.12);
   --ifm-table-border-width: 1px;
   --ifm-table-cell-padding: 7px 14px;
-  --ifm-table-head-background: rgba(0, 0, 0, 0.04);
+  --ifm-table-head-background: rgba(0, 0, 0, 0.06);
   --ifm-table-stripe-background: rgba(0, 0, 0, 0.02);
+
+  /* ─────────── Link: design.md 기준 ─────────── */
+  --ifm-link-color: var(--smk-accent-blue-link);       /* #376cd5 */
+  --ifm-link-hover-color: var(--smk-primary-deep);     /* #3a40c4 */
+  --ifm-link-decoration: none;
+  --ifm-link-hover-decoration: underline;
 }
 
 /* Infima 변수가 markdown body에 미적용되는 경우 직접 선택자로 보완 */
@@ -112,6 +118,41 @@
 .markdown > ul,
 .markdown > ol {
   margin-bottom: 0.5rem;
+}
+
+/* ─────────── Inline code: Notion 스타일 ─────────── */
+/* Notion: 따뜻한 회색 배경 + 붉은빛 텍스트 */
+.markdown :not(pre) > code {
+  background: rgba(135, 131, 120, 0.15);
+  color: #e03e2d;
+  border-radius: 3px;
+  padding: 0.15em 0.4em;
+  font-size: 0.875em;
+  border: none;
+}
+
+/* ─────────── Links ─────────── */
+.markdown a,
+.markdown a:link,
+.markdown a:visited,
+article a,
+article a:link,
+article a:visited {
+  color: #376cd5 !important;
+  text-decoration: none;
+}
+.markdown a:hover,
+article a:hover {
+  color: #3a40c4 !important;
+  text-decoration: underline;
+}
+
+/* ─────────── Code block border — Notion 스타일 ─────────── */
+.theme-code-block {
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 6px;
+  margin-bottom: 0.75rem;
+  box-shadow: none;
 }
 
 /* ─────────── OL 번호 스타일 — Notion 기준 ─────────── */
@@ -175,12 +216,6 @@
 [data-theme='dark'] [data-notion-bg="red_background"]    { background: #361a1a; }
 
 /* ─────────── Code block: Notion 스타일 ─────────── */
-/* 라이트/다크 모두 vsDark 배경 사용 → 흰 배경 오버라이드 불필요 */
-.theme-code-block {
-  border-radius: 6px;
-  margin-bottom: 0.75rem;
-  box-shadow: none;
-}
 
 /* 언어 레이블 (Notion의 상단 언어 표시처럼) */
 .theme-code-block .prism-code {
@@ -257,7 +292,7 @@
   gap: 10px;
 }
 
-/* 다크 모드: cobalt 톤만 한 단계 밝게 — 캔버스/서피스는 Infima 기본을 따름 */
+/* 다크 모드 */
 [data-theme='dark'] {
   --ifm-color-primary: var(--smk-primary-bright);
   --ifm-color-primary-dark: var(--smk-primary);
@@ -267,5 +302,25 @@
   --ifm-color-primary-lighter: #7c80f6;
   --ifm-color-primary-lightest: #a3a6f9;
 
+  --ifm-link-color: #6b9eff;
+  --ifm-link-hover-color: #93b8ff;
+
+  --ifm-table-border-color: rgba(255, 255, 255, 0.12);
+  --ifm-table-head-background: rgba(255, 255, 255, 0.07);
+
   --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
+}
+
+[data-theme='dark'] .markdown :not(pre) > code {
+  background: rgba(135, 131, 120, 0.25);
+  color: #ff7b72;
+}
+
+[data-theme='dark'] .theme-code-block {
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+[data-theme='dark'] .markdown table th,
+[data-theme='dark'] .markdown table td {
+  border-color: rgba(255, 255, 255, 0.12);
 }
