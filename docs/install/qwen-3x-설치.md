@@ -120,7 +120,7 @@ G4dn, G5, G6, Gr6, G6e, P4d, P4de, P5, P5e, P5en, P6-B200, P6-B300
 | 인스턴스 스토어 | NVMe SSD 1.9 TB (`nvme1n1` ) — 인스턴스 유형에 기본 포함 |
 
 <details>
-<summary>**g7e 패밀리 비교 (참고)**</summary>
+<summary><strong>g7e 패밀리 비교 (참고)</strong></summary>
 
 | Type | vCPU | RAM | GPU 수 | VRAM 총량 | Network |
 | --- | --- | --- | --- | --- | --- |

@@ -115,7 +115,7 @@ G4dn, G5, G6, Gr6, G6e, P4d, P4de, P5, P5e, P5en, P6-B200, P6-B300
 | Instance Store | NVMe SSD 1.9 TB (`nvme1n1` ) — Included by default with this instance type |
 
 <details>
-<summary>**g7e Family Comparison (for reference)**</summary>
+<summary><strong>g7e Family Comparison (for reference)</strong></summary>
 
 | Type | vCPU | RAM | Number of GPUs | Total VRAM | Network |
 | --- | --- | --- | --- | --- | --- |
