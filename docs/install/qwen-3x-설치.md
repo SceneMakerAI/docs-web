@@ -31,7 +31,6 @@ last_update:
 1. **Capacity 점유 가능성** — 원할 때 실제로 띄울 수 있는가
 1. **한국 응답시간** — 사용자가 체감할 네트워크 지연 
 
-<br />
 
 **G7e 제공 리전 비교** (2026-05-19 측정)
 
@@ -190,7 +189,6 @@ G4dn, G5, G6, Gr6, G6e, P4d, P4de, P5, P5e, P5en, P6-B200, P6-B300
 - **EBS (** `/` **)** : 모델 가중치, 영구 데이터 → 절대 잃으면 안 되는 것
 - **인스턴스 스토어 (** `/mnt/nvme` **)** : KV 캐시, 임시 빌드, swap, 추론 로그 → 잃어도 되는 것
 
-<br />
 
 ---
 
@@ -214,7 +212,6 @@ nvme1n1       259:1    0  1.7T  0 disk
 > 
 ```
 
-<br />
 
 #### 2. 디스크 포멧 및 마운트
 
@@ -242,13 +239,10 @@ Filesystem      Size  Used Avail Use% Mounted on
 >
 ```
 
-<br />
 
-<br />
 
 ---
 
-<br />
 
 ## 모델 설치
 
@@ -264,7 +258,6 @@ Filesystem      Size  Used Avail Use% Mounted on
 - vllm 설정
 - 모델 설정
 
-<br />
 
 ### 기본 패키지 설치
 
@@ -274,7 +267,6 @@ Filesystem      Size  Used Avail Use% Mounted on
 > pip install -U "huggingface_hub[cli]" hf_transfer 
 ```
 
-<br />
 
 ##### 환경 변수 설정
 
@@ -287,7 +279,6 @@ export HF_HOME=/mnt/nvme/hf-cache      # 빠르지만 stop 시 소실
 # export HF_HOME=/root/hf-cache        # 또는 EBS (영구)
 ```
 
-<br />
 
 ### 모델 다운로드
 
@@ -315,15 +306,12 @@ drwxr-xr-x. 4 root root    92 May 19 18:45 hub
 drwxr-xr-x. 4 root root    59 May 19 17:28 xet
 ```
 
-<br />
 
-<br />
 
 ### VLLM 설치
 
 vllm 은 패키지 의존성을 많이 요구하기 때문에 uv 환경에서 격리 하여 패키지 설치를 권장 함
 
-<br />
 
 #### uv 설치
 
@@ -340,7 +328,6 @@ uv 0.11.15 (x86_64-unknown-linux-gnu)
 >
 ```
 
-<br />
 
 #### vllm 전용 프로젝트 생성 및 설치
 
@@ -357,9 +344,7 @@ Activate with: source .venv/bin/activate
 (vllm-svc) > uv pip install vllm --torch-backend=auto
 ```
 
-<br />
 
-<br />
 
 ##### 테스트
 
@@ -376,7 +361,6 @@ Activate with: source .venv/bin/activate
   --trust-remote-code
 ```
 
-<br />
 
 ```shell
 (vllm-svc) >  curl http://localhost:8000/v1/chat/completions \
@@ -392,13 +376,11 @@ Activate with: source .venv/bin/activate
 {"id":"chatcmpl-89cf9de14d6fdfd2","object":"chat.completion","created":1779181606,"prompt_routed_experts":null,"model":"qwen","choices":[{"index":0,"message":{"role":"assistant","content":"안녕하세요! 반갑습니다. 😊\n오늘 어떤 도움이 필요하신가요? 궁금한 점이 있거나 대화하고 싶은 주제가 있다면 언제든지 말씀해 주세요.","refusal":null,"annotations":null,"audio":null,"function_call":null,"tool_calls":[],"reasoning":null},"logprobs":null,"finish_reason":"stop","stop_reason":null,"token_ids":null,"routed_experts":null}],"service_tier":null,"system_fingerprint":"vllm-0.21.0-2426ae93","usage":{"prompt_tokens":14,"total_tokens":49,"completion_tokens":35,"prompt_tokens_details":null},"prompt_logprobs":null,"prompt_token_ids":null,"prompt_text":null,"kv_transfer_params":null}[root@ip-172-31-22-41 models]#
 ```
 
-<br />
 
 #### Service 등록
 
 실행시 /stg/models/Qwen3.5-122B-A10B-GPTQ-Int ⇒ /mnt/nvme/models/Qwen3.5-122B-A10B-GPTQ-Int4 로 모델을 옮기고 nvme 에 있는 모델을 로드 한다.
 
-<br />
 
 - Qwen3.5-122B-A10B-GPTQ-Int4 
 
@@ -456,7 +438,6 @@ LimitNPROC=1048576
 WantedBy=multi-user.target
 ```
 
-<br />
 
 - Qwen3.6-27B-FP8
 
@@ -514,9 +495,7 @@ WantedBy=multi-user.target
 
 ```
 
-<br />
 
-<br />
 
 ---
 
@@ -532,7 +511,6 @@ WantedBy=multi-user.target
   --max-workers 16
 ```
 
-<br />
 
 ### 오디오 입력 지원 (필수)
 
@@ -546,7 +524,6 @@ WantedBy=multi-user.target
 - 설치 후 **서비스 재기동해야 적용** 된다 (`sudo systemctl restart vllm_omni_i` )
 - 클라이언트 요청 본문에 `mm_processor_kwargs: {"use_audio_in_video": true}` 를 넣어야 mp4 안 오디오가 함께 처리된다
 
-<br />
 
 ### Service 등록
 
@@ -592,7 +569,6 @@ LimitNPROC=1048576
 WantedBy=multi-user.target
 ```
 
-<br />
 
 감사합니다.
 

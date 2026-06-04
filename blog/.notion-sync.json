@@ -5,12 +5,5 @@
     "content_hash": "e57803fe3aa92436ed57cf13a4563d22624e7e650e15cea8730519aab6b575a3",
     "order": 1,
     "parent_id": null
-  },
-  "375e15b4-0359-80e8-8044-e37d77b7b492": {
-    "file": "blog/2026-06-04-신규페이지-삭제-테스트-진행-예정.md",
-    "last_edited": "2026-06-04T05:14:00.000Z",
-    "content_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-    "order": 2,
-    "parent_id": null
   }
 }
