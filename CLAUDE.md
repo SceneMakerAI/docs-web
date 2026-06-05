@@ -1,7 +1,7 @@
 
 # CLAUDE.md — docs-web 작업 가이드
 
-콘텐츠 사이트. 작업 대부분은 Markdown 추가·수정.
+콘텐츠 사이트. 작업 대부분은 Markdown 추가·수정과 notion_to_md.py 스크립트 유지보수.
 
 ---
 
@@ -22,7 +22,11 @@
 |------|------|
 | `docs/` | KR 원본. **Notion 자동 동기화가 덮어씀** — 수동 수정은 다음 sync에 사라짐 |
 | `scripts/notion_to_md.py` | Notion → docs/ · blog/ 변환 핵심 스크립트 |
+| `scripts/translate_to_en.py` | 변경된 KR → DeepL → `docs_en/` 자동 번역 |
 | `scripts/server-sync.sh` | crontab 진입점 (pull→sync→commit→push) |
+| `scripts/tests/` | notion_to_md.py · md_to_notion.py 단위 테스트 |
+
+---
 
 ## URL/Slug 시스템
 
@@ -89,9 +93,33 @@ docs/poc/vision-bench/child.md  (slug: "1")  →  /docs/poc/vision-bench/1
 - `git commit` 을 `main` 또는 `develop` 에서 직접 실행 ❌
 - 작업 시작 전 항상 `git checkout feat/<이름>` 또는 `git checkout design` 먼저
 
-**design 브랜치:** 장기 유지 (삭제 금지). 작업 전 반드시 `git rebase origin/main` 실행.
+**design 브랜치:** 장기 유지 (삭제 금지). 작업 전 반드시 `git merge origin/main --ff-only` 실행.
 **feat 브랜치:** 작업 완료 후 main에 merge → 로컬·원격 브랜치 삭제.
 Notion 자동 동기화가 main에 직접 커밋하므로 브랜치 작업 시작 전 rebase 생략 시 conflict 발생.
+
+### crontab 충돌 처리
+
+crontab은 30분마다 main에 직접 push한다. 내가 main에 push하려 할 때 `non-fast-forward` 에러가 나면:
+
+```bash
+git stash            # 미커밋 변경 임시 저장
+git pull --rebase origin main   # crontab 커밋 위로 rebase
+# 충돌 시: docs/poc/.notion-sync.json 등 Notion 파일은 --theirs 선택
+git add <충돌파일>
+git rebase --continue
+git stash pop
+git push origin main
+```
+
+### design 브랜치 최신화
+
+main에 변경이 쌓이면 design도 함께 업데이트한다:
+
+```bash
+git checkout design
+git merge main --ff-only   # 또는: git merge origin/main --ff-only
+git push origin design
+```
 
 ---
 
@@ -106,6 +134,8 @@ Notion 자동 동기화가 main에 직접 커밋하므로 브랜치 작업 시�
 | `npm run clear` | Docusaurus 캐시 정리 |
 | `npm run typecheck` | TypeScript 검사 (빌드와 무관, IDE 보조) |
 
+**dev 서버 404 / 브랜치 전환 후 캐시 꼬임:** `npm run clear` 후 재시작.
+
 ---
 
 ## 빌드 게이트
@@ -113,6 +143,7 @@ Notion 자동 동기화가 main에 직접 커밋하므로 브랜치 작업 시�
 `onBrokenLinks: 'throw'` — CI에서 아래 시 빌드 실패:
 - **깨진 내부 링크** — PR 전 `npm run build` 로컬 통과 필수
 - **MDX 컴파일 오류** — frontmatter·JSX 문법 오류
+- **사이드바 비어있음** — `aboutSidebar`처럼 docs/가 비면 빌드 실패 → placeholder.md 필요
 
 ---
 
@@ -132,6 +163,35 @@ Notion 자동 동기화가 main에 직접 커밋하므로 브랜치 작업 시�
 
 ---
 
+## notion_to_md.py 핵심 동작
+
+### 번호 매기기 목록 (OL) 순서 번호
+
+스크립트가 `numbered_list_item` 블록에 실제 순서 번호(1, 2, 3…)를 출력한다.
+HTML `<ol start="N">`이 자동 생성되어 코드블록으로 분리된 OL도 연속 번호가 유지된다.
+CSS는 표준 `list-style: decimal`을 사용 — CSS 카운터 없음.
+
+**카운터 리셋 기준 (`_OL_RESET_TYPES`):**
+
+| 블록 타입 | 동작 |
+|----------|------|
+| `heading_1~4` | **리셋** (섹션 경계) |
+| `table`, `toggle`, `column_list` | **리셋** |
+| `code`, `paragraph`, `image`, `divider`, `quote`, `callout` | **유지** (split-OL 연속 번호) |
+| `bulleted_list_item`, `to_do` | **유지** — 번호 목록 항목 사이 sub-bullet로 나타나므로 |
+
+### HTML 엔티티 처리
+
+Notion API가 일부 셀에서 `&amp;gt;` 형태로 이중 인코딩해 반환할 때
+`extract_text_from_rich_text`에서 안정될 때까지 반복 unescape한다.
+
+### 꺾쇠 이스케이프 (`escape_mdx_angle_brackets`)
+
+`<한글>` 패턴을 `&lt;한글&gt;`으로 변환해 MDX JSX 파싱 오류 방지.
+트리플 백틱 코드 블록과 인라인 코드 스팬(`` ` ``) 안은 건드리지 않는다.
+
+---
+
 ## 콘텐츠 추가 체크리스트
 
 **새 Notion 섹션 추가:**
@@ -147,7 +207,24 @@ Notion 자동 동기화가 main에 직접 커밋하므로 브랜치 작업 시�
 
 **수동 Notion 동기화 (단일 섹션):**
 ```bash
-NOTION_TOKEN=... NOTION_DATABASE_ID=... SAVE_DIR=docs/guide python3 scripts/notion_to_md.py
+export $(grep -v '^#' .env | xargs)
+NOTION_DATABASE_ID="$NOTION_POC" SAVE_DIR=docs/poc FETCH_MODE=ALL python3 scripts/notion_to_md.py
+```
+
+**특정 페이지 강제 재sync (last_edited 캐시 무효화):**
+```bash
+python3 -c "
+import json
+with open('docs/poc/.notion-sync.json') as f:
+    data = json.load(f)
+for pid, info in data.items():
+    if 'vision-bench' in str(info.get('file', '')):  # 조건 수정
+        info['last_edited'] = ''
+        info['content_hash'] = ''
+with open('docs/poc/.notion-sync.json', 'w') as f:
+    json.dump(data, f, indent=2, ensure_ascii=False)
+"
+# 이후 수동 sync 실행
 ```
 
 ---
@@ -159,3 +236,5 @@ NOTION_TOKEN=... NOTION_DATABASE_ID=... SAVE_DIR=docs/guide python3 scripts/noti
 - `.docusaurus/`, `build/`, `node_modules/` 커밋 금지
 - 부모 `index.md`에 `id:` 필드 추가 금지 — `_category_.json` link.id와 충돌
 - `.docusaurus/` 캐시를 무시하고 빌드 통과로 간주하지 말 것 — `npm run clear` 후 재빌드
+- `docs/` 파일 수동 편집 금지 — 다음 Notion sync에 덮어씌워짐. 영구 수정은 Notion 원본을 고치거나 `notion_to_md.py`를 수정할 것
+- `scripts/tests/` 테스트 없이 `notion_to_md.py` 수정 금지 — `python3 -m pytest scripts/tests/` 통과 필수
