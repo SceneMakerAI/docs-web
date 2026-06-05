@@ -350,13 +350,15 @@ article a:hover {
 }
 
 .markdown details summary::before {
-  content: '▶';
-  font-size: 0.65em;
-  line-height: 1;
+  content: '';
+  width: 0;
+  height: 0;
+  border-top: 4px solid transparent;
+  border-bottom: 4px solid transparent;
+  border-left: 6px solid var(--ifm-color-content-secondary);
   transition: transform 0.15s;
-  color: var(--ifm-color-content-secondary);
   position: absolute;
-  left: 0;
+  left: 2px;
   top: 50%;
   transform: translateY(-50%);
 }
