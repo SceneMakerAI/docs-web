@@ -216,7 +216,8 @@ article a:hover {
   display: block;           /* overflow-x 활성화 — 넓은 테이블 가로 스크롤 */
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
-  width: 100%;
+  width: max-content;       /* 컨텐츠 폭에 맞춤 — Notion처럼 짧은 열은 좁게 */
+  max-width: 100%;          /* 컨테이너 초과 시 스크롤 */
   border-collapse: collapse;
   margin-bottom: 1.5rem;
   font-size: 1rem;          /* Notion 본문(16px)과 동일, 0.9rem 제거 */
