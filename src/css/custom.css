@@ -49,10 +49,11 @@
   --smk-font-display: 'Geist', 'Inter Display', 'General Sans', system-ui, -apple-system, sans-serif;
   --smk-font-body: 'Inter', system-ui, -apple-system, sans-serif;
 
-  /* ─────────── Heading sizes ─────────── */
-  --ifm-h2-font-size: 1.5rem;
-  --ifm-h3-font-size: 1.25rem;
-  --ifm-h4-font-size: 1.1rem;   /* 1.05rem → 본문(1rem)과 구분이 너무 안 됨 */
+  /* ─────────── Heading sizes — Notion 기준 ─────────── */
+  --ifm-h1-font-size: 2.5rem;    /* 40px — Notion 페이지 제목 (Infima 기본 3rem=48px) */
+  --ifm-h2-font-size: 1.75rem;   /* 28px — 계층감 강화 (기존 1.5rem=24px) */
+  --ifm-h3-font-size: 1.25rem;   /* 20px — 유지 */
+  --ifm-h4-font-size: 1.0625rem; /* 17px */
   --ifm-h5-font-size: 1rem;
 
   /* ─────────── Radius ─────────── */
@@ -85,6 +86,7 @@
 
   --ifm-font-family-base: var(--smk-font-body);
   --ifm-heading-font-family: var(--smk-font-display);
+  --ifm-font-color-base: rgb(44, 44, 43);  /* Notion 본문 색상 */
 
   --ifm-code-font-size: 95%;
   --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.1);
@@ -110,6 +112,49 @@
   --ifm-link-decoration: none;
   --ifm-link-hover-decoration: underline;
 }
+
+/* ─────────── Heading 간격·행간 — Notion 기준 ─────────── */
+/* Docusaurus가 h1을 CSS 변수 없이 직접 3rem으로 선언하므로 덮어씀 */
+h1 {
+  font-size: 2.5rem !important;  /* 40px — Notion 페이지 제목 (기본 3rem=48px) */
+}
+.markdown h1 {
+  line-height: 1.15;
+  margin-bottom: 1rem;
+}
+.markdown h2 {
+  line-height: 1.2;
+  margin-top: 2.5rem;    /* 40px: 이전 섹션과 명확한 시각적 분리 */
+  margin-bottom: 0.5rem;
+}
+.markdown h3 {
+  line-height: 1.3;
+  margin-top: 1.75rem;   /* 28px */
+  margin-bottom: 0.25rem;
+}
+.markdown h4 {
+  line-height: 1.4;
+  margin-top: 1.25rem;
+  margin-bottom: 0.25rem;
+}
+/* 페이지 첫 번째 heading은 위 여백 제거 */
+.markdown > h2:first-child,
+.markdown > h3:first-child,
+.markdown > h4:first-child {
+  margin-top: 0;
+}
+
+/* ─────────── Blockquote: Notion 스타일 ─────────── */
+.markdown blockquote {
+  border-left: 3px solid rgba(55, 53, 47, 0.35);
+  background: transparent;
+  padding: 0.25rem 0 0.25rem 1rem;
+  margin: 0.5rem 0 1rem 0;
+  color: inherit;
+  font-style: normal;
+}
+.markdown blockquote p { margin-bottom: 0.25rem; }
+.markdown blockquote p:last-child { margin-bottom: 0; }
 
 /* Infima 변수가 markdown body에 미적용되는 경우 직접 선택자로 보완 */
 .markdown > p {
