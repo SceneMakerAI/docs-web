@@ -412,7 +412,7 @@ Whisper 는 언어마다 훈련시킨 데이터 양이 다르기 때문에 Tier�
    │
    ▼  ALLOWED_LANGS 게이트 (Tier 1+2+3 외 skip)
    │
-[LID_TRUST_PROB]  prob<0.5 + 비-ko → ko 강제
+[LID_TRUST_PROB]  prob&lt;0.5 + 비-ko → ko 강제
    │
    ▼
 [transcribe 분기]
@@ -470,143 +470,183 @@ transcribe 결과 text 의 **문자 종류로 lang 후처리 정정** — LID/Qw
 
 ---
 
+## 5. 평가
+
+Gemini 3.5 Flash 가 audio (ground truth) 와 STT 결과 segment 를 비교해서 채점. 시스템 독립 (Whisper / Qwen 각각 같은 audio 로 평가).
 
 
+### 5.1 점수 체계 (-3 \~ 3, 교정 가능성 기반)
 
+단순 일치/불일치가 아니라 **"이 segment 가 추후 교정 단계 (Gemini correct 등) 에서 살릴 수 있는가"** 를 점수에 반영.
 
-
-
-
-
-
-
-
-
-
-
-
-## 1. 프로젝트 개요 (Overview)
-
-- **목적:** 배경음악, 효과음, 관중 함성 등이 섞인 미디어 파일에서 인간의 대사(Dialogue)만 고립시켜, 자막의 오인식 및 AI 환각(Hallucination) 현상을 원천 차단하고 단 3분 만에 1시간짜리 영상을 완벽한 다국어 자막으로 변환하는 시스템 검증.
-- **핵심 목표:** 
-  -  음성 향상(Speech Enhancement)을 통한 단어 오차율(WER) 최소화
-
-  -  문장별/구간별 실시간 다국어 교차 인식(Code-switching) 및 공백 처리 구현
-
-  -  LLM을 통한 문맥 기반 고유명사 및 맞춤형 오타 최종 교정
-
-- 예상 처리 프로세스
-
-```smalltalk
-[영상 파일 입력]
-⬇️
-1단계. 오디오 추출 (ffmpeg)
-원본 영상에서 딥러닝 엔진이 분석할 수 있는 고음질 오디오 트랙을 고속으로 분리합니다.
-⬇️
-2단계. AI 음성 향상 (DeepFilterNet v3)
-배경음악(BGM), 영화 효과음, 스포츠 관중 함성 등을 '소음'으로 규정하여 10초 
-만에 완벽히 소거하고 순수 목소리만 고립시킵니다.
-⬇️
-3단계. 다국어 전사 엔진 (WhisperX)
-내장된 Silero VAD로 공백을 청소하고, 조각별 언어 자동 감지를 거쳐 환각 없이 
-고속으로 텍스트를 타이핑합니다.
-⬇️
-4단계. 화자 분리 매칭 (PyAnnote Audio)
-추출된 텍스트의 타임스탬프와 목소리 주인공의 시간대를 대조하여 
-[화자 1], [화자 2] 태그를 자동으로 부여합니다.
-⬇️
-5단계. LLM 문맥 교정 (LLM Engine)
-앞뒤 문맥을 파악하여 Whisper가 틀린 고유명사, 오타, 띄어쓰기를 최종 교정하고 
-규격화된 최종 SRT 자막을 출력합니다.
-```
-
-
-## 2. 사전 조사
-
-#### **2.1. 음성 인식 엔진: WhisperX (Turbo vs Large-v3)**
-
-
-- **결론:** 전사(Transcription) 중심의 초고속 시스템을 위해 `Turbo (Large-v3-Turbo)` 모델 채택.
-- **이유:** Large-v3 가 최고 성능을 내지만 정확도 손실은 1% 내외 이고 속도는 Turbo 가 3배 이상 빠름. 음성 데이터를 전처리를 해서 원본 품질을 높이는게 정확도+속도 면에서 유리하다고 판단
-
-| **비교 항목** | **WhisperX Large-v3** | **WhisperX Turbo** | **비고 및 비즈니스 영향** |
+| 점수 | 이름 | 설명 | 예시 |
 | --- | --- | --- | --- |
-| **매개변수 (Parameters)** | 1,550M (15.5억 개) | **809M (8.09억 개)** | 구조 슬림화로 가벼운 구동 가능 |
-| **디코더 레이어 수** | 32개 | **4개** | 레이어를 1/8로 줄여 추론 속도 극대화 |
-| **실구동 VRAM** *(FP16 기준)* | 약 4.5 GB \~ 5.0 GB | **약 2.5 GB \~ 3.0 GB** | GPU 메모리 절약으로 동시 처리량(Batch) 확대 가능 |
-| **1시간 오디오 처리 시간** *(RTX 4090 / WhisperX 배치 기준)* | 약 45초 \~ 1분 내외 | **약 15초 \~ 20초 내외** | **Turbo가 약 3배 이상 빠름** (I/O 속도 제외 순수 연산) |
-| **정확도 지표** *(LibriSpeech WER)* | 기준점 (\~2.7%) | **미세 하락 (\~3.0%)** | **오차율 차이 약 0.3%** 수준으로 실전 체감 불가 |
-| **번역 기능** *(--task translate)* | **지원** (다국어 ➡️ 영어 번역) | **미지원** (오직 들리는 언어 그대로 전사) | 다국어 '받아쓰기'는 둘 다 완벽 지원 |
+| **3** | OK | 의미 동일, 사소한 차이 (띄어쓰기/오타/조사 미세 차이) | "넌 가가멜이 무섭지도 않아?" 정답 일치 |
+| **2** | 의미동일 | 의미 같음, 표현 다름 (동의어/어순 변화) | 정답 "갔다" → STT "갔어요" |
+| **1** | 절반/추임새 | 핵심 의미 절반, 또는 짧은 추임새 (1-2글자, 무해) | "어", "음", "아" / 교정 가능성 50%+ |
+| **0** | 교정가능 | 문장은 잘못됐지만 추후 교정 가능성 20%+ | "투수" → "제수" 같은 오인식 — 문맥으로 복원 가능 |
+| **-1** | 일부맞음 | 일부 단어만 맞음, 의미 대부분 다름 (교정 어려움) |  |
+| **-2** | 환각 | audio 발화 없는데 자막처럼 보이는 text 생성 | 침묵 + "Thank you for watching" / 아랍어 자막 크레딧 |
+| **-3** | 완전다름 | audio 발화는 있지만 text 와 완전히 무관 | ja 인터뷰인데 garbled ko text |
 
-#### 2.2 노이즈 제거
+#### -2 vs -3 의 차이
 
-- **결론:** 방송, 영화, 스포츠 해설 등 다채로운 소음 환경에서 대사(Dialogue)만 초고속으로 고립시키기 위해 `DeepFilterNet v3` 를 전처리 메인 엔진으로 채택.
-- **이유:** BGM 제거에 특화된 음악 분리 모델(RoFormer, MDX)과 달리, 인간의 성대 구조 주파수 외의 모든 소리(효과음, 함성, 배경음)를 '잡음'으로 인지해 완벽히 제거함. 특히 RTX 4090 환경에서 1시간 분량을 단 10초대에 끊어내는 압도적인 인프라 비용 절감 효과를 가짐.
-
-| **비교 대상 모델** | **DeepFilterNet v3 (채택)** | **BS-RoFormer (Vocal)** | **MDX23C (Kim Vocal 2)** | **HTDemucs v4** |
-| --- | --- | --- | --- | --- |
-| **모델 분류** | **음성 향상 (Speech Enhancement)** | 음악 소스 분리 (SOTA) | 주파수 분리 (전통 강호) | 하이브리드 소스 분리 |
-| RTX 4090 기준 1시간 처리 시간 | **🚀 약 10초 \~ 15초** | 약 1분 30초 \~ 2분 | 약 45초 \~ 1분 | 약 1분 \~ 1분 30초 |
-| **연산 소요 VRAM** | **⚡ 1 GB 미만 (극도로 가벼움)** | 약 4 GB \~ 8 GB | 약 4 GB \~ 6 GB | 약 4 GB 내외 |
-| **주요 필터링 타겟** | **현장 소음, 관중 함성, 울림(에코), 효과음, BGM** | 배경음악(OST), 악기 반주 | 배경음악, 스튜디오 잡음 | 드럼, 베이스, 기타 악기군 |
-| **최대 장점** | 연산 속도가 압도적으로 빠르며, 배우들의 웅얼거림이나 속삭임 등 극적 대사 보존력이 우수함. | 배경음악(BGM) 차단 능력이 현존 오픈소스 중 세계 최고 수준. | 목소리의 선명도(Clarity)가 높아 딕션이 또렷해짐. | 오디오를 4개 트랙으로 분리하여 현장감 조절이 가능함. |
-| **단점 및 한계** | 대사보다 BGM 볼륨이 극도로 큰 일부 예능에서는 음악 소리가 미세하게 새어 나올 수 있음. | 모델이 무거워 대량 처리 시 병목 우려. 대사가 왜곡되어 Whisper가 씹을 가능성 존재. | 영화 효과음이나 스포츠 관중 소리를 '악기'로 인지하지 못해 걸러내지 못함. | 속삭이는 작은 대사를 '소음'으로 오인해 통째로 지워버리는 경우가 있음. |
-| **PoC 최종 지위** | **메인 파이프라인 확정** | 특수 장르(예능)용 서브 픽 | 대량 고속 처리용 후보 픽 | 스포츠 중계용 검증 픽 |
+| 구분 | audio 발화 여부 | text |
+| --- | --- | --- |
+| **-2 환각** | ❌ 발화 없음 (침묵/BGM) | 자막처럼 자연스러운 문장 생성 |
+| **-3 완전다름** | ✅ 발화 있음 | 발화 내용과 완전히 다른 text |
 
 
 ---
 
+### 5.2 외국어 +1 보정
 
-## 3. 테스트
+한국어 외 (lang ≠ ko) segment 는 점수를 **+1점 후하게** (max 3 cap).
 
-### 3.1 테스트 방법
+| 보정 전 | 보정 후 (외국어) |
+| --- | --- |
+| 2점 | 3점 |
+| 1점 | 2점 |
+| 0점 | 1점 |
+| -1점 | 0점 |
+| -2점 | -1점 |
+| -3점 | -2점 |
 
+#### 이유
 
+- ASR 시스템의 외국어 정확도가 한국어 대비 낮음 — 우리 시스템 (한국어 콘텐츠 가정) 의 외국어 처리는 best-effort
+- 영어 인터뷰가 일부 단어 누락 / 미세 어색 → 그래도 시청자가 자막으로 이해 가능
+- 한국어 자막의 표준 잣대를 그대로 외국어에 적용하면 너무 가혹
 
-### 3.2 테스트 데이터
+#### 예시
 
-테스트 데이터는 아래와 같다. 가능한 실제 방송 영상과 비슷한 50분\~2시간 사이로 영상
+`audio: "I go to school"
+STT  : "I go to the school"   ← 사소한 단어 추가
+원래 점수: 2 (의미동일, 표현 다름)
+보정 후 : 3 (외국어 +1)`
 
-| 방송 | 재생시간 | URL |
+### 5.3 자막 사용 가능률 (≥0점)
+
+**기준** — segment 점수가 0점 이상이면 "자막으로 사용 가능"
+
+| 점수 | 자막 처리 (production 시) |
+| --- | --- |
+| 3, 2 | ✅ 그대로 자막 사용 |
+| 1 | ✅ Gemini 교정으로 다듬어 사용 |
+| 0 | ✅ Gemini 교정 시도 (가능성 20%+) |
+| -1, -2, -3 | ❌ Drop (잘못된 자막보다 누락이 낫다) |
+
+#### 정량 지표
+
+`자막 사용 가능률 = (점수 ≥ 0 인 segment 수) / 전체 segment 수 × 100%`
+
+POC 결과 (7장 참조) 에서 모든 시스템 × 콘텐츠가 90%+ 달성. = 우리 환각 게이트가 효과적으로 -1 \~ -3 케이스를 사전 차단했음을 시사.
+
+#### 왜 0점 기준?
+
+- "잘못됐지만 교정 가능 (가능성 20%+)" 까지를 자막 후보로 인정
+- production 시 Gemini correct 단계에서 가능성 20%+ segment 를 실제로 살릴 시도
+- 0점 미만은 교정 비용 &gt; 가치 → drop
+
+---
+
+### 6.4 Caching / Chunk / Retry
+
+Gemini API 비용/성능 최적화 3종 세트.
+
+#### Audio Caching (75% 비용 절감)
+
+`audio_file = client.files.upload(file=audio_path)
+cache = client.caches.create(
+    model="gemini-3.5-flash",
+    config=CreateCachedContentConfig(
+        contents=[audio_file],
+        ttl="3600s",   # 1시간
+    ),
+)`
+
+**효과** :
+
+- audio (큰 입력) 를 1회 업로드 + cache 생성
+- 이후 chunk 별 채점 호출 시 audio 토큰 비용 회피 (cached_content 재참조)
+- **비용 75% 절감**  (Gemini caching pricing)
+
+평가 끝나면 `client.caches.delete()` 로 정리 (TTL 안 기다림).
+
+#### Chunk 단위 (CHUNK_SIZE=20)
+
+전체 segment 를 한 번에 보내면 응답 token 한계 (Flash 32K) 초과. 20개씩 분할.
+
+`for ci in range(n_chunks):
+    chunk = segments[ci * 20 : (ci + 1) * 20]
+    response = client.models.generate_content(
+        model=MODEL,
+        contents=[prompt],
+        config=GenerateContentConfig(
+            cached_content=cache.name,                  # audio 재참조
+            response_mime_type="application/json",
+            response_schema=list[ScoreItem],            # JSON schema 강제
+            max_output_tokens=32768,
+            thinking_config=ThinkingConfig(thinking_budget=0),  # Flash 는 thinking off
+        ),
+    )`
+
+| 항목 | 값 | 이유 |
 | --- | --- | --- |
-| KBS 9 뉴스 | 48:30 | [https://www.youtube.com/watch?v=rX1P-jOoNmM](https://www.youtube.com/watch?v=rX1P-jOoNmM) |
-| 슈퍼피쉬 1부 | 58:40 | [https://www.youtube.com/watch?v=iNbWqC1iqKw](https://www.youtube.com/watch?v=iNbWqC1iqKw) |
-| KBS 겨울 연가 | 1:04:52 | [https://www.youtube.com/watch?v=irVKEhb9g8M](https://www.youtube.com/watch?v=irVKEhb9g8M) |
-| 태조 왕건 | 54:10 | [https://www.youtube.com/watch?v=nmlE2iPWLGM](https://www.youtube.com/watch?v=nmlE2iPWLGM) |
-| 출장십오야 X 스타쉽 전국체전 풀버전 | 1:00:06 | [https://www.youtube.com/watch?v=6wJGpi1nkCg](https://www.youtube.com/watch?v=6wJGpi1nkCg) |
-| 2009 프로야구 한국시리즈 7차전 | 1:55:22 | [https://www.youtube.com/watch?v=fP1QEs1Uj5U](https://www.youtube.com/watch?v=fP1QEs1Uj5U) |
+| `CHUNK_SIZE` | 20 | Flash 응답 token 한계 회피 + retry 단위 작게 |
+| `response_schema` | `list[ScoreItem]`  (TypedDict) | JSON 형식 강제, 파싱 에러 방지 |
+| `max_output_tokens` | 32768 | Flash 최대치 |
+| `thinking_budget` | 0 | Flash 는 thinking 비활성 (Pro 와 다름) |
 
-#### 3.2.1 영상 다운로드 및 포멧 변환
+#### Retry (응답 누락 보정)
 
-##### 영상 다운로드)
+Flash 가 chunk 마지막 segment 의 score 를 누락하는 케이스 빈번. 2회 attempt + 그래도 부족하면 None padding.
 
-- 영상은 720p 사이즈로 받는다.
-  - 너무 클 경우: 분석시 시간이 오래 걸림
+`for attempt in range(2):
+    response = client.models.generate_content(...)
+    chunk_scores = json.loads(response.text or "[]")
+    if len(chunk_scores) == len(chunk):
+        break
+    log.warning(f"chunk attempt {attempt+1}: {len(chunk_scores)}/{len(chunk)} — retry")
 
-  - 너무 작은 경우: 이미지 분석에 정밀도가 떨어짐
+# 최종 불일치 시 None padding
+while len(chunk_scores) &lt; len(chunk):
+    chunk_scores.append({"score": None, "reason": "no response"})`
 
-```yaml
-> yt-dlp -f "bv*[height<=720]+ba/b[height<=720]" "<URL">
-```
+**프롬프트 추가 명시** — `{{COUNT}}` 로 segment 수 강조:
+
+&gt; 반드시 입력 segment 와 동일한 개수 (**{{COUNT}}개** ) 의 결과를 빠짐없이 응답하세요. 마지막 segment 까지 누락 금지.
+
+#### 출력 — CSV
+
+`idx,start,end,lang,text,score,reason
+0,177.1,178.4,ko,넌 가가멜이 무섭지도 않아?,3,의미가 잘 전달되며, 사소한 띄어쓰기 외에 일치함
+1,179.4,181.6,ko,2학년 중에 너처럼 강 큰 애 내가 처음이다.,3,일부 조사의 미세한 차이를 제외하고 정확히 일치함`
+
+- `utf-8-sig`  (BOM) — Windows Excel 한글 깨짐 방지
+- segment 별 score + reason → 시각적 검수 가능
+
+#### 비용 추정
+
+| 항목 | 추정 |
+| --- | --- |
+| 6 콘텐츠 × 2 시스템 = 12 평가 | **\~$1-2** |
+| 한 평가당 audio 1회 업로드 (\~30분-2시간) | $0.05-0.15 |
+| chunk 별 호출 (caching 적용) | $0.01-0.05/chunk |
+
+→ 평가 비용 부담 작음 (POC 다회 반복 가능).
 
 
-##### 영상 변환)
 
-- 다운로드 받은 영상으로 부터 음성만 분리 한다.
-- 음성은 압축이 되지 않는 wav 파일 형태로 받고 Noise 제거를 위해서 아래 옵션은 중요함
-  - -vn : 비디오 제외(Video No)
 
-  - -ac 1 : Audio Channel 수 (2: 스테레오, 1: Mono)
-    - WhisperX 와 DeepFilterNet 은 내부적으로 Mono 로 처리 한다. (스테레오가 들어오면 Mono로 변환 함)
 
-  - -ar 48000 : DeepFilterNet 의 native 샘플레이트는 48KHz
-    - 만약 16KHz 가 들어오면 내부적으로 업샘플을 거치는데 이때 정보 손실이 발생한다.
 
-  - -c:a pcm_s16le : 음성 압축 없이 원본 그대로 출력
 
-```yaml
-ffmpeg -y -i <input.mp4> -vn -ac 1 -ar 48000 -c:a pcm_s16le <audio.wav>
-```
+
+
+
+
+
 
 
 
