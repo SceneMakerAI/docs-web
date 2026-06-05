@@ -282,7 +282,9 @@ def get_page_blocks(page_id):
 def extract_text_from_rich_text(rich_text_list):
     parts = []
     for text in rich_text_list:
-        plain = _html.unescape(text["plain_text"])  # Notion API가 &gt;·&lt; 반환 시 복원
+        plain = text["plain_text"]
+        while (unescaped := _html.unescape(plain)) != plain:  # 이중 인코딩(&amp;gt; 등) 완전 복원
+            plain = unescaped
         ann = text.get("annotations", {})
         href = text.get("href")
 
