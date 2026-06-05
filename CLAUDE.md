@@ -60,6 +60,39 @@ docs/poc/vision-bench/child.md  (slug: "1")  →  /docs/poc/vision-bench/1
 
 ---
 
+## 자동화 구조
+
+### 서버 crontab (콘텐츠 동기화 주체)
+
+```
+*/30 * * * * /root/docs-web/scripts/server-sync.sh >> /var/log/notion-sync.log 2>&1
+```
+
+`server-sync.sh` 실행 흐름: `git pull` → Notion 8개 DB 동기화 → DeepL 번역 → `git commit [skip-notion]` → `push` → `deploy.yml` 트리거
+
+로그 확인: `tail -f /var/log/notion-sync.log`
+
+### GitHub Actions 워크플로우
+
+| 파일 | 트리거 | 역할 |
+|------|--------|------|
+| `deploy.yml` | main push | npm build → GH Pages 배포 |
+| `sync-develop.yml` | 매일 KST 03:00 | main 콘텐츠를 develop으로 머지 (`.notion-sync.json` 충돌 자동 해소) |
+| `merge-develop.yml` | 매일 KST 11:00 | develop 코드 변경을 main으로 머지 (콘텐츠 디렉토리 제외, 빌드 게이트 포함) |
+| `md-to-notion.yml` | `docs/**/*.md` push | 수동 편집된 md → Notion DB 역업로드 |
+| `pr-build.yml` | main·develop PR | 프로덕션 빌드 검증 (깨진 링크·MDX 오류 차단) |
+
+### 커밋 메시지 태그 규칙
+
+| 태그 | 효과 |
+|------|------|
+| `[skip-notion]` | `md-to-notion.yml` 스킵 — 서버 crontab 커밋에 자동 부여 |
+| 커미터가 `server-cron` | `md-to-notion.yml` 스킵 |
+
+**`md-to-notion.yml`이 트리거되지 말아야 할 상황:** Notion에서 내려받은 내용을 다시 올리면 무한 루프. 서버 crontab은 `[skip-notion]`으로 이를 방지한다. Claude가 수동으로 커밋할 때도 Notion 동기화 내용(`.notion-sync.json`, `docs/` Notion 원본)을 커밋하면 `[skip-notion]` 필수.
+
+---
+
 ## 브랜치 전략
 
 | 작업 유형 | 브랜치 |
