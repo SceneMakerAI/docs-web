@@ -168,16 +168,18 @@ article a:hover {
 
 /* ─────────── Table: Notion 스타일 직접 선택자 ─────────── */
 .markdown table {
-  display: table;
+  display: block;           /* overflow-x 활성화 — 넓은 테이블 가로 스크롤 */
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
   width: 100%;
   border-collapse: collapse;
-  margin-bottom: 1.5rem;  /* 12px → 24px */
-  font-size: 0.9rem;
+  margin-bottom: 1.5rem;
+  font-size: 1rem;          /* Notion 본문(16px)과 동일, 0.9rem 제거 */
 }
 
 .markdown table th,
 .markdown table td {
-  padding: 7px 14px;
+  padding: 10px 14px;       /* 7px → 10px: 행 높이 37px → 44px */
   border: 1px solid var(--ifm-table-border-color);
   text-align: left;
   vertical-align: middle;
