@@ -220,7 +220,7 @@ article a:hover {
   max-width: 100%;          /* 컨테이너 초과 시 스크롤 */
   border-collapse: collapse;
   margin-bottom: 1.5rem;
-  font-size: 1rem;          /* Notion 본문(16px)과 동일, 0.9rem 제거 */
+  font-size: 0.9375rem;     /* 15px — 본문보다 살짝 작아 열 폭 절약 */
 }
 
 .markdown table th,
