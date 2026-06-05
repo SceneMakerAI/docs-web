@@ -119,8 +119,10 @@ Notion 자동 동기화가 main에 직접 커밋하므로 브랜치 작업 시�
 
 | 명령어 | 용도 |
 |--------|------|
-| `npm start` | KR dev 서버 (port 3000) |
-| `npm run start:en` | EN dev 서버 (port 3002) |
+| `npm start` | main 브랜치 dev 서버 (port 3000) |
+| `npm run start:develop` | develop 브랜치 dev 서버 (port 3001) |
+| `npm run start:design` | design 브랜치 dev 서버 (port 3002) |
+| `npm run start:en` | EN 로케일 dev 서버 (port 3003) |
 | `npm run build` | 프로덕션 빌드 (KR + EN) — **PR 전 통과 필수** |
 | `npm run clear` | Docusaurus 캐시 정리 |
 | `npm run typecheck` | TypeScript 검사 (빌드와 무관, IDE 보조) |
