@@ -1,6 +1,8 @@
 import {themes as prismThemes} from 'prism-react-renderer';
 import type {Config} from '@docusaurus/types';
 import type * as Preset from '@docusaurus/preset-classic';
+import remarkMath from 'remark-math';
+import rehypeKatex from 'rehype-katex';
 
 // This runs in Node.js - Don't use client-side code here (browser APIs, JSX...)
 
@@ -32,6 +34,14 @@ const config: Config = {
   projectName: 'docs-web',          // GitHub repo name
 
   onBrokenLinks: 'throw',
+
+  stylesheets: [
+    {
+      href: 'https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css',
+      type: 'text/css',
+      crossorigin: 'anonymous',
+    },
+  ],
 
   headTags: [
     // 파비콘 변형 (SVG 우선 — favicon 옵션 / PNG·ICO·apple-touch-icon fallback)
@@ -100,6 +110,8 @@ const config: Config = {
         docs: {
           sidebarPath: './sidebars.ts',
           editUrl: 'https://github.com/SceneMakerAI/docs-web/edit/main/',
+          remarkPlugins: [remarkMath],
+          rehypePlugins: [rehypeKatex],
         },
         blog: {
           path: 'blog',
@@ -127,6 +139,8 @@ const config: Config = {
           },
           onInlineTags: 'warn',
           onInlineAuthors: 'warn',
+          remarkPlugins: [remarkMath],
+          rehypePlugins: [rehypeKatex],
         },
         theme: {
           customCss: './src/css/custom.css',
