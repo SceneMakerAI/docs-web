@@ -14,8 +14,7 @@ GitHub Actions가 아닌 **서버에서 직접 crontab으로 30분마다** 실�
 
 1. `git pull --rebase origin main` — 원격 최신 코드 반영
 2. 8개 Notion DB 병렬 동기화 (`notion_to_md.py`, `FETCH_MODE=ALL`)
-3. `translate_to_en.py` — 변경된 KR 파일 DeepL 번역 → `docs_en/` 저장
-4. 변경사항 있으면 `git commit + push` → `deploy.yml` 트리거 → GH Pages 배포
+3. 변경사항 있으면 `git commit + push` → `deploy.yml` 트리거 → GH Pages 배포
 
 환경변수는 `/root/docs-web/.env` 파일에서 로드한다 (레포에 포함되지 않음).
 
@@ -41,7 +40,6 @@ tail -f /var/log/notion-sync.log
 | `NOTION_POC` | `docs/poc/` |
 | `NOTION_RELEASE` | `docs/release-notes/` |
 | `NOTION_TOKEN` | API 인증 토큰 |
-| `DEEPL_API_KEY` | DeepL 번역 API 키 |
 
 ## 동기화 내부 로직 (`notion_to_md.py`)
 

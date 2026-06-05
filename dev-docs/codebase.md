@@ -19,18 +19,6 @@ docs-web/
 │   ├── authors.yml                # 저자 프로필 목록
 │   └── YYYY-MM-DD-slug.md         # 블로그 포스트
 │
-├── docs_en/                       # EN 번역 문서 (개발자 편집 위치)
-│   └── (docs/ 와 동일한 서브디렉토리 구조)
-│
-├── i18n/
-│   └── en/
-│       ├── docusaurus-plugin-content-docs/
-│       │   └── current -> ../../../docs_en   ← symlink (docs_en/ 가리킴)
-│       ├── docusaurus-theme-classic/
-│       │   ├── navbar.json        # EN 네비바 라벨
-│       │   └── footer.json        # EN 푸터 라벨
-│       └── code.json              # EN 컴포넌트 UI 문자열
-│
 ├── src/
 │   ├── pages/index.tsx            # 홈페이지 (Hero + Features + KPI)
 │   ├── components/
@@ -44,8 +32,7 @@ docs-web/
 │
 ├── scripts/
 │   ├── notion_to_md.py            # Notion DB → docs/ · blog/ 범용 동기화 (계층 구조 지원, blog 모드 포함)
-│   ├── translate_to_en.py         # 변경된 docs/ → DeepL 번역 → docs_en/ 저장
-│   ├── server-sync.sh             # 실 운영: 서버 crontab 30분 주기 (pull→sync→translate→commit→push)
+│   ├── server-sync.sh             # 실 운영: 서버 crontab 30분 주기 (pull→sync→commit→push)
 │   ├── md_to_notion.py            # docs/*.md 변경 → Notion DB 업로드
 │   ├── md_to_notion.sh            # md_to_notion.py 실행 래퍼
 │   ├── sync-develop.sh            # 로컬 수동: main → develop 콘텐츠 흡수
@@ -139,5 +126,4 @@ docs/poc/vision-bench/child.md         (slug: "1")                              
 ### 수동으로 새 문서 추가 시
 
 1. `docs/section/filename.md` 생성 (slug, sidebar_position, title 포함)
-2. `docs_en/section/filename.md` 생성 (동일 frontmatter + 영어 내용, `id:` 필드 제외)
-3. `npm run build` 통과 확인 후 main에 push
+2. `npm run build` 통과 확인 후 main에 push

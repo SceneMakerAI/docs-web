@@ -920,26 +920,15 @@ def main():
     # docs/* 섹션에서 sync 결과가 0개면 빌드 실패 방지용 placeholder 생성.
     # 실제 문서가 생기면 자동 제거.
     if SAVE_DIR.startswith("docs/") and FETCH_MODE != "DAILY":
-        placeholder_name = "placeholder.md"
-        kr_placeholder = os.path.join(SAVE_DIR, placeholder_name)
-        section = SAVE_DIR.split("/", 1)[1]
-        en_dir = os.path.join("docs_en", section)
-        en_placeholder = os.path.join(en_dir, placeholder_name)
-
+        placeholder = os.path.join(SAVE_DIR, "placeholder.md")
         if not synced_files:
-            if not os.path.exists(kr_placeholder):
-                with open(kr_placeholder, "w", encoding="utf-8") as f:
+            if not os.path.exists(placeholder):
+                with open(placeholder, "w", encoding="utf-8") as f:
                     f.write("---\ntitle: \"준비 중\"\nsidebar_position: 1\nslug: \"placeholder\"\n---\n\n콘텐츠를 준비 중입니다.\n")
-                log(f"[placeholder] DB 비어 있음 → {kr_placeholder} 생성")
-            if os.path.isdir(en_dir) and not os.path.exists(en_placeholder):
-                with open(en_placeholder, "w", encoding="utf-8") as f:
-                    f.write("---\ntitle: \"Coming Soon\"\nsidebar_position: 1\nslug: \"placeholder\"\n---\n\nContent is coming soon.\n")
-                log(f"[placeholder] EN → {en_placeholder} 생성")
-        else:
-            for path in (kr_placeholder, en_placeholder):
-                if os.path.exists(path):
-                    os.remove(path)
-                    log(f"[placeholder] 실제 문서 존재 → {path} 제거")
+                log(f"[placeholder] DB 비어 있음 → {placeholder} 생성")
+        elif os.path.exists(placeholder):
+            os.remove(placeholder)
+            log(f"[placeholder] 실제 문서 존재 → {placeholder} 제거")
 
 
 if __name__ == "__main__":

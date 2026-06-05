@@ -65,7 +65,7 @@ const config: Config = {
 
   i18n: {
     defaultLocale: 'ko',
-    locales: ['ko', 'en'],
+    locales: ['ko'],
     localeConfigs: {
       ko: {
         label: '한국어',
@@ -74,26 +74,8 @@ const config: Config = {
         calendar: 'gregory',
         path: 'ko',
       },
-      en: {
-        label: 'English',
-        direction: 'ltr',
-        htmlLang: 'en-US',
-        calendar: 'gregory',
-        path: 'en',
-      },
     },
   },
-
-  plugins: [
-    function () {
-      return {
-        name: 'symlinks-webpack-fix',
-        configureWebpack() {
-          return { resolve: { symlinks: false } };
-        },
-      };
-    },
-  ],
 
   presets: [
     [
@@ -197,10 +179,6 @@ const config: Config = {
         {to: '/blog', label: '블로그', position: 'left'},
         {type: 'docSidebar', sidebarId: 'contributeSidebar', position: 'left', label: '오픈소스 기여'},
         {type: 'docSidebar', sidebarId: 'releaseNotesSidebar', position: 'left', label: '릴리즈 노트'},
-        {
-          type: 'localeDropdown',
-          position: 'right',
-        },
         {
           href: 'https://github.com/SceneMakerAI/docs-web',
           label: 'GitHub',

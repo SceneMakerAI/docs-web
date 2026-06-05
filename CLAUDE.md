@@ -1,7 +1,7 @@
 
 # CLAUDE.md — docs-web 작업 가이드
 
-콘텐츠 사이트. 작업 대부분은 Markdown 추가·수정과 EN 번역.
+콘텐츠 사이트. 작업 대부분은 Markdown 추가·수정.
 
 ---
 
@@ -10,7 +10,7 @@
 **SceneMakerAI** — 오픈소스 AI(멀티모달 LLM)로 방송 콘텐츠를 재가공하는 솔박스 사내 프로젝트.
 
 - 운영 URL: `https://doc.scenemaker.solbox.com`
-- 스택: **Docusaurus 3.10.1** (React 19, TypeScript 6), KR 원본 / EN 번역
+- 스택: **Docusaurus 3.10.1** (React 19, TypeScript 6), 한국어
 - 파이프라인: Notion DB → 서버 crontab(30분, `server-sync.sh`) → GH Pages (`deploy.yml`)
 - 참고: https://docusaurus.io/ko/docs
 
@@ -21,28 +21,8 @@
 | 경로 | 역할 |
 |------|------|
 | `docs/` | KR 원본. **Notion 자동 동기화가 덮어씀** — 수동 수정은 다음 sync에 사라짐 |
-| `docs_en/` | EN 번역본 **실제 파일** 위치 (여기서 편집) |
-| `i18n/en/.../current` | `docs_en/`을 가리키는 symlink — **방향 고정, 변경 금지** |
 | `scripts/notion_to_md.py` | Notion → docs/ · blog/ 변환 핵심 스크립트 |
-| `scripts/translate_to_en.py` | 변경된 KR → DeepL → docs_en/ 자동 번역 |
-| `scripts/server-sync.sh` | crontab 진입점 (pull→sync→translate→commit→push) |
-
----
-
-## i18n 핵심 규칙
-
-**symlink 방향 (절대 바꾸지 말 것):**
-```
-i18n/en/docusaurus-plugin-content-docs/current  →  ../../../docs_en
-```
-반대로 하면 Docusaurus SSG 라우팅 깨짐 (`docusaurus.config.ts` `resolve.symlinks: false`로 보완 중).
-
-**EN 파일 규칙:**
-1. **KR과 동일한 파일명** 필수 — 로케일 스위처가 파일 경로 기준으로 KR/EN 매칭
-2. frontmatter: `slug:` KR과 동일, `id:` 필드는 넣지 않음
-3. KR 파일명 변경(rename) 시 EN 파일도 수동 변경 필요 (`translate_to_en.py`는 rename 자동 처리 안 됨)
-
----
+| `scripts/server-sync.sh` | crontab 진입점 (pull→sync→commit→push) |
 
 ## URL/Slug 시스템
 
@@ -68,7 +48,7 @@ docs/poc/vision-bench/child.md  (slug: "1")  →  /docs/poc/vision-bench/1
 */30 * * * * /root/docs-web/scripts/server-sync.sh >> /var/log/notion-sync.log 2>&1
 ```
 
-`server-sync.sh` 실행 흐름: `git pull` → Notion 8개 DB 동기화 → DeepL 번역 → `git commit [skip-notion]` → `push` → `deploy.yml` 트리거
+`server-sync.sh` 실행 흐름: `git pull` → Notion 8개 DB 동기화 → `git commit [skip-notion]` → `push` → `deploy.yml` 트리거
 
 로그 확인: `tail -f /var/log/notion-sync.log`
 
@@ -101,7 +81,7 @@ docs/poc/vision-bench/child.md  (slug: "1")  →  /docs/poc/vision-bench/1
 
 | 작업 유형 | 브랜치 |
 |----------|--------|
-| 콘텐츠 변경 (Markdown·EN 번역, Notion 자동 동기화) | `main` 직접 커밋 *(자동화 전용)* |
+| 콘텐츠 변경 (Markdown, Notion 자동 동기화) | `main` 직접 커밋 *(자동화 전용)* |
 | **UI 변경** (CSS·컴포넌트·디자인·레이아웃) | `design` 브랜치 → main merge |
 | **기능 추가·버그픽스·설정 변경** | `feat/<이름>` 브랜치 → main merge 후 삭제 |
 
@@ -122,8 +102,7 @@ Notion 자동 동기화가 main에 직접 커밋하므로 브랜치 작업 시�
 | `npm start` | main 브랜치 dev 서버 (port 3000) |
 | `npm run start:develop` | develop 브랜치 dev 서버 (port 3001) |
 | `npm run start:design` | design 브랜치 dev 서버 (port 3002) |
-| `npm run start:en` | EN 로케일 dev 서버 (port 3003) |
-| `npm run build` | 프로덕션 빌드 (KR + EN) — **PR 전 통과 필수** |
+| `npm run build` | 프로덕션 빌드 (한국어) — **PR 전 통과 필수** |
 | `npm run clear` | Docusaurus 캐시 정리 |
 | `npm run typecheck` | TypeScript 검사 (빌드와 무관, IDE 보조) |
 
@@ -160,12 +139,11 @@ Notion 자동 동기화가 main에 직접 커밋하므로 브랜치 작업 시�
 2. `scripts/server-sync.sh`에 DB 동기화 블록 추가
 3. `docs/new-section/_category_.json` 생성
 4. `sidebars.ts` + `docusaurus.config.ts` navbar 추가
-5. KR/EN 플레이스홀더 `.md` 즉시 생성 (navbar 등록 직후 빌드 통과 필요)
+5. KR 플레이스홀더 `.md` 즉시 생성 (navbar 등록 직후 빌드 통과 필요)
 
 **수동 새 문서 추가:**
 1. `docs/section/filename.md` 생성 (`slug`, `sidebar_position`, `title` 포함)
-2. `docs_en/section/filename.md` 동일 파일명으로 생성
-3. `npm run build` 통과 확인 후 main push
+2. `npm run build` 통과 확인 후 main push
 
 **수동 Notion 동기화 (단일 섹션):**
 ```bash
@@ -178,8 +156,6 @@ NOTION_TOKEN=... NOTION_DATABASE_ID=... SAVE_DIR=docs/guide python3 scripts/noti
 
 - `docusaurus.config.ts`의 `url`/`baseUrl`/`organizationName`/`projectName` 변경 금지
 - `onBrokenLinks: 'throw'` → `'warn'`으로 낮추지 말 것
-- KR 원본(`docs/`)을 영어로 덮어쓰지 말 것
-- `i18n/en/.../current`를 real directory로 바꾸지 말 것 (symlink여야 함)
 - `.docusaurus/`, `build/`, `node_modules/` 커밋 금지
 - 부모 `index.md`에 `id:` 필드 추가 금지 — `_category_.json` link.id와 충돌
 - `.docusaurus/` 캐시를 무시하고 빌드 통과로 간주하지 말 것 — `npm run clear` 후 재빌드
