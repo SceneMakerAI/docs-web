@@ -206,49 +206,24 @@ article a:hover {
 
 
 /* ─────────── OL 번호 스타일 — Notion 기준 ─────────── */
-/* Notion 변환 시 항목 사이에 코드블록 등이 끼면 <ol>이 분리돼 번호가 1로 리셋됨.
-   커스텀 카운터 md-ol 로 .markdown 안에서 연속 번호 유지.
-   제목(h1~h5)마다 카운터 리셋 → 섹션별 독립 번호. */
-.markdown { counter-reset: md-ol; }
-.markdown :is(h1, h2, h3, h4, h5) { counter-reset: md-ol; }
-
+/* notion_to_md.py 가 실제 순서 번호(1. 2. 3. …)를 출력하므로
+   HTML <ol start="N"> 속성을 표준 list-style로 그대로 사용한다.
+   코드블록으로 split된 OL은 start="N"으로 연속 번호가 유지됨. */
 .markdown > ol {
-  counter-reset: none;
-  list-style: none;
+  list-style: decimal;
   padding-left: 1.75em;
 }
 .markdown > ol > li {
-  counter-increment: md-ol;
   padding-left: 0.25em;
 }
-.markdown > ol > li::before {
-  content: counter(md-ol) ".";
-  display: inline-block;
-  width: 1.5em;
-  margin-left: -1.75em;
-  text-align: right;
-  padding-right: 0.25em;
-  color: inherit;
-  font-size: inherit;
-}
 
-/* 중첩 ol: 독립 카운터 */
+/* 중첩 ol: lower-alpha */
 .markdown > ol ol {
-  counter-reset: md-inner-ol;
-  list-style: none;
+  list-style: lower-alpha;
   padding-left: 1.5em;
 }
 .markdown > ol ol > li {
-  counter-increment: md-inner-ol;
-  list-style: none;
-}
-.markdown > ol ol > li::before {
-  content: counter(md-inner-ol, lower-alpha) ".";
-  display: inline-block;
-  width: 1.25em;
-  margin-left: -1.5em;
-  text-align: right;
-  padding-right: 0.25em;
+  padding-left: 0.25em;
 }
 
 /* ─────────── Table: Notion 스타일 직접 선택자 ─────────── */

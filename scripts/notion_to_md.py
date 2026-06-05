@@ -343,7 +343,7 @@ def indent_md(text, prefix="  "):
     return "\n".join(prefix + line if line.strip() else line for line in lines) + "\n"
 
 
-def block_to_markdown(block, slug, image_counter):
+def block_to_markdown(block, slug, image_counter, item_num=1):
     b_type = block["type"]
     children = block.get("_children", [])
 
@@ -419,8 +419,8 @@ def block_to_markdown(block, slug, image_counter):
             return f"- {safe}\n\n"
         elif b_type == "numbered_list_item":
             if child_md:
-                return f"1. {content}\n{indent_md(child_md, '   ')}\n"
-            return f"1. {content}\n\n"
+                return f"{item_num}. {content}\n{indent_md(child_md, '   ')}\n"
+            return f"{item_num}. {content}\n\n"
         elif b_type == "to_do":
             checked = "[x]" if block["to_do"]["checked"] else "[ ]"
             return f"- {checked} {content}\n\n" + child_md
@@ -503,9 +503,27 @@ def escape_single_tildes(text):
     return ''.join(result)
 
 
+_OL_RESET_TYPES = {
+    "heading_1", "heading_2", "heading_3", "heading_4",
+    "bulleted_list_item", "to_do",
+    "table", "toggle", "column_list",
+}
+
+
 def blocks_to_markdown(blocks, slug):
     image_counter = [0]
-    body = "".join(block_to_markdown(b, slug, image_counter) for b in blocks)
+    ol_seq = [0]  # numbered_list_item 연속 카운터
+
+    def convert(b):
+        btype = b.get("type", "")
+        if btype == "numbered_list_item":
+            ol_seq[0] += 1
+        elif btype in _OL_RESET_TYPES:
+            ol_seq[0] = 0
+        # code / paragraph / image / divider / quote / callout 은 리셋 안 함 (split-OL 연속 번호 유지)
+        return block_to_markdown(b, slug, image_counter, ol_seq[0])
+
+    body = "".join(convert(b) for b in blocks)
     body = escape_mdx_angle_brackets(body)
     body = re.sub(r'(<[a-zA-Z][^>]*/)\s*&gt;', r'\1>', body)
     body = escape_single_tildes(body)
