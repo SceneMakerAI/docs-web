@@ -259,6 +259,7 @@ article a:hover {
   width: max-content;       /* 컨텐츠 폭에 맞춤 — Notion처럼 짧은 열은 좁게 */
   max-width: 100%;          /* 컨테이너 초과 시 스크롤 */
   border-collapse: collapse;
+  margin-top: 1.25rem;
   margin-bottom: 1.5rem;
   font-size: 0.9375rem;     /* 15px — 본문보다 살짝 작아 열 폭 절약 */
 }
