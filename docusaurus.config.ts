@@ -35,14 +35,6 @@ const config: Config = {
 
   onBrokenLinks: 'throw',
 
-  stylesheets: [
-    {
-      href: 'https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css',
-      type: 'text/css',
-      crossorigin: 'anonymous',
-    },
-  ],
-
   headTags: [
     // 파비콘 변형 (SVG 우선 — favicon 옵션 / PNG·ICO·apple-touch-icon fallback)
     { tagName: 'link', attributes: { rel: 'icon', type: 'image/png', sizes: '32x32', href: '/img/favicon-32x32.png' } },
@@ -143,7 +135,10 @@ const config: Config = {
           rehypePlugins: [rehypeKatex],
         },
         theme: {
-          customCss: './src/css/custom.css',
+          customCss: [
+            './src/css/custom.css',
+            require.resolve('katex/dist/katex.min.css'),
+          ],
         },
       } satisfies Preset.Options,
     ],
