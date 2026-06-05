@@ -86,7 +86,7 @@
 
   --ifm-font-family-base: var(--smk-font-body);
   --ifm-heading-font-family: var(--smk-font-display);
-  --ifm-font-color-base: rgb(44, 44, 43);  /* Notion 본문 색상 */
+  --ifm-font-color-base: rgb(44, 44, 43);  /* Notion 본문 색상 (light) */
 
   --ifm-code-font-size: 95%;
   --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.1);
@@ -346,6 +346,8 @@ article a:hover {
 
 /* 다크 모드 */
 [data-theme='dark'] {
+  --ifm-font-color-base: rgba(255, 255, 255, 0.88);  /* dark mode 본문: 부드러운 흰색 */
+
   --ifm-color-primary: var(--smk-primary-bright);
   --ifm-color-primary-dark: var(--smk-primary);
   --ifm-color-primary-darker: var(--smk-primary-deep);
