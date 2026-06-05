@@ -1,8 +1,8 @@
 ---
 id: 한국어-콘텐츠-lid-정확도-비교-whisper-vs-voxlingua107
 title: "한국어 콘텐츠 LID 정확도 비교 — Whisper vs VoxLingua107"
-sidebar_position: 1
-slug: "1"
+sidebar_position: 2
+slug: "2"
 last_update:
   date: 2026-06-04
 ---
@@ -177,7 +177,7 @@ poc-lid-bench/
 | `torch` | `>=2.4,&lt;2.9` | cu128 wheel, 상한은 DF 호환성 |
 | `torchaudio` | `&gt;=2.4,&lt;2.9` | 동일 |
 
-&gt; torch/torchaudio 상한 `&lt;2.9` 는 `torchaudio.backend.common.AudioMetaData`
+&gt; torch/torchaudio 상한 `<2.9` 는 `torchaudio.backend.common.AudioMetaData`
 가 2.9 에서 제거되며 DF 의 import 가 깨지는 문제 회피용. 검증된 조합:
 `torch==2.8.0+cu128` .
 
@@ -204,7 +204,7 @@ poc-lid-bench/
 
 ```javascript
 # log.py 에서 로그파일 위치 적절히 수정
-&gt; .venv/bin/python main.py
+> .venv/bin/python main.py
 ```
 
 

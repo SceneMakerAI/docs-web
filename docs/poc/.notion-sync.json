@@ -1,10 +1,10 @@
 {
   "367e15b4-0359-80c9-885a-ea288010356f": {
-    "file": "docs/poc/poc-기획안-초고속초고품질-다국어-ai-자막-생성-시스템-구축.md",
-    "last_edited": "2026-05-28T10:32:00.000Z",
-    "content_hash": "f81b6f8074ce1f3ab0769f900c4ac48740b1c5cafd6b84dd7c835845d254e104",
-    "order": 2,
-    "parent_id": null
+    "file": "docs/poc/audio-bench/poc-기획안-초고속초고품질-다국어-ai-자막-생성-시스템-구축.md",
+    "last_edited": "2026-06-05T04:51:00.000Z",
+    "content_hash": "55826e7eba0f262ec43d43538a77ca8626aa5a6e365aa521586bb4bbfc20e874",
+    "order": 1,
+    "parent_id": "audio-bench"
   },
   "368e15b4-0359-81cb-9b9b-d555dbfd19e3": {
     "file": "docs/poc/vision-bench/1편-멀티모달-llm-한국-방송-6초-클립-영상-이해-벤치마크-파이프라인-구축.md",
@@ -23,8 +23,8 @@
   "36ee15b4-0359-80b6-97c6-f628f0347d36": {
     "file": "docs/poc/audio-bench/한국어-콘텐츠-lid-정확도-비교-whisper-vs-voxlingua107.md",
     "last_edited": "2026-06-04T07:20:00.000Z",
-    "content_hash": "62bafb244e80c4c7ae70a3f77c43e9ca592a739a5a7ea85c0fbd6c2550a208bd",
-    "order": 1,
+    "content_hash": "580fc1167e9b85313a4dcb854c923f497e664a24bc956dcc2b92afa414f3b838",
+    "order": 2,
     "parent_id": "audio-bench"
   },
   "373e15b4-0359-8150-88f3-eedc5ebd727b": {
@@ -36,7 +36,7 @@
   },
   "365e15b4-0359-80d4-8f38-d8a5c80ae5d0": {
     "file": "docs/poc/audio-bench/index.md",
-    "last_edited": "2026-06-02T07:58:00.000Z",
+    "last_edited": "2026-06-05T04:51:00.000Z",
     "content_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "order": 1,
     "parent_id": null
@@ -45,7 +45,7 @@
     "file": "docs/poc/vision-bench/index.md",
     "last_edited": "2026-06-02T08:15:00.000Z",
     "content_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-    "order": 3,
+    "order": 2,
     "parent_id": null
   },
   "373e15b4-0359-813e-b9cb-fcd1ccefc0c4": {
