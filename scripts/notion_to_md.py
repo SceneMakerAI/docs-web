@@ -505,7 +505,7 @@ def escape_single_tildes(text):
 
 _OL_RESET_TYPES = {
     "heading_1", "heading_2", "heading_3", "heading_4",
-    "bulleted_list_item", "to_do",
+    # bulleted_list_item / to_do 는 번호 목록 항목 사이에 주석·sub-bullet로 나타나므로 리셋 안 함
     "table", "toggle", "column_list",
 }
 

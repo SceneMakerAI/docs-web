@@ -198,7 +198,7 @@ for i in $(seq 0 99); do
 done
 ```
 
-1. **화면 블랙아웃** (음성-전용 검증용)
+3. **화면 블랙아웃** (음성-전용 검증용)
    - 분할된 첫 클립의 화면만 검게 가리고 오디오는 그대로 둔 클립 1개 생성
 
    - `data/blackout/{category}/{원본명}/`
@@ -369,7 +369,7 @@ ffmpeg -nostdin -i "$FIRST" \
 
 > 실행: `./script/curl_examples.sh chat`
 
-1. `/chat/batch` (다건) — 입력: `{items:[{id, body}, …]}` (각 body = ②와 동일)
+3. `/chat/batch` (다건) — 입력: `{items:[{id, body}, …]}` (각 body = ②와 동일)
 
 ```json
 {"items": [
@@ -466,7 +466,7 @@ curl -sS -X POST http://localhost:8001/chat \
 }
 ```
 
-1. **영상 + 프롬프트**
+2. **영상 + 프롬프트**
 - 요청 — 영상 base64 가 커서 payload 를 파일로 빌드 후 전송(`--data-binary` ). 영상은 **저온(temperature 0)** 권장 — 고온 기본값은 이종문자 degeneration 유발(편2).
 
 ```bash
