@@ -95,15 +95,23 @@ docs/poc/vision-bench/child.md  (slug: "1")  →  /docs/poc/vision-bench/1
 
 ## 브랜치 전략
 
+> ⚠️ **핵심 규칙: `main`·`develop`에 코드를 직접 커밋하지 않는다.**
+> 모든 코드 변경은 반드시 별도 브랜치에서 작업 후 merge한다.
+> (예외: 서버 crontab의 Notion 자동 동기화는 `main`에 직접 커밋 — `[skip-notion]` 태그 포함)
+
 | 작업 유형 | 브랜치 |
 |----------|--------|
-| 콘텐츠 변경 (Markdown·EN 번역) | `main` 직접 커밋 |
-| 버그픽스·CI·설정 소폭 변경 | `main` 직접 커밋 |
+| 콘텐츠 변경 (Markdown·EN 번역, Notion 자동 동기화) | `main` 직접 커밋 *(자동화 전용)* |
 | **UI 변경** (CSS·컴포넌트·디자인·레이아웃) | `design` 브랜치 → main merge |
-| **기능 추가** (스크립트 신규 등) | `feat/<이름>` 브랜치 → main merge 후 삭제 |
+| **기능 추가·버그픽스·설정 변경** | `feat/<이름>` 브랜치 → main merge 후 삭제 |
+
+**수동 작업 시 절대 금지:**
+- `git commit` 을 `main` 또는 `develop` 에서 직접 실행 ❌
+- 작업 시작 전 항상 `git checkout feat/<이름>` 또는 `git checkout design` 먼저
 
 **design 브랜치:** 장기 유지 (삭제 금지). 작업 전 반드시 `git rebase origin/main` 실행.
-Notion 자동 동기화가 main에 직접 커밋하므로 rebase 생략 시 merge conflict 발생.
+**feat 브랜치:** 작업 완료 후 main에 merge → 로컬·원격 브랜치 삭제.
+Notion 자동 동기화가 main에 직접 커밋하므로 브랜치 작업 시작 전 rebase 생략 시 conflict 발생.
 
 ---
 
