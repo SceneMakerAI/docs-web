@@ -1,36 +1,36 @@
 {
   "367e15b4-0359-80c9-885a-ea288010356f": {
     "file": "docs/poc/audio-bench/poc-기획안-초고속초고품질-다국어-ai-자막-생성-시스템-구축.md",
-    "last_edited": "2026-06-05T07:06:00.000Z",
-    "content_hash": "55826e7eba0f262ec43d43538a77ca8626aa5a6e365aa521586bb4bbfc20e874",
+    "last_edited": "2026-06-05T08:31:00.000Z",
+    "content_hash": "e149705d09ff8d85633f54665da63508da1982f68caa621af1fa1cb80bcaea42",
     "order": 1,
     "parent_id": "audio-bench"
   },
   "368e15b4-0359-81cb-9b9b-d555dbfd19e3": {
     "file": "docs/poc/vision-bench/1편-멀티모달-llm-한국-방송-6초-클립-영상-이해-벤치마크-파이프라인-구축.md",
-    "last_edited": "2026-06-04T06:48:00.000Z",
-    "content_hash": "ba11492bb03fc2cd0ec6511696f0a7ffef54bb5b6a6864ad16f649567aa763f2",
+    "last_edited": "2026-06-05T08:30:00.000Z",
+    "content_hash": "8218e5bd17953f8ce49690b1ef0f038e13ad5779f2fdaa073f282d7d7f7bf7b8",
     "order": 1,
     "parent_id": "vision-bench"
   },
   "36de15b4-0359-80e0-a6fb-cfd55a5df8e6": {
     "file": "docs/poc/vision-bench/qwen3-omni-baseline-news-stt-없이-30fps-vs-05fps.md",
     "last_edited": "2026-05-27T06:48:00.000Z",
-    "content_hash": "243104a2752a2cf9f1563ab52435fbfdfaf2d16110ded9a1d7d6064eaa03d241",
+    "content_hash": "0f7c59731c81b3a41eb909a34c0e5575b5f875ef40215013b36802d9865ea76e",
     "order": 2,
     "parent_id": "vision-bench"
   },
   "36ee15b4-0359-80b6-97c6-f628f0347d36": {
     "file": "docs/poc/audio-bench/한국어-콘텐츠-lid-정확도-비교-whisper-vs-voxlingua107.md",
-    "last_edited": "",
-    "content_hash": "",
+    "last_edited": "2026-06-04T07:20:00.000Z",
+    "content_hash": "580fc1167e9b85313a4dcb854c923f497e664a24bc956dcc2b92afa414f3b838",
     "order": 2,
     "parent_id": "audio-bench"
   },
   "373e15b4-0359-8150-88f3-eedc5ebd727b": {
     "file": "docs/poc/vision-bench/추론-파라미터-튜닝-qwen3-omni-6초-클립-분석-ofat-스윕.md",
     "last_edited": "2026-06-04T05:33:00.000Z",
-    "content_hash": "5b451e735608cf061e9ec2a7269f584ee49cbafe2d9a7cfc7cf0852a631f4c8c",
+    "content_hash": "1828821d5c11991b53fde1b108bcb0a287fd3f6b6736afdde2f59b22b1f3be5e",
     "order": 3,
     "parent_id": "vision-bench"
   },
@@ -51,7 +51,7 @@
   "373e15b4-0359-813e-b9cb-fcd1ccefc0c4": {
     "file": "docs/poc/vision-bench/3편-추론-파라미터-상세-조정-및-품질-평가.md",
     "last_edited": "2026-06-02T08:14:00.000Z",
-    "content_hash": "1f2a2d5697e80e3b6167c150ef2fe77cdd18584c83787f00b048e1be7551ed96",
+    "content_hash": "f556ae8c287423ff11c62aefe640fe4ff3d222436124ffe6332fecf515bc42eb",
     "order": 4,
     "parent_id": "vision-bench"
   }
