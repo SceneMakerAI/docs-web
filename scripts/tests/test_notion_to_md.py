@@ -200,3 +200,43 @@ class TestSaveDocPageSkip:
 
         assert any(slug in f for f in written_files), \
             f"last_edited 변경 후 파일 write 없음 (written: {written_files})"
+
+
+# ── TC-6: HTML 엔티티 이중 인코딩 복원 ───────────────────────────────────────
+
+class TestHtmlEntityDecode:
+    """Notion API가 &amp;gt; / &amp;lt; 형태로 이중 인코딩해 반환할 때
+    extract_text_from_rich_text가 온전히 복원하는지 검증."""
+
+    def _rt(self, plain: str, code: bool = False) -> list:
+        return [{"plain_text": plain, "annotations": {"code": code, "bold": False, "italic": False, "strikethrough": False}, "href": None}]
+
+    def test_single_encoded_gt_decoded(self):
+        """`&gt;` (단일 인코딩) → `>`"""
+        result = n.extract_text_from_rich_text(self._rt("&gt;=1.0"))
+        assert result == ">=1.0"
+
+    def test_double_encoded_gt_decoded(self):
+        """`&amp;gt;` (이중 인코딩) → `>` — 현재 버그 재현."""
+        result = n.extract_text_from_rich_text(self._rt("&amp;gt;=1.0"))
+        assert result == ">=1.0"
+
+    def test_double_encoded_lt_decoded(self):
+        """`&amp;lt;` (이중 인코딩) → `<`"""
+        result = n.extract_text_from_rich_text(self._rt("&amp;lt;3.12"))
+        assert result == "<3.12"
+
+    def test_mixed_double_encoded(self):
+        """`&amp;gt;=2.4,&amp;lt;2.9` → `>=2.4,<2.9`"""
+        result = n.extract_text_from_rich_text(self._rt("&amp;gt;=2.4,&amp;lt;2.9"))
+        assert result == ">=2.4,<2.9"
+
+    def test_inline_code_double_encoded(self):
+        """인라인 코드 스팬 내부도 이중 인코딩 복원."""
+        result = n.extract_text_from_rich_text(self._rt("&amp;gt;=1.0", code=True))
+        assert result == "`>=1.0`"
+
+    def test_plain_text_unchanged(self):
+        """이미 올바른 텍스트는 변경 없음."""
+        result = n.extract_text_from_rich_text(self._rt(">=1.0"))
+        assert result == ">=1.0"
