@@ -1,15 +1,15 @@
 {
   "367e15b4-0359-80c9-885a-ea288010356f": {
     "file": "docs/poc/audio-bench/poc-기획안-초고속초고품질-다국어-ai-자막-생성-시스템-구축.md",
-    "last_edited": "2026-06-05T08:37:00.000Z",
-    "content_hash": "d49253c6fd691c7d2e68807894c30ccc95107fc9552fc1c34a59d5f8f99175f9",
+    "last_edited": "2026-06-05T09:11:00.000Z",
+    "content_hash": "aa4628df268a6e9dbe3fe4a06be4e6f009d8fdad6132b9c405485a5e11914878",
     "order": 1,
     "parent_id": "audio-bench"
   },
   "368e15b4-0359-81cb-9b9b-d555dbfd19e3": {
     "file": "docs/poc/vision-bench/1편-멀티모달-llm-한국-방송-6초-클립-영상-이해-벤치마크-파이프라인-구축.md",
     "last_edited": "2026-06-05T08:30:00.000Z",
-    "content_hash": "bdc394b5027c7b1941ca1cf40f7e6940589d969530505b9f3707476e86ef74f4",
+    "content_hash": "37d434f2c1c43684ebe0a84f6afaa714c3de65f833b44164c78c67cafe16e75a",
     "order": 1,
     "parent_id": "vision-bench"
   },
@@ -30,7 +30,7 @@
   "373e15b4-0359-8150-88f3-eedc5ebd727b": {
     "file": "docs/poc/vision-bench/추론-파라미터-튜닝-qwen3-omni-6초-클립-분석-ofat-스윕.md",
     "last_edited": "2026-06-04T05:33:00.000Z",
-    "content_hash": "1828821d5c11991b53fde1b108bcb0a287fd3f6b6736afdde2f59b22b1f3be5e",
+    "content_hash": "bbf5f1b624f52529481d8445c2c1c806d47491fb35990dcc61f0161f26d9da7e",
     "order": 3,
     "parent_id": "vision-bench"
   },

@@ -46,9 +46,9 @@ SceneMaker 의 6초 클립 분석은 영상·오디오·대사를 한 번에 보
 | `max_tokens` | completion 토큰 상한 (출력 길이 캡) | `>0` · 남은 컨텍스트 이내 | 고정 512 |
 | `use_audio_in_video` | mp4 내 오디오 동시 디코딩 | `true` / `false` | 고정 on |
 | `chat_template_kwargs.enable_thinking` | 사고(thinking) 토큰 생성 on/off | `true` / `false` | 고정 off |
-| `seed` | 재현성 (고정 시 동일 입력→동일 출력) | 정수 · `&lt;0` =비활성(매번 무작위) | 고정 -1 |
+| `seed` | 재현성 (고정 시 동일 입력→동일 출력) | 정수 · `<0` =비활성(매번 무작위) | 고정 -1 |
 
-&gt; 📌 `frequency_penalty` **vs** `repetition_penalty` — 둘 다 반복을 억제하지만 방식이 다르다.
+> 📌 `frequency_penalty` **vs** `repetition_penalty` — 둘 다 반복을 억제하지만 방식이 다르다.
 >
 > - **frequency** (가산·빼기) — 이미 **많이** 나온 토큰일수록 **더** 깎음(횟수 비례·누적) → 폭주 루프(`공 공 공…` ) 제동에 강함. **출력 토큰만** 카운트. 비활성 `0` , 범위 `[-2, 2]` .
 >

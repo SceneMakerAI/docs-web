@@ -479,11 +479,11 @@ def block_to_markdown(block, slug, image_counter, item_num=1):
 
 def escape_mdx_angle_brackets(text):
     """<한글> 같이 비 ASCII를 포함한 꺾쇠 패턴을 MDX가 태그로 해석하지 않도록 이스케이프.
-    코드 블록(```...```) 내부는 건너뜀 — 코드에서는 < > 를 이스케이프하면 안 됨."""
-    parts = re.split(r'(```[\s\S]*?```)', text)
+    코드 블록(```...```) 및 인라인 코드(`...`) 내부는 건너뜀."""
+    parts = re.split(r'(```[\s\S]*?```|`[^`\n]+`)', text)
     result = []
     for i, part in enumerate(parts):
-        if i % 2 == 1:  # 코드 블록 — 그대로 유지
+        if i % 2 == 1:  # 코드 스팬/블록 — 그대로 유지
             result.append(part)
         else:
             result.append(re.sub(r'<([^>]*[^\x00-\x7F][^>]*)>', r'&lt;\1&gt;', part))

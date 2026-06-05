@@ -285,7 +285,7 @@ POC 의 핵심 시행착오는 거의 Whisper 측 환각 처리. Qwen 측은 lan
 
 Whisper 는 언어마다 훈련시킨 데이터 양이 다르기 때문에 Tier가 낮을 수록 환각이 심하게 나타난다. Tier4로 가면 거의 번역이 안되며, 해당 Tier는 과감히 Skip 
 
-- Tier-1 (Word Error Rate &lt; 5%)
+- Tier-1 (Word Error Rate < 5%)
   -   영어,  스페인어, 이탈리아어, 프랑스어, 독일어, 포르투칼어
 
 - Tier-2 (WER <5-8%)
@@ -331,14 +331,14 @@ Whisper 는 언어마다 훈련시킨 데이터 양이 다르기 때문에 Tier�
 
 - `1.0` 미만 = 각 토큰 평균 확률 37% 미만 = 모델이 자신 없는 상태로 토큰 토함 = 환각 위험.
 
-&gt; 폐지된 게이트 `no_speech_prob` 와 달리, `avg_logprob` 는 BGM/denoise 잔여에 덜 민감 → false positive 적음.
+> 폐지된 게이트 `no_speech_prob` 와 달리, `avg_logprob` 는 BGM/denoise 잔여에 덜 민감 → false positive 적음.
 
 #### 게이트 3 — LID_TRUST_PROB (0.5)
 
 | 약어 | **LID = Language Identification**  (언어 자동 감지) |
 | --- | --- |
 | 함수 | Whisper `detect_language()`  → `(lang_code, prob, all_probs)`  반환 |
-| 임계 | `prob &lt; 0.5`  + 감지된 lang 이 `MAIN_LANG (ko)`  가 아닐 때 |
+| 임계 | `prob < 0.5`  + 감지된 lang 이 `MAIN_LANG (ko)`  가 아닐 때 |
 | 동작 | `lang_code`  를 `MAIN_LANG (ko)`  로 **강제 변경** . 이후 단일 ko transcribe |
 
 **왜 0.5?** — LID 확률 0.23 같은 케이스 = "ko/de/ja/zh 어디든 비슷하게 들림" = LID 자체가 신뢰 못 함. 한국어 콘텐츠 가정 → ko 가정이 자연스러움.
@@ -390,7 +390,7 @@ Whisper 는 언어마다 훈련시킨 데이터 양이 다르기 때문에 Tier�
 | `FA컵 결승` | 33% (FA=2, 컵결승=3) | pass (3% 마진) |
 | `MVP 수상` | 40% | pass |
 
-&gt; 이 게이트가 잡는 환각 = Whisper 모델 자체의 한계. 외부 코드로 막을 수 있는 가장 가까운 방법 (drop only, 정정 불가).
+> 이 게이트가 잡는 환각 = Whisper 모델 자체의 한계. 외부 코드로 막을 수 있는 가장 가까운 방법 (drop only, 정정 불가).
 
 #### Drop 정책 (살리기 불가능한 케이스)
 
@@ -412,7 +412,7 @@ Whisper 는 언어마다 훈련시킨 데이터 양이 다르기 때문에 Tier�
    │
    ▼  ALLOWED_LANGS 게이트 (Tier 1+2+3 외 skip)
    │
-[LID_TRUST_PROB]  prob&lt;0.5 + 비-ko → ko 강제
+[LID_TRUST_PROB]  prob<0.5 + 비-ko → ko 강제
    │
    ▼
 [transcribe 분기]
@@ -442,6 +442,12 @@ segment 저장 (transcribe MD)`
 | 지원 lang 게이트 | `ALIGNER_LANGS`  (11개) — ko/en/ja/zh/yue/it/es/fr/de/pt/ru |
 | LID | **Whisper LID 채택**  (POC 95.2% vs Voxlingua107 88.9%) |
 | Batch | `max_inference_batch_size=8`  (4090 안전치) |
+
+#### 지원 언어
+
+Qwen 은 약 30개 언어가 가능하지만, Timestamp 를 지원하는  **Qwen3-ForcedAligner 가 11 개 언어만 구분 가능**
+
+- 한국어, 일본어, 중국어 (보통화), 광둥어, 영어, 이탈리아어, 스페인어, 프랑스어, 독일어, 포르투갈어, 러시아어
 
 #### main_lang 하드코딩 + 짧은 발화 override
 
@@ -546,107 +552,130 @@ POC 결과 (7장 참조) 에서 모든 시스템 × 콘텐츠가 90%+ 달성. = 
 
 - "잘못됐지만 교정 가능 (가능성 20%+)" 까지를 자막 후보로 인정
 - production 시 Gemini correct 단계에서 가능성 20%+ segment 를 실제로 살릴 시도
-- 0점 미만은 교정 비용 &gt; 가치 → drop
+- 0점 미만은 교정 비용 > 가치 → drop
+
 
 ---
 
-### 6.4 Caching / Chunk / Retry
+## 6. 결과
 
-Gemini API 비용/성능 최적화 3종 세트.
+### 6.1 실행 명령어
 
-#### Audio Caching (75% 비용 절감)
+```javascript
+cd /usr/service/source/scenemaker/poc/poc-stt-bench
 
-`audio_file = client.files.upload(file=audio_path)
-cache = client.caches.create(
-    model="gemini-3.5-flash",
-    config=CreateCachedContentConfig(
-        contents=[audio_file],
-        ttl="3600s",   # 1시간
-    ),
-)`
+# (필요시) 기존 결과 정리 — denoise 캐시는 유지
+\rm -rf output/whisper/2_transcribe output/whisper/evaluate output/whisper/timings.csv
+\rm -rf output/qwen/2_transcribe output/qwen/evaluate output/qwen/timings.csv
 
-**효과** :
+# 1. Whisper STT
+.venv/bin/python main.py
 
-- audio (큰 입력) 를 1회 업로드 + cache 생성
-- 이후 chunk 별 채점 호출 시 audio 토큰 비용 회피 (cached_content 재참조)
-- **비용 75% 절감**  (Gemini caching pricing)
+# 2. Qwen STT (별도 venv)
+.venv-qwen/bin/python main_qwen.py
 
-평가 끝나면 `client.caches.delete()` 로 정리 (TTL 안 기다림).
+# 3. Gemini judge 평가 (whisper + qwen)
+.venv/bin/python evaluate.py all
 
-#### Chunk 단위 (CHUNK_SIZE=20)
+# 4. 종합 비교 리포트
+.venv/bin/python report.py
+```
 
-전체 segment 를 한 번에 보내면 응답 token 한계 (Flash 32K) 초과. 20개씩 분할.
 
-`for ci in range(n_chunks):
-    chunk = segments[ci * 20 : (ci + 1) * 20]
-    response = client.models.generate_content(
-        model=MODEL,
-        contents=[prompt],
-        config=GenerateContentConfig(
-            cached_content=cache.name,                  # audio 재참조
-            response_mime_type="application/json",
-            response_schema=list[ScoreItem],            # JSON schema 강제
-            max_output_tokens=32768,
-            thinking_config=ThinkingConfig(thinking_budget=0),  # Flash 는 thinking off
-        ),
-    )`
+처리 단계별 출력
 
-| 항목 | 값 | 이유 |
-| --- | --- | --- |
-| `CHUNK_SIZE` | 20 | Flash 응답 token 한계 회피 + retry 단위 작게 |
-| `response_schema` | `list[ScoreItem]`  (TypedDict) | JSON 형식 강제, 파싱 에러 방지 |
-| `max_output_tokens` | 32768 | Flash 최대치 |
-| `thinking_budget` | 0 | Flash 는 thinking 비활성 (Pro 와 다름) |
-
-#### Retry (응답 누락 보정)
-
-Flash 가 chunk 마지막 segment 의 score 를 누락하는 케이스 빈번. 2회 attempt + 그래도 부족하면 None padding.
-
-`for attempt in range(2):
-    response = client.models.generate_content(...)
-    chunk_scores = json.loads(response.text or "[]")
-    if len(chunk_scores) == len(chunk):
-        break
-    log.warning(f"chunk attempt {attempt+1}: {len(chunk_scores)}/{len(chunk)} — retry")
-
-# 최종 불일치 시 None padding
-while len(chunk_scores) &lt; len(chunk):
-    chunk_scores.append({"score": None, "reason": "no response"})`
-
-**프롬프트 추가 명시** — `{{COUNT}}` 로 segment 수 강조:
-
-&gt; 반드시 입력 segment 와 동일한 개수 (**{{COUNT}}개** ) 의 결과를 빠짐없이 응답하세요. 마지막 segment 까지 누락 금지.
-
-#### 출력 — CSV
-
-`idx,start,end,lang,text,score,reason
-0,177.1,178.4,ko,넌 가가멜이 무섭지도 않아?,3,의미가 잘 전달되며, 사소한 띄어쓰기 외에 일치함
-1,179.4,181.6,ko,2학년 중에 너처럼 강 큰 애 내가 처음이다.,3,일부 조사의 미세한 차이를 제외하고 정확히 일치함`
-
-- `utf-8-sig`  (BOM) — Windows Excel 한글 깨짐 방지
-- segment 별 score + reason → 시각적 검수 가능
-
-#### 비용 추정
-
-| 항목 | 추정 |
+| 단계 | 출력 |
 | --- | --- |
-| 6 콘텐츠 × 2 시스템 = 12 평가 | **\~$1-2** |
-| 한 평가당 audio 1회 업로드 (\~30분-2시간) | $0.05-0.15 |
-| chunk 별 호출 (caching 적용) | $0.01-0.05/chunk |
-
-→ 평가 비용 부담 작음 (POC 다회 반복 가능).
-
+| (1) Whisper | `output/whisper/2_transcribe/*.md`  + `timings.csv` |
+| (2) Qwen | `output/qwen/2_transcribe/*.md`  + `timings.csv` |
+| (3) evaluate | `output/{whisper,qwen}/evaluate/*.csv` |
+| (4) report | `output/report.csv`   |
 
 
+### 6.2 처리 시간 비교
+
+#### 6.2.1 콘텐츠별 transcribe 시간 (denoise 제외)
+
+| 콘텐츠 | 길이 | Whisper (RTF) | Qwen (RTF) | Qwen 속도 비교 |
+| --- | --- | --- | --- | --- |
+| baseball | 1h 55m | 345.9s (0.050) | 309.0s (0.045) | 1.12× ↑ |
+| docu | 58m | 118.2s (0.034) | 54.4s (0.015) | **2.17× ↑** |
+| drama | 1h 5m | 88.3s (0.023) | 49.1s (0.013) | **1.80× ↑** |
+| entertain | 1h | 159.8s (0.044) | 193.9s (0.054) | 0.82× (Whisper 우세) |
+| hist_drama | 54m | 111.5s (0.034) | 54.1s (0.017) | **2.06× ↑** |
+| news | 48m | 149.5s (0.051) | 80.5s (0.028) | 1.86× ↑ |
 
 
+#### 6.2.2 관찰
+
+- **Qwen 이 대체로 1.8 \~ 2.2배 빠름**  — Qwen3-ASR 이 chunk 들을 batch 처리 (`max_inference_batch_size=8` )
+- **entertain**  만 Whisper 우세 — Qwen 의 ForcedAligner 가 효과음/추임새 많은 콘텐츠에서 word timestamp 부정확 → 재처리 비용 ↑ 추정
+- **baseball**  은 두 시스템 비슷 — Whisper 측 segment 수가 Qwen 보다 1.6배 많아 처리 부담 분산 (1983 vs 1250)
+- RTF &lt; 0.06 → 둘 다 실시간보다 **20배 이상 빠름**  (production 처리량 여유 충분)
 
 
+### 6.3 vRAM 사용량 비교
+
+| 컴포넌트 | Whisper 측 | Qwen 측 | 비고 |
+| --- | --- | --- | --- |
+| **ASR 모델** | 3 GB<br&gt;(`Systran/faster-whisper-large-v3` , CT2 float16) | 3.5 GB<br>(`Qwen3-ASR-1.7B` , bfloat16, batch=8) |  |
+| **Timestamp 모델** | — (ASR 에 포함) | 1.5 GB<br>(`Qwen3-ForcedAligner-0.6B` ) | word 단위 timestamp |
+| **LID 모델** | — (ASR 과 동일 인스턴스 재사용) | 1.5 GB<br>(`large-v3-turbo` , float16) | Whisper 측은 ASR 모델이 LID 까지 처리 |
+| **Denoise** | 0.5 GB (DeepFilterNet v3) | 0.5 GB (DeepFilterNet v3) | 양쪽 공통 |
+| **VAD** | 10 MB (Silero VAD) | 10 MB (Silero VAD) | 양쪽 공통 |
+| **합계** | **\~3.5 GB** | **\~7 GB** |  |
+| **GPU 점유율 (4090 24GB)** | 15% | 30% |  |
 
 
+### **6.4 품질 결과 비교**
+
+#### 종합 점수표
+
+| 콘텐츠 | Whisper (avg / 사용%/-3%) | Qwen (avg / 사용%/-3%) | 승자 |
+| --- | --- | --- | --- |
+| **baseball** | 2.72 / 98.6% / 0.7% | 2.74 / 99.4% / 0.2% | Qwen (미세) |
+| **docu** | **2.73**  / **97.6%**  / 1.6% | 2.41 / 92.3% / **6.0%** | 🏆 **Whisper**  (큰 차이) |
+| **drama** | 2.69 / 98.0% / 1.5% | 2.69 / 98.5% / 1.2% | 동률 |
+| **entertain** | 2.64 / 97.1% / 1.7% | 2.55 / 97.3% / 1.3% | Whisper (미세) |
+| **hist_drama** | 2.58 / 96.1% / 2.4% | 2.52 / 96.1% / 1.1% | 동률 |
+| **news** | 2.92 / 99.5% / 0.4% | 2.85 / 98.7% / 0.8% | Whisper (미세) |
 
 
+#### Segment 수 비교
 
+| 콘텐츠 | Whisper | Qwen | Whisper / Qwen |
+| --- | --- | --- | --- |
+| baseball | 1983 | 1250 | 1.59× |
+| docu | 371 | 401 | 0.93× |
+| drama | 402 | 336 | 1.20× |
+| entertain | 1150 | 848 | 1.36× |
+| hist_drama | 460 | 459 | 1.00× |
+| news | 731 | 471 | 1.55× |
+
+
+### 6.5 전체 평가
+
+1. **단일 시스템 선택 시 → Whisper 권장**
+   - 안정적인 정확도 (5/6 콘텐츠 우세 or 동률)
+
+   - VRAM 절반 (3.5 GB vs 7 GB)
+
+   - 환각 게이트 5종으로 production-ready
+
+   - docu 같은 위험 콘텐츠에서 명확한 우위
+
+2. **Qwen 의 강점**
+   - **속도**  — Whisper 대비 1.8-2.2배 (batch 처리) (단, Whisper 도 일부 Batch 처리 가능)
+
+   - **baseball**  같은 BGM 강한 빠른 발화 콘텐츠
+
+#### 의사결정 매트릭스
+
+| 우선순위 | 선택 |
+| --- | --- |
+| 정확도 + 단순함 | **Whisper 단독** |
+| 처리량 최대 + 정확도 양호 | Qwen 단독 + batch tuning |
+| 비용 최소 (단일 GPU, 작은 모델) | Whisper turbo 도 검토 (정확도 trade-off) |
 
 
 

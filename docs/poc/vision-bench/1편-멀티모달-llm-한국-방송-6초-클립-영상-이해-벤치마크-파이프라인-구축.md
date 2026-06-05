@@ -218,7 +218,7 @@ ffmpeg -nostdin -i "$FIRST" \
 >
 > - 위  작업을 자동화한 스크립트
 >
-> `./script/prepare_data.sh &lt;카테고리&gt; &lt;파일명&gt; <URL>`
+> `./script/prepare_data.sh <카테고리> <파일명> <URL>`
 >
 > - 원본이 이미 있으면 다운로드를 건너뜀(원본 보호).
 
