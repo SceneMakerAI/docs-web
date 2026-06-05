@@ -343,24 +343,26 @@ article a:hover {
   background: transparent;
   color: var(--ifm-color-content);
   font-weight: 500;
-  padding: 4px 0;
+  padding: 4px 0 4px 1.25em;  /* 왼쪽 padding으로 화살표 공간 확보 */
   cursor: pointer;
   list-style: none;
-  display: flex;
-  align-items: center;
-  gap: 6px;
+  position: relative;
 }
 
 .markdown details summary::before {
   content: '▶';
   font-size: 0.65em;
+  line-height: 1;
   transition: transform 0.15s;
   color: var(--ifm-color-content-secondary);
-  flex-shrink: 0;
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
 }
 
 .markdown details[open] > summary::before {
-  transform: rotate(90deg);
+  transform: translateY(-50%) rotate(90deg);
 }
 
 /* WebKit의 기본 disclosure triangle 숨김 */
