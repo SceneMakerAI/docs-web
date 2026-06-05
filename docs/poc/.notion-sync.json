@@ -22,8 +22,8 @@
   },
   "36ee15b4-0359-80b6-97c6-f628f0347d36": {
     "file": "docs/poc/audio-bench/한국어-콘텐츠-lid-정확도-비교-whisper-vs-voxlingua107.md",
-    "last_edited": "2026-06-04T07:20:00.000Z",
-    "content_hash": "62bafb244e80c4c7ae70a3f77c43e9ca592a739a5a7ea85c0fbd6c2550a208bd",
+    "last_edited": "",
+    "content_hash": "",
     "order": 1,
     "parent_id": "audio-bench"
   },
@@ -36,8 +36,8 @@
   },
   "365e15b4-0359-80d4-8f38-d8a5c80ae5d0": {
     "file": "docs/poc/audio-bench/index.md",
-    "last_edited": "2026-06-02T07:58:00.000Z",
-    "content_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "last_edited": "",
+    "content_hash": "",
     "order": 1,
     "parent_id": null
   },
