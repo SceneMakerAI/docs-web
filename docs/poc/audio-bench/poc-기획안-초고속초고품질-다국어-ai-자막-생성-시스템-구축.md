@@ -476,7 +476,7 @@ transcribe 결과 text 의 **문자 종류로 lang 후처리 정정** — LID/Qw
 
 ---
 
-## 5. 평가
+## 5. 평가 방법
 
 Gemini 3.5 Flash 가 audio (ground truth) 와 STT 결과 segment 를 비교해서 채점. 시스템 독립 (Whisper / Qwen 각각 같은 audio 로 평가).
 
@@ -558,6 +558,8 @@ POC 결과 (7장 참조) 에서 모든 시스템 × 콘텐츠가 90%+ 달성. = 
 ---
 
 ## 6. 결과
+
+실행 소스 : [https://github.com/SceneMakerAI/poc-stt-bench](https://github.com/SceneMakerAI/poc-stt-bench)
 
 ### 6.1 실행 명령어
 

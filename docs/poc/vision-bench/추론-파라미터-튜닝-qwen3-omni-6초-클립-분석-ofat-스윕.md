@@ -4,7 +4,7 @@ title: "추론 파라미터 튜닝 — Qwen3-Omni 6초 클립 분석 (OFAT 스�
 sidebar_position: 3
 slug: "3"
 last_update:
-  date: 2026-06-04
+  date: 2026-06-05
 ---
 
 ## 1. 들어가며
