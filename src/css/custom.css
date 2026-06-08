@@ -416,6 +416,9 @@ article a:hover {
 .token.number                  { color: #61afef; }  /* 숫자 — 파랑 */
 .token.boolean, .token.null    { color: #c678dd; }  /* true/false/null — 보라 */
 
+/* Python 함수명: Notion은 기본 흰색 — 특수 색 제거 */
+.language-python .token.function { color: inherit !important; }
+
 /* ─────────── bash / shell 언어 스코프 오버라이드 ─────────── */
 /* prism-react-renderer가 inline style 적용 → !important 필요 */
 .language-bash .token.function,
