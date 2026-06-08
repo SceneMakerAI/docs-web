@@ -566,7 +566,7 @@ def escape_mdx_angle_brackets(text):
         if i % 2 == 1:  # 코드 스팬/블록 — 그대로 유지
             result.append(part)
         else:
-            result.append(re.sub(r'<([^>]*[^\x00-\x7F][^>]*)>', r'&lt;\1&gt;', part))
+            result.append(re.sub(r'<([^>\n]*[^\x00-\x7F\n][^>\n]*)>', r'&lt;\1&gt;', part))
     return ''.join(result)
 
 

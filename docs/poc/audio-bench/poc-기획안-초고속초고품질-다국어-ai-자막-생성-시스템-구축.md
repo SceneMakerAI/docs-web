@@ -208,7 +208,7 @@ output/
 | 청크 처리 | 30초 단위 분할 (긴 audio 의 spectrogram VRAM OOM 회피) |
 | 캐시 | `output/1_denoise/<stem>.wav`  — 양쪽 시스템 공유, 동일 stem 재실행 시 재사용 |
 
-**왜 atten_lim_db = -30?**
+**왜 atten_lim_db = -30?**  
 풀파워 (`None` ) 면 노래 가창이나 작은 발화도 잡음으로 잘려 ASR 누락 발생. -30dB 로 강도 제한 = 음성 보존 ↑.
 
 ---
@@ -320,7 +320,7 @@ POC 의 핵심 시행착오는 거의 Whisper 측 환각 처리. Qwen 측은 lan
 
 Whisper 는 언어마다 훈련시킨 데이터 양이 다르기 때문에 Tier가 낮을 수록 환각이 심하게 나타난다. Tier4로 가면 거의 번역이 안되며, 해당 Tier는 과감히 Skip 
 
-- Tier-1 (Word Error Rate &lt; 5%)
+- Tier-1 (Word Error Rate < 5%)
   -   영어,  스페인어, 이탈리아어, 프랑스어, 독일어, 포르투칼어
 
 - Tier-2 (WER <5-8%)
@@ -337,7 +337,7 @@ Whisper 는 언어마다 훈련시킨 데이터 양이 다르기 때문에 Tier�
 
 ##### 게이트 1 — VAD pre-filter
 
-<table&gt;
+<table>
 <tbody>
 <tr>
 <th>약어</th>
@@ -505,7 +505,7 @@ Whisper 는 언어마다 훈련시킨 데이터 양이 다르기 때문에 Tier�
 
 #### Drop 정책 (살리기 불가능한 케이스)
 
-**케이스** — 음향이 ko 인데 Whisper 가 ko 모드에서도 일본어 토큰 출력
+**케이스** — 음향이 ko 인데 Whisper 가 ko 모드에서도 일본어 토큰 출력  
 **원칙** — "**잘못된 자막보다 누락이 낫다** " → drop
 
 ---
@@ -728,14 +728,14 @@ cd /usr/service/source/scenemaker/poc/poc-stt-bench
 - **Qwen 이 대체로 1.8 \~ 2.2배 빠름**  — Qwen3-ASR 이 chunk 들을 batch 처리 (`max_inference_batch_size=8` )
 - **entertain**  만 Whisper 우세 — Qwen 의 ForcedAligner 가 효과음/추임새 많은 콘텐츠에서 word timestamp 부정확 → 재처리 비용 ↑ 추정
 - **baseball**  은 두 시스템 비슷 — Whisper 측 segment 수가 Qwen 보다 1.6배 많아 처리 부담 분산 (1983 vs 1250)
-- RTF &lt; 0.06 → 둘 다 실시간보다 **20배 이상 빠름**  (production 처리량 여유 충분)
+- RTF < 0.06 → 둘 다 실시간보다 **20배 이상 빠름**  (production 처리량 여유 충분)
 
 
 ### 6.3 vRAM 사용량 비교
 
 | 컴포넌트 | Whisper 측 | Qwen 측 | 비고 |
 | --- | --- | --- | --- |
-| **ASR 모델** | 3 GB<br&gt;(`Systran/faster-whisper-large-v3` , CT2 float16) | 3.5 GB<br>(`Qwen3-ASR-1.7B` , bfloat16, batch=8) |  |
+| **ASR 모델** | 3 GB<br>(`Systran/faster-whisper-large-v3` , CT2 float16) | 3.5 GB<br>(`Qwen3-ASR-1.7B` , bfloat16, batch=8) |  |
 | **Timestamp 모델** | — (ASR 에 포함) | 1.5 GB<br>(`Qwen3-ForcedAligner-0.6B` ) | word 단위 timestamp |
 | **LID 모델** | — (ASR 과 동일 인스턴스 재사용) | 1.5 GB<br>(`large-v3-turbo` , float16) | Whisper 측은 ASR 모델이 LID 까지 처리 |
 | **Denoise** | 0.5 GB (DeepFilterNet v3) | 0.5 GB (DeepFilterNet v3) | 양쪽 공통 |

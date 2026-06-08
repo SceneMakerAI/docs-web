@@ -128,7 +128,7 @@ graph LR
 
 ### 3.0. 테스트 방법
 
-클라이언트 → API 서버 → vLLM 의 **기본 동작** 을 아래 6단계로 확인한다. (분석 *품질* 평가는 편2·편3.)
+클라이언트 → API 서버 → vLLM 의 **기본 동작** 을 아래 6단계로 확인한다. (분석 *품질* 평가는 추후.)
 
 1. **샘플 데이터 준비**
    - 테스트 영상 데이터를 준비하고 10분 구간을 6초 클립 100개로 분할한다.
@@ -719,6 +719,5 @@ print(f"순차 {seq_ms}ms · 배치 {batch_ms}ms · {seq_ms / batch_ms:.2f}×")
 
 - [Qwen3-Omni vLLM 서빙 가이드](https://docs.vllm.ai/projects/vllm-omni/en/latest/user_guide/examples/online_serving/qwen3_omni/) — `vllm serve` 옵션 (`--max-model-len` 등)
 - [vLLM — OpenAI-Compatible Server](https://docs.vllm.ai/en/latest/serving/openai_compatible_server.html) — `/v1/chat/completions` 규약·`response_format` ·extra body(`mm_processor_kwargs` ·`chat_template_kwargs` ). 게이트웨이가 이 본문을 그대로 패스
-- [vLLM — Structured Outputs (Guided Decoding)](https://docs.vllm.ai/en/latest/features/structured_outputs.html) — `response_format: json_schema(strict)` 강제. 편2의 4필드 스키마 출력 안정화의 토대
 
 
