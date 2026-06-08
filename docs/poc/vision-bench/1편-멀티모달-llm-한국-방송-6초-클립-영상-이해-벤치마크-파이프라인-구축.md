@@ -78,11 +78,12 @@ graph LR
 - `--tensor-parallel-size 1` **:** 모델을 GPU 여러 장에 쪼개지 않고 한 장에 통째로 올린다.
 - `--max-num-seqs 8` **:** vLLM 이 동시에 처리하는 요청(시퀀스) 최대 수 = 내부 배치 상한. 게이트웨이(API Server) 동시성(4)보다 커서 vLLM 에 여유가 있다.
 
-> 📍 **이 설정들은 어디에 있나 - 두 곳을 구분**
->
-> - 위 `--dtype` ·`--gpu-memory-utilization` ·`--tensor-parallel-size` ·`--max-num-seqs` 는 **vLLM 서버 기동 인자** 다 → 서빙 호스트에서 vLLM 을 띄우는 서비스의 `vllm serve …` 명령에 있음 (우리 게이트웨이 repo 가 아니라 **vLLM 서빙 측** ).
->
-> - 우리 게이트웨이(`poc-vision-bench` )의 자체 설정(`VLLM_BASE_URL` ·`VLLM_CONCURRENCY` 등)은 별개로 `.env` **→** `src/config.py` **의** `Settings` 에 있음.
+:::info
+📍 **이 설정들은 어디에 있나 - 두 곳을 구분**
+
+- 위 `--dtype` ·`--gpu-memory-utilization` ·`--tensor-parallel-size` ·`--max-num-seqs` 는 **vLLM 서버 기동 인자** 다 → 서빙 호스트에서 vLLM 을 띄우는 서비스의 `vllm serve …` 명령에 있음 (우리 게이트웨이 repo 가 아니라 **vLLM 서빙 측** ).
+- 우리 게이트웨이(`poc-vision-bench` )의 자체 설정(`VLLM_BASE_URL` ·`VLLM_CONCURRENCY` 등)은 별개로 `.env` **→** `src/config.py` **의** `Settings` 에 있음.
+:::
 
 **서빙 컨텍스트 한계**
 
@@ -103,11 +104,12 @@ graph LR
 
   1. 또는 **fps 를 낮추** 비디오 토큰을 억제한다.
 
-> 📍 **설정 위치 — 서버 vs 클라이언트**
->
-> - `--max-model-len` 은 **vLLM 서버 기동 인자** (위 VRAM 설정과 같은 `vllm serve …` ).
->
-> - `fps` 는 **클라이언트 요청 본문** 파라미터(`mm_processor_kwargs.fps` )
+:::info
+📍 **설정 위치 — 서버 vs 클라이언트**
+
+- `--max-model-len` 은 **vLLM 서버 기동 인자** (위 VRAM 설정과 같은 `vllm serve …` ).
+- `fps` 는 **클라이언트 요청 본문** 파라미터(`mm_processor_kwargs.fps` )
+:::
 
 #### **2.2. 입력 방식:** `from_video` **(mp4 단일 입력) vs** `from_frames_audio` **(분리 입력)**
 
@@ -214,13 +216,15 @@ ffmpeg -nostdin -i "$FIRST" \
   -c:v libopenh264 -b:v 300k -c:a copy "$BLACK/$(basename "$FIRST")"
 ```
 
-> ⚡ **한 번에 실행** 
->
-> - 위  작업을 자동화한 스크립트
->
-> `./script/prepare_data.sh <카테고리> <파일명> <URL>`
->
-> - 원본이 이미 있으면 다운로드를 건너뜀(원본 보호).
+:::tip
+⚡ **한 번에 실행** 
+
+- 위  작업을 자동화한 스크립트
+
+`./script/prepare_data.sh <카테고리> <파일명> <URL>`
+
+- 원본이 이미 있으면 다운로드를 건너뜀(원본 보호).
+:::
 
 
 **최종 테스트 클립 데이터**
@@ -236,15 +240,14 @@ ffmpeg -nostdin -i "$FIRST" \
 | `esports` | e스포츠 | 100 | 1920×1080 | **60** | 1.35 MB | 게임 UI 오버레이 + 캐스터 + 게임음 |
 | **합계** | — | **700** | — | — | ≈ 1.25 MB | 원본 영상 7편 (장르당 1편, 10분 윈도우 100 등분) |
 
-> 🔒 **데이터 취급 원칙**
->
-> - 영상은 **내부 품질 평가(PoC) 목적에 한해** 사용하며, 외부로 배포·재공개하지 않는다.
->
-> - 영상·분석 결과는 코드 저장소에 **포함하지 않는다**
->
-> - 가공 사본을 별도 보관하지 않는다.
->
-> - 평가 종료 후 로컬 영상·산출물은 보관기간 정책에 따라 **폐기** 한다.
+:::caution
+🔒 **데이터 취급 원칙**
+
+- 영상은 **내부 품질 평가(PoC) 목적에 한해** 사용하며, 외부로 배포·재공개하지 않는다.
+- 영상·분석 결과는 코드 저장소에 **포함하지 않는다**
+- 가공 사본을 별도 보관하지 않는다.
+- 평가 종료 후 로컬 영상·산출물은 보관기간 정책에 따라 **폐기** 한다.
+:::
 
 
 ### 3.2. 분석 서버 (vLLM 앞단 API 게이트웨이)
@@ -410,146 +413,216 @@ x-request-id: 6da1b40a
 #### 3.3.2. 단일 추론 (`POST /chat` )
 
 1. **텍스트추론**
-- 요청
+   <details>
+   <summary>요청 </summary>
 
-```bash
-curl -sS -X POST http://localhost:8001/chat \
-  -H "Content-Type: application/json" \
-  -d '{
-    "model": "qwen",
-    "messages": [{"role": "user", "content": [
-      {"type": "text", "text": "한국어로 자기소개를 한 문장으로 해줘."}
-    ]}]
-  }' | jq
-```
+   ```bash
+   curl -sS -X POST http://localhost:8001/chat \
+     -H "Content-Type: application/json" \
+     -d '{
+       "model": "qwen",
+       "messages": [{"role": "user", "content": [
+         {"type": "text", "text": "한국어로 자기소개를 한 문장으로 해줘."}
+       ]}]
+     }' | jq
+   ```
 
-- 응답
 
-```json
-{
-  "id": "chatcmpl-9a1f5dd8d02e3b0d",
-  "object": "chat.completion",
-  "created": 1780885800,
-  "prompt_routed_experts": null,
-  "model": "qwen",
-  "choices": [
-    {
-      "index": 0,
-      "message": {
-        "role": "assistant",
-        "content": "안녕하세요, 저는 한국어로 간단히 자기소개를 드리고 싶습니다.",
-        "refusal": null,
-        "annotations": null,
-        "audio": null,
-        "function_call": null,
-        "tool_calls": [],
-        "reasoning": null
-      },
-      "logprobs": null,
-      "finish_reason": "stop",
-      "stop_reason": null,
-      "token_ids": null,
-      "routed_experts": null
-    }
-  ],
-  "service_tier": null,
-  "system_fingerprint": "vllm-0.21.0-955d20dc",
-  "usage": {
-    "prompt_tokens": 23,
-    "total_tokens": 48,
-    "completion_tokens": 25,
-    "prompt_tokens_details": null
-  },
-  "prompt_logprobs": null,
-  "prompt_token_ids": null,
-  "prompt_text": null,
-  "kv_transfer_params": null
-}
-```
+   </details>
+
+   <details>
+   <summary>응답 </summary>
+
+   ```json
+   {
+     "id": "chatcmpl-9a1f5dd8d02e3b0d",
+     "object": "chat.completion",
+     "created": 1780885800,
+     "prompt_routed_experts": null,
+     "model": "qwen",
+     "choices": [
+       {
+         "index": 0,
+         "message": {
+           "role": "assistant",
+           "content": "안녕하세요, 저는 한국어로 간단히 자기소개를 드리고 싶습니다.",
+           "refusal": null,
+           "annotations": null,
+           "audio": null,
+           "function_call": null,
+           "tool_calls": [],
+           "reasoning": null
+         },
+         "logprobs": null,
+         "finish_reason": "stop",
+         "stop_reason": null,
+         "token_ids": null,
+         "routed_experts": null
+       }
+     ],
+     "service_tier": null,
+     "system_fingerprint": "vllm-0.21.0-955d20dc",
+     "usage": {
+       "prompt_tokens": 23,
+       "total_tokens": 48,
+       "completion_tokens": 25,
+       "prompt_tokens_details": null
+     },
+     "prompt_logprobs": null,
+     "prompt_token_ids": null,
+     "prompt_text": null,
+     "kv_transfer_params": null
+   }
+   ```
+
+
+   </details>
 
 2. **영상 + 프롬프트**
-- 요청 — 영상 base64 가 커서 payload 를 파일로 빌드 후 전송(`--data-binary` ). 영상의 **temperature** 는 **0.3** 권장(높은 값은 이종문자 degeneration 유발).
+   <details>
+   <summary>요청 (curl)</summary>
 
-```bash
-REPO_DIR=$(git rev-parse --show-toplevel)
-CLIP=${REPO_DIR}/data/clips/baseball/baseball/0001_0600-0606.mp4
-PYTHONPATH=src uv run python - "$CLIP" <<'PY'
-import base64, json, sys
-b = base64.b64encode(open(sys.argv[1],"rb").read()).decode()
-json.dump({"model":"qwen","messages":[{"role":"user","content":[
-    {"type":"video_url","video_url":{"url":"data:video/mp4;base64,"+b}},
-    {"type":"text","text":"이 영상의 시각과 음성을 한국어로 분석해줘."}]}],
-  "temperature":0.3,
-  "mm_processor_kwargs":{"fps":0.5,"use_audio_in_video":True},
-  "chat_template_kwargs":{"enable_thinking":False}}, open("/tmp/req.json","w"), ensure_ascii=False)
-PY
-curl -sS -X POST http://localhost:8001/chat -H "Content-Type: application/json" --data-binary @/tmp/req.json | jq
-```
+   영상 base64 가 커서 payload 를 파일로 빌드 후 전송(`--data-binary` ). 영상의 **temperature** 는 **0.3** 권장(높은 값은 이종문자 degeneration 유발).
 
-- 응답 (주요 필드)
+   ```bash
+   REPO_DIR=$(git rev-parse --show-toplevel)
+   CLIP=${REPO_DIR}/data/clips/baseball/baseball/0001_0600-0606.mp4
+   PYTHONPATH=src uv run python - "$CLIP" <<'PY'
+   import base64, json, sys
+   b = base64.b64encode(open(sys.argv[1],"rb").read()).decode()
+   json.dump({"model":"qwen","messages":[{"role":"user","content":[
+       {"type":"video_url","video_url":{"url":"data:video/mp4;base64,"+b}},
+       {"type":"text","text":"이 영상의 시각과 음성을 한국어로 분석해줘."}]}],
+     "temperature":0.3,
+     "mm_processor_kwargs":{"fps":0.5,"use_audio_in_video":True},
+     "chat_template_kwargs":{"enable_thinking":False}}, open("/tmp/req.json","w"), ensure_ascii=False)
+   PY
+   curl -sS -X POST http://localhost:8001/chat -H "Content-Type: application/json" --data-binary @/tmp/req.json | jq
+   ```
 
-```json
-{
-  "id": "chatcmpl-81ee61dfec3201dd",
-  "object": "chat.completion",
-  "created": 1780885818,
-  "prompt_routed_experts": null,
-  "model": "qwen",
-  "choices": [
-    {
-      "index": 0,
-      "message": {
-        "role": "assistant",
-        "content": "assistant\n이 영상은 야구 경기의 한 장면을 담고 있습니다. 경기장 내부의 분위기는 매우 활기차며, 관중의 함성과 선수들의 움직임이 경기의 긴박함을 더합니다. 경기장의 배경에는 'Pocari Sweat'와 '새마을금고' 등의 광고판이 보이며, 이는 경기장의 위치와 후원사 정보를 제공합니다. 경기 중인 투수와 타자 사이의 대결이 주요 포커스입니다. 투수는 흰색 유니폼을 입고 있으며, 집중력을 보여주고 있습니다. 반면, 타자는 붉은색 유니폼을 입고 있으며, 준비 자세를 취하고 있습니다. 이 장면은 경기의 중요한 순간을 포착한 것으로 보이며, 투수와 타자 사이의 긴장감이 느껴집니다. 경기의 스코어는 'SK 2:0 KIA'로, SK가 앞서고 있는 상황입니다. 이 장면은 경기의 중요한 순간을 포착한 것으로, 선수들의 집중력과 경기의 긴박함을 잘 보여줍니다.",
-        "refusal": null,
-        "annotations": null,
-        "audio": null,
-        "function_call": null,
-        "tool_calls": [],
-        "reasoning": null
-      },
-      "logprobs": null,
-      "finish_reason": "stop",
-      "stop_reason": null,
-      "token_ids": null,
-      "routed_experts": null
-    }
-  ],
-  "service_tier": null,
-  "system_fingerprint": "vllm-0.21.0-955d20dc",
-  "usage": {
-    "prompt_tokens": 3633,
-    "total_tokens": 3920,
-    "completion_tokens": 287,
-    "prompt_tokens_details": null
-  },
-  "prompt_logprobs": null,
-  "prompt_token_ids": null,
-  "prompt_text": null,
-  "kv_transfer_params": null
-}
-```
+
+   </details>
+
+   <details>
+   <summary>응답 (JSON)</summary>
+
+   ```json
+   {
+     "id": "chatcmpl-81ee61dfec3201dd",
+     "object": "chat.completion",
+     "created": 1780885818,
+     "prompt_routed_experts": null,
+     "model": "qwen",
+     "choices": [
+       {
+         "index": 0,
+         "message": {
+           "role": "assistant",
+           "content": "assistant\n이 영상은 야구 경기의 한 장면을 담고 있습니다. 경기장 내부의 분위기는 매우 활기차며, 관중의 함성과 선수들의 움직임이 경기의 긴박함을 더합니다. 경기장의 배경에는 'Pocari Sweat'와 '새마을금고' 등의 광고판이 보이며, 이는 경기장의 위치와 후원사 정보를 제공합니다. 경기 중인 투수와 타자 사이의 대결이 주요 포커스입니다. 투수는 흰색 유니폼을 입고 있으며, 집중력을 보여주고 있습니다. 반면, 타자는 붉은색 유니폼을 입고 있으며, 준비 자세를 취하고 있습니다. 이 장면은 경기의 중요한 순간을 포착한 것으로 보이며, 투수와 타자 사이의 긴장감이 느껴집니다. 경기의 스코어는 'SK 2:0 KIA'로, SK가 앞서고 있는 상황입니다. 이 장면은 경기의 중요한 순간을 포착한 것으로, 선수들의 집중력과 경기의 긴박함을 잘 보여줍니다.",
+           "refusal": null,
+           "annotations": null,
+           "audio": null,
+           "function_call": null,
+           "tool_calls": [],
+           "reasoning": null
+         },
+         "logprobs": null,
+         "finish_reason": "stop",
+         "stop_reason": null,
+         "token_ids": null,
+         "routed_experts": null
+       }
+     ],
+     "service_tier": null,
+     "system_fingerprint": "vllm-0.21.0-955d20dc",
+     "usage": {
+       "prompt_tokens": 3633,
+       "total_tokens": 3920,
+       "completion_tokens": 287,
+       "prompt_tokens_details": null
+     },
+     "prompt_logprobs": null,
+     "prompt_token_ids": null,
+     "prompt_text": null,
+     "kv_transfer_params": null
+   }
+   ```
+
+
+   </details>
 
 3. **블랙아웃 영상 + 프롬프트** (통제 실험 — 화면만 검게, 오디오 유지)
-- 요청 — ⓑ와 **완전히 동일** (같은 프롬프트·`temperature 0.3` ·`fps 0.5` ), `CLIP` 만 화면을 검게 가린 클립으로 교체. 화면을 지워도 출력에 음성이 남으면 → 모델이 오디오를 실제로 처리한다는 증거(시각 유추가 아님).
+   <details>
+   <summary>요청 (curl)</summary>
 
-```bash
-# ⓑ와 동일 — CLIP 만 교체 (이하 base64 빌드·POST 동일)
-CLIP=${REPO_DIR}/data/blackout/baseball/baseball/0001_0600-0606.mp4
-```
+   위 [**2. 영상 + 프롬프트** ]와 **완전히 동일** (같은 프롬프트·`temperature 0.3` ·`fps 0.5` ), `CLIP` 만 화면을 검게 가린 클립으로 교체. 화면을 지워도 출력에 음성이 남으면 → 모델이 오디오를 실제로 처리
 
-- 응답 (content)
+   ```bash
+   REPO_DIR=$(git rev-parse --show-toplevel)
+   CLIP=${REPO_DIR}/data/blackout/baseball/baseball/0001_0600-0606.mp4
+   PYTHONPATH=src uv run python - "$CLIP" <<'PY'
+   import base64, json, sys
+   b = base64.b64encode(open(sys.argv[1],"rb").read()).decode()
+   json.dump({"model":"qwen","messages":[{"role":"user","content":[
+       {"type":"video_url","video_url":{"url":"data:video/mp4;base64,"+b}},
+       {"type":"text","text":"이 영상의 시각과 음성을 한국어로 분석해줘."}]}],
+     "temperature":0.3,
+     "mm_processor_kwargs":{"fps":0.5,"use_audio_in_video":True},
+     "chat_template_kwargs":{"enable_thinking":False}}, open("/tmp/req.json","w"), ensure_ascii=False)
+   PY
+   curl -sS -X POST http://localhost:8001/chat -H "Content-Type: application/json" --data-binary @/tmp/req.json | jq
+   ```
 
-```javascript
-이 영상은 전면적으로 검은색 배경을 보여주며, 시각적으로 아무런 이미지나 텍스트가 나타나지 않습니다. …
-음성 측면에서, 이 영상은 한국어로 된 대화를 포함하고 있습니다. 대화 내용은 다음과 같습니다:
-"제 MVP를 줄 수밖에 없지 않나요? 그렇죠. 그러나 기아의 반격도 또…"
-… 시각적으로는 아무런 정보를 제공하지 않지만, 음성 측면에서는 스포츠 경기에 대한 논의를 포함하고 있습니다.
-```
 
-- `usage` : `prompt_tokens 3,633 · completion_tokens 314 · finish_reason stop`
+   </details>
 
-→ **PASS** — 시각은 "검은 배경·정보 없음"으로 화면 가림을 정확히 인식, 음성은 야구 중계 멘트("MVP"·"기아의 반격")를 그대로 포착. 화면을 제거해도 오디오가 남으므로 **모델이 영상 내 음성을 실제로 분석** 함이 증명됨. (`prompt_tokens 3,633` — 영상 토큰은 해상도·fps 기반이라 화면이 검어도 ⓑ과 동일.)
+   <details>
+   <summary>응답 (content)</summary>
+
+   ```javascript
+   {
+     "id": "chatcmpl-8ea2324da44fa4b9",
+     "object": "chat.completion",
+     "created": 1780891827,
+     "prompt_routed_experts": null,
+     "model": "qwen",
+     "choices": [
+       {
+         "index": 0,
+         "message": {
+           "role": "assistant",
+           "content": "assistant>\n이 영상은 전면적으로 검은색 화면을 보여주며, 시각적으로는 아무런 정보나 행동이 나타나지 않습니다. 이는 시청자에게 집중을 유도하거나 특정한 분위기를 조성하기 위한 의도적인 디자인일 수 있습니다. \n\n음성 측면에서, 한국어로 된 남성의 목소리가 들립니다. 그는 다음과 같은 내용을 말합니다:\n\n\"이렇게 MVP를 줄 수밖에 없지 않나. 그래서 지금 여기서 또 공격이 또.\"\n\n이 발언은 특정한 상황, 예를 들어 스포츠 경기 중의 전술 논의나 분석일 가능성이 있습니다. \"MVP\"는 \"Most Valuable Player\"의 약자로, 일반적으로 스포츠 경기에서 가장 가치 있는 선수를 의미합니다. 이는 스포츠 경기 중의 전술 논의나 분석일 가능성이 높습니다. \n\n전체적으로, 이 영상은 시각적으로는 매우 단순하지만 음성으로는 특정한 상황에 대한 논의가 이루어지고 있습니다. 이는 시청자에게 집중을 유도하거나 특정한 분위기를 조성하기 위한 의도적인 디자인일 수 있습니다.",
+           "refusal": null,
+           "annotations": null,
+           "audio": null,
+           "function_call": null,
+           "tool_calls": [],
+           "reasoning": null
+         },
+         "logprobs": null,
+         "finish_reason": "stop",
+         "stop_reason": null,
+         "token_ids": null,
+         "routed_experts": null
+       }
+     ],
+     "service_tier": null,
+     "system_fingerprint": "vllm-0.21.0-955d20dc",
+     "usage": {
+       "prompt_tokens": 3633,
+       "total_tokens": 3927,
+       "completion_tokens": 294,
+       "prompt_tokens_details": null
+     },
+     "prompt_logprobs": null,
+     "prompt_token_ids": null,
+     "prompt_text": null,
+     "kv_transfer_params": null
+   }
+   ```
+
+
+   </details>
 
 #### 3.3.3. 배치 추론 (`POST /chat/batch` )
 
@@ -557,7 +630,7 @@ CLIP=${REPO_DIR}/data/blackout/baseball/baseball/0001_0600-0606.mp4
 
 #### 3.3.4. 요약
 
-*(API별 PASS·소요시간 표 기입 예정)*
+*(위 테스트 표 기입 예정)*
 
 ---
 
