@@ -144,15 +144,16 @@ h1 {
   margin-top: 0;
 }
 
-/* ─────────── Blockquote: Notion callout 스타일 ─────────── */
+/* ─────────── Blockquote: Notion 인용(quote) 스타일 ─────────── */
+/* callout은 :::admonition으로 분리됨 — blockquote는 순수 인용만 */
 .markdown blockquote {
-  border-left: none;
-  background: var(--ifm-color-emphasis-100);
-  border-radius: 4px;
-  padding: 0.75rem 1rem;
+  border-left: 4px solid var(--ifm-color-emphasis-300);
+  background: transparent;
+  border-radius: 0;
+  padding: 0.5rem 1rem;
   margin: 0.75rem 0 1rem 0;
-  color: inherit;
-  font-style: normal;
+  color: var(--ifm-color-emphasis-700);
+  font-style: italic;
 }
 .markdown blockquote p { margin-bottom: 0.25rem; }
 .markdown blockquote p:last-child { margin-bottom: 0; }
