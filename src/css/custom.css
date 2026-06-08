@@ -52,9 +52,9 @@
   /* ─────────── Heading sizes — Notion 기준 ─────────── */
   --ifm-h1-font-size: 2.5rem;    /* 40px — Notion 페이지 제목 (Infima 기본 3rem=48px) */
   --ifm-h2-font-size: 1.75rem;   /* 28px — 계층감 강화 (기존 1.5rem=24px) */
-  --ifm-h3-font-size: 1.25rem;   /* 20px — 유지 */
-  --ifm-h4-font-size: 1.0625rem; /* 17px */
-  --ifm-h5-font-size: 1rem;
+  --ifm-h3-font-size: 1.375rem;  /* 22px — H2(28px)와 간격 확보 */
+  --ifm-h4-font-size: 1.125rem;  /* 18px — H3(22px)와 4px 간격 */
+  --ifm-h5-font-size: 1rem;      /* 16px — bold+margin으로 본문 구분 */
 
   /* ─────────── Radius ─────────── */
   --smk-r-sm: 8px;
@@ -137,11 +137,22 @@ h1 {
   margin-top: 1.25rem;
   margin-bottom: 0.25rem;
 }
+.markdown h5 {
+  line-height: 1.4;
+  margin-top: 1rem;
+  margin-bottom: 0.25rem;
+}
 /* 페이지 첫 번째 heading은 위 여백 제거 */
 .markdown > h2:first-child,
 .markdown > h3:first-child,
-.markdown > h4:first-child {
+.markdown > h4:first-child,
+.markdown > h5:first-child {
   margin-top: 0;
+}
+
+/* ─────────── Admonition: 제목(레이블 + 아이콘) 숨김 ─────────── */
+[class*="admonitionHeading"] {
+  display: none;
 }
 
 /* ─────────── Blockquote: Notion 인용(quote) 스타일 ─────────── */
@@ -397,16 +408,18 @@ article a:hover {
   border-color: rgba(255, 255, 255, 0.08);
 }
 
-/* ─────────── JSON Syntax Token 색상 (oneDark 위 오버라이드) ─────────── */
-.token.property                { color: #e06c75; }  /* 키명 — 빨강 */
-.token.string                  { color: #e5c07b; }  /* 문자열 값 — 주황/노랑 */
+/* ─────────── Syntax Token 색상 (Notion 다크 계열) ─────────── */
+.token.property                { color: #e09060; }  /* 키명 — 따뜻한 주황-빨강 */
+.token.string                  { color: #e5a55a; }  /* 문자열 값 — 순수 주황 */
 .token.number                  { color: #61afef; }  /* 숫자 — 파랑 */
 .token.boolean, .token.null    { color: #c678dd; }  /* true/false/null — 보라 */
 
 /* ─────────── bash / shell 언어 스코프 오버라이드 ─────────── */
 /* prism-react-renderer가 inline style 적용 → !important 필요 */
+.language-bash .token.function,
+.language-shell .token.function             { color: #61c0d4 !important; }  /* 명령어·함수명 — 청록 */
 .language-bash .token.assign-left.variable,
-.language-shell .token.assign-left.variable { color: #e06c75 !important; }  /* PYTHONPATH=, ExecStart= 등 */
+.language-shell .token.assign-left.variable { color: #e09060 !important; }  /* PYTHONPATH=, ExecStart= 등 */
 .language-bash .token.operator,
 .language-shell .token.operator             { color: #abb2bf !important; }  /* = 연산자 — 중립 */
 .language-bash .token.comment,

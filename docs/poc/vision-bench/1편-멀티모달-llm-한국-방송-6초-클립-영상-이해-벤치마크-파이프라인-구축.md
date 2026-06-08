@@ -393,7 +393,7 @@ ffmpeg -nostdin -i "$FIRST" \
 
 ### 3.3. 테스트 실행 및 결과
 
-클라이언트 → API 서버 → vLLM 파이프라인을 §3.0 흐름대로 실제 호출해 확인한다. (재현: `experiments/01_pipeline/api_check.py` )
+클라이언트 → API 서버 → vLLM 파이프라인을 §3.0 흐름대로 실제 호출해 확인한다. (재현: `experiments/01_pipeline/smoke.py` )
 
 #### 3.3.1. 상태 조회 (`GET /healthz` )
 
@@ -626,13 +626,13 @@ x-request-id: 6da1b40a
 
 #### 3.3.3. 배치 추론 (`POST /chat/batch` )
 
-같은 11클립·동일 파라미터(`temperature 0.3` ·`fps 0.5` ·`max_tokens 128` )로 **① 한 건씩** `/chat` **순차** vs **②** `/chat/batch` **일괄** 처리시간을 비교한다. (재현: `experiments/01_pipeline/batch_throughput.py` )
+같은 11클립·동일 파라미터(`temperature 0.3` ·`fps 0.5` ·`max_tokens 128` )로 **① 한 건씩** `/chat` **순차** vs **②** `/chat/batch` **일괄** 처리시간을 비교한다. (재현: `experiments/01_pipeline/run.py` )
 
 <details>
-<summary>재현 요약 코드 (`batch_throughput.py` 핵심부)</summary>
+<summary>재현 요약 코드 (`run.py` 핵심부)</summary>
 
 ```python
-# experiments/01_pipeline/batch_throughput.py — 핵심부 (같은 items 로 순차 vs 배치 비교)
+# experiments/01_pipeline/run.py — 핵심부 (같은 items 로 순차 vs 배치 비교)
 import os, base64, json, time, httpx
 from pathlib import Path
 

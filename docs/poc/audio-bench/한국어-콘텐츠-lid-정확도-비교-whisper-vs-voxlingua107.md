@@ -49,12 +49,12 @@ audio → VAD → 각 발화 구간 → [Whisper | VoxLingua] → LID
 
 비교 대상은 두 가지 LID 모델이다.
 
-**Whisper LID (baseline).** faster-whisper large-v3-turbo
+**Whisper LID (baseline).** faster-whisper large-v3-turbo  
 (`mobiuslabsgmbh/faster-whisper-large-v3-turbo` ) 의 `detect_language()` 를 호출. Whisper 는 다국어 음성인식을 학습한 모델이며, LID 는 그 부산물로 얻는 100여 언어 분류 결과다. 입력 오디오의 처음 30초만 사용한다. 상위 STT 파이프라인이 이미 쓰고 있으므로 본 POC 의 **baseline** 으로 둔다.
 
 **VoxLingua107 (실험군).** SpeechBrain ECAPA-TDNN 기반 LID **전용** 모델 (`speechbrain/lang-id-voxlingua107-ecapa` ). 107개 언어를 분류하도록 학습되었고, 음향이 유사한 언어 쌍(ko/ja, zh/ja, th/lo/km 등) 구분이 강한 것으로 알려져 있다. 짧은 발화에서도 비교적 안정적인 신뢰도를 낸다.
 
-LID 전용 모델 후보는 여럿(NeMo TitaNet, ECAPA 포크 등)이지만, VoxLingua107 은 한국어가 학습 언어에 포함되어 있고 우리 환경(GPU 단일, HF 캐시)에 즉시 통합 가능하며, 비교 자료가 풍부해 결과 해석이 쉽다.
+LID 전용 모델 후보는 여럿(NeMo TitaNet, ECAPA 포크 등)이지만, VoxLingua107 은 한국어가 학습 언어에 포함되어 있고 우리 환경(GPU 단일, HF 캐시)에 즉시 통합 가능하며, 비교 자료가 풍부해 결과 해석이 쉽다.  
 따라서 본 POC 의 대안으로 채택했다.
 
 ### 2.2 변수
@@ -76,7 +76,7 @@ LID 전용 모델 후보는 여럿(NeMo TitaNet, ECAPA 포크 등)이지만, Vox
 
 콘텐츠에 ground truth 레이블이 없어 정확도를 직접 잴 수 없다. 대신 네 결과(W-raw / V-raw / W-den / V-den)의 **상호 일치 여부** 를 proxy 로 쓴다. 모두 같으면 안전한 발화, 불일치는 어느 한쪽이 틀렸다는 신호다.
 
-
+  
 산출 항목:
 
 - **4-way 일치율** — 네 결과 전부 일치

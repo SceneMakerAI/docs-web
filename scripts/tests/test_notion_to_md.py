@@ -482,3 +482,104 @@ class TestNotionPageLinkConversion:
                 "href": "https://www.notion.so/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"}]
         result = n.extract_text_from_rich_text(rt)
         assert result == "[외부 페이지](https://www.notion.so/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa)"
+
+
+# ── TC-12: 테이블 has_column_header / has_row_header 반영 ─────────────────────
+
+def _make_table_block(has_column_header, has_row_header, rows):
+    """rows: [["셀1", "셀2"], ...] 형태의 문자열 리스트."""
+    def _rt(text):
+        return [{"plain_text": text, "href": None,
+                 "annotations": {"bold": False, "italic": False, "strikethrough": False,
+                                 "underline": False, "code": False, "color": "default"}}]
+    children = [
+        {"type": "table_row", "table_row": {"cells": [_rt(c) for c in row]}}
+        for row in rows
+    ]
+    return (
+        {"type": "table", "table": {"has_column_header": has_column_header,
+                                    "has_row_header": has_row_header}},
+        children,
+    )
+
+
+class TestTableHeaders:
+
+    def _render(self, has_col, has_row, rows):
+        block, children = _make_table_block(has_col, has_row, rows)
+        block["_children"] = children
+        return n.block_to_markdown(block, lambda: "", lambda: 1)
+
+    def test_column_header_only_uses_plain_markdown(self):
+        """has_column_header=True만 있을 때 → plain markdown (| --- | 구분자)."""
+        out = self._render(True, False, [["헤더A", "헤더B"], ["값1", "값2"]])
+        assert "<table>" not in out
+        assert "| --- |" in out
+        assert "| 헤더A | 헤더B |" in out
+
+    def test_row_header_only_first_col_is_th(self):
+        """has_row_header=True → 1열만 <th>, 나머지 <td>."""
+        out = self._render(False, True, [["레이블1", "값1"], ["레이블2", "값2"]])
+        assert "<th>" in out
+        # 두 번째 열은 td
+        assert "<td>" in out
+        # thead 없음 (열 헤더가 없으므로)
+        assert "<thead>" not in out
+
+    def test_both_headers(self):
+        """has_column_header=True, has_row_header=True → 1행+1열 모두 <th>."""
+        out = self._render(True, True, [["구분", "A", "B"], ["X", "1", "2"]])
+        assert "<thead>" in out
+        assert "<th>" in out
+        assert "<td>" in out
+
+    def test_no_header_plain_markdown(self):
+        """헤더 없고 색 없으면 plain markdown."""
+        out = self._render(False, False, [["a", "b"], ["c", "d"]])
+        assert "<table>" not in out
+        assert "| a | b |" in out
+
+    def test_pipe_in_cell_forces_html(self):
+        """셀 내용에 | 포함 시 HTML 테이블로 전환 — markdown 테이블 파싱 깨짐 방지."""
+        out = self._render(True, False, [["단계", "명령"], ["evaluate", ".venv/bin/python evaluate.py [whisper|qwen|all]"]])
+        assert "<table>" in out
+        assert "whisper|qwen|all" in out
+        # markdown 파이프 구분자로 쪼개지지 않음
+        assert "| .venv" not in out
+
+
+# ── TC-13: Shift+Enter (단락 내 줄바꿈) ──────────────────────────────────────
+
+def _make_paragraph_block(text: str):
+    """plain_text로 paragraph 블록 생성. \n은 Shift+Enter를 시뮬레이션."""
+    return {
+        "type": "paragraph",
+        "paragraph": {
+            "rich_text": [{"plain_text": text, "href": None,
+                           "annotations": {"bold": False, "italic": False,
+                                           "strikethrough": False, "underline": False,
+                                           "code": False, "color": "default"}}]
+        },
+        "_children": [],
+    }
+
+
+class TestShiftEnterLineBreak:
+    def _render(self, text):
+        block = _make_paragraph_block(text)
+        return n.block_to_markdown(block, lambda: "", lambda: 1)
+
+    def test_shift_enter_becomes_hard_break(self):
+        """Shift+Enter(\n) → CommonMark hard line break (두 스페이스 + \n)."""
+        out = self._render("첫 줄\n둘째 줄")
+        assert "첫 줄  \n둘째 줄" in out
+
+    def test_plain_paragraph_no_break(self):
+        """일반 단락은 변환 없음."""
+        out = self._render("일반 텍스트")
+        assert "일반 텍스트\n\n" == out
+
+    def test_multiple_shift_enters(self):
+        """여러 Shift+Enter가 모두 hard break으로 변환."""
+        out = self._render("A\nB\nC")
+        assert "A  \nB  \nC" in out

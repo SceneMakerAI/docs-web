@@ -409,28 +409,40 @@ def block_to_markdown(block, slug, image_counter, item_num=1):
     if b_type == "table":
         if not children:
             return ""
+        tbl = block.get("table", {})
+        col_header = tbl.get("has_column_header", False)  # 1행 헤더
+        row_header = tbl.get("has_row_header", False)     # 1열 헤더
         has_color = any(
             _get_cell_bg(cell)
             for row in children
             for cell in row.get("table_row", {}).get("cells", [])
         )
-        if has_color:
+        has_pipe = any(
+            "|" in extract_text_from_rich_text(cell)
+            for row in children
+            for cell in row.get("table_row", {}).get("cells", [])
+        )
+        if has_color or row_header or has_pipe:
             lines = ["<table>"]
+            in_tbody = False
             for i, row in enumerate(children):
                 cells = row.get("table_row", {}).get("cells", [])
-                tag = "th" if i == 0 else "td"
-                if i == 0:
+                is_col_header_row = col_header and i == 0
+                if is_col_header_row:
                     lines.append("<thead><tr>")
                 else:
-                    if i == 1:
+                    if not in_tbody:
                         lines.append("<tbody>")
+                        in_tbody = True
                     lines.append("<tr>")
-                for cell in cells:
+                for j, cell in enumerate(cells):
+                    is_th = is_col_header_row or (row_header and j == 0)
+                    tag = "th" if is_th else "td"
                     bg = _get_cell_bg(cell)
                     text = _rich_text_to_html(cell)
                     attr = f' data-notion-bg="{bg}"' if bg else ""
                     lines.append(f"<{tag}{attr}>{text}</{tag}>")
-                lines.append("</tr></thead>" if i == 0 else "</tr>")
+                lines.append("</tr></thead>" if is_col_header_row else "</tr>")
             lines.append("</tbody></table>")
             return "\n".join(lines) + "\n\n"
         lines = []
@@ -441,7 +453,7 @@ def block_to_markdown(block, slug, image_counter, item_num=1):
                 for cell in cells
             )
             lines.append(f"| {row_text} |")
-            if i == 0:
+            if i == 0:  # GFM 테이블은 구분선 필수 — col_header 여부 무관
                 sep = " | ".join("---" for _ in cells)
                 lines.append(f"| {sep} |")
         return "\n".join(lines) + "\n\n"
@@ -463,6 +475,9 @@ def block_to_markdown(block, slug, image_counter, item_num=1):
             _m = re.match(r'^`([^`]+)`$', content)
             if _m and '\n' in _m.group(1):
                 return f"```\n{_m.group(1)}\n```\n\n" + child_md
+            # Shift+Enter → CommonMark hard line break (스페이스 2개 + \n)
+            if '\n' in content:
+                content = content.replace('\n', '  \n')
             return (content + "\n\n" if content else "\n") + child_md
         elif b_type == "heading_1":
             return f"## {content}\n\n" + child_md
@@ -551,7 +566,7 @@ def escape_mdx_angle_brackets(text):
         if i % 2 == 1:  # 코드 스팬/블록 — 그대로 유지
             result.append(part)
         else:
-            result.append(re.sub(r'<([^>]*[^\x00-\x7F][^>]*)>', r'&lt;\1&gt;', part))
+            result.append(re.sub(r'<([^>\n]*[^\x00-\x7F\n][^>\n]*)>', r'&lt;\1&gt;', part))
     return ''.join(result)
 
 

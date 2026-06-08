@@ -17,10 +17,24 @@ last_update:
 
 **비교 대상 시스템**
 
-| 시스템 | 모델 | 비고 |
-| --- | --- | --- |
-| Whisper | `Systran/faster-whisper-large-v3` | OpenAI Whisper large-v3 의 CTranslate2 변환 (faster-whisper 백엔드) |
-| Qwen | `Qwen3-ASR-1.7B`  + `Qwen3-ForcedAligner-0.6B` | 알리바바, ASR + word timestamp 분리 |
+<table>
+<thead><tr>
+<th>시스템</th>
+<th>모델</th>
+<th>비고</th>
+</tr></thead>
+<tbody>
+<tr>
+<th>Whisper</th>
+<td><code>Systran/faster-whisper-large-v3</code></td>
+<td>OpenAI Whisper large-v3 의 CTranslate2 변환 (faster-whisper 백엔드)</td>
+</tr>
+<tr>
+<th>Qwen</th>
+<td><code>Qwen3-ASR-1.7B</code> + <code>Qwen3-ForcedAligner-0.6B</code></td>
+<td>알리바바, ASR + word timestamp 분리</td>
+</tr>
+</tbody></table>
 
 > 초기에는 Gemini STT 도 비교 대상이었으나, timestamp 정확도가 분 단위로 drift 되는 이슈로 자막 용도 부적합 판정 후 제외. Gemini 는 judge (평가자) 역할로만 사용.
 
@@ -121,12 +135,29 @@ NVIDIA RTX 4090 (24GB) 1장 기반 기본 가속 환경
 
 진입점:
 
-| 단계 | 명령 |
-| --- | --- |
-| transcribe — Whisper | `.venv/bin/python main.py` |
-| transcribe — Qwen | `.venv-qwen/bin/python main_qwen.py` |
-| evaluate | `.venv/bin/python evaluate.py [whisper|qwen|all]` |
-| report | `.venv/bin/python report.py` |
+<table>
+<thead><tr>
+<th>단계</th>
+<th>명령</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>transcribe — Whisper</td>
+<td><code>.venv/bin/python main.py</code></td>
+</tr>
+<tr>
+<td>transcribe — Qwen</td>
+<td><code>.venv-qwen/bin/python main_qwen.py</code></td>
+</tr>
+<tr>
+<td>evaluate</td>
+<td><code>.venv/bin/python evaluate.py [whisper|qwen|all]</code></td>
+</tr>
+<tr>
+<td>report</td>
+<td><code>.venv/bin/python report.py</code></td>
+</tr>
+</tbody></table>
 
 
 ### 2.2 디렉토리 / 출력 구조
@@ -177,7 +208,7 @@ output/
 | 청크 처리 | 30초 단위 분할 (긴 audio 의 spectrogram VRAM OOM 회피) |
 | 캐시 | `output/1_denoise/<stem>.wav`  — 양쪽 시스템 공유, 동일 stem 재실행 시 재사용 |
 
-**왜 atten_lim_db = -30?**
+**왜 atten_lim_db = -30?**  
 풀파워 (`None` ) 면 노래 가창이나 작은 발화도 잡음으로 잘려 ASR 누락 발생. -30dB 로 강도 제한 = 음성 보존 ↑.
 
 ---
@@ -306,23 +337,55 @@ Whisper 는 언어마다 훈련시킨 데이터 양이 다르기 때문에 Tier�
 
 ##### 게이트 1 — VAD pre-filter
 
-| 약어 | **VAD = Voice Activity Detection**  (음성 활동 감지) |
-| --- | --- |
-| 도구 | Silero VAD (`snakers4/silero-vad` , torch.hub) |
-| 입력 | raw audio (전체) |
-| 출력 | 발화 구간 `[(start_s, end_s), ...]` |
-| 동작 | 발화 외 구간 (침묵/BGM/효과음) 은 ASR 에 안 보냄 |
+<table>
+<tbody>
+<tr>
+<th>약어</th>
+<td><strong>VAD = Voice Activity Detection</strong> (음성 활동 감지)</td>
+</tr>
+<tr>
+<th>도구</th>
+<td>Silero VAD (<code>snakers4/silero-vad</code>, torch.hub)</td>
+</tr>
+<tr>
+<th>입력</th>
+<td>raw audio (전체)</td>
+</tr>
+<tr>
+<th>출력</th>
+<td>발화 구간 <code>[(start_s, end_s), ...]</code></td>
+</tr>
+<tr>
+<th>동작</th>
+<td>발화 외 구간 (침묵/BGM/효과음) 은 ASR 에 안 보냄</td>
+</tr>
+</tbody></table>
+
 
 
 **왜 효과적?** — Whisper 환각의 가장 큰 원인은 **침묵/BGM 구간에서 학습된 자막 패턴을 생성하는 것** (`ご視聴ありがとうございました` , `Thanks for watching` 등). 발화 구간만 입력하면 이 문제 자체가 사라짐. WhisperX/stable-ts 등 업계 표준 도구도 동일 패턴.
 
 #### 게이트 2 — MIN_LOGPROB (-1.0)
 
-| 정의 | `avg_logprob`  = transcribe 한 각 토큰의 log probability 평균 (segment 단위) |
-| --- | --- |
-| 의미 | 0 에 가까울수록 모델이 확신, 음수로 멀어질수록 자신 없음 |
-| 임계 | `< -1.0`  → segment drop |
-| 잡는 케이스 | 환각 catch-all (게이트 1/3/4 가 못 잡은 환각의 최종 방어선) |
+<table>
+<tbody>
+<tr>
+<th>정의</th>
+<td><code>avg_logprob</code> = transcribe 한 각 토큰의 log probability 평균 (segment 단위)</td>
+</tr>
+<tr>
+<th>의미</th>
+<td>0 에 가까울수록 모델이 확신, 음수로 멀어질수록 자신 없음</td>
+</tr>
+<tr>
+<th>임계</th>
+<td><code>&lt; -1.0</code> → segment drop</td>
+</tr>
+<tr>
+<th>잡는 케이스</th>
+<td>환각 catch-all (게이트 1/3/4 가 못 잡은 환각의 최종 방어선)</td>
+</tr>
+</tbody></table>
 
 **임계값 -1.0 의 의미** — log probability 환산:
 
@@ -340,11 +403,25 @@ Whisper 는 언어마다 훈련시킨 데이터 양이 다르기 때문에 Tier�
 
 #### 게이트 3 — LID_TRUST_PROB (0.5)
 
-| 약어 | **LID = Language Identification**  (언어 자동 감지) |
-| --- | --- |
-| 함수 | Whisper `detect_language()`  → `(lang_code, prob, all_probs)`  반환 |
-| 임계 | `prob < 0.5`  + 감지된 lang 이 `MAIN_LANG (ko)`  가 아닐 때 |
-| 동작 | `lang_code`  를 `MAIN_LANG (ko)`  로 **강제 변경** . 이후 단일 ko transcribe |
+<table>
+<tbody>
+<tr>
+<th>약어</th>
+<td><strong>LID = Language Identification</strong> (언어 자동 감지)</td>
+</tr>
+<tr>
+<th>함수</th>
+<td>Whisper <code>detect_language()</code> → <code>(lang_code, prob, all_probs)</code> 반환</td>
+</tr>
+<tr>
+<th>임계</th>
+<td><code>prob &lt; 0.5</code> + 감지된 lang 이 <code>MAIN_LANG (ko)</code> 가 아닐 때</td>
+</tr>
+<tr>
+<th>동작</th>
+<td><code>lang_code</code> 를 <code>MAIN_LANG (ko)</code> 로 <strong>강제 변경</strong>. 이후 단일 ko transcribe</td>
+</tr>
+</tbody></table>
 
 **왜 0.5?** — LID 확률 0.23 같은 케이스 = "ko/de/ja/zh 어디든 비슷하게 들림" = LID 자체가 신뢰 못 함. 한국어 콘텐츠 가정 → ko 가정이 자연스러움.
 
@@ -361,12 +438,29 @@ Whisper 는 언어마다 훈련시킨 데이터 양이 다르기 때문에 Tier�
 
 #### 게이트 4 — dual transcribe + MIN_DUAL_LOGPROB (-0.6)
 
-| 조건 | 발화 길이 `< 3초`  + LID 가 비-ko (게이트 3 통과 후) |
-| --- | --- |
-| 동작 1 | ko 와 LID lang 두 번 transcribe → 각각 `avg_logprob`  계산 |
-| 동작 2 | `max(lp_ko, lp_lid)`  가 더 큰 (확신 높은) lang 채택 |
-| 동작 3 (drop 조건) | **양쪽 lp 모두** `< -0.6`  **→ 둘 다 환각 의심 → drop** |
-| 잡는 케이스 | ja/zh 짧은 환각 (1-2초짜리 LID 오인 케이스) |
+<table>
+<tbody>
+<tr>
+<th>조건</th>
+<td>발화 길이 <code>&lt; 3초</code> + LID 가 비-ko (게이트 3 통과 후)</td>
+</tr>
+<tr>
+<th>동작 1</th>
+<td>ko 와 LID lang 두 번 transcribe → 각각 <code>avg_logprob</code> 계산</td>
+</tr>
+<tr>
+<th>동작 2</th>
+<td><code>max(lp_ko, lp_lid)</code> 가 더 큰 (확신 높은) lang 채택</td>
+</tr>
+<tr>
+<th>동작 3 (drop 조건)</th>
+<td><strong>양쪽 lp 모두 </strong><code>&lt; -0.6</code><strong> → 둘 다 환각 의심 → drop</strong></td>
+</tr>
+<tr>
+<th>잡는 케이스</th>
+<td>ja/zh 짧은 환각 (1-2초짜리 LID 오인 케이스)</td>
+</tr>
+</tbody></table>
 
 **왜 -0.6?** — log probability 50% 수준. 양쪽 다 50% 미만이면 모델이 어느 lang 으로도 자신 없음 = 짧은 음향이 garbled/노이즈일 가능성 ↑.
 
@@ -380,10 +474,21 @@ Whisper 는 언어마다 훈련시킨 데이터 양이 다르기 때문에 Tier�
 
 #### 게이트 5 — 한글 char 비율 게이트 (30%)
 
-| 조건 | `chosen_lang == "ko"`  + 결과 text 의 한글 비율 `< 30%` |
-| --- | --- |
-| 동작 | segment drop |
-| 잡는 케이스 | ko 강제 transcribe 했는데 결과가 일본어 토큰 (Whisper 한계) |
+<table>
+<tbody>
+<tr>
+<th>조건</th>
+<td><code>chosen_lang == &quot;ko&quot;</code> + 결과 text 의 한글 비율 <code>&lt; 30%</code></td>
+</tr>
+<tr>
+<th>동작</th>
+<td>segment drop</td>
+</tr>
+<tr>
+<th>잡는 케이스</th>
+<td>ko 강제 transcribe 했는데 결과가 일본어 토큰 (Whisper 한계)</td>
+</tr>
+</tbody></table>
 
 **왜 30%?** — 정상 한국어 발화는 보통 한글 비율 70%+ (숫자/영문 약자 섞여도). 30% 미만 = 사실상 일본어/한자 토큰 환각.
 
@@ -401,7 +506,7 @@ Whisper 는 언어마다 훈련시킨 데이터 양이 다르기 때문에 Tier�
 
 #### Drop 정책 (살리기 불가능한 케이스)
 
-**케이스** — 음향이 ko 인데 Whisper 가 ko 모드에서도 일본어 토큰 출력
+**케이스** — 음향이 ko 인데 Whisper 가 ko 모드에서도 일본어 토큰 출력  
 **원칙** — "**잘못된 자막보다 누락이 낫다** " → drop
 
 ---
@@ -624,14 +729,14 @@ cd /usr/service/source/scenemaker/poc/poc-stt-bench
 - **Qwen 이 대체로 1.8 \~ 2.2배 빠름**  — Qwen3-ASR 이 chunk 들을 batch 처리 (`max_inference_batch_size=8` )
 - **entertain**  만 Whisper 우세 — Qwen 의 ForcedAligner 가 효과음/추임새 많은 콘텐츠에서 word timestamp 부정확 → 재처리 비용 ↑ 추정
 - **baseball**  은 두 시스템 비슷 — Whisper 측 segment 수가 Qwen 보다 1.6배 많아 처리 부담 분산 (1983 vs 1250)
-- RTF &lt; 0.06 → 둘 다 실시간보다 **20배 이상 빠름**  (production 처리량 여유 충분)
+- RTF < 0.06 → 둘 다 실시간보다 **20배 이상 빠름**  (production 처리량 여유 충분)
 
 
 ### 6.3 vRAM 사용량 비교
 
 | 컴포넌트 | Whisper 측 | Qwen 측 | 비고 |
 | --- | --- | --- | --- |
-| **ASR 모델** | 3 GB<br&gt;(`Systran/faster-whisper-large-v3` , CT2 float16) | 3.5 GB<br>(`Qwen3-ASR-1.7B` , bfloat16, batch=8) |  |
+| **ASR 모델** | 3 GB<br>(`Systran/faster-whisper-large-v3` , CT2 float16) | 3.5 GB<br>(`Qwen3-ASR-1.7B` , bfloat16, batch=8) |  |
 | **Timestamp 모델** | — (ASR 에 포함) | 1.5 GB<br>(`Qwen3-ForcedAligner-0.6B` ) | word 단위 timestamp |
 | **LID 모델** | — (ASR 과 동일 인스턴스 재사용) | 1.5 GB<br>(`large-v3-turbo` , float16) | Whisper 측은 ASR 모델이 LID 까지 처리 |
 | **Denoise** | 0.5 GB (DeepFilterNet v3) | 0.5 GB (DeepFilterNet v3) | 양쪽 공통 |
