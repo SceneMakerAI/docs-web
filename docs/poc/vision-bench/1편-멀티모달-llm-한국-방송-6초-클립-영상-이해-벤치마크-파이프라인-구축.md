@@ -414,7 +414,7 @@ x-request-id: 6da1b40a
 
 1. **텍스트추론**
    <details>
-   <summary>요청 </summary>
+   <summary>요청</summary>
 
    ```bash
    curl -sS -X POST http://localhost:8001/chat \
@@ -431,7 +431,7 @@ x-request-id: 6da1b40a
    </details>
 
    <details>
-   <summary>응답 </summary>
+   <summary>응답</summary>
 
    ```json
    {
@@ -626,7 +626,61 @@ x-request-id: 6da1b40a
 
 #### 3.3.3. 배치 추론 (`POST /chat/batch` )
 
-*(결과 기입 예정)*
+같은 11클립·동일 파라미터(`temperature 0.3` ·`fps 0.5` ·`max_tokens 128` )로 **① 한 건씩** `/chat` **순차** vs **②** `/chat/batch` **일괄** 처리시간을 비교한다. (재현: `experiments/01_pipeline/run.py` )
+
+<details>
+<summary>재현 요약 코드 ([run.py](http://run.py/) 핵심부)</summary>
+
+```python
+# experiments/01_pipeline/run.py — 핵심부 (같은 items 로 순차 vs 배치 비교)
+import base64, json, time, httpx
+from pathlib import Path
+
+SVR, ROOT = "http://localhost:8001", Path("data/clips")
+CLIPS = ["baseball/baseball/0001_0600-0606.mp4", "…", "baseball/baseball/0011_0660-0666.mp4"]  # 연속 11클립
+
+def chat_body(clip):
+    b64 = base64.b64encode(clip.read_bytes()).decode()
+    return {"model": "qwen", "temperature": 0.3, "max_tokens": 128,
+            "messages": [{"role": "user", "content": [
+                {"type": "video_url", "video_url": {"url": f"data:video/mp4;base64,{b64}"}},
+                {"type": "text", "text": "이 영상의 시각과 음성을 한국어로 분석해줘."}]}],
+            "mm_processor_kwargs": {"fps": 0.5, "use_audio_in_video": True},
+            "chat_template_kwargs": {"enable_thinking": False}}
+
+items = [{"id": Path(c).name, "body": chat_body(ROOT / c)} for c in CLIPS]  # base64 1회 인코딩 → 양 모드 재사용
+
+with httpx.Client(timeout=600) as cli:
+    # ① 순차: 한 건씩 /chat (앞 건 완료 후 다음)
+    t = time.monotonic()
+    for it in items:
+        cli.post(f"{SVR}/chat", json=it["body"])
+    seq_ms = int((time.monotonic() - t) * 1000)
+
+    # ② 배치: /chat/batch 일괄 → 완료순 NDJSON 스트리밍
+    t = time.monotonic()
+    with cli.stream("POST", f"{SVR}/chat/batch", json={"items": items}) as r:
+        for line in r.iter_lines():
+            if line:
+                json.loads(line)  # 라인 = {id, status, elapsed_ms, body|error}
+    batch_ms = int((time.monotonic() - t) * 1000)
+
+print(f"순차 {seq_ms}ms · 배치 {batch_ms}ms · {seq_ms / batch_ms:.2f}×")
+```
+
+
+</details>
+
+| 모드 | 총 처리시간 | 성공 |
+| --- | --- | --- |
+| 순차 (한 건씩 `/chat` ) | 14.2 s | 11/11 |
+| 배치 (`/chat/batch` 일괄) | 9.5 s | 11/11 |
+
+→ **PASS** — 배치가 순차보다 빠름(이 실행 **1.49×** , 게이트웨이 동시성 `VLLM_CONCURRENCY=4` 만큼 fan-out 병렬). 도착 순서 ≠ 입력 순서(**완료순 스트리밍** ), `X-Batch-Total=11` . 다건 1요청·완료순 스트리밍·각 건 독립 `status` 모두 정상.
+
+:::warning
+⚠️ 배수는 run 마다 **약 1.5–2.8×** 변동한다 — 스키마 없는 자유생성이라 클립별로 빈 출력부터 정상까지 섞여 처리량이 불균일하기 때문. 출력·처리량 안정화는 다음 테스트에서 진행한다.
+:::
 
 #### 3.3.4. 요약
 
