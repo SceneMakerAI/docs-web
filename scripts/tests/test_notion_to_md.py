@@ -280,3 +280,77 @@ class TestHtmlEntityHtmlTable:
         """이미 올바른 텍스트는 변경 없음."""
         result = n._rich_text_to_html(self._rt(">=1.0"))
         assert result == "&gt;=1.0"
+
+
+# ── TC-8: Notion 페이지 링크 → 내부 docs URL 변환 ────────────────────────────
+
+class TestNotionPageLinkConversion:
+    """_build_page_link_map / _resolve_notion_href / extract_text_from_rich_text
+    연동으로 Notion 페이지 링크가 내부 docs 경로로 변환되는지 검증."""
+
+    def setup_method(self):
+        n._page_id_to_internal_url.clear()
+
+    def teardown_method(self):
+        n._page_id_to_internal_url.clear()
+
+    def _make_sync_map(self):
+        return {
+            "368e15b4-0359-81cb-9b9b-d555dbfd19e3": {
+                "file": "docs/poc/vision-bench/1편-...md",
+                "last_edited": "2026-06-01T00:00:00.000Z",
+                "content_hash": "abc",
+                "order": 1,
+                "parent_id": "vision-bench",
+            },
+            "365e15b4-0359-804b-87c8-f1acee149564": {  # 인덱스 페이지 — parent_id 없음
+                "file": "docs/poc/vision-bench/index.md",
+                "last_edited": "2026-06-01T00:00:00.000Z",
+                "content_hash": "def",
+                "order": 2,
+                "parent_id": None,
+            },
+        }
+
+    def test_build_page_link_map_child_page(self):
+        """자식 페이지(parent_id 있음)는 /save_dir/parent/order 경로로 매핑."""
+        with patch.object(n, "SAVE_DIR", "docs/poc"):
+            n._build_page_link_map(self._make_sync_map())
+        assert n._page_id_to_internal_url["368e15b4-0359-81cb-9b9b-d555dbfd19e3"] == "/docs/poc/vision-bench/1"
+
+    def test_build_page_link_map_index_page_skipped(self):
+        """parent_id 가 None 인 인덱스 페이지는 매핑에 포함하지 않음."""
+        with patch.object(n, "SAVE_DIR", "docs/poc"):
+            n._build_page_link_map(self._make_sync_map())
+        assert "365e15b4-0359-804b-87c8-f1acee149564" not in n._page_id_to_internal_url
+
+    def test_resolve_notion_href_known_page(self):
+        """Notion 페이지 URL → 내부 경로 변환."""
+        n._page_id_to_internal_url["368e15b4-0359-81cb-9b9b-d555dbfd19e3"] = "/docs/poc/vision-bench/1"
+        result = n._resolve_notion_href("https://www.notion.so/368e15b4035981cb9b9bd555dbfd19e3")
+        assert result == "/docs/poc/vision-bench/1"
+
+    def test_resolve_notion_href_unknown_page_returns_original(self):
+        """매핑에 없는 Notion URL은 그대로 반환."""
+        result = n._resolve_notion_href("https://www.notion.so/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
+        assert result == "https://www.notion.so/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+
+    def test_resolve_non_notion_href_unchanged(self):
+        """Notion URL 이 아닌 링크는 변환하지 않음."""
+        result = n._resolve_notion_href("https://github.com/example")
+        assert result == "https://github.com/example"
+
+    def test_extract_text_converts_notion_link(self):
+        """extract_text_from_rich_text 가 Notion href 를 내부 경로로 변환."""
+        n._page_id_to_internal_url["368e15b4-0359-81cb-9b9b-d555dbfd19e3"] = "/docs/poc/vision-bench/1"
+        rt = [{"plain_text": "1편 문서", "annotations": {"code": False, "bold": False, "italic": False, "strikethrough": False},
+                "href": "https://www.notion.so/368e15b4035981cb9b9bd555dbfd19e3"}]
+        result = n.extract_text_from_rich_text(rt)
+        assert result == "[1편 문서](/docs/poc/vision-bench/1)"
+
+    def test_extract_text_unknown_notion_link_kept(self):
+        """매핑에 없는 Notion 링크는 원본 URL 유지."""
+        rt = [{"plain_text": "외부 페이지", "annotations": {"code": False, "bold": False, "italic": False, "strikethrough": False},
+                "href": "https://www.notion.so/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"}]
+        result = n.extract_text_from_rich_text(rt)
+        assert result == "[외부 페이지](https://www.notion.so/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa)"
