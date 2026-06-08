@@ -409,10 +409,15 @@ article a:hover {
 }
 
 /* ─────────── Syntax Token 색상 (Notion 다크 계열) ─────────── */
+.token.keyword                 { color: #e09060 !important; }  /* import·def·return·for 등 — 따뜻한 주황 */
+.token.comment                 { color: #7f848e !important; }  /* 주석 — 중립 회색 */
 .token.property                { color: #e09060; }  /* 키명 — 따뜻한 주황-빨강 */
 .token.string                  { color: #e5a55a; }  /* 문자열 값 — 순수 주황 */
 .token.number                  { color: #61afef; }  /* 숫자 — 파랑 */
 .token.boolean, .token.null    { color: #c678dd; }  /* true/false/null — 보라 */
+
+/* Python 함수명: Notion은 기본 흰색 — 특수 색 제거 */
+.language-python .token.function { color: inherit !important; }
 
 /* ─────────── bash / shell 언어 스코프 오버라이드 ─────────── */
 /* prism-react-renderer가 inline style 적용 → !important 필요 */

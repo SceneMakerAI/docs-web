@@ -18,4 +18,6 @@ vLLM(`vllm-project/vllm` ) 오픈소스 기여 모음. 각 이슈/PR 는 하위 
 | --- | --- | --- |
 | use_audio_in_video + MM 프로세서 캐시 → StopIteration(400) | Bug Issue | 초안(미제출) |
 
+- [use_audio_in_video + MM 프로세서 캐시 → StopIteration (HTTP 400)](https://www.notion.so/375e15b403598134a4a5c5232516e90c)
+
 
