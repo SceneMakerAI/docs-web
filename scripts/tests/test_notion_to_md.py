@@ -601,3 +601,47 @@ class TestShiftEnterLineBreak:
         """여러 Shift+Enter가 모두 hard break으로 변환."""
         out = self._render("A\nB\nC")
         assert "A  \nB  \nC" in out
+
+
+# ── TC-14: toggle summary 인라인 마크다운 → HTML 변환 ──────────────────────────
+
+class TestToggleSummaryInlineMarkdown:
+    """toggle summary 안의 bold·italic·code가 HTML 태그로 변환되는지 검증."""
+
+    def _block(self, summary_rich_text: list) -> dict:
+        return {
+            "type": "toggle",
+            "toggle": {"rich_text": summary_rich_text},
+            "_children": [
+                {
+                    "type": "paragraph",
+                    "paragraph": {"rich_text": [{"plain_text": "내용", "href": None,
+                                   "annotations": {"bold": False, "italic": False,
+                                                   "strikethrough": False, "underline": False,
+                                                   "code": False, "color": "default"}}]},
+                    "_children": [],
+                }
+            ],
+        }
+
+    def _render(self, block: dict) -> str:
+        def child_fn():
+            return "내용\n\n"
+        return n.block_to_markdown(block, child_fn, lambda: 1)
+
+    def test_code_in_summary(self):
+        """summary 안 code annotation → <code>태그"""
+        rt = [
+            {"plain_text": "요약 코드 (", "href": None,
+             "annotations": {"bold": False, "italic": False, "strikethrough": False,
+                             "underline": False, "code": False, "color": "default"}},
+            {"plain_text": "batch.py", "href": None,
+             "annotations": {"bold": False, "italic": False, "strikethrough": False,
+                             "underline": False, "code": True, "color": "default"}},
+            {"plain_text": " 핵심부)", "href": None,
+             "annotations": {"bold": False, "italic": False, "strikethrough": False,
+                             "underline": False, "code": False, "color": "default"}},
+        ]
+        result = self._render(self._block(rt))
+        assert "<code>batch.py</code>" in result
+        assert "`batch.py`" not in result

@@ -520,6 +520,7 @@ def block_to_markdown(block, slug, image_counter, item_num=1):
                 # <summary> 안에서는 마크다운이 처리되지 않으므로 HTML 태그로 변환
                 summary = re.sub(r'\*\*(.+?)\*\*', r'<strong>\1</strong>', content)
                 summary = re.sub(r'\*(.+?)\*', r'<em>\1</em>', summary)
+                summary = re.sub(r'`(.+?)`', r'<code>\1</code>', summary)
                 return f"<details>\n<summary>{summary}</summary>\n\n{child_md}\n</details>\n\n"
             return f"- {content}\n"
 
