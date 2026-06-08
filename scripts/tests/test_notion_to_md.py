@@ -373,6 +373,45 @@ class TestQuoteBlockquote:
 
 # ── TC-8: Notion 페이지 링크 → 내부 docs URL 변환 ────────────────────────────
 
+# ── TC-10: 멀티라인 인라인 코드 → fenced code block 변환 ──────────────────────
+
+class TestMultilineInlineCodeToFenced:
+    """paragraph 블록에서 단일 멀티라인 인라인 코드가 fenced code block으로 변환되는지 검증."""
+
+    def _block(self, text: str, code: bool = True) -> dict:
+        return {
+            "type": "paragraph",
+            "paragraph": {
+                "rich_text": [{"plain_text": text, "annotations": {"code": code, "bold": False, "italic": False, "strikethrough": False}, "href": None}],
+            },
+            "has_children": False,
+        }
+
+    def _render(self, block: dict) -> str:
+        return n.block_to_markdown(block, lambda: "", lambda: 1)
+
+    def test_multiline_code_becomes_fenced(self):
+        """멀티라인 인라인 코드 → ``` fenced block"""
+        result = self._render(self._block("line1\nline2\nline3"))
+        assert result.startswith("```\n")
+        assert "line1\nline2\nline3" in result
+        assert result.strip().endswith("```")
+
+    def test_single_line_code_stays_inline(self):
+        """단일 줄 인라인 코드 → 그대로 인라인 코드"""
+        result = self._render(self._block("single line"))
+        assert "`single line`" in result
+        assert "```" not in result
+
+    def test_flowchart_pattern(self):
+        """파이프라인 플로우차트 패턴 → fenced block으로 변환"""
+        flowchart = "원본 wav\n   │\n   ▼\n[1] denoise\n   ↳ output/"
+        result = self._render(self._block(flowchart))
+        assert result.startswith("```\n")
+        assert "원본 wav" in result
+        assert "│" in result
+
+
 class TestNotionPageLinkConversion:
     """_build_page_link_map / _resolve_notion_href / extract_text_from_rich_text
     연동으로 Notion 페이지 링크가 내부 docs 경로로 변환되는지 검증."""
