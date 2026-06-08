@@ -396,6 +396,12 @@ article a:hover {
   border-color: rgba(255, 255, 255, 0.08);
 }
 
+/* ─────────── JSON Syntax Token 색상 (oneDark 위 오버라이드) ─────────── */
+.token.property                { color: #e06c75; }  /* 키명 — 빨강 */
+.token.string                  { color: #e5c07b; }  /* 문자열 값 — 주황/노랑 */
+.token.number                  { color: #61afef; }  /* 숫자 — 파랑 */
+.token.boolean, .token.null    { color: #c678dd; }  /* true/false/null — 보라 */
+
 [data-theme='dark'] .markdown table th,
 [data-theme='dark'] .markdown table td {
   border-color: rgba(255, 255, 255, 0.12);
