@@ -1,15 +1,15 @@
 {
   "367e15b4-0359-80c9-885a-ea288010356f": {
     "file": "docs/poc/audio-bench/poc-기획안-초고속초고품질-다국어-ai-자막-생성-시스템-구축.md",
-    "last_edited": "2026-06-08T04:59:00.000Z",
-    "content_hash": "14c1f878e33528f913d1eb2e24ed57022b90c4d153491ead2f3ed8792be1999d",
+    "last_edited": "2026-06-08T05:50:00.000Z",
+    "content_hash": "8fa75dd1f135bd6c94471fd6086842f8cc6594a69a7d7de6a1a6747272c2c4a7",
     "order": 1,
     "parent_id": "audio-bench"
   },
   "368e15b4-0359-81cb-9b9b-d555dbfd19e3": {
     "file": "docs/poc/vision-bench/1편-멀티모달-llm-한국-방송-6초-클립-영상-이해-벤치마크-파이프라인-구축.md",
-    "last_edited": "2026-06-08T04:24:00.000Z",
-    "content_hash": "633e7a3d12577f036b479a3a6df5fe80a014d449de71a18d8b0cf18ebcf7eaef",
+    "last_edited": "2026-06-08T06:56:00.000Z",
+    "content_hash": "d681cf64af79eba4621c080fad138e96f6360d32d51d1c5ce5de2afc88f48ebd",
     "order": 1,
     "parent_id": "vision-bench"
   },

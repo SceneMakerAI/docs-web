@@ -4,7 +4,7 @@ title: "[PoC 기획안] 초고속·초고품질 다국어 AI 자막 생성 시�
 sidebar_position: 1
 slug: "1"
 last_update:
-  date: 2026-06-05
+  date: 2026-06-08
 ---
 
 ## 1. 개요
@@ -312,6 +312,7 @@ Whisper 는 언어마다 훈련시킨 데이터 양이 다르기 때문에 Tier�
 | 입력 | raw audio (전체) |
 | 출력 | 발화 구간 `[(start_s, end_s), ...]` |
 | 동작 | 발화 외 구간 (침묵/BGM/효과음) 은 ASR 에 안 보냄 |
+
 
 **왜 효과적?** — Whisper 환각의 가장 큰 원인은 **침묵/BGM 구간에서 학습된 자막 패턴을 생성하는 것** (`ご視聴ありがとうございました` , `Thanks for watching` 등). 발화 구간만 입력하면 이 문제 자체가 사라짐. WhisperX/stable-ts 등 업계 표준 도구도 동일 패턴.
 

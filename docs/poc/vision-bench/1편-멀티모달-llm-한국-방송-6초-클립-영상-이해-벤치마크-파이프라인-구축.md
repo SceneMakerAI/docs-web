@@ -128,7 +128,7 @@ graph LR
 
 ### 3.0. 테스트 방법
 
-클라이언트 → API 서버 → vLLM 의 **기본 동작** 을 아래 6단계로 확인한다. (분석 *품질* 평가는 편2·편3.)
+클라이언트 → API 서버 → vLLM 의 **기본 동작** 을 아래 6단계로 확인한다. (분석 *품질* 평가는 추후.)
 
 1. **샘플 데이터 준비**
    - 테스트 영상 데이터를 준비하고 10분 구간을 6초 클립 100개로 분할한다.
@@ -353,7 +353,7 @@ ffmpeg -nostdin -i "$FIRST" \
     {"type": "video_url", "video_url": {"url": "data:video/mp4;base64,<...>"}},
     {"type": "text", "text": "<프롬프트>"}
   ]}],
-  "temperature": 0.2, "max_tokens": 1024,
+  "temperature": 0.3, "max_tokens": 1024,
   "response_format": {"type": "json_schema", "json_schema": {"name": "clip_analysis", "strict": true, "schema": "<AnalysisResult 4필드>"}},
   "mm_processor_kwargs": {"fps": 2.0},
   "chat_template_kwargs": {"enable_thinking": false}
@@ -393,7 +393,7 @@ ffmpeg -nostdin -i "$FIRST" \
 
 ### 3.3. 테스트 실행 및 결과
 
-클라이언트 → API 서버 → vLLM 파이프라인을 §3.0 흐름대로 실제 호출해 확인한다. (재현: `experiments/01_pipeline/smoke.py` )
+클라이언트 → API 서버 → vLLM 파이프라인을 §3.0 흐름대로 실제 호출해 확인한다. (재현: `experiments/01_pipeline/api_check.py` )
 
 #### 3.3.1. 상태 조회 (`GET /healthz` )
 
@@ -414,7 +414,7 @@ x-request-id: 6da1b40a
 
 1. **텍스트추론**
    <details>
-   <summary>요청 </summary>
+   <summary>요청</summary>
 
    ```bash
    curl -sS -X POST http://localhost:8001/chat \
@@ -431,7 +431,7 @@ x-request-id: 6da1b40a
    </details>
 
    <details>
-   <summary>응답 </summary>
+   <summary>응답</summary>
 
    ```json
    {
@@ -626,11 +626,78 @@ x-request-id: 6da1b40a
 
 #### 3.3.3. 배치 추론 (`POST /chat/batch` )
 
-*(결과 기입 예정)*
+같은 11클립·동일 파라미터(`temperature 0.3` ·`fps 0.5` ·`max_tokens 128` )로 **① 한 건씩** `/chat` **순차** vs **②** `/chat/batch` **일괄** 처리시간을 비교한다. (재현: `experiments/01_pipeline/batch_throughput.py` )
+
+<details>
+<summary>재현 요약 코드 (`batch_throughput.py` 핵심부)</summary>
+
+```python
+# experiments/01_pipeline/batch_throughput.py — 핵심부 (같은 items 로 순차 vs 배치 비교)
+import os, base64, json, time, httpx
+from pathlib import Path
+
+_HERE = Path(__file__).resolve().parent
+_DATA = Path(os.environ.get("DATA_DIR") or _HERE.parent.parent / "data")
+CLIPS_ROOT = _DATA / "clips"
+
+SVR = "http://localhost:8001"
+_SCENE = CLIPS_ROOT / "baseball/baseball"
+CLIPS = [str(p.relative_to(CLIPS_ROOT)) for p in sorted(_SCENE.glob("*.mp4"))[:11]]  # 연속 11클립 (0001~0011)
+
+def chat_body(clip):
+    b64 = base64.b64encode(clip.read_bytes()).decode()
+    return {"model": "qwen", "temperature": 0.3, "max_tokens": 128,
+            "messages": [{"role": "user", "content": [
+                {"type": "video_url", "video_url": {"url": f"data:video/mp4;base64,{b64}"}},
+                {"type": "text", "text": "이 영상의 시각과 음성을 한국어로 분석해줘."}]}],
+            "mm_processor_kwargs": {"fps": 0.5, "use_audio_in_video": True},
+            "chat_template_kwargs": {"enable_thinking": False}}
+
+items = [{"id": Path(c).name, "body": chat_body(CLIPS_ROOT / c)} for c in CLIPS]  # base64 1회 인코딩 → 양 모드 재사용
+
+with httpx.Client(timeout=600) as cli:
+    # ① 순차: 한 건씩 /chat (앞 건 완료 후 다음)
+    t = time.monotonic()
+    for it in items:
+        cli.post(f"{SVR}/chat", json=it["body"])
+    seq_ms = int((time.monotonic() - t) * 1000)
+
+    # ② 배치: /chat/batch 일괄 → 완료순 NDJSON 스트리밍
+    t = time.monotonic()
+    with cli.stream("POST", f"{SVR}/chat/batch", json={"items": items}) as r:
+        for line in r.iter_lines():
+            if line:
+                json.loads(line)  # 라인 = {id, status, elapsed_ms, body|error}
+    batch_ms = int((time.monotonic() - t) * 1000)
+
+print(f"순차 {seq_ms}ms · 배치 {batch_ms}ms · {seq_ms / batch_ms:.2f}×")
+```
+
+
+</details>
+
+| 모드 | 총 처리시간 | 성공 |
+| --- | --- | --- |
+| 순차 (한 건씩 `/chat` ) | 13737ms | 11/11 |
+| 배치 (`/chat/batch` 일괄) | 6496ms | 11/11 |
+
+배치가 순차보다 빠름(약 **2배** , 게이트웨이 동시성 `VLLM_CONCURRENCY=4` 만큼 fan-out 병렬). 도착 순서 ≠ 입력 순서(**완료순 스트리밍** ), `X-Batch-Total=11` . 다건 1요청·완료순 스트리밍·각 건 독립 `status` 모두 정상.
 
 #### 3.3.4. 요약
 
-*(위 테스트 표 기입 예정)*
+§3.3 호출 결과를 한눈에. (출력 품질·정확도가 아니라 **파이프라인 정상 동작** 기준)
+
+| 항목 | 라우트 | 검증 내용 | 핵심 결과 | 판정 |
+| --- | --- | --- | --- | --- |
+| 상태 조회 | GET /healthz | 게이트웨이 생존·X-Request-Id | x-request-id 부여 | ✅ PASS |
+| 단일·텍스트 | POST /chat | 텍스트 추론 기본 동작 | 정상 1문장 (prompt 23·completion 25) | ✅ PASS |
+| 단일·영상 | POST /chat | 영상+음성 통합 분석 | 한국어 장면 분석 (prompt_tokens 3,633) | ✅ PASS |
+| 단일·블랙아웃 | POST /chat | 화면 가려도 음성 반영(통제) | 검은 화면 인식 + 중계 음성 포착 | ✅ PASS |
+| 배치 | POST /chat/batch | 다건 동시·완료순 스트리밍 | 완료순≠입력순, 배치처리가 약 2배 빠름 | ✅ PASS |
+
+**결론** 
+
+클라이언트 → `poc-vision-bench` → vLLM 파이프라인의 핵심 메커니즘(본문 패스스루·동시성 게이트·완료순 배치 스트리밍·영상 내 오디오 통합)이 모두 정상 동작함을 확인.
 
 ---
 
@@ -651,4 +718,6 @@ x-request-id: 6da1b40a
 **서빙 — vLLM**
 
 - [Qwen3-Omni vLLM 서빙 가이드](https://docs.vllm.ai/projects/vllm-omni/en/latest/user_guide/examples/online_serving/qwen3_omni/) — `vllm serve` 옵션 (`--max-model-len` 등)
+- [vLLM — OpenAI-Compatible Server](https://docs.vllm.ai/en/latest/serving/openai_compatible_server.html) — `/v1/chat/completions` 규약·`response_format` ·extra body(`mm_processor_kwargs` ·`chat_template_kwargs` ). 게이트웨이가 이 본문을 그대로 패스
+
 
