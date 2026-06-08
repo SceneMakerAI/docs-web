@@ -103,7 +103,7 @@
   --ifm-table-border-color: rgba(0, 0, 0, 0.12);
   --ifm-table-border-width: 1px;
   --ifm-table-cell-padding: 7px 14px;
-  --ifm-table-head-background: #f7f6f3;
+  --ifm-table-head-background: rgba(73, 79, 223, 0.08);
   --ifm-table-stripe-background: rgba(0, 0, 0, 0.02);
 
   /* ─────────── Link: design.md 기준 ─────────── */
@@ -242,7 +242,7 @@ article a:hover {
 
 .markdown table th,
 .markdown table td {
-  padding: 10px 14px;       /* 7px → 10px: 행 높이 37px → 44px */
+  padding: 6px 12px;
   border: 1px solid var(--ifm-table-border-color);
   text-align: left;
   vertical-align: middle;
@@ -259,7 +259,7 @@ article a:hover {
 /* 다크 모드 테이블 */
 [data-theme='dark'] .markdown table {
   --ifm-table-border-color: rgba(255, 255, 255, 0.1);
-  --ifm-table-head-background: #2a2826;
+  --ifm-table-head-background: rgba(73, 79, 223, 0.15);
   --ifm-table-stripe-background: rgba(255, 255, 255, 0.02);
 }
 
@@ -382,7 +382,7 @@ article a:hover {
   --ifm-link-hover-color: #93b8ff;
 
   --ifm-table-border-color: rgba(255, 255, 255, 0.12);
-  --ifm-table-head-background: #2a2826;
+  --ifm-table-head-background: rgba(73, 79, 223, 0.15);
 
   --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
 }
