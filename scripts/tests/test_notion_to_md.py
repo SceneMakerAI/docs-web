@@ -538,3 +538,11 @@ class TestTableHeaders:
         out = self._render(False, False, [["a", "b"], ["c", "d"]])
         assert "<table>" not in out
         assert "| a | b |" in out
+
+    def test_pipe_in_cell_forces_html(self):
+        """셀 내용에 | 포함 시 HTML 테이블로 전환 — markdown 테이블 파싱 깨짐 방지."""
+        out = self._render(True, False, [["단계", "명령"], ["evaluate", ".venv/bin/python evaluate.py [whisper|qwen|all]"]])
+        assert "<table>" in out
+        assert "whisper|qwen|all" in out
+        # markdown 파이프 구분자로 쪼개지지 않음
+        assert "| .venv" not in out

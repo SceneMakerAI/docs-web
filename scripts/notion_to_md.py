@@ -417,7 +417,12 @@ def block_to_markdown(block, slug, image_counter, item_num=1):
             for row in children
             for cell in row.get("table_row", {}).get("cells", [])
         )
-        if has_color or row_header:
+        has_pipe = any(
+            "|" in extract_text_from_rich_text(cell)
+            for row in children
+            for cell in row.get("table_row", {}).get("cells", [])
+        )
+        if has_color or row_header or has_pipe:
             lines = ["<table>"]
             in_tbody = False
             for i, row in enumerate(children):
