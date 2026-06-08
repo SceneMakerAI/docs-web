@@ -42,6 +42,18 @@ _NOTION_BG_COLOR_NAMES = {
 }
 
 
+_CALLOUT_EMOJI_MAP = {
+    "⚠️": "warning", "🚨": "warning", "❗": "warning", "‼️": "warning",
+    "🔒": "caution", "🛑": "caution", "🚫": "caution",
+    "💡": "tip", "⚡": "tip", "✅": "tip", "🎯": "tip",
+    "ℹ️": "info", "📌": "info", "📍": "info", "🔍": "info",
+}
+
+
+def _emoji_to_admonition(emoji: str) -> str:
+    return _CALLOUT_EMOJI_MAP.get(emoji, "note")
+
+
 def _get_cell_bg(cell_rich_text):
     """셀 rich_text 목록에서 Notion 배경색 이름 반환. 없으면 None."""
     for rt in cell_rich_text:
@@ -74,9 +86,40 @@ def _rich_text_to_html(rich_text_list):
             if ann.get("strikethrough"):
                 content = f"<del>{content}</del>"
         if href:
-            content = f'<a href="{_html.escape(href)}">{content}</a>'
+            content = f'<a href="{_html.escape(_resolve_notion_href(href))}">{content}</a>'
         parts.append(content)
     return "".join(parts)
+
+
+# Notion page ID → 내부 docs URL 매핑 (sync 실행 시 _build_page_link_map 으로 채워짐)
+_page_id_to_internal_url: dict = {}
+
+
+def _build_page_link_map(sync_map: dict) -> None:
+    """sync_map 에서 Notion page ID → 내부 docs URL 매핑을 구성한다.
+    parent_id 가 있는 자식 페이지만 처리 (섹션 인덱스는 스킵)."""
+    _page_id_to_internal_url.clear()
+    url_base = "/" + SAVE_DIR  # "docs/poc" → "/docs/poc"
+    for page_id, info in sync_map.items():
+        if not isinstance(info, dict):
+            continue
+        parent_id = info.get("parent_id")
+        order = info.get("order")
+        if order is None or parent_id is None:
+            continue
+        _page_id_to_internal_url[page_id] = f"{url_base}/{parent_id}/{order}"
+
+
+def _resolve_notion_href(href: str) -> str:
+    """Notion 페이지 URL을 내부 docs 경로로 변환한다. 매핑 없으면 원본 반환."""
+    if not href or not href.startswith("https://www.notion.so/"):
+        return href
+    raw = href.rstrip("/").split("/")[-1].split("?")[0]
+    if len(raw) != 32:
+        return href
+    pid = f"{raw[:8]}-{raw[8:12]}-{raw[12:16]}-{raw[16:20]}-{raw[20:]}"
+    return _page_id_to_internal_url.get(pid, href)
+
 
 NOTION_TOKEN = os.environ["NOTION_TOKEN"]
 DATABASE_ID_RAW = os.environ["NOTION_DATABASE_ID"]
@@ -309,7 +352,7 @@ def extract_text_from_rich_text(rich_text_list):
                     core = f"~~{core}~~"
                 formatted = leading + core + trailing
 
-        parts.append(f"[{formatted}]({href})" if href else formatted)
+        parts.append(f"[{formatted}]({_resolve_notion_href(href)})" if href else formatted)
 
     result = ""
     for part in parts:
@@ -431,19 +474,23 @@ def block_to_markdown(block, slug, image_counter, item_num=1):
         elif b_type == "to_do":
             checked = "[x]" if block["to_do"]["checked"] else "[ ]"
             return f"- {checked} {content}\n\n" + child_md
-        elif b_type in ("quote", "callout"):
-            icon = ""
-            if b_type == "callout":
-                icon_data = block.get("callout", {}).get("icon", {})
-                icon = icon_data.get("emoji", "")
-            prefix = f"{icon} " if icon else ""
+        elif b_type == "quote":
             if child_md:
                 child_quoted = "\n".join(
                     f"> {line}" if line.strip() else ">"
                     for line in child_md.rstrip("\n").splitlines()
                 )
-                return f"> {prefix}{content}\n>\n{child_quoted}\n\n"
-            return f"> {prefix}{content}\n\n"
+                return f"> {content}\n>\n{child_quoted}\n\n"
+            return f"> {content}\n\n"
+        elif b_type == "callout":
+            icon_data = block.get("callout", {}).get("icon", {})
+            emoji = icon_data.get("emoji", "")
+            admonition = _emoji_to_admonition(emoji)
+            prefix = f"{emoji} " if emoji else ""
+            inner = f"{prefix}{content}"
+            if child_md:
+                inner += "\n\n" + child_md.rstrip("\n")
+            return f":::{admonition}\n{inner}\n:::\n\n"
         elif b_type == "toggle":
             if child_md:
                 # <summary> 안에서는 마크다운이 처리되지 않으므로 HTML 태그로 변환
@@ -825,6 +872,7 @@ def main():
         log("[모드: 전체] 모든 페이지 조회")
 
     existing_map = load_sync_map()
+    _build_page_link_map(existing_map)
     log(f"기존 파일 {len(existing_map)}개 추적 중")
 
     has_more = True

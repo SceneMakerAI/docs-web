@@ -371,8 +371,6 @@ class TestQuoteBlockquote:
         result = self._render(self._block("인용 내용"))
         assert ":::" not in result
 
-# ── TC-8: Notion 페이지 링크 → 내부 docs URL 변환 ────────────────────────────
-
 # ── TC-10: 멀티라인 인라인 코드 → fenced code block 변환 ──────────────────────
 
 class TestMultilineInlineCodeToFenced:
@@ -411,6 +409,8 @@ class TestMultilineInlineCodeToFenced:
         assert "원본 wav" in result
         assert "│" in result
 
+
+# ── TC-11: Notion 페이지 링크 → 내부 docs URL 변환 ───────────────────────────
 
 class TestNotionPageLinkConversion:
     """_build_page_link_map / _resolve_notion_href / extract_text_from_rich_text
