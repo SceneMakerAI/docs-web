@@ -546,3 +546,40 @@ class TestTableHeaders:
         assert "whisper|qwen|all" in out
         # markdown 파이프 구분자로 쪼개지지 않음
         assert "| .venv" not in out
+
+
+# ── TC-13: Shift+Enter (단락 내 줄바꿈) ──────────────────────────────────────
+
+def _make_paragraph_block(text: str):
+    """plain_text로 paragraph 블록 생성. \n은 Shift+Enter를 시뮬레이션."""
+    return {
+        "type": "paragraph",
+        "paragraph": {
+            "rich_text": [{"plain_text": text, "href": None,
+                           "annotations": {"bold": False, "italic": False,
+                                           "strikethrough": False, "underline": False,
+                                           "code": False, "color": "default"}}]
+        },
+        "_children": [],
+    }
+
+
+class TestShiftEnterLineBreak:
+    def _render(self, text):
+        block = _make_paragraph_block(text)
+        return n.block_to_markdown(block, lambda: "", lambda: 1)
+
+    def test_shift_enter_becomes_hard_break(self):
+        """Shift+Enter(\n) → CommonMark hard line break (두 스페이스 + \n)."""
+        out = self._render("첫 줄\n둘째 줄")
+        assert "첫 줄  \n둘째 줄" in out
+
+    def test_plain_paragraph_no_break(self):
+        """일반 단락은 변환 없음."""
+        out = self._render("일반 텍스트")
+        assert "일반 텍스트\n\n" == out
+
+    def test_multiple_shift_enters(self):
+        """여러 Shift+Enter가 모두 hard break으로 변환."""
+        out = self._render("A\nB\nC")
+        assert "A  \nB  \nC" in out

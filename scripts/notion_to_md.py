@@ -475,6 +475,9 @@ def block_to_markdown(block, slug, image_counter, item_num=1):
             _m = re.match(r'^`([^`]+)`$', content)
             if _m and '\n' in _m.group(1):
                 return f"```\n{_m.group(1)}\n```\n\n" + child_md
+            # Shift+Enter → CommonMark hard line break (스페이스 2개 + \n)
+            if '\n' in content:
+                content = content.replace('\n', '  \n')
             return (content + "\n\n" if content else "\n") + child_md
         elif b_type == "heading_1":
             return f"## {content}\n\n" + child_md
