@@ -402,6 +402,10 @@ article a:hover {
 .token.number                  { color: #61afef; }  /* 숫자 — 파랑 */
 .token.boolean, .token.null    { color: #c678dd; }  /* true/false/null — 보라 */
 
+/* ─────────── bash 언어 스코프 오버라이드 ─────────── */
+.language-bash .token.assign-left.variable { color: #e06c75; }  /* CLIP=, PYTHONPATH= — Notion 주황/빨강 */
+.language-bash .token.number               { color: #d19a66; }  /* HTTP 200 등 — 중립 주황 */
+
 [data-theme='dark'] .markdown table th,
 [data-theme='dark'] .markdown table td {
   border-color: rgba(255, 255, 255, 0.12);
