@@ -4,7 +4,7 @@ title: "[1편] 멀티모달 LLM 한국 방송 6초 클립 영상 이해 벤치�
 sidebar_position: 1
 slug: "1"
 last_update:
-  date: 2026-06-05
+  date: 2026-06-08
 ---
 
 
@@ -35,7 +35,7 @@ graph LR
 
      1. 영상 추론
 
-     1. 음성만(영상만 제거) 추론 - 영상에서 실제 음성을 분석하는지 검증
+     1. 화면만 검게(오디오 유지) — 영상에서 실제 음성을 분석하는지 검증
 
   1. **배치 처리** — `/chat/batch`
 
@@ -141,7 +141,7 @@ graph LR
 
    1. 영상 + 프롬프트 
 
-   1. 화면 검정·음성만 영상 + 프롬프트.
+   1. 화면만 블랙아웃(ⓑ와 동일 프롬프트) — 음성 반영 확인
 
 4. **배치 추론 호출** (`/chat/batch` )
    - 여러 클립(영상 + 프롬프트)을 한 요청으로 보내 다건 동시 처리를 확인한다.
@@ -387,6 +387,7 @@ ffmpeg -nostdin -i "$FIRST" \
 
 > 실행: `./script/curl_examples.sh batch`
 
+
 ### 3.3. 테스트 실행 및 결과
 
 클라이언트 → API 서버 → vLLM 파이프라인을 §3.0 흐름대로 실제 호출해 확인한다. (재현: `experiments/01_pipeline/smoke.py` )
@@ -409,103 +410,216 @@ x-request-id: 6da1b40a
 #### 3.3.2. 단일 추론 (`POST /chat` )
 
 1. **텍스트추론**
-- 요청
+   <details>
+   <summary>요청 </summary>
 
-```bash
-curl -sS -X POST http://localhost:8001/chat \
-  -H "Content-Type: application/json" \
-  -d '{
-    "model": "qwen",
-    "messages": [{"role": "user", "content": [
-      {"type": "text", "text": "한국어로 자기소개를 한 문장으로 해줘."}
-    ]}]
-  }' | jq
-```
+   ```bash
+   curl -sS -X POST http://localhost:8001/chat \
+     -H "Content-Type: application/json" \
+     -d '{
+       "model": "qwen",
+       "messages": [{"role": "user", "content": [
+         {"type": "text", "text": "한국어로 자기소개를 한 문장으로 해줘."}
+       ]}]
+     }' | jq
+   ```
 
-- 응답
 
-```json
-{
-  "id": "chatcmpl-bf2131310aa31d88",
-  "object": "chat.completion",
-  "created": 1780555306,
-  "prompt_routed_experts": null,
-  "model": "qwen",
-  "choices": [
-    {
-      "index": 0,
-      "message": {
-        "role": "assistant",
-        "content": "저는 열정적이며 책임감 있는 사람이며, 부여된 역할을 최선을 다해 성실히 수행합니다.",
-        "refusal": null,
-        "annotations": null,
-        "audio": null,
-        "function_call": null,
-        "tool_calls": [],
-        "reasoning": null
-      },
-      "logprobs": null,
-      "finish_reason": "stop",
-      "stop_reason": null,
-      "token_ids": null,
-      "routed_experts": null
-    }
-  ],
-  "service_tier": null,
-  "system_fingerprint": "vllm-0.21.0-4a8d85e0",
-  "usage": {
-    "prompt_tokens": 23,
-    "total_tokens": 55,
-    "completion_tokens": 32,
-    "prompt_tokens_details": null
-  },
-  "prompt_logprobs": null,
-  "prompt_token_ids": null,
-  "prompt_text": null,
-  "kv_transfer_params": null
-}
-```
+   </details>
+
+   <details>
+   <summary>응답 </summary>
+
+   ```json
+   {
+     "id": "chatcmpl-9a1f5dd8d02e3b0d",
+     "object": "chat.completion",
+     "created": 1780885800,
+     "prompt_routed_experts": null,
+     "model": "qwen",
+     "choices": [
+       {
+         "index": 0,
+         "message": {
+           "role": "assistant",
+           "content": "안녕하세요, 저는 한국어로 간단히 자기소개를 드리고 싶습니다.",
+           "refusal": null,
+           "annotations": null,
+           "audio": null,
+           "function_call": null,
+           "tool_calls": [],
+           "reasoning": null
+         },
+         "logprobs": null,
+         "finish_reason": "stop",
+         "stop_reason": null,
+         "token_ids": null,
+         "routed_experts": null
+       }
+     ],
+     "service_tier": null,
+     "system_fingerprint": "vllm-0.21.0-955d20dc",
+     "usage": {
+       "prompt_tokens": 23,
+       "total_tokens": 48,
+       "completion_tokens": 25,
+       "prompt_tokens_details": null
+     },
+     "prompt_logprobs": null,
+     "prompt_token_ids": null,
+     "prompt_text": null,
+     "kv_transfer_params": null
+   }
+   ```
+
+
+   </details>
 
 2. **영상 + 프롬프트**
-- 요청 — 영상 base64 가 커서 payload 를 파일로 빌드 후 전송(`--data-binary` ). 영상은 **저온(temperature 0)** 권장 — 고온 기본값은 이종문자 degeneration 유발(편2).
+   <details>
+   <summary>요청 (curl)</summary>
 
-```bash
-CLIP=data/clips/baseball/baseball/0001_0600-0606.mp4
-PYTHONPATH=src uv run python - "$CLIP" <<'PY'
-import base64, json, sys
-b = base64.b64encode(open(sys.argv[1],"rb").read()).decode()
-json.dump({"model":"qwen","messages":[{"role":"user","content":[
-    {"type":"video_url","video_url":{"url":"data:video/mp4;base64,"+b}},
-    {"type":"text","text":"이 영상의 장면을 한국어로 묘사해줘."}]}],
-  "temperature":0.0,
-  "mm_processor_kwargs":{"fps":0.5,"use_audio_in_video":True},
-  "chat_template_kwargs":{"enable_thinking":False}}, open("/tmp/req.json","w"), ensure_ascii=False)
-PY
-curl -sS -X POST http://localhost:8001/chat -H "Content-Type: application/json" --data-binary @/tmp/req.json | jq
-```
+   영상 base64 가 커서 payload 를 파일로 빌드 후 전송(`--data-binary` ). 영상의 **temperature** 는 **0.3** 권장(높은 값은 이종문자 degeneration 유발).
 
-- 응답 (주요 필드)
+   ```bash
+   REPO_DIR=$(git rev-parse --show-toplevel)
+   CLIP=${REPO_DIR}/data/clips/baseball/baseball/0001_0600-0606.mp4
+   PYTHONPATH=src uv run python - "$CLIP" <<'PY'
+   import base64, json, sys
+   b = base64.b64encode(open(sys.argv[1],"rb").read()).decode()
+   json.dump({"model":"qwen","messages":[{"role":"user","content":[
+       {"type":"video_url","video_url":{"url":"data:video/mp4;base64,"+b}},
+       {"type":"text","text":"이 영상의 시각과 음성을 한국어로 분석해줘."}]}],
+     "temperature":0.3,
+     "mm_processor_kwargs":{"fps":0.5,"use_audio_in_video":True},
+     "chat_template_kwargs":{"enable_thinking":False}}, open("/tmp/req.json","w"), ensure_ascii=False)
+   PY
+   curl -sS -X POST http://localhost:8001/chat -H "Content-Type: application/json" --data-binary @/tmp/req.json | jq
+   ```
 
-```json
-{
-  "id": "chatcmpl-...",
-  "model": "qwen",
-  "choices": [{
-    "index": 0,
-    "message": {"role": "assistant", "content": "이 영상은 야구 경기의 한 장면을 보여줍니다. 경기장의 관중석에 앉아 있는 감독이 등장합니다. 그는 빨간색 모자와 선글라스를 착용하고 있으며, 흰색과 빨간색이 조화를 이루는 유니폼을 입고 있습니다. 감독은 팔짱을 끼고 경기를 집중적으로 관찰하고 있습니다. 배경에는 'Pocari Sweat'라는 광고판이 보입니다."},
-    "finish_reason": "stop"
-  }],
-  "usage": {"prompt_tokens": 3631, "completion_tokens": 240, "total_tokens": 3871}
-}
-```
 
-→ **PASS** — 영상을 실제로 읽어 한국어로 장면 묘사(감독·복장·광고판). 영상 토큰 prompt 3,631 (360p · fps 0.5).
+   </details>
 
-> ⚠️ 자유 생성(schema 미사용) 시 content 앞에 `assistant\n` role prefix 가 붙음(편2/3 strict JSON 경로에선 제거). `temperature` 미지정(고온 기본값)이면 이종문자 degeneration → 저온 고정 필요(편2).
+   <details>
+   <summary>응답 (JSON)</summary>
 
-**ⓒ 화면 검정 · 음성만**
+   ```json
+   {
+     "id": "chatcmpl-81ee61dfec3201dd",
+     "object": "chat.completion",
+     "created": 1780885818,
+     "prompt_routed_experts": null,
+     "model": "qwen",
+     "choices": [
+       {
+         "index": 0,
+         "message": {
+           "role": "assistant",
+           "content": "assistant\n이 영상은 야구 경기의 한 장면을 담고 있습니다. 경기장 내부의 분위기는 매우 활기차며, 관중의 함성과 선수들의 움직임이 경기의 긴박함을 더합니다. 경기장의 배경에는 'Pocari Sweat'와 '새마을금고' 등의 광고판이 보이며, 이는 경기장의 위치와 후원사 정보를 제공합니다. 경기 중인 투수와 타자 사이의 대결이 주요 포커스입니다. 투수는 흰색 유니폼을 입고 있으며, 집중력을 보여주고 있습니다. 반면, 타자는 붉은색 유니폼을 입고 있으며, 준비 자세를 취하고 있습니다. 이 장면은 경기의 중요한 순간을 포착한 것으로 보이며, 투수와 타자 사이의 긴장감이 느껴집니다. 경기의 스코어는 'SK 2:0 KIA'로, SK가 앞서고 있는 상황입니다. 이 장면은 경기의 중요한 순간을 포착한 것으로, 선수들의 집중력과 경기의 긴박함을 잘 보여줍니다.",
+           "refusal": null,
+           "annotations": null,
+           "audio": null,
+           "function_call": null,
+           "tool_calls": [],
+           "reasoning": null
+         },
+         "logprobs": null,
+         "finish_reason": "stop",
+         "stop_reason": null,
+         "token_ids": null,
+         "routed_experts": null
+       }
+     ],
+     "service_tier": null,
+     "system_fingerprint": "vllm-0.21.0-955d20dc",
+     "usage": {
+       "prompt_tokens": 3633,
+       "total_tokens": 3920,
+       "completion_tokens": 287,
+       "prompt_tokens_details": null
+     },
+     "prompt_logprobs": null,
+     "prompt_token_ids": null,
+     "prompt_text": null,
+     "kv_transfer_params": null
+   }
+   ```
 
-*(결과 기입 예정)*
+
+   </details>
+
+3. **블랙아웃 영상 + 프롬프트** (통제 실험 — 화면만 검게, 오디오 유지)
+   <details>
+   <summary>요청 (curl)</summary>
+
+   위 [**2. 영상 + 프롬프트** ]와 **완전히 동일** (같은 프롬프트·`temperature 0.3` ·`fps 0.5` ), `CLIP` 만 화면을 검게 가린 클립으로 교체. 화면을 지워도 출력에 음성이 남으면 → 모델이 오디오를 실제로 처리
+
+   ```bash
+   REPO_DIR=$(git rev-parse --show-toplevel)
+   CLIP=${REPO_DIR}/data/blackout/baseball/baseball/0001_0600-0606.mp4
+   PYTHONPATH=src uv run python - "$CLIP" <<'PY'
+   import base64, json, sys
+   b = base64.b64encode(open(sys.argv[1],"rb").read()).decode()
+   json.dump({"model":"qwen","messages":[{"role":"user","content":[
+       {"type":"video_url","video_url":{"url":"data:video/mp4;base64,"+b}},
+       {"type":"text","text":"이 영상의 시각과 음성을 한국어로 분석해줘."}]}],
+     "temperature":0.3,
+     "mm_processor_kwargs":{"fps":0.5,"use_audio_in_video":True},
+     "chat_template_kwargs":{"enable_thinking":False}}, open("/tmp/req.json","w"), ensure_ascii=False)
+   PY
+   curl -sS -X POST http://localhost:8001/chat -H "Content-Type: application/json" --data-binary @/tmp/req.json | jq
+   ```
+
+
+   </details>
+
+   <details>
+   <summary>응답 (content)</summary>
+
+   ```javascript
+   {
+     "id": "chatcmpl-8ea2324da44fa4b9",
+     "object": "chat.completion",
+     "created": 1780891827,
+     "prompt_routed_experts": null,
+     "model": "qwen",
+     "choices": [
+       {
+         "index": 0,
+         "message": {
+           "role": "assistant",
+           "content": "assistant>\n이 영상은 전면적으로 검은색 화면을 보여주며, 시각적으로는 아무런 정보나 행동이 나타나지 않습니다. 이는 시청자에게 집중을 유도하거나 특정한 분위기를 조성하기 위한 의도적인 디자인일 수 있습니다. \n\n음성 측면에서, 한국어로 된 남성의 목소리가 들립니다. 그는 다음과 같은 내용을 말합니다:\n\n\"이렇게 MVP를 줄 수밖에 없지 않나. 그래서 지금 여기서 또 공격이 또.\"\n\n이 발언은 특정한 상황, 예를 들어 스포츠 경기 중의 전술 논의나 분석일 가능성이 있습니다. \"MVP\"는 \"Most Valuable Player\"의 약자로, 일반적으로 스포츠 경기에서 가장 가치 있는 선수를 의미합니다. 이는 스포츠 경기 중의 전술 논의나 분석일 가능성이 높습니다. \n\n전체적으로, 이 영상은 시각적으로는 매우 단순하지만 음성으로는 특정한 상황에 대한 논의가 이루어지고 있습니다. 이는 시청자에게 집중을 유도하거나 특정한 분위기를 조성하기 위한 의도적인 디자인일 수 있습니다.",
+           "refusal": null,
+           "annotations": null,
+           "audio": null,
+           "function_call": null,
+           "tool_calls": [],
+           "reasoning": null
+         },
+         "logprobs": null,
+         "finish_reason": "stop",
+         "stop_reason": null,
+         "token_ids": null,
+         "routed_experts": null
+       }
+     ],
+     "service_tier": null,
+     "system_fingerprint": "vllm-0.21.0-955d20dc",
+     "usage": {
+       "prompt_tokens": 3633,
+       "total_tokens": 3927,
+       "completion_tokens": 294,
+       "prompt_tokens_details": null
+     },
+     "prompt_logprobs": null,
+     "prompt_token_ids": null,
+     "prompt_text": null,
+     "kv_transfer_params": null
+   }
+   ```
+
+
+   </details>
 
 #### 3.3.3. 배치 추론 (`POST /chat/batch` )
 
@@ -513,7 +627,7 @@ curl -sS -X POST http://localhost:8001/chat -H "Content-Type: application/json" 
 
 #### 3.3.4. 요약
 
-*(API별 PASS·소요시간 표 기입 예정)*
+*(위 테스트 표 기입 예정)*
 
 ---
 
