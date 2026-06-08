@@ -402,9 +402,12 @@ article a:hover {
 .token.number                  { color: #61afef; }  /* 숫자 — 파랑 */
 .token.boolean, .token.null    { color: #c678dd; }  /* true/false/null — 보라 */
 
-/* ─────────── bash 언어 스코프 오버라이드 ─────────── */
-.language-bash .token.assign-left.variable { color: #e06c75; }  /* CLIP=, PYTHONPATH= — Notion 주황/빨강 */
-.language-bash .token.number               { color: #d19a66; }  /* HTTP 200 등 — 중립 주황 */
+/* ─────────── bash / shell 언어 스코프 오버라이드 ─────────── */
+/* prism-react-renderer가 variable 토큰에 inline style 적용 → !important 필요 */
+.language-bash .token.assign-left.variable,
+.language-shell .token.assign-left.variable { color: #e06c75 !important; }  /* CLIP=, ExecStart= 등 — Notion 주황/빨강 */
+.language-bash .token.number,
+.language-shell .token.number               { color: #d19a66 !important; }  /* 숫자 — 중립 주황 */
 
 [data-theme='dark'] .markdown table th,
 [data-theme='dark'] .markdown table td {
