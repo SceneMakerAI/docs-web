@@ -362,6 +362,7 @@ Whisper 는 언어마다 훈련시킨 데이터 양이 다르기 때문에 Tier�
 </tbody></table>
 
 
+
 **왜 효과적?** — Whisper 환각의 가장 큰 원인은 **침묵/BGM 구간에서 학습된 자막 패턴을 생성하는 것** (`ご視聴ありがとうございました` , `Thanks for watching` 등). 발화 구간만 입력하면 이 문제 자체가 사라짐. WhisperX/stable-ts 등 업계 표준 도구도 동일 패턴.
 
 #### 게이트 2 — MIN_LOGPROB (-1.0)
