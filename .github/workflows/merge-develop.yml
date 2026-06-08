@@ -65,7 +65,7 @@ jobs:
           git checkout main
           git pull origin main
 
-          if git merge develop --no-edit; then
+          if git merge develop -m "chore: develop → main 머지 [skip-notion]"; then
             git push origin main
             echo "머지 완료 (충돌 없음)"
             exit 0
@@ -83,5 +83,5 @@ jobs:
           echo ".notion-sync.json 충돌 자동 해소 (main 버전 유지)"
           git diff --name-only --diff-filter=U | xargs -r git checkout --ours --
           git add -A
-          git commit --no-edit
+          git commit -m "chore: develop → main 머지 (sync-json 충돌 자동 해소) [skip-notion]"
           git push origin main
