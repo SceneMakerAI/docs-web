@@ -282,10 +282,10 @@ class TestHtmlEntityHtmlTable:
         assert result == "&gt;=1.0"
 
 
-# ── TC-8: callout → Docusaurus 어드모니션 변환 ────────────────────────────────
+# ── TC-8: callout → Markdown blockquote 변환 ─────────────────────────────────
 
 class TestCalloutAdmonition:
-    """callout 블록이 이모지에 맞는 어드모니션 타입으로 변환되는지 검증."""
+    """callout 블록이 이모지와 함께 blockquote(>)로 변환되는지 검증."""
 
     def _block(self, emoji: str, text: str) -> dict:
         return {
@@ -301,34 +301,31 @@ class TestCalloutAdmonition:
         return n.block_to_markdown(block, lambda: "", lambda: 1)
 
     def test_warning_emoji(self):
-        """⚠️ → :::warning"""
+        """⚠️ callout → > ⚠️ content (blockquote, no admonition)"""
         result = self._render(self._block("⚠️", "주의사항"))
-        assert result.startswith(":::warning\n")
-        assert "⚠️ 주의사항" in result
-        assert result.strip().endswith(":::")
+        assert result.startswith("> ⚠️ 주의사항")
+        assert ":::" not in result
 
     def test_tip_emoji(self):
-        """💡 → :::tip"""
+        """💡 callout → > 💡 content"""
         result = self._render(self._block("💡", "팁 내용"))
-        assert result.startswith(":::tip\n")
+        assert result.startswith("> 💡 팁 내용")
+        assert ":::" not in result
 
     def test_info_emoji(self):
-        """📍 → :::info"""
+        """📍 callout → > 📍 content"""
         result = self._render(self._block("📍", "위치 정보"))
-        assert result.startswith(":::info\n")
+        assert result.startswith("> 📍 위치 정보")
+        assert ":::" not in result
 
-    def test_caution_emoji(self):
-        """🔒 → :::caution"""
-        result = self._render(self._block("🔒", "보안 주의"))
-        assert result.startswith(":::caution\n")
-
-    def test_unknown_emoji_defaults_to_note(self):
-        """매핑에 없는 이모지 → :::note"""
+    def test_unknown_emoji(self):
+        """매핑에 없는 이모지도 동일하게 blockquote"""
         result = self._render(self._block("🐍", "파이썬 관련"))
-        assert result.startswith(":::note\n")
+        assert result.startswith("> 🐍 파이썬 관련")
+        assert ":::" not in result
 
-    def test_no_emoji_defaults_to_note(self):
-        """이모지 없는 callout → :::note, prefix 없음"""
+    def test_no_emoji(self):
+        """이모지 없는 callout → > content (prefix 없음)"""
         block = {
             "type": "callout",
             "callout": {
@@ -338,9 +335,8 @@ class TestCalloutAdmonition:
             "has_children": False,
         }
         result = self._render(block)
-        assert result.startswith(":::note\n")
-        assert "일반 메모" in result
-        assert "  " not in result.split("\n")[1]  # 이모지+공백 prefix 없음
+        assert result.startswith("> 일반 메모")
+        assert ":::" not in result
 
 
 # ── TC-9: quote → Markdown blockquote 변환 ───────────────────────────────────
