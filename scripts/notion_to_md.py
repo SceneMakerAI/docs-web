@@ -404,6 +404,11 @@ def block_to_markdown(block, slug, image_counter, item_num=1):
         content = extract_text_from_rich_text(rich_text)
         child_md = render_children()
         if b_type == "paragraph":
+            # 단일 멀티라인 인라인 코드 (`...\n...`) → fenced code block
+            # CommonMark 파서가 인라인 코드 내 \n을 공백으로 치환하므로 선변환 필요
+            _m = re.match(r'^`([^`]*\n[^`]*)`$', content, re.DOTALL)
+            if _m:
+                return f"```\n{_m.group(1)}\n```\n\n" + child_md
             return (content + "\n\n" if content else "\n") + child_md
         elif b_type == "heading_1":
             return f"## {content}\n\n" + child_md
