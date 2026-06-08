@@ -97,6 +97,23 @@ docs/poc/vision-bench/child.md  (slug: "1")  →  /docs/poc/vision-bench/1
 **feat 브랜치:** 작업 완료 후 main에 merge → 로컬·원격 브랜치 삭제.
 Notion 자동 동기화가 main에 직접 커밋하므로 브랜치 작업 시작 전 rebase 생략 시 conflict 발생.
 
+### ⚠️ feat → design 머지 금지 — cherry-pick 사용
+
+feat 브랜치는 main을 기점으로 생성되므로, main의 모든 커밋이 포함된다.
+`git merge feat/<이름>` 을 design에 실행하면 **feat 브랜치에 딸려 온 main 커밋까지 design으로 유입**된다.
+
+**올바른 방법:** feat 브랜치의 변경만 design에 적용할 때는 `git cherry-pick <커밋해시>` 사용.
+
+```bash
+# 잘못된 방법 (main 커밋이 따라옴)
+git checkout design
+git merge feat/something  # ❌
+
+# 올바른 방법 (해당 커밋만 적용)
+git checkout design
+git cherry-pick <feat-commit-hash>  # ✅
+```
+
 ### crontab 충돌 처리
 
 crontab은 30분마다 main에 직접 push한다. 내가 main에 push하려 할 때 `non-fast-forward` 에러가 나면:
