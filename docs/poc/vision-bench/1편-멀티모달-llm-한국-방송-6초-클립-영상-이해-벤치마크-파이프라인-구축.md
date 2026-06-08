@@ -54,7 +54,7 @@ graph LR
 | 파라미터 | 추론 코어(Thinker) 총 30B / 활성 3B · Talker·인코더 포함 전체 ≈ 35B |
 | 입력 | 텍스트 · 이미지 · 오디오 · 비디오 |
 | 출력 | 텍스트(+음성) — 본 PoC는 텍스트만 사용 (Talker 미사용) |
-| 컨텍스트 | 네이티브 32,768 토큰 (실서빙은 16,384 운용 → 아래 표) |
+| 컨텍스트 | 네이티브 32,768 토큰 (실서빙은 16,384 운용) |
 | 다국어 지원 | 텍스트 119개 / 음성입력 19개 / 음성출력 10개 → 한국어 모두 지원 |
 | 라이선스 | Apache 2.0 (상용 가능) |
 
@@ -78,37 +78,11 @@ graph LR
 - `--tensor-parallel-size 1` **:** 모델을 GPU 여러 장에 쪼개지 않고 한 장에 통째로 올린다.
 - `--max-num-seqs 8` **:** vLLM 이 동시에 처리하는 요청(시퀀스) 최대 수 = 내부 배치 상한. 게이트웨이(API Server) 동시성(4)보다 커서 vLLM 에 여유가 있다.
 
-:::info
+:::note
 📍 **이 설정들은 어디에 있나 - 두 곳을 구분**
 
 - 위 `--dtype` ·`--gpu-memory-utilization` ·`--tensor-parallel-size` ·`--max-num-seqs` 는 **vLLM 서버 기동 인자** 다 → 서빙 호스트에서 vLLM 을 띄우는 서비스의 `vllm serve …` 명령에 있음 (우리 게이트웨이 repo 가 아니라 **vLLM 서빙 측** ).
 - 우리 게이트웨이(`poc-vision-bench` )의 자체 설정(`VLLM_BASE_URL` ·`VLLM_CONCURRENCY` 등)은 별개로 `.env` **→** `src/config.py` **의** `Settings` 에 있음.
-:::
-
-**서빙 컨텍스트 한계**
-
-| **항목** | **값** | **영향** |
-| --- | --- | --- |
-| 실서빙 `--max-model-len` | **16,384** (네이티브 32,768의 절반) | 컨텍스트 예산 제한 |
-| 관측 `prompt_tokens` | ≈ 11,887 (약 73% 소진) | 이미 상당 부분 사용 |
-| 리스크 | 고 fps 시 비디오 토큰 급증 → 16k 천장 초과 | 30fps 실험 시 주의 |
-| 대응 | `--max-model-len` 상향(KV캐시 VRAM 트레이드오프) 또는 fps 제약 | — |
-
-**각 항목 설명**
-
-- **실서빙** `--max-model-len` **16,384:** 모델이 한 번에 다루는 토큰(입력 + 출력)의 **총 예산** . 네이티브는 32,768 이지만 실서빙은 절반인 16,384 로 운용한다 — KV 캐시 VRAM 을 아끼려는 선택. 이 한도 안에 프롬프트 + 비디오 토큰 + 생성 출력이 **전부** 들어가야 한다.
-- **관측** `prompt_tokens` **≈ 11,887 (약 73%):** 실제 한 클립 요청에서 **입력** (프롬프트 + 비디오)이 차지한 토큰. 16,384 의 약 73% 를 입력이 이미 소진 → 출력에 쓸 여유는 약 4,500 토큰 남짓이다.
-- **리스크 — 고 fps 시 16k 초과:** 비디오 토큰 수는 **fps 에 비례** 한다. fps 를 올리면(예: 30fps) 비디오 토큰이 급증해 16,384 천장을 넘겨 요청이 실패하거나 잘린다. 본 PoC 가 저 fps(0.5)를 쓰는 이유 중 하나.
-- **대응:**
-  1. `--max-model-len` 을 32k 로 올려 여유를 늘린다(단 KV 캐시 VRAM 을 더 먹는 **트레이드오프** )
-
-  1. 또는 **fps 를 낮추** 비디오 토큰을 억제한다.
-
-:::info
-📍 **설정 위치 — 서버 vs 클라이언트**
-
-- `--max-model-len` 은 **vLLM 서버 기동 인자** (위 VRAM 설정과 같은 `vllm serve …` ).
-- `fps` 는 **클라이언트 요청 본문** 파라미터(`mm_processor_kwargs.fps` )
 :::
 
 #### **2.2. 입력 방식:** `from_video` **(mp4 단일 입력) vs** `from_frames_audio` **(분리 입력)**
@@ -216,7 +190,7 @@ ffmpeg -nostdin -i "$FIRST" \
   -c:v libopenh264 -b:v 300k -c:a copy "$BLACK/$(basename "$FIRST")"
 ```
 
-:::tip
+:::note
 ⚡ **한 번에 실행** 
 
 - 위  작업을 자동화한 스크립트
@@ -240,7 +214,7 @@ ffmpeg -nostdin -i "$FIRST" \
 | `esports` | e스포츠 | 100 | 1920×1080 | **60** | 1.35 MB | 게임 UI 오버레이 + 캐스터 + 게임음 |
 | **합계** | — | **700** | — | — | ≈ 1.25 MB | 원본 영상 7편 (장르당 1편, 10분 윈도우 100 등분) |
 
-:::caution
+:::warning
 🔒 **데이터 취급 원칙**
 
 - 영상은 **내부 품질 평가(PoC) 목적에 한해** 사용하며, 외부로 배포·재공개하지 않는다.
@@ -365,8 +339,7 @@ ffmpeg -nostdin -i "$FIRST" \
 ```json
 {
   "id": "chatcmpl-...",
-  "choices": [{"message": {"role": "assistant", "content": "<아래 JSON>"}, "finish_reason": "stop"}],
-  "usage": {"prompt_tokens": 11887, "completion_tokens": 190, "total_tokens": 12077}
+  "choices": [{"message": {"role": "assistant", "content": "<아래 JSON>"}, "finish_reason": "stop"}]
 }
 ```
 
@@ -691,7 +664,7 @@ print(f"순차 {seq_ms}ms · 배치 {batch_ms}ms · {seq_ms / batch_ms:.2f}×")
 | --- | --- | --- | --- | --- |
 | 상태 조회 | GET /healthz | 게이트웨이 생존·X-Request-Id | x-request-id 부여 | ✅ PASS |
 | 단일·텍스트 | POST /chat | 텍스트 추론 기본 동작 | 정상 1문장 (prompt 23·completion 25) | ✅ PASS |
-| 단일·영상 | POST /chat | 영상+음성 통합 분석 | 한국어 장면 분석 (prompt_tokens 3,633) | ✅ PASS |
+| 단일·영상 | POST /chat | 영상+음성 통합 분석 | 한국어 장면 분석 | ✅ PASS |
 | 단일·블랙아웃 | POST /chat | 화면 가려도 음성 반영(통제) | 검은 화면 인식 + 중계 음성 포착 | ✅ PASS |
 | 배치 | POST /chat/batch | 다건 동시·완료순 스트리밍 | 완료순≠입력순, 배치처리가 약 2배 빠름 | ✅ PASS |
 

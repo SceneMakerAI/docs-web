@@ -282,17 +282,19 @@ class TestHtmlEntityHtmlTable:
         assert result == "&gt;=1.0"
 
 
-# ── TC-8: callout → Docusaurus 어드모니션 변환 ────────────────────────────────
+# ── TC-8: callout → Docusaurus 어드모니션 변환 (Notion 배경색 기준) ────────────
 
 class TestCalloutAdmonition:
-    """callout 블록이 이모지에 맞는 어드모니션 타입으로 변환되는지 검증."""
+    """callout 블록이 Notion 배경색에 맞는 어드모니션 타입으로 변환되는지 검증.
+    레이블(팁/경고 등)은 CSS로 숨기고 색상 배경만 유지."""
 
-    def _block(self, emoji: str, text: str) -> dict:
+    def _block(self, color: str, text: str, emoji: str = "⚡") -> dict:
         return {
             "type": "callout",
             "callout": {
                 "rich_text": [{"plain_text": text, "annotations": {"code": False, "bold": False, "italic": False, "strikethrough": False}, "href": None}],
                 "icon": {"type": "emoji", "emoji": emoji},
+                "color": color,
             },
             "has_children": False,
         }
@@ -300,47 +302,63 @@ class TestCalloutAdmonition:
     def _render(self, block: dict) -> str:
         return n.block_to_markdown(block, lambda: "", lambda: 1)
 
-    def test_warning_emoji(self):
-        """⚠️ → :::warning"""
-        result = self._render(self._block("⚠️", "주의사항"))
-        assert result.startswith(":::warning\n")
-        assert "⚠️ 주의사항" in result
-        assert result.strip().endswith(":::")
-
-    def test_tip_emoji(self):
-        """💡 → :::tip"""
-        result = self._render(self._block("💡", "팁 내용"))
+    def test_green_background(self):
+        """초록색 배경 → :::tip"""
+        result = self._render(self._block("green_background", "한 번에 실행"))
         assert result.startswith(":::tip\n")
 
-    def test_info_emoji(self):
-        """📍 → :::info"""
-        result = self._render(self._block("📍", "위치 정보"))
+    def test_blue_background(self):
+        """파란색 배경 → :::info"""
+        result = self._render(self._block("blue_background", "안내"))
         assert result.startswith(":::info\n")
 
-    def test_caution_emoji(self):
-        """🔒 → :::caution"""
-        result = self._render(self._block("🔒", "보안 주의"))
+    def test_purple_background(self):
+        """보라색 배경 → :::info"""
+        result = self._render(self._block("purple_background", "보라"))
+        assert result.startswith(":::info\n")
+
+    def test_yellow_background(self):
+        """노란색 배경 → :::warning"""
+        result = self._render(self._block("yellow_background", "주의"))
+        assert result.startswith(":::warning\n")
+
+    def test_orange_background(self):
+        """주황색 배경 → :::warning"""
+        result = self._render(self._block("orange_background", "주황 주의"))
+        assert result.startswith(":::warning\n")
+
+    def test_red_background(self):
+        """빨간색 배경 → :::caution"""
+        result = self._render(self._block("red_background", "경고"))
         assert result.startswith(":::caution\n")
 
-    def test_unknown_emoji_defaults_to_note(self):
-        """매핑에 없는 이모지 → :::note"""
-        result = self._render(self._block("🐍", "파이썬 관련"))
+    def test_pink_background(self):
+        """분홍색 배경 → :::caution"""
+        result = self._render(self._block("pink_background", "분홍 경고"))
+        assert result.startswith(":::caution\n")
+
+    def test_gray_background(self):
+        """회색 배경 → :::note"""
+        result = self._render(self._block("gray_background", "메모"))
         assert result.startswith(":::note\n")
 
-    def test_no_emoji_defaults_to_note(self):
-        """이모지 없는 callout → :::note, prefix 없음"""
+    def test_default_color(self):
+        """기본 배경(color 없음) → :::note"""
         block = {
             "type": "callout",
             "callout": {
-                "rich_text": [{"plain_text": "일반 메모", "annotations": {"code": False, "bold": False, "italic": False, "strikethrough": False}, "href": None}],
+                "rich_text": [{"plain_text": "기본", "annotations": {"code": False, "bold": False, "italic": False, "strikethrough": False}, "href": None}],
                 "icon": {},
             },
             "has_children": False,
         }
         result = self._render(block)
         assert result.startswith(":::note\n")
-        assert "일반 메모" in result
-        assert "  " not in result.split("\n")[1]  # 이모지+공백 prefix 없음
+
+    def test_emoji_preserved_in_content(self):
+        """이모지는 color와 무관하게 콘텐츠 앞에 유지"""
+        result = self._render(self._block("green_background", "내용", "🚀"))
+        assert "🚀 내용" in result
 
 
 # ── TC-9: quote → Markdown blockquote 변환 ───────────────────────────────────

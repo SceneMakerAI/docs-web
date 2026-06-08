@@ -42,16 +42,21 @@ _NOTION_BG_COLOR_NAMES = {
 }
 
 
-_CALLOUT_EMOJI_MAP = {
-    "⚠️": "warning", "🚨": "warning", "❗": "warning", "‼️": "warning",
-    "🔒": "caution", "🛑": "caution", "🚫": "caution",
-    "💡": "tip", "⚡": "tip", "✅": "tip", "🎯": "tip",
-    "ℹ️": "info", "📌": "info", "📍": "info", "🔍": "info",
+_CALLOUT_COLOR_MAP = {
+    "green_background":  "tip",
+    "blue_background":   "info",
+    "purple_background": "info",
+    "yellow_background": "warning",
+    "orange_background": "warning",
+    "red_background":    "caution",
+    "pink_background":   "caution",
+    "brown_background":  "note",
+    "gray_background":   "note",
 }
 
 
-def _emoji_to_admonition(emoji: str) -> str:
-    return _CALLOUT_EMOJI_MAP.get(emoji, "note")
+def _color_to_admonition(color: str) -> str:
+    return _CALLOUT_COLOR_MAP.get(color, "note")
 
 
 def _get_cell_bg(cell_rich_text):
@@ -363,15 +368,6 @@ def extract_text_from_rich_text(rich_text_list):
     return result
 
 
-_CALLOUT_EMOJI_MAP = {
-    "⚠️": "warning", "🚨": "warning", "❗": "warning", "‼️": "warning",
-    "🔒": "caution", "🛑": "caution", "🚫": "caution",
-    "💡": "tip", "⚡": "tip", "✅": "tip", "🎯": "tip",
-    "ℹ️": "info", "📌": "info", "📍": "info", "🔍": "info",
-}
-
-def _emoji_to_admonition(emoji: str) -> str:
-    return _CALLOUT_EMOJI_MAP.get(emoji, "note")
 
 
 def download_image(url: str, slug: str, index: int) -> str:
@@ -509,9 +505,11 @@ def block_to_markdown(block, slug, image_counter, item_num=1):
                 return f"> {content}\n>\n{child_quoted}\n\n"
             return f"> {content}\n\n"
         elif b_type == "callout":
-            icon_data = block.get("callout", {}).get("icon", {})
+            callout_data = block.get("callout", {})
+            color = callout_data.get("color", "default")
+            admonition = _color_to_admonition(color)
+            icon_data = callout_data.get("icon", {})
             emoji = icon_data.get("emoji", "")
-            admonition = _emoji_to_admonition(emoji)
             prefix = f"{emoji} " if emoji else ""
             inner = f"{prefix}{content}"
             if child_md:
