@@ -1,10 +1,10 @@
 ---
-id: 추론-파라미터-튜닝-qwen3-omni-6초-클립-분석-ofat-스윕
-title: "추론 파라미터 튜닝 — Qwen3-Omni 6초 클립 분석 (OFAT 스윕)"
+id: 2편-추론-파라미터-튜닝-qwen3-omni-6초-클립-분석-ofat-스윕
+title: "[2편] 추론 파라미터 튜닝 — Qwen3-Omni 6초 클립 분석 (OFAT 스윕)"
 sidebar_position: 3
 slug: "3"
 last_update:
-  date: 2026-06-05
+  date: 2026-06-08
 ---
 
 ## 1. 들어가며

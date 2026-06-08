@@ -8,8 +8,8 @@
   },
   "368e15b4-0359-81cb-9b9b-d555dbfd19e3": {
     "file": "docs/poc/vision-bench/1편-멀티모달-llm-한국-방송-6초-클립-영상-이해-벤치마크-파이프라인-구축.md",
-    "last_edited": "2026-06-08T06:50:00.000Z",
-    "content_hash": "a970f83f0f6f95d7ae77240c937ffe766c61b27d577ac840db234f73eff31cf1",
+    "last_edited": "2026-06-08T06:56:00.000Z",
+    "content_hash": "d681cf64af79eba4621c080fad138e96f6360d32d51d1c5ce5de2afc88f48ebd",
     "order": 1,
     "parent_id": "vision-bench"
   },
@@ -28,8 +28,8 @@
     "parent_id": "audio-bench"
   },
   "373e15b4-0359-8150-88f3-eedc5ebd727b": {
-    "file": "docs/poc/vision-bench/추론-파라미터-튜닝-qwen3-omni-6초-클립-분석-ofat-스윕.md",
-    "last_edited": "2026-06-05T09:37:00.000Z",
+    "file": "docs/poc/vision-bench/2편-추론-파라미터-튜닝-qwen3-omni-6초-클립-분석-ofat-스윕.md",
+    "last_edited": "2026-06-08T07:10:00.000Z",
     "content_hash": "79de064fc252ba5e19761d7c9d69c76feff94d7730633aea09bb63ddb4f23a3d",
     "order": 3,
     "parent_id": "vision-bench"
@@ -43,14 +43,14 @@
   },
   "365e15b4-0359-804b-87c8-f1acee149564": {
     "file": "docs/poc/vision-bench/index.md",
-    "last_edited": "2026-06-02T08:15:00.000Z",
+    "last_edited": "2026-06-08T07:09:00.000Z",
     "content_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "order": 2,
     "parent_id": null
   },
   "373e15b4-0359-813e-b9cb-fcd1ccefc0c4": {
     "file": "docs/poc/vision-bench/3편-추론-파라미터-상세-조정-및-품질-평가.md",
-    "last_edited": "2026-06-02T08:14:00.000Z",
+    "last_edited": "2026-06-08T07:09:00.000Z",
     "content_hash": "4ba851abff1ad1efa9f87884b1aec2adc5b6ce070f60eb5f2af7995e1fdda5ef",
     "order": 4,
     "parent_id": "vision-bench"
