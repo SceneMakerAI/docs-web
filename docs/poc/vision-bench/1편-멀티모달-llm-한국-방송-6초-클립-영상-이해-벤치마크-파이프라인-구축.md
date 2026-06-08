@@ -318,7 +318,7 @@ ffmpeg -nostdin -i "$FIRST" \
 ```
 
 2. `/chat` (단건)
-- 입력: 클라가 조립한 vLLM body (base64 영상 + 프롬프트 + strict schema)
+- 입력: 클라가 조립한 vLLM body (base64 영상 + 프롬프트 + strict schema). 멀티모달 옵션은 **두 키로 분리** — 프레임 샘플링은 `media_io_kwargs.video` (`fps` 또는 `num_frames` , vLLM I/O 로더), 오디오 통합은 `mm_processor_kwargs.use_audio_in_video` (HF 프로세서).
 
 ```json
 {
@@ -329,7 +329,8 @@ ffmpeg -nostdin -i "$FIRST" \
   ]}],
   "temperature": 0.3, "max_tokens": 1024,
   "response_format": {"type": "json_schema", "json_schema": {"name": "clip_analysis", "strict": true, "schema": "<AnalysisResult 4필드>"}},
-  "mm_processor_kwargs": {"fps": 2.0},
+  "media_io_kwargs": {"video": {"fps": 2.0}},
+  "mm_processor_kwargs": {"use_audio_in_video": true},
   "chat_template_kwargs": {"enable_thinking": false}
 }
 ```
@@ -408,9 +409,9 @@ x-request-id: 6da1b40a
 
    ```json
    {
-     "id": "chatcmpl-9a1f5dd8d02e3b0d",
+     "id": "chatcmpl-a4e66116bd600be3",
      "object": "chat.completion",
-     "created": 1780885800,
+     "created": 1780911108,
      "prompt_routed_experts": null,
      "model": "qwen",
      "choices": [
@@ -418,7 +419,7 @@ x-request-id: 6da1b40a
          "index": 0,
          "message": {
            "role": "assistant",
-           "content": "안녕하세요, 저는 한국어로 간단히 자기소개를 드리고 싶습니다.",
+           "content": "안녕하세요, 저는 한국어 모국어 화자이며 다양한 주제에 대해 자연스럽고 흥미로운 대화를 나누는 것을 좋아합니다.",
            "refusal": null,
            "annotations": null,
            "audio": null,
@@ -437,8 +438,8 @@ x-request-id: 6da1b40a
      "system_fingerprint": "vllm-0.21.0-955d20dc",
      "usage": {
        "prompt_tokens": 23,
-       "total_tokens": 48,
-       "completion_tokens": 25,
+       "total_tokens": 63,
+       "completion_tokens": 40,
        "prompt_tokens_details": null
      },
      "prompt_logprobs": null,
@@ -467,7 +468,7 @@ x-request-id: 6da1b40a
        {"type":"video_url","video_url":{"url":"data:video/mp4;base64,"+b}},
        {"type":"text","text":"이 영상의 시각과 음성을 한국어로 분석해줘."}]}],
      "temperature":0.3,
-     "mm_processor_kwargs":{"fps":0.5,"use_audio_in_video":True},
+     "mm_processor_kwargs":{"use_audio_in_video":True},
      "chat_template_kwargs":{"enable_thinking":False}}, open("/tmp/req.json","w"), ensure_ascii=False)
    PY
    curl -sS -X POST http://localhost:8001/chat -H "Content-Type: application/json" --data-binary @/tmp/req.json | jq
@@ -481,9 +482,9 @@ x-request-id: 6da1b40a
 
    ```json
    {
-     "id": "chatcmpl-81ee61dfec3201dd",
+     "id": "chatcmpl-be4589ee14d26f36",
      "object": "chat.completion",
-     "created": 1780885818,
+     "created": 1780911130,
      "prompt_routed_experts": null,
      "model": "qwen",
      "choices": [
@@ -491,7 +492,7 @@ x-request-id: 6da1b40a
          "index": 0,
          "message": {
            "role": "assistant",
-           "content": "assistant\n이 영상은 야구 경기의 한 장면을 담고 있습니다. 경기장 내부의 분위기는 매우 활기차며, 관중의 함성과 선수들의 움직임이 경기의 긴박함을 더합니다. 경기장의 배경에는 'Pocari Sweat'와 '새마을금고' 등의 광고판이 보이며, 이는 경기장의 위치와 후원사 정보를 제공합니다. 경기 중인 투수와 타자 사이의 대결이 주요 포커스입니다. 투수는 흰색 유니폼을 입고 있으며, 집중력을 보여주고 있습니다. 반면, 타자는 붉은색 유니폼을 입고 있으며, 준비 자세를 취하고 있습니다. 이 장면은 경기의 중요한 순간을 포착한 것으로 보이며, 투수와 타자 사이의 긴장감이 느껴집니다. 경기의 스코어는 'SK 2:0 KIA'로, SK가 앞서고 있는 상황입니다. 이 장면은 경기의 중요한 순간을 포착한 것으로, 선수들의 집중력과 경기의 긴박함을 잘 보여줍니다.",
+           "content": "assistant>\n이 영상은 야구 경기 중 한 장면을 담고 있습니다. 경기장 내부에서 촬영되었으며, 주로 투수와 타자, 그리고 포수의 위치가 보입니다. 투수와 포수는 모두 빨간색 유니폼을 입고 있으며, 타자도 빨간색 유니폼을 입고 있습니다. 배경에는 광고판이 보이며, \"Pocari Sweat\"와 \"Super Dong\" 등의 광고가 있습니다. 경기장의 분위기는 활기차며, 관중들의 함성 소리가 들립니다. \n\n음성은 한국어로 진행되며, 경기 중계 방송의 목소리가 들립니다. 중계 방송에서는 경기의 진행 상황을 설명하고 있으며, 특정 선수의 활약에 대해 언급합니다. \"MVP를 줄 수밖에 없지 않나\"라는 말이 들리며, 이는 특정 선수의 훌륭한 활약에 대한 평가로 보입니다. 또한 \"기아의 반격이 또 나왔습니다\"라는 말이 들리며, 이는 경기 중 상대 팀이 반격을 시도하고 있음을 나타냅니다. \n\n전반적으로 이 영상은 야구 경기의 긴박한 순간을 포착한 것으로, 팀의 활약과 경기의 흐름을 중계 방송을 통해 관객들에게 전달하고 있습니다.",
            "refusal": null,
            "annotations": null,
            "audio": null,
@@ -510,8 +511,8 @@ x-request-id: 6da1b40a
      "system_fingerprint": "vllm-0.21.0-955d20dc",
      "usage": {
        "prompt_tokens": 3633,
-       "total_tokens": 3920,
-       "completion_tokens": 287,
+       "total_tokens": 3974,
+       "completion_tokens": 341,
        "prompt_tokens_details": null
      },
      "prompt_logprobs": null,
@@ -528,7 +529,7 @@ x-request-id: 6da1b40a
    <details>
    <summary>요청 (curl)</summary>
 
-   위 [**2. 영상 + 프롬프트** ]와 **완전히 동일** (같은 프롬프트·`temperature 0.3` ·`fps 0.5` ), `CLIP` 만 화면을 검게 가린 클립으로 교체. 화면을 지워도 출력에 음성이 남으면 → 모델이 오디오를 실제로 처리
+   위 [**2. 영상 + 프롬프트** ]와 **완전히 동일** (같은 프롬프트·`temperature 0.3` ), `CLIP` 만 화면을 검게 가린 클립으로 교체. 화면을 지워도 출력에 음성이 남으면 → 모델이 오디오를 실제로 처리
 
    ```bash
    REPO_DIR=$(git rev-parse --show-toplevel)
@@ -540,7 +541,7 @@ x-request-id: 6da1b40a
        {"type":"video_url","video_url":{"url":"data:video/mp4;base64,"+b}},
        {"type":"text","text":"이 영상의 시각과 음성을 한국어로 분석해줘."}]}],
      "temperature":0.3,
-     "mm_processor_kwargs":{"fps":0.5,"use_audio_in_video":True},
+     "mm_processor_kwargs":{"use_audio_in_video":True},
      "chat_template_kwargs":{"enable_thinking":False}}, open("/tmp/req.json","w"), ensure_ascii=False)
    PY
    curl -sS -X POST http://localhost:8001/chat -H "Content-Type: application/json" --data-binary @/tmp/req.json | jq
@@ -554,9 +555,9 @@ x-request-id: 6da1b40a
 
    ```javascript
    {
-     "id": "chatcmpl-8ea2324da44fa4b9",
+     "id": "chatcmpl-afbd596bbaba2f3b",
      "object": "chat.completion",
-     "created": 1780891827,
+     "created": 1780911151,
      "prompt_routed_experts": null,
      "model": "qwen",
      "choices": [
@@ -564,7 +565,7 @@ x-request-id: 6da1b40a
          "index": 0,
          "message": {
            "role": "assistant",
-           "content": "assistant>\n이 영상은 전면적으로 검은색 화면을 보여주며, 시각적으로는 아무런 정보나 행동이 나타나지 않습니다. 이는 시청자에게 집중을 유도하거나 특정한 분위기를 조성하기 위한 의도적인 디자인일 수 있습니다. \n\n음성 측면에서, 한국어로 된 남성의 목소리가 들립니다. 그는 다음과 같은 내용을 말합니다:\n\n\"이렇게 MVP를 줄 수밖에 없지 않나. 그래서 지금 여기서 또 공격이 또.\"\n\n이 발언은 특정한 상황, 예를 들어 스포츠 경기 중의 전술 논의나 분석일 가능성이 있습니다. \"MVP\"는 \"Most Valuable Player\"의 약자로, 일반적으로 스포츠 경기에서 가장 가치 있는 선수를 의미합니다. 이는 스포츠 경기 중의 전술 논의나 분석일 가능성이 높습니다. \n\n전체적으로, 이 영상은 시각적으로는 매우 단순하지만 음성으로는 특정한 상황에 대한 논의가 이루어지고 있습니다. 이는 시청자에게 집중을 유도하거나 특정한 분위기를 조성하기 위한 의도적인 디자인일 수 있습니다.",
+           "content": "assistant\n이 영상은 흑백으로 전환된 장면을 보여줍니다. 화면에는 아무런 시각적 정보가 없으며, 오직 검은색 배경만 존재합니다. 이는 아마도 비디오의 일부가 손상되었거나, 또는 의도적으로 흑백으로 처리된 것으로 보입니다. \n\n음성은 한국어로 되어 있으며, 두 명의 남성이 대화를 나누고 있습니다. 첫 번째 남성은 \"MVP를 줄 수밖에 없지 않나?\"라고 말하며, 두 번째 남성은 \"그렇죠.\"라고 동의합니다. 이 대화는 아마도 스포츠 경기에 대한 논의일 수 있습니다. \n\n그러나 이 대화는 비디오의 시각적 정보와 연결되지 않으며, 시청자가 비디오의 내용을 이해하기 위해 음성 정보에만 의존해야 합니다. 이는 비디오의 시각적 정보가 부족하거나, 의도적으로 시청자의 주의를 음성 정보에 집중시키기 위한 전략일 수 있습니다.",
            "refusal": null,
            "annotations": null,
            "audio": null,
@@ -583,8 +584,8 @@ x-request-id: 6da1b40a
      "system_fingerprint": "vllm-0.21.0-955d20dc",
      "usage": {
        "prompt_tokens": 3633,
-       "total_tokens": 3927,
-       "completion_tokens": 294,
+       "total_tokens": 3885,
+       "completion_tokens": 252,
        "prompt_tokens_details": null
      },
      "prompt_logprobs": null,
@@ -599,7 +600,7 @@ x-request-id: 6da1b40a
 
 #### 3.3.3. 배치 추론 (`POST /chat/batch` )
 
-같은 11클립·동일 파라미터(`temperature 0.3` ·`fps 0.5` ·`max_tokens 128` )로 **① 한 건씩** `/chat` **순차** vs **②** `/chat/batch` **일괄** 처리시간을 비교한다. (재현: `experiments/01_pipeline/batch_throughput.py` )
+같은 12클립·동일 파라미터(`temperature 0.3` , 측정 시점 서버 기본 샘플)로 **① 한 건씩** `/chat` **순차** vs **②** `/chat/batch` **일괄** 처리시간을 비교한다. (재현: `experiments/01_pipeline/batch_throughput.py` )
 
 <details>
 <summary>재현 요약 코드 (<code>batch_throughput.py</code> 핵심부)</summary>
@@ -615,15 +616,15 @@ CLIPS_ROOT = _DATA / "clips"
 
 SVR = "http://localhost:8001"
 _SCENE = CLIPS_ROOT / "baseball/baseball"
-CLIPS = [str(p.relative_to(CLIPS_ROOT)) for p in sorted(_SCENE.glob("*.mp4"))[:11]]  # 연속 11클립 (0001~0011)
+CLIPS = [str(p.relative_to(CLIPS_ROOT)) for p in sorted(_SCENE.glob("*.mp4"))[:12]]  # 연속 12클립 (0001~0012)
 
 def chat_body(clip):
     b64 = base64.b64encode(clip.read_bytes()).decode()
-    return {"model": "qwen", "temperature": 0.3, "max_tokens": 128,
+    return {"model": "qwen", "temperature": 0.3,
             "messages": [{"role": "user", "content": [
                 {"type": "video_url", "video_url": {"url": f"data:video/mp4;base64,{b64}"}},
                 {"type": "text", "text": "이 영상의 시각과 음성을 한국어로 분석해줘."}]}],
-            "mm_processor_kwargs": {"fps": 0.5, "use_audio_in_video": True},
+            "mm_processor_kwargs": {"use_audio_in_video": True},
             "chat_template_kwargs": {"enable_thinking": False}}
 
 items = [{"id": Path(c).name, "body": chat_body(CLIPS_ROOT / c)} for c in CLIPS]  # base64 1회 인코딩 → 양 모드 재사용
@@ -651,10 +652,10 @@ print(f"순차 {seq_ms}ms · 배치 {batch_ms}ms · {seq_ms / batch_ms:.2f}×")
 
 | 모드 | 총 처리시간 | 성공 |
 | --- | --- | --- |
-| 순차 (한 건씩 `/chat` ) | 13737ms | 11/11 |
-| 배치 (`/chat/batch` 일괄) | 6496ms | 11/11 |
+| 순차 (한 건씩 `/chat` ) | 37536ms | 12/12 |
+| 배치 (`/chat/batch` 일괄) | 22603ms | 12/12 |
 
-배치가 순차보다 빠름(약 **2배** , 게이트웨이 동시성 `VLLM_CONCURRENCY=4` 만큼 fan-out 병렬). 도착 순서 ≠ 입력 순서(**완료순 스트리밍** ), `X-Batch-Total=11` . 다건 1요청·완료순 스트리밍·각 건 독립 `status` 모두 정상.
+배치가 순차보다 빠름(약 **1.7배** , 게이트웨이 동시성 `VLLM_CONCURRENCY=4` 만큼 fan-out 병렬 — 빈출력/폭주 jitter 로 실행마다 배수는 변동). 도착 순서 ≠ 입력 순서(**완료순 스트리밍** ), `X-Batch-Total=12` . 다건 1요청·완료순 스트리밍·각 건 독립 `status` 모두 정상.
 
 #### 3.3.4. 요약
 
@@ -666,7 +667,7 @@ print(f"순차 {seq_ms}ms · 배치 {batch_ms}ms · {seq_ms / batch_ms:.2f}×")
 | 단일·텍스트 | POST /chat | 텍스트 추론 기본 동작 | 정상 1문장 (prompt 23·completion 25) | ✅ PASS |
 | 단일·영상 | POST /chat | 영상+음성 통합 분석 | 한국어 장면 분석 | ✅ PASS |
 | 단일·블랙아웃 | POST /chat | 화면 가려도 음성 반영(통제) | 검은 화면 인식 + 중계 음성 포착 | ✅ PASS |
-| 배치 | POST /chat/batch | 다건 동시·완료순 스트리밍 | 완료순≠입력순, 배치처리가 약 2배 빠름 | ✅ PASS |
+| 배치 | POST /chat/batch | 다건 동시·완료순 스트리밍 | 완료순≠입력순, 배치처리가 약 1.7배 빠름 | ✅ PASS |
 
 **결론** 
 
