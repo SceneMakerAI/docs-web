@@ -240,3 +240,43 @@ class TestHtmlEntityDecode:
         """이미 올바른 텍스트는 변경 없음."""
         result = n.extract_text_from_rich_text(self._rt(">=1.0"))
         assert result == ">=1.0"
+
+
+# ── TC-7: _rich_text_to_html HTML 테이블 엔티티 이중 인코딩 복원 ──────────────
+
+class TestHtmlEntityHtmlTable:
+    """HTML 테이블 경로(_rich_text_to_html)에서 Notion이 &amp;gt; / &amp;lt; 형태로
+    이중 인코딩해 반환할 때 렌더링 가능한 HTML로 올바르게 변환하는지 검증."""
+
+    def _rt(self, plain: str, code: bool = False) -> list:
+        return [{"plain_text": plain, "annotations": {"code": code, "bold": False, "italic": False, "strikethrough": False}, "href": None}]
+
+    def test_single_encoded_gt_in_html_table(self):
+        """`&gt;` (단일 인코딩) → HTML에서 `>` 로 렌더링 가능한 `&gt;` 출력."""
+        result = n._rich_text_to_html(self._rt("&gt;=1.0"))
+        assert result == "&gt;=1.0"
+
+    def test_double_encoded_gt_in_html_table(self):
+        """`&amp;gt;` (이중 인코딩) → 루프 unescape 후 `&gt;` 출력 (not `&amp;gt;`)."""
+        result = n._rich_text_to_html(self._rt("&amp;gt;=1.0"))
+        assert result == "&gt;=1.0"
+
+    def test_double_encoded_lt_in_html_table(self):
+        """`&amp;lt;2.9` → `&lt;2.9`"""
+        result = n._rich_text_to_html(self._rt("&amp;lt;2.9"))
+        assert result == "&lt;2.9"
+
+    def test_mixed_double_encoded_in_html_table(self):
+        """`&amp;gt;=2.4,&amp;lt;2.9` → `&gt;=2.4,&lt;2.9`"""
+        result = n._rich_text_to_html(self._rt("&amp;gt;=2.4,&amp;lt;2.9"))
+        assert result == "&gt;=2.4,&lt;2.9"
+
+    def test_code_span_double_encoded(self):
+        """인라인 코드 내 이중 인코딩 → `<code>&gt;=1.0</code>`"""
+        result = n._rich_text_to_html(self._rt("&amp;gt;=1.0", code=True))
+        assert result == "<code>&gt;=1.0</code>"
+
+    def test_plain_text_unchanged_in_html_table(self):
+        """이미 올바른 텍스트는 변경 없음."""
+        result = n._rich_text_to_html(self._rt(">=1.0"))
+        assert result == "&gt;=1.0"

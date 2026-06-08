@@ -56,6 +56,8 @@ def _rich_text_to_html(rich_text_list):
     parts = []
     for text in rich_text_list:
         plain = text["plain_text"]
+        while (unescaped := _html.unescape(plain)) != plain:
+            plain = unescaped
         ann = text.get("annotations", {})
         href = text.get("href")
         escaped = _html.escape(plain)
