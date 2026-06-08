@@ -42,6 +42,16 @@ _NOTION_BG_COLOR_NAMES = {
 }
 
 
+_CALLOUT_EMOJI_MAP = {
+    "⚠️": "warning", "🚨": "warning", "❗": "warning", "‼️": "warning",
+    "🔒": "caution", "🛑": "caution", "🚫": "caution",
+    "💡": "tip", "⚡": "tip", "✅": "tip", "🎯": "tip",
+    "ℹ️": "info", "📌": "info", "📍": "info", "🔍": "info",
+}
+
+
+def _emoji_to_admonition(emoji: str) -> str:
+    return _CALLOUT_EMOJI_MAP.get(emoji, "note")
 
 
 def _get_cell_bg(cell_rich_text):
@@ -492,12 +502,12 @@ def block_to_markdown(block, slug, image_counter, item_num=1):
         elif b_type == "callout":
             icon_data = block.get("callout", {}).get("icon", {})
             emoji = icon_data.get("emoji", "")
+            admonition = _emoji_to_admonition(emoji)
             prefix = f"{emoji} " if emoji else ""
             inner = f"{prefix}{content}"
             if child_md:
                 inner += "\n\n" + child_md.rstrip("\n")
-            quoted = "\n".join(f"> {line}" if line else ">" for line in inner.split("\n"))
-            return f"{quoted}\n\n"
+            return f":::{admonition}\n{inner}\n:::\n\n"
         elif b_type == "toggle":
             if child_md:
                 # <summary> 안에서는 마크다운이 처리되지 않으므로 HTML 태그로 변환
