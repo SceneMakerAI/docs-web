@@ -75,6 +75,8 @@ docs/poc/vision-bench/child.md  (slug: "1")  →  /docs/poc/vision-bench/1
 
 **`md-to-notion.yml`이 트리거되지 말아야 할 상황:** Notion에서 내려받은 내용을 다시 올리면 무한 루프. 서버 crontab은 `[skip-notion]`으로 이를 방지한다. Claude가 수동으로 커밋할 때도 Notion 동기화 내용(`.notion-sync.json`, `docs/` Notion 원본)을 커밋하면 `[skip-notion]` 필수.
 
+> ⚠️ **merge 커밋 주의:** `design → main` 등 브랜치 머지 커밋이 `docs/` 파일을 포함하면 merge 커밋 메시지에도 반드시 `[skip-notion]` 부여. 누락 시 `md-to-notion.yml`이 트리거되어 Notion 내용이 일시 삭제·덮어써질 수 있음.
+
 ---
 
 ## 브랜치 전략
