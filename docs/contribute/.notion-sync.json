@@ -1,23 +1,9 @@
 {
-  "373e15b4-0359-81f0-8e5b-dbbe6736ef85": {
-    "file": "docs/contribute/오픈소스-기여.md",
-    "last_edited": "2026-06-02T06:41:00.000Z",
-    "content_hash": "ec9874c3627f856f0ab5fafd6bcee398ae2c095bba38038cfd8cabd69d39636e",
-    "order": 1,
-    "parent_id": null
-  },
-  "373e15b4-0359-81b7-a94b-d1a0791f365f": {
-    "file": "docs/contribute/오픈소스-기여.md",
-    "last_edited": "2026-06-04T05:43:00.000Z",
-    "content_hash": "ec9874c3627f856f0ab5fafd6bcee398ae2c095bba38038cfd8cabd69d39636e",
-    "order": 1,
-    "parent_id": null
-  },
   "375e15b4-0359-81cb-a108-f0349254a59b": {
     "file": "docs/contribute/vllm.md",
     "last_edited": "2026-06-04T11:24:00.000Z",
-    "content_hash": "f742ec5e181c377e64be92797a00b93727694dca58fe3eb310900d5accb09fa6",
-    "order": 2,
+    "content_hash": "a376a0ff559597d76dbdc1e771fb5c0834fe2d42745c72a953997ea21ac9f035",
+    "order": 1,
     "parent_id": null
   }
 }
