@@ -409,28 +409,35 @@ def block_to_markdown(block, slug, image_counter, item_num=1):
     if b_type == "table":
         if not children:
             return ""
+        tbl = block.get("table", {})
+        col_header = tbl.get("has_column_header", False)  # 1행 헤더
+        row_header = tbl.get("has_row_header", False)     # 1열 헤더
         has_color = any(
             _get_cell_bg(cell)
             for row in children
             for cell in row.get("table_row", {}).get("cells", [])
         )
-        if has_color:
+        if has_color or row_header:
             lines = ["<table>"]
+            in_tbody = False
             for i, row in enumerate(children):
                 cells = row.get("table_row", {}).get("cells", [])
-                tag = "th" if i == 0 else "td"
-                if i == 0:
+                is_col_header_row = col_header and i == 0
+                if is_col_header_row:
                     lines.append("<thead><tr>")
                 else:
-                    if i == 1:
+                    if not in_tbody:
                         lines.append("<tbody>")
+                        in_tbody = True
                     lines.append("<tr>")
-                for cell in cells:
+                for j, cell in enumerate(cells):
+                    is_th = is_col_header_row or (row_header and j == 0)
+                    tag = "th" if is_th else "td"
                     bg = _get_cell_bg(cell)
                     text = _rich_text_to_html(cell)
                     attr = f' data-notion-bg="{bg}"' if bg else ""
                     lines.append(f"<{tag}{attr}>{text}</{tag}>")
-                lines.append("</tr></thead>" if i == 0 else "</tr>")
+                lines.append("</tr></thead>" if is_col_header_row else "</tr>")
             lines.append("</tbody></table>")
             return "\n".join(lines) + "\n\n"
         lines = []
@@ -441,7 +448,7 @@ def block_to_markdown(block, slug, image_counter, item_num=1):
                 for cell in cells
             )
             lines.append(f"| {row_text} |")
-            if i == 0:
+            if i == 0 and col_header:
                 sep = " | ".join("---" for _ in cells)
                 lines.append(f"| {sep} |")
         return "\n".join(lines) + "\n\n"
