@@ -602,7 +602,7 @@ x-request-id: 6da1b40a
 같은 11클립·동일 파라미터(`temperature 0.3` ·`fps 0.5` ·`max_tokens 128` )로 **① 한 건씩** `/chat` **순차** vs **②** `/chat/batch` **일괄** 처리시간을 비교한다. (재현: `experiments/01_pipeline/batch_throughput.py` )
 
 <details>
-<summary>재현 요약 코드 (`batch_throughput.py` 핵심부)</summary>
+<summary>재현 요약 코드 (<code>batch_throughput.py</code> 핵심부)</summary>
 
 ```python
 # experiments/01_pipeline/batch_throughput.py — 핵심부 (같은 items 로 순차 vs 배치 비교)
