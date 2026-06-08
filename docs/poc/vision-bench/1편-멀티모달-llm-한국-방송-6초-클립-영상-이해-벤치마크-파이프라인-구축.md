@@ -49,7 +49,6 @@ graph LR
 **모델 스펙**
 
 | 항목 | 값 |
-| --- | --- |
 | 구조 | Thinker–Talker MoE (네이티브 옴니모달 end-to-end) |
 | 파라미터 | 추론 코어(Thinker) 총 30B / 활성 3B · Talker·인코더 포함 전체 ≈ 35B |
 | 입력 | 텍스트 · 이미지 · 오디오 · 비디오 |
@@ -61,7 +60,6 @@ graph LR
 **VRAM / 실서빙 설정 (g7e.4xlarge · 1 GPU)**
 
 | **항목** | **값** | **메모** |
-| --- | --- | --- |
 | GPU | NVIDIA RTX PRO 6000 Blackwell × 1 (96 GB) | 오레곤 us-west-2 |
 | BF16 메모리(공식 카드) | 15초 78.85 GB / 30초 88.52 / 60초 107.74 | 6초 클립이라 96 GB에 충분 |
 | `--dtype` | bfloat16 | 원본 정밀도(양자화 아님, 66 GiB 풀 체크포인트) |
@@ -88,7 +86,6 @@ graph LR
 **서빙 컨텍스트 한계**
 
 | **항목** | **값** | **영향** |
-| --- | --- | --- |
 | 실서빙 `--max-model-len` | **16,384** (네이티브 32,768의 절반) | 컨텍스트 예산 제한 |
 | 관측 `prompt_tokens` | ≈ 11,887 (약 73% 소진) | 이미 상당 부분 사용 |
 | 리스크 | 고 fps 시 비디오 토큰 급증 → 16k 천장 초과 | 30fps 실험 시 주의 |
@@ -117,7 +114,6 @@ graph LR
 - Qwen3-Omni 는 use_audio_in_video 로 영상+오디오 통합 이해를 네이티브 지원하므로, mp4 한 덩어리를 그대로 넘기는 from_video가 모델 권장 입력 방식이자 파이프라인이 가장 단순하다. 분리 입력은 컴포넌트가 4개로 늘고 키프레임 사이 동작 누락·정렬 부담이 있어 보류.
 
 | **비교 항목** | `from_video` **(채택)** | `from_frames_audio` **(보류)** |
-| --- | --- | --- |
 | **입력 구성** | mp4 한 파일 → `video_url` (data URI) 1 컴포넌트 | 키프레임 JPG N장 + WAV 1 개 → 컴포넌트 4 개 |
 | **시간 정렬** | 영상·오디오가 컨테이너 안에서 자동 동기 | 클라이언트 측 별도 정렬 보장 필요 |
 | **전처리 산출물 용량** | 6초 mp4 (\~1\~3 MB / 클립) | frames JPG 3 장 + wav (\~수백 KB / 클립) |
@@ -230,7 +226,6 @@ ffmpeg -nostdin -i "$FIRST" \
 **최종 테스트 클립 데이터**
 
 | **카테고리 키** | **장르** | **클립 수** | **해상도** | **fps** | **평균 크기** | **비고** |
-| --- | --- | --- | --- | --- | --- | --- |
 | `news` | 뉴스 | 100 | 1920×1080 | 30 | 1.17 MB | 자막·앵커 멘트 비중 높음 |
 | `docu` | 다큐 | 100 | 1920×1080 | 30 | 1.62 MB | 내레이션 + 자연·현장음 혼합 |
 | `baseball` | 야구 중계 | 100 | 640×360 | 29.97 | 1.13 MB | 캐스터 + 관중 함성 + 전광판 UI |
@@ -278,7 +273,6 @@ ffmpeg -nostdin -i "$FIRST" \
 **서버 설정 (** `.env` **→** `Settings` **)**
 
 | **키** | **기본** | **역할** |
-| --- | --- | --- |
 | `VLLM_BASE_URL` | — | vLLM `/v1` 엔드포인트 |
 | `VLLM_CONCURRENCY` | 4 | 동시 호출 상한(Semaphore). 권장 1\~8 |
 | `MAX_BATCH_ITEMS` | 128 | `/chat/batch` 한 요청의 최대 items |
@@ -307,7 +301,6 @@ ffmpeg -nostdin -i "$FIRST" \
 ```
 
 | **필드** | **의미** |
-| --- | --- |
 | `id` | 클라가 보낸 식별자(보통 clip_id). vLLM 이 발급하는 `body.id` (`chatcmpl-…` ) 와 의미가 다름 |
 | `status` | 200=성공 / vLLM 4xx·5xx 그대로 / 500=서버측 예외(네트워크 끊김 등) |
 | `elapsed_ms` | Semaphore 획득 후 vLLM 응답 완료까지(큐 대기 제외). 예외 시 0 |
@@ -332,7 +325,6 @@ ffmpeg -nostdin -i "$FIRST" \
 #### 3.2.5. API 입출력 예시
 
 | **Method** | **Path** | **역할** | **비고** |
-| --- | --- | --- | --- |
 | GET | `/healthz` | 헬스체크 | lifespan 통과 후 항상 200. 업스트림 도달 여부는 검사 X |
 | POST | `/chat` | 단건 passthrough | vLLM body 그대로 → 응답 그대로. 업스트림 도달 불가 시 502 |
 | POST | `/chat/batch` | 다건 NDJSON 스트리밍 | 완료 순서로 라인별 흘림 (상세 3.2.3) |
@@ -353,7 +345,7 @@ ffmpeg -nostdin -i "$FIRST" \
     {"type": "video_url", "video_url": {"url": "data:video/mp4;base64,<...>"}},
     {"type": "text", "text": "<프롬프트>"}
   ]}],
-  "temperature": 0.2, "max_tokens": 1024,
+  "temperature": 0.3, "max_tokens": 1024,
   "response_format": {"type": "json_schema", "json_schema": {"name": "clip_analysis", "strict": true, "schema": "<AnalysisResult 4필드>"}},
   "mm_processor_kwargs": {"fps": 2.0},
   "chat_template_kwargs": {"enable_thinking": false}
@@ -629,15 +621,20 @@ x-request-id: 6da1b40a
 같은 11클립·동일 파라미터(`temperature 0.3` ·`fps 0.5` ·`max_tokens 128` )로 **① 한 건씩** `/chat` **순차** vs **②** `/chat/batch` **일괄** 처리시간을 비교한다. (재현: `experiments/01_pipeline/run.py` )
 
 <details>
-<summary>재현 요약 코드 ([run.py](http://run.py/) 핵심부)</summary>
+<summary>재현 요약 코드 (`run.py` 핵심부)</summary>
 
 ```python
 # experiments/01_pipeline/run.py — 핵심부 (같은 items 로 순차 vs 배치 비교)
-import base64, json, time, httpx
+import os, base64, json, time, httpx
 from pathlib import Path
 
-SVR, ROOT = "http://localhost:8001", Path("data/clips")
-CLIPS = ["baseball/baseball/0001_0600-0606.mp4", "…", "baseball/baseball/0011_0660-0666.mp4"]  # 연속 11클립
+_HERE = Path(__file__).resolve().parent
+_DATA = Path(os.environ.get("DATA_DIR") or _HERE.parent.parent / "data")
+CLIPS_ROOT = _DATA / "clips"
+
+SVR = "http://localhost:8001"
+_SCENE = CLIPS_ROOT / "baseball/baseball"
+CLIPS = [str(p.relative_to(CLIPS_ROOT)) for p in sorted(_SCENE.glob("*.mp4"))[:11]]  # 연속 11클립 (0001~0011)
 
 def chat_body(clip):
     b64 = base64.b64encode(clip.read_bytes()).decode()
@@ -648,7 +645,7 @@ def chat_body(clip):
             "mm_processor_kwargs": {"fps": 0.5, "use_audio_in_video": True},
             "chat_template_kwargs": {"enable_thinking": False}}
 
-items = [{"id": Path(c).name, "body": chat_body(ROOT / c)} for c in CLIPS]  # base64 1회 인코딩 → 양 모드 재사용
+items = [{"id": Path(c).name, "body": chat_body(CLIPS_ROOT / c)} for c in CLIPS]  # base64 1회 인코딩 → 양 모드 재사용
 
 with httpx.Client(timeout=600) as cli:
     # ① 순차: 한 건씩 /chat (앞 건 완료 후 다음)
@@ -673,18 +670,26 @@ print(f"순차 {seq_ms}ms · 배치 {batch_ms}ms · {seq_ms / batch_ms:.2f}×")
 
 | 모드 | 총 처리시간 | 성공 |
 | --- | --- | --- |
-| 순차 (한 건씩 `/chat` ) | 14.2 s | 11/11 |
-| 배치 (`/chat/batch` 일괄) | 9.5 s | 11/11 |
+| 순차 (한 건씩 `/chat` ) | 13737ms | 11/11 |
+| 배치 (`/chat/batch` 일괄) | 6496ms | 11/11 |
 
-→ **PASS** — 배치가 순차보다 빠름(이 실행 **1.49×** , 게이트웨이 동시성 `VLLM_CONCURRENCY=4` 만큼 fan-out 병렬). 도착 순서 ≠ 입력 순서(**완료순 스트리밍** ), `X-Batch-Total=11` . 다건 1요청·완료순 스트리밍·각 건 독립 `status` 모두 정상.
-
-:::warning
-⚠️ 배수는 run 마다 **약 1.5–2.8×** 변동한다 — 스키마 없는 자유생성이라 클립별로 빈 출력부터 정상까지 섞여 처리량이 불균일하기 때문. 출력·처리량 안정화는 다음 테스트에서 진행한다.
-:::
+배치가 순차보다 빠름(약 **2배** , 게이트웨이 동시성 `VLLM_CONCURRENCY=4` 만큼 fan-out 병렬). 도착 순서 ≠ 입력 순서(**완료순 스트리밍** ), `X-Batch-Total=11` . 다건 1요청·완료순 스트리밍·각 건 독립 `status` 모두 정상.
 
 #### 3.3.4. 요약
 
-*(위 테스트 표 기입 예정)*
+§3.3 호출 결과를 한눈에. (출력 품질·정확도가 아니라 **파이프라인 정상 동작** 기준)
+
+| 항목 | 라우트 | 검증 내용 | 핵심 결과 | 판정 |
+| --- | --- | --- | --- | --- |
+| 상태 조회 | GET /healthz | 게이트웨이 생존·X-Request-Id | x-request-id 부여 | ✅ PASS |
+| 단일·텍스트 | POST /chat | 텍스트 추론 기본 동작 | 정상 1문장 (prompt 23·completion 25) | ✅ PASS |
+| 단일·영상 | POST /chat | 영상+음성 통합 분석 | 한국어 장면 분석 (prompt_tokens 3,633) | ✅ PASS |
+| 단일·블랙아웃 | POST /chat | 화면 가려도 음성 반영(통제) | 검은 화면 인식 + 중계 음성 포착 | ✅ PASS |
+| 배치 | POST /chat/batch | 다건 동시·완료순 스트리밍 | 완료순≠입력순, 배치처리가 약 2배 빠름 | ✅ PASS |
+
+**결론** 
+
+클라이언트 → `poc-vision-bench` → vLLM 파이프라인의 핵심 메커니즘(본문 패스스루·동시성 게이트·완료순 배치 스트리밍·영상 내 오디오 통합)이 모두 정상 동작함을 확인.
 
 ---
 
@@ -705,4 +710,7 @@ print(f"순차 {seq_ms}ms · 배치 {batch_ms}ms · {seq_ms / batch_ms:.2f}×")
 **서빙 — vLLM**
 
 - [Qwen3-Omni vLLM 서빙 가이드](https://docs.vllm.ai/projects/vllm-omni/en/latest/user_guide/examples/online_serving/qwen3_omni/) — `vllm serve` 옵션 (`--max-model-len` 등)
+- [vLLM — OpenAI-Compatible Server](https://docs.vllm.ai/en/latest/serving/openai_compatible_server.html) — `/v1/chat/completions` 규약·`response_format` ·extra body(`mm_processor_kwargs` ·`chat_template_kwargs` ). 게이트웨이가 이 본문을 그대로 패스
+- [vLLM — Structured Outputs (Guided Decoding)](https://docs.vllm.ai/en/latest/features/structured_outputs.html) — `response_format: json_schema(strict)` 강제. 편2의 4필드 스키마 출력 안정화의 토대
+
 

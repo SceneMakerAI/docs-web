@@ -2,14 +2,14 @@
   "367e15b4-0359-80c9-885a-ea288010356f": {
     "file": "docs/poc/audio-bench/poc-기획안-초고속초고품질-다국어-ai-자막-생성-시스템-구축.md",
     "last_edited": "2026-06-08T05:50:00.000Z",
-    "content_hash": "8fa75dd1f135bd6c94471fd6086842f8cc6594a69a7d7de6a1a6747272c2c4a7",
+    "content_hash": "4c7ad9f76c8bbc09575e11b24cd152bdb29398ee128dd984ad0be8c078a63c93",
     "order": 1,
     "parent_id": "audio-bench"
   },
   "368e15b4-0359-81cb-9b9b-d555dbfd19e3": {
     "file": "docs/poc/vision-bench/1편-멀티모달-llm-한국-방송-6초-클립-영상-이해-벤치마크-파이프라인-구축.md",
-    "last_edited": "2026-06-08T05:49:00.000Z",
-    "content_hash": "70374a83588a8abd47bc459374a73c4e68120d9b213bded7fad2a96db75e9def",
+    "last_edited": "2026-06-08T06:20:00.000Z",
+    "content_hash": "f1e51b9a6061920bad3e200e340ba3a97e34c83c59da2c6a200595ca492ab15d",
     "order": 1,
     "parent_id": "vision-bench"
   },
@@ -23,7 +23,7 @@
   "36ee15b4-0359-80b6-97c6-f628f0347d36": {
     "file": "docs/poc/audio-bench/한국어-콘텐츠-lid-정확도-비교-whisper-vs-voxlingua107.md",
     "last_edited": "2026-06-04T07:20:00.000Z",
-    "content_hash": "d31d50f5392dc426e38749781b081d186bc896d58fb8617d3471dad5cc076e22",
+    "content_hash": "4361d77b8996cc8563506676832a1ac4ae4c4292886fd39c1b55607860dfea52",
     "order": 2,
     "parent_id": "audio-bench"
   },
