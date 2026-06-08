@@ -144,6 +144,11 @@ h1 {
   margin-top: 0;
 }
 
+/* ─────────── Admonition: 제목(레이블 + 아이콘) 숨김 ─────────── */
+[class*="admonitionHeading"] {
+  display: none;
+}
+
 /* ─────────── Blockquote: Notion 인용(quote) 스타일 ─────────── */
 /* callout은 :::admonition으로 분리됨 — blockquote는 순수 인용만 */
 .markdown blockquote {
