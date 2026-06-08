@@ -193,20 +193,29 @@ h1 {
   border: none;
 }
 
-/* ─────────── Links ─────────── */
+/* ─────────── Links — Notion 스타일: 회색 + 밑줄 (.markdown 본문 전용) ─────────── */
 .markdown a,
 .markdown a:link,
-.markdown a:visited,
-article a,
-article a:link,
-article a:visited {
-  color: #376cd5 !important;
-  text-decoration: none;
-}
-.markdown a:hover,
-article a:hover {
-  color: #3a40c4 !important;
+.markdown a:visited {
+  color: #6b7280 !important;
   text-decoration: underline;
+  text-underline-offset: 2px;
+  text-decoration-color: rgba(107, 114, 128, 0.5);
+}
+.markdown a:hover {
+  color: #4b5563 !important;
+  text-decoration: underline;
+  text-decoration-color: #4b5563;
+}
+[data-theme='dark'] .markdown a,
+[data-theme='dark'] .markdown a:link,
+[data-theme='dark'] .markdown a:visited {
+  color: rgba(255, 255, 255, 0.5) !important;
+  text-decoration-color: rgba(255, 255, 255, 0.25);
+}
+[data-theme='dark'] .markdown a:hover {
+  color: rgba(255, 255, 255, 0.75) !important;
+  text-decoration-color: rgba(255, 255, 255, 0.5);
 }
 
 /* ─────────── Code block border — Notion 스타일 ─────────── */
@@ -431,6 +440,10 @@ article a:hover {
 .language-shell .token.comment              { color: #7f848e !important; }  /* 주석 — 밝은 회색 */
 .language-bash .token.parameter.variable,
 .language-shell .token.parameter.variable   { color: #56b6c2 !important; }  /* --flags — 청록 */
+.language-bash .token.string,
+.language-shell .token.string               { color: #e5a55a !important; }  /* 문자열 — 주황 */
+.language-bash .token.string.variable,
+.language-shell .token.string.variable      { color: #e5a55a !important; }  /* $VAR·$() — 주황 */
 .language-bash .token.number,
 .language-shell .token.number               { color: #d19a66 !important; }  /* 숫자 — 중립 주황 */
 
