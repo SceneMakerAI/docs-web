@@ -238,7 +238,7 @@ const config: Config = {
     prism: {
       theme: prismThemes.oneDark,
       darkTheme: prismThemes.oneDark,
-      additionalLanguages: ['bash', 'shell-session'],
+      additionalLanguages: ['bash', 'shell-session', 'json'],
     },
   } satisfies Preset.ThemeConfig,
 };

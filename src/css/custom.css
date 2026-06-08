@@ -103,7 +103,7 @@
   --ifm-table-border-color: rgba(0, 0, 0, 0.12);
   --ifm-table-border-width: 1px;
   --ifm-table-cell-padding: 7px 14px;
-  --ifm-table-head-background: rgba(0, 0, 0, 0.06);
+  --ifm-table-head-background: rgba(73, 79, 223, 0.08);
   --ifm-table-stripe-background: rgba(0, 0, 0, 0.02);
 
   /* ─────────── Link: design.md 기준 ─────────── */
@@ -144,14 +144,16 @@ h1 {
   margin-top: 0;
 }
 
-/* ─────────── Blockquote: Notion 스타일 ─────────── */
+/* ─────────── Blockquote: Notion 인용(quote) 스타일 ─────────── */
+/* callout은 :::admonition으로 분리됨 — blockquote는 순수 인용만 */
 .markdown blockquote {
-  border-left: 3px solid rgba(55, 53, 47, 0.35);
+  border-left: 4px solid var(--ifm-color-emphasis-300);
   background: transparent;
-  padding: 0.25rem 0 0.25rem 1rem;
-  margin: 0.5rem 0 1rem 0;
-  color: inherit;
-  font-style: normal;
+  border-radius: 0;
+  padding: 0.5rem 1rem;
+  margin: 0.75rem 0 1rem 0;
+  color: var(--ifm-color-emphasis-700);
+  font-style: italic;
 }
 .markdown blockquote p { margin-bottom: 0.25rem; }
 .markdown blockquote p:last-child { margin-bottom: 0; }
@@ -241,7 +243,7 @@ article a:hover {
 
 .markdown table th,
 .markdown table td {
-  padding: 10px 14px;       /* 7px → 10px: 행 높이 37px → 44px */
+  padding: 6px 12px;
   border: 1px solid var(--ifm-table-border-color);
   text-align: left;
   vertical-align: middle;
@@ -258,7 +260,7 @@ article a:hover {
 /* 다크 모드 테이블 */
 [data-theme='dark'] .markdown table {
   --ifm-table-border-color: rgba(255, 255, 255, 0.1);
-  --ifm-table-head-background: rgba(255, 255, 255, 0.05);
+  --ifm-table-head-background: rgba(73, 79, 223, 0.15);
   --ifm-table-stripe-background: rgba(255, 255, 255, 0.02);
 }
 
@@ -381,7 +383,7 @@ article a:hover {
   --ifm-link-hover-color: #93b8ff;
 
   --ifm-table-border-color: rgba(255, 255, 255, 0.12);
-  --ifm-table-head-background: rgba(255, 255, 255, 0.07);
+  --ifm-table-head-background: rgba(73, 79, 223, 0.15);
 
   --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
 }
@@ -394,6 +396,25 @@ article a:hover {
 [data-theme='dark'] .theme-code-block {
   border-color: rgba(255, 255, 255, 0.08);
 }
+
+/* ─────────── JSON Syntax Token 색상 (oneDark 위 오버라이드) ─────────── */
+.token.property                { color: #e06c75; }  /* 키명 — 빨강 */
+.token.string                  { color: #e5c07b; }  /* 문자열 값 — 주황/노랑 */
+.token.number                  { color: #61afef; }  /* 숫자 — 파랑 */
+.token.boolean, .token.null    { color: #c678dd; }  /* true/false/null — 보라 */
+
+/* ─────────── bash / shell 언어 스코프 오버라이드 ─────────── */
+/* prism-react-renderer가 inline style 적용 → !important 필요 */
+.language-bash .token.assign-left.variable,
+.language-shell .token.assign-left.variable { color: #e06c75 !important; }  /* PYTHONPATH=, ExecStart= 등 */
+.language-bash .token.operator,
+.language-shell .token.operator             { color: #abb2bf !important; }  /* = 연산자 — 중립 */
+.language-bash .token.comment,
+.language-shell .token.comment              { color: #7f848e !important; }  /* 주석 — 밝은 회색 */
+.language-bash .token.parameter.variable,
+.language-shell .token.parameter.variable   { color: #56b6c2 !important; }  /* --flags — 청록 */
+.language-bash .token.number,
+.language-shell .token.number               { color: #d19a66 !important; }  /* 숫자 — 중립 주황 */
 
 [data-theme='dark'] .markdown table th,
 [data-theme='dark'] .markdown table td {

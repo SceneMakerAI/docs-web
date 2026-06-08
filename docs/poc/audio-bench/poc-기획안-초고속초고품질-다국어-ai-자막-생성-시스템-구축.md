@@ -102,7 +102,8 @@ NVIDIA RTX 4090 (24GB) 1장 기반 기본 가속 환경
 
 ### 2.1 전체 흐름
 
-`원본 wav (mono, 16kHz)
+```
+원본 wav (mono, 16kHz)
    │
    ▼
 [1] denoise — DeepFilterNet v3
@@ -115,7 +116,8 @@ NVIDIA RTX 4090 (24GB) 1장 기반 기본 가속 환경
    │   ↳ output/{system}/evaluate/<stem>.csv
    ▼
 [4] report — 시스템 비교 집계
-       ↳ output/report.csv`
+       ↳ output/report.csv
+```
 
 진입점:
 
@@ -129,7 +131,8 @@ NVIDIA RTX 4090 (24GB) 1장 기반 기본 가속 환경
 
 ### 2.2 디렉토리 / 출력 구조
 
-`output/
+```
+output/
 ├── 1_denoise/<stem>.wav          # DF 결과 (양쪽 공유, 캐시)
 ├── whisper/
 │   ├── 2_transcribe/<stem>.md    # STT 결과
@@ -137,7 +140,8 @@ NVIDIA RTX 4090 (24GB) 1장 기반 기본 가속 환경
 │   └── timings.csv               # duration / transcribe time / RTF
 ├── qwen/
 │   └── (동일 구조)
-└── report.csv                    # 시스템 × 콘텐츠 종합 비교`
+└── report.csv                    # 시스템 × 콘텐츠 종합 비교
+```
 
 **transcribe MD** — 1줄 = 1 segment, 자체 포맷:
 
@@ -345,8 +349,10 @@ Whisper 는 언어마다 훈련시킨 데이터 양이 다르기 때문에 Tier�
 
 **예시 — 실제 baseball.wav 로그**
 
-`[01:18:43.3\~01:18:44.4] LID de=0.23 → pass
-    LID de=0.23 < 0.5 → ko 강제      ← 게이트 3 발동`
+```
+[01:18:43.3~01:18:44.4] LID de=0.23 → pass
+    LID de=0.23 < 0.5 → ko 강제      ← 게이트 3 발동
+```
 
 원본 LID 결과 그대로 갔으면 독일어로 transcribe → 환각. ko 강제로 정상화.
 
@@ -401,7 +407,8 @@ Whisper 는 언어마다 훈련시킨 데이터 양이 다르기 때문에 Tier�
 
 #### 최종 흐름
 
-`audio_raw + audio_denoised
+```
+audio_raw + audio_denoised
    │
    ▼  16kHz resample
    │
@@ -427,7 +434,8 @@ Whisper 는 언어마다 훈련시킨 데이터 양이 다르기 때문에 Tier�
    └─ chosen=ko + 한글 < 30% → drop
    │
    ▼
-segment 저장 (transcribe MD)`
+segment 저장 (transcribe MD)
+```
 
 ---
 
@@ -526,10 +534,12 @@ Gemini 3.5 Flash 가 audio (ground truth) 와 STT 결과 segment 를 비교해�
 
 #### 예시
 
-`audio: "I go to school"
+```
+audio: "I go to school"
 STT  : "I go to the school"   ← 사소한 단어 추가
 원래 점수: 2 (의미동일, 표현 다름)
-보정 후 : 3 (외국어 +1)`
+보정 후 : 3 (외국어 +1)
+```
 
 ### 5.3 자막 사용 가능률 (≥0점)
 
