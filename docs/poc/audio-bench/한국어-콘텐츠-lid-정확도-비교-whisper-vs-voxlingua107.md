@@ -161,7 +161,7 @@ poc-lid-bench/
 
 #### 환경
 
-- Python **3.11** (`>=3.11,&lt;3.12` — DeepFilterNet 공식 패키지가 3.11까지만 안정 지원)
+- Python **3.11** (`>=3.11,<3.12` — DeepFilterNet 공식 패키지가 3.11까지만 안정 지원)
 - 패키지 관리 **uv** (`.venv` + `uv.lock` )
 - GPU **RTX 4090 24GB** , cuda:0 단일 사용
 
@@ -169,15 +169,15 @@ poc-lid-bench/
 
 | 패키지 | 버전 | 용도 |
 | --- | --- | --- |
-| `faster-whisper` | `&gt;=1.0` | Whisper LID (`detect_language` ) |
+| `faster-whisper` | `>=1.0` | Whisper LID (`detect_language` ) |
 | `speechbrain` | `>=1.0` | VoxLingua107 LID |
 | `deepfilternet-py312` | `>=0.5.7` | DeepFilterNet v3 모델 |
 | `deepfilterlib` | `>=0.5.6` | DF 런타임 라이브러리 |
 | `soundfile` | `>=0.13` | wav 로드 |
-| `torch` | `>=2.4,&lt;2.9` | cu128 wheel, 상한은 DF 호환성 |
-| `torchaudio` | `&gt;=2.4,&lt;2.9` | 동일 |
+| `torch` | `>=2.4,<2.9` | cu128 wheel, 상한은 DF 호환성 |
+| `torchaudio` | `>=2.4,<2.9` | 동일 |
 
-&gt; torch/torchaudio 상한 `<2.9` 는 `torchaudio.backend.common.AudioMetaData`
+> torch/torchaudio 상한 `<2.9` 는 `torchaudio.backend.common.AudioMetaData`
 가 2.9 에서 제거되며 DF 의 import 가 깨지는 문제 회피용. 검증된 조합:
 `torch==2.8.0+cu128` .
 
