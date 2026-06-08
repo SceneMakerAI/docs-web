@@ -34,11 +34,29 @@ _NOTION_LANG_MAP = {
     "java/c/c++/c#": "java",
 }
 
+
 _NOTION_BG_COLOR_NAMES = {
     "gray_background", "brown_background", "orange_background",
     "yellow_background", "green_background", "blue_background",
     "purple_background", "pink_background", "red_background",
 }
+
+
+_CALLOUT_COLOR_MAP = {
+    "green_background":  "tip",
+    "blue_background":   "info",
+    "purple_background": "info",
+    "yellow_background": "warning",
+    "orange_background": "warning",
+    "red_background":    "caution",
+    "pink_background":   "caution",
+    "brown_background":  "note",
+    "gray_background":   "note",
+}
+
+
+def _color_to_admonition(color: str) -> str:
+    return _CALLOUT_COLOR_MAP.get(color, "note")
 
 
 def _get_cell_bg(cell_rich_text):
@@ -55,6 +73,8 @@ def _rich_text_to_html(rich_text_list):
     parts = []
     for text in rich_text_list:
         plain = text["plain_text"]
+        while (unescaped := _html.unescape(plain)) != plain:
+            plain = unescaped
         ann = text.get("annotations", {})
         href = text.get("href")
         escaped = _html.escape(plain)
@@ -71,9 +91,40 @@ def _rich_text_to_html(rich_text_list):
             if ann.get("strikethrough"):
                 content = f"<del>{content}</del>"
         if href:
-            content = f'<a href="{_html.escape(href)}">{content}</a>'
+            content = f'<a href="{_html.escape(_resolve_notion_href(href))}">{content}</a>'
         parts.append(content)
     return "".join(parts)
+
+
+# Notion page ID → 내부 docs URL 매핑 (sync 실행 시 _build_page_link_map 으로 채워짐)
+_page_id_to_internal_url: dict = {}
+
+
+def _build_page_link_map(sync_map: dict) -> None:
+    """sync_map 에서 Notion page ID → 내부 docs URL 매핑을 구성한다.
+    parent_id 가 있는 자식 페이지만 처리 (섹션 인덱스는 스킵)."""
+    _page_id_to_internal_url.clear()
+    url_base = "/" + SAVE_DIR  # "docs/poc" → "/docs/poc"
+    for page_id, info in sync_map.items():
+        if not isinstance(info, dict):
+            continue
+        parent_id = info.get("parent_id")
+        order = info.get("order")
+        if order is None or parent_id is None:
+            continue
+        _page_id_to_internal_url[page_id] = f"{url_base}/{parent_id}/{order}"
+
+
+def _resolve_notion_href(href: str) -> str:
+    """Notion 페이지 URL을 내부 docs 경로로 변환한다. 매핑 없으면 원본 반환."""
+    if not href or not href.startswith("https://www.notion.so/"):
+        return href
+    raw = href.rstrip("/").split("/")[-1].split("?")[0]
+    if len(raw) != 32:
+        return href
+    pid = f"{raw[:8]}-{raw[8:12]}-{raw[12:16]}-{raw[16:20]}-{raw[20:]}"
+    return _page_id_to_internal_url.get(pid, href)
+
 
 NOTION_TOKEN = os.environ["NOTION_TOKEN"]
 DATABASE_ID_RAW = os.environ["NOTION_DATABASE_ID"]
@@ -282,6 +333,8 @@ def extract_text_from_rich_text(rich_text_list):
     parts = []
     for text in rich_text_list:
         plain = text["plain_text"]
+        while (unescaped := _html.unescape(plain)) != plain:  # 이중 인코딩(&amp;gt; 등) 완전 복원
+            plain = unescaped
         ann = text.get("annotations", {})
         href = text.get("href")
 
@@ -304,7 +357,7 @@ def extract_text_from_rich_text(rich_text_list):
                     core = f"~~{core}~~"
                 formatted = leading + core + trailing
 
-        parts.append(f"[{formatted}]({href})" if href else formatted)
+        parts.append(f"[{formatted}]({_resolve_notion_href(href)})" if href else formatted)
 
     result = ""
     for part in parts:
@@ -313,6 +366,8 @@ def extract_text_from_rich_text(rich_text_list):
                 result += " "
         result += part
     return result
+
+
 
 
 def download_image(url: str, slug: str, index: int) -> str:
@@ -340,7 +395,7 @@ def indent_md(text, prefix="  "):
     return "\n".join(prefix + line if line.strip() else line for line in lines) + "\n"
 
 
-def block_to_markdown(block, slug, image_counter):
+def block_to_markdown(block, slug, image_counter, item_num=1):
     b_type = block["type"]
     children = block.get("_children", [])
 
@@ -350,28 +405,40 @@ def block_to_markdown(block, slug, image_counter):
     if b_type == "table":
         if not children:
             return ""
+        tbl = block.get("table", {})
+        col_header = tbl.get("has_column_header", False)  # 1행 헤더
+        row_header = tbl.get("has_row_header", False)     # 1열 헤더
         has_color = any(
             _get_cell_bg(cell)
             for row in children
             for cell in row.get("table_row", {}).get("cells", [])
         )
-        if has_color:
+        has_pipe = any(
+            "|" in extract_text_from_rich_text(cell)
+            for row in children
+            for cell in row.get("table_row", {}).get("cells", [])
+        )
+        if has_color or row_header or has_pipe:
             lines = ["<table>"]
+            in_tbody = False
             for i, row in enumerate(children):
                 cells = row.get("table_row", {}).get("cells", [])
-                tag = "th" if i == 0 else "td"
-                if i == 0:
+                is_col_header_row = col_header and i == 0
+                if is_col_header_row:
                     lines.append("<thead><tr>")
                 else:
-                    if i == 1:
+                    if not in_tbody:
                         lines.append("<tbody>")
+                        in_tbody = True
                     lines.append("<tr>")
-                for cell in cells:
+                for j, cell in enumerate(cells):
+                    is_th = is_col_header_row or (row_header and j == 0)
+                    tag = "th" if is_th else "td"
                     bg = _get_cell_bg(cell)
                     text = _rich_text_to_html(cell)
                     attr = f' data-notion-bg="{bg}"' if bg else ""
                     lines.append(f"<{tag}{attr}>{text}</{tag}>")
-                lines.append("</tr></thead>" if i == 0 else "</tr>")
+                lines.append("</tr></thead>" if is_col_header_row else "</tr>")
             lines.append("</tbody></table>")
             return "\n".join(lines) + "\n\n"
         lines = []
@@ -382,7 +449,7 @@ def block_to_markdown(block, slug, image_counter):
                 for cell in cells
             )
             lines.append(f"| {row_text} |")
-            if i == 0:
+            if i == 0:  # GFM 테이블은 구분선 필수 — col_header 여부 무관
                 sep = " | ".join("---" for _ in cells)
                 lines.append(f"| {sep} |")
         return "\n".join(lines) + "\n\n"
@@ -394,12 +461,20 @@ def block_to_markdown(block, slug, image_counter):
         "paragraph", "heading_1", "heading_2", "heading_3", "heading_4",
         "bulleted_list_item", "numbered_list_item", "to_do",
         "toggle", "quote", "callout",
-    ):
+    ):  # callout은 아래 elif에서 별도 처리 — 이 tuple 포함은 rich_text 추출용
         rich_text = block[b_type].get("rich_text", [])
         content = extract_text_from_rich_text(rich_text)
         child_md = render_children()
         if b_type == "paragraph":
-            return (content + "\n\n" if content else "<br />\n\n") + child_md
+            # 단일 멀티라인 인라인 코드 (`...\n...`) → fenced code block
+            # CommonMark 파서가 인라인 코드 내 \n을 공백으로 치환하므로 선변환 필요
+            _m = re.match(r'^`([^`]+)`$', content)
+            if _m and '\n' in _m.group(1):
+                return f"```\n{_m.group(1)}\n```\n\n" + child_md
+            # Shift+Enter → CommonMark hard line break (스페이스 2개 + \n)
+            if '\n' in content:
+                content = content.replace('\n', '  \n')
+            return (content + "\n\n" if content else "\n") + child_md
         elif b_type == "heading_1":
             return f"## {content}\n\n" + child_md
         elif b_type == "heading_2":
@@ -416,27 +491,37 @@ def block_to_markdown(block, slug, image_counter):
             return f"- {safe}\n\n"
         elif b_type == "numbered_list_item":
             if child_md:
-                return f"1. {content}\n{indent_md(child_md, '   ')}\n"
-            return f"1. {content}\n\n"
+                return f"{item_num}. {content}\n{indent_md(child_md, '   ')}\n"
+            return f"{item_num}. {content}\n\n"
         elif b_type == "to_do":
             checked = "[x]" if block["to_do"]["checked"] else "[ ]"
             return f"- {checked} {content}\n\n" + child_md
-        elif b_type in ("quote", "callout"):
-            icon = ""
-            if b_type == "callout":
-                icon_data = block.get("callout", {}).get("icon", {})
-                icon = icon_data.get("emoji", "")
-            prefix = f"{icon} " if icon else ""
+        elif b_type == "quote":
             if child_md:
                 child_quoted = "\n".join(
                     f"> {line}" if line.strip() else ">"
                     for line in child_md.rstrip("\n").splitlines()
                 )
-                return f"> {prefix}{content}\n>\n{child_quoted}\n\n"
-            return f"> {prefix}{content}\n\n"
+                return f"> {content}\n>\n{child_quoted}\n\n"
+            return f"> {content}\n\n"
+        elif b_type == "callout":
+            callout_data = block.get("callout", {})
+            color = callout_data.get("color", "default")
+            admonition = _color_to_admonition(color)
+            icon_data = callout_data.get("icon", {})
+            emoji = icon_data.get("emoji", "")
+            prefix = f"{emoji} " if emoji else ""
+            inner = f"{prefix}{content}"
+            if child_md:
+                inner += "\n\n" + child_md.rstrip("\n")
+            return f":::{admonition}\n{inner}\n:::\n\n"
         elif b_type == "toggle":
             if child_md:
-                return f"<details>\n<summary>{content}</summary>\n\n{child_md}\n</details>\n\n"
+                # <summary> 안에서는 마크다운이 처리되지 않으므로 HTML 태그로 변환
+                summary = re.sub(r'\*\*(.+?)\*\*', r'<strong>\1</strong>', content)
+                summary = re.sub(r'\*(.+?)\*', r'<em>\1</em>', summary)
+                summary = re.sub(r'`(.+?)`', r'<code>\1</code>', summary)
+                return f"<details>\n<summary>{summary}</summary>\n\n{child_md}\n</details>\n\n"
             return f"- {content}\n"
 
     elif b_type == "table_row":
@@ -445,7 +530,8 @@ def block_to_markdown(block, slug, image_counter):
     elif b_type == "code":
         raw_lang = block["code"].get("language", "text")
         language = _NOTION_LANG_MAP.get(raw_lang.lower(), raw_lang)
-        content = extract_text_from_rich_text(block["code"].get("rich_text", []))
+        raw = extract_text_from_rich_text(block["code"].get("rich_text", []))
+        content = _html.unescape(raw)  # Notion이 &lt; &gt; 등을 반환할 때 코드 블록 내 이중 이스케이프 방지
         return f"```{language}\n{content}\n```\n\n"
 
     elif b_type == "image":
@@ -467,12 +553,34 @@ def block_to_markdown(block, slug, image_counter):
     elif b_type == "divider":
         return "---\n\n"
 
+    elif b_type == "child_page":
+        title = block.get("child_page", {}).get("title", "")
+        page_id = block.get("id", "").replace("-", "")
+        if not title or not page_id:
+            return ""
+        return f"- [{title}](https://www.notion.so/{page_id})\n\n"
+
+    elif b_type == "link_to_page":
+        link_data = block.get("link_to_page", {})
+        page_id = (link_data.get("page_id") or link_data.get("database_id") or "").replace("-", "")
+        if not page_id:
+            return ""
+        return f"- [페이지 링크](https://www.notion.so/{page_id})\n\n"
+
     return ""
 
 
 def escape_mdx_angle_brackets(text):
-    """<한글> 같이 비 ASCII를 포함한 꺾쇠 패턴을 MDX가 태그로 해석하지 않도록 이스케이프."""
-    return re.sub(r'<([^>]*[^\x00-\x7F][^>]*)>', r'&lt;\1&gt;', text)
+    """<한글> 같이 비 ASCII를 포함한 꺾쇠 패턴을 MDX가 태그로 해석하지 않도록 이스케이프.
+    코드 블록(```...```) 및 인라인 코드(`...`) 내부는 건너뜀."""
+    parts = re.split(r'(```[\s\S]*?```|`[^`\n]+`)', text)
+    result = []
+    for i, part in enumerate(parts):
+        if i % 2 == 1:  # 코드 스팬/블록 — 그대로 유지
+            result.append(part)
+        else:
+            result.append(re.sub(r'<([^>\n]*[^\x00-\x7F\n][^>\n]*)>', r'&lt;\1&gt;', part))
+    return ''.join(result)
 
 
 def escape_single_tildes(text):
@@ -488,9 +596,27 @@ def escape_single_tildes(text):
     return ''.join(result)
 
 
+_OL_RESET_TYPES = {
+    "heading_1", "heading_2", "heading_3", "heading_4",
+    # bulleted_list_item / to_do 는 번호 목록 항목 사이에 주석·sub-bullet로 나타나므로 리셋 안 함
+    "table", "toggle", "column_list",
+}
+
+
 def blocks_to_markdown(blocks, slug):
     image_counter = [0]
-    body = "".join(block_to_markdown(b, slug, image_counter) for b in blocks)
+    ol_seq = [0]  # numbered_list_item 연속 카운터
+
+    def convert(b):
+        btype = b.get("type", "")
+        if btype == "numbered_list_item":
+            ol_seq[0] += 1
+        elif btype in _OL_RESET_TYPES:
+            ol_seq[0] = 0
+        # code / paragraph / image / divider / quote / callout 은 리셋 안 함 (split-OL 연속 번호 유지)
+        return block_to_markdown(b, slug, image_counter, ol_seq[0])
+
+    body = "".join(convert(b) for b in blocks)
     body = escape_mdx_angle_brackets(body)
     body = re.sub(r'(<[a-zA-Z][^>]*/)\s*&gt;', r'\1>', body)
     body = escape_single_tildes(body)
@@ -642,6 +768,13 @@ def save_doc_page(page, position, existing_map, parent_slug=None, is_parent=Fals
         raw_slug = read_rich_text_plain(props, NOTION_PROPERTY_SLUG)
         safe_slug = re.sub(r"[^a-z0-9-]", "", raw_slug.lower().replace(" ", "-")) if raw_slug else None
 
+        # Notion에 slug 속성이 없으면 기존 파일에 설정된 slug 보존
+        if not safe_slug and os.path.exists(new_filename):
+            with open(new_filename, encoding="utf-8") as _f:
+                _existing_slug_m = re.search(r"^slug:\s*(\S+)", _f.read(), re.MULTILINE)
+            if _existing_slug_m:
+                safe_slug = _existing_slug_m.group(1)
+
         lines = ["---", f'title: "{safe_title}"', f"date: {date_str}"]
         if safe_slug:
             lines.append(f"slug: {safe_slug}")
@@ -778,6 +911,7 @@ def main():
         log("[모드: 전체] 모든 페이지 조회")
 
     existing_map = load_sync_map()
+    _build_page_link_map(existing_map)
     log(f"기존 파일 {len(existing_map)}개 추적 중")
 
     has_more = True
@@ -876,6 +1010,19 @@ def main():
 
     save_sync_map(existing_map)
     log(f"완료: {saved}개 저장")
+
+    # docs/* 섹션에서 sync 결과가 0개면 빌드 실패 방지용 placeholder 생성.
+    # 실제 문서가 생기면 자동 제거.
+    if SAVE_DIR.startswith("docs/") and FETCH_MODE != "DAILY":
+        placeholder = os.path.join(SAVE_DIR, "placeholder.md")
+        if not synced_files:
+            if not os.path.exists(placeholder):
+                with open(placeholder, "w", encoding="utf-8") as f:
+                    f.write("---\ntitle: \"준비 중\"\nsidebar_position: 1\nslug: \"placeholder\"\n---\n\n콘텐츠를 준비 중입니다.\n")
+                log(f"[placeholder] DB 비어 있음 → {placeholder} 생성")
+        elif os.path.exists(placeholder):
+            os.remove(placeholder)
+            log(f"[placeholder] 실제 문서 존재 → {placeholder} 제거")
 
 
 if __name__ == "__main__":

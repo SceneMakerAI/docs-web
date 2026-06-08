@@ -1,5 +1,5 @@
 #!/bin/bash
-# Notion → docs/ 동기화 + DeepL EN 번역 → git push
+# Notion → docs/ 동기화 → git push
 # 서버 crontab에서 30분마다 실행
 
 set -e
@@ -74,11 +74,7 @@ for pid in "${pids[@]}"; do
 done
 [ $failed -ne 0 ] && exit 1
 
-# 변경된 KR 파일 즉시 EN 번역 (body 해시 캐시로 중복 호출 방지)
-python3 scripts/translate_to_en.py
-
-# 변경사항 커밋 & 푸시 (KR + EN 동시)
-git add docs/ docs_en/ blog/ static/img/
+git add docs/ blog/ static/img/
 if ! git diff --staged --quiet; then
   git -c user.name="server-cron" -c user.email="sbin@solbox.com" \
     commit -m "chore: Notion 동기화 $(date +'%Y-%m-%d %H:%M')"

@@ -1,6 +1,6 @@
 name: Sync main → develop
 
-# 서버 crontab이 main 에 쌓는 콘텐츠(docs/ · docs_en/ · blog/ · static/img/)를
+# 서버 crontab이 main 에 쌓는 콘텐츠(docs/ · blog/ · static/img/)를
 # develop 으로 정기 흡수한다.
 #
 # .notion-sync.json 충돌은 자동 해소 (main 버전 채택).

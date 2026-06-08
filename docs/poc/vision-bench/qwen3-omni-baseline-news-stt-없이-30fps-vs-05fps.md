@@ -3,6 +3,8 @@ id: qwen3-omni-baseline-news-stt-없이-30fps-vs-05fps
 title: "qwen3-omni-baseline-news-stt-없이-30fps-vs-05fps"
 sidebar_position: 2
 slug: "2"
+last_update:
+  date: 2026-05-27
 ---
 
 > **news 카테고리 100 클립** 을 STT(Speech-to-Text) 컨텍스트 없이 Qwen3-Omni 로 분석한 baseline.
@@ -24,9 +26,7 @@ slug: "2"
 #### 2. 데이터
 
 - 카테고리: `news` / 클립 수: **100개** × 2 fps variant
-
 - 각 클립 **6초** → 영상 합계 600초 (10분)
-
 - 클립 명명: `0001_0600-0606` `0100_1194-1200` (원본 영상의 절대초 인코딩)
 
 #### 2.1 클립 사양 (variant 별)
@@ -134,11 +134,8 @@ Prompt 토큰의 대부분이 mp4 base64 인코딩 (영상 프레임 + 오디오
 #### 10. 다음 단계
 
 - 나머지 6 카테고리 동일 조건 측정 (특히 동작 많은 `baseball` , `lol` — 0.5fps 격차 더 클 것으로 예상)
-
 - Fail 케이스 재시도 + 원인 분석
-
 - STT 컨텍스트 추가 후 동일 100 클립 재측정 → baseline 대비 품질 개선 정량 비교
-
 - Gemini 동일 입력 평행 측정 → 모델 간 비교
 
 #### 11. 재현 명령
@@ -161,8 +158,6 @@ PYTHONPATH=src uv run script/render_summary.py qwen_no_script_0.5fps news news_0
 산출물:
 
 - `predictions/{model}/news/{source}/{clip_id}.json` — 요청별 envelope
-
 - `predictions/{model}/news/{source}/_meta.json` — 시간·토큰 통계 raw
-
 - `predictions/{model}/news/{source}/summary.md` — 사람 보기용 요약
 

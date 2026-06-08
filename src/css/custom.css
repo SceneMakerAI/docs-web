@@ -49,11 +49,12 @@
   --smk-font-display: 'Geist', 'Inter Display', 'General Sans', system-ui, -apple-system, sans-serif;
   --smk-font-body: 'Inter', system-ui, -apple-system, sans-serif;
 
-  /* ─────────── Heading sizes (Infima 기본 H4=1rem 은 본문과 구분 안 됨, H5=0.875rem 은 본문보다 작음) ─────────── */
-  --ifm-h2-font-size: 1.5rem;
-  --ifm-h3-font-size: 1.25rem;
-  --ifm-h4-font-size: 1.05rem;
-  --ifm-h5-font-size: 1rem;
+  /* ─────────── Heading sizes — Notion 기준 ─────────── */
+  --ifm-h1-font-size: 2.5rem;    /* 40px — Notion 페이지 제목 (Infima 기본 3rem=48px) */
+  --ifm-h2-font-size: 1.75rem;   /* 28px — 계층감 강화 (기존 1.5rem=24px) */
+  --ifm-h3-font-size: 1.375rem;  /* 22px — H2(28px)와 간격 확보 */
+  --ifm-h4-font-size: 1.125rem;  /* 18px — H3(22px)와 4px 간격 */
+  --ifm-h5-font-size: 1rem;      /* 16px — bold+margin으로 본문 구분 */
 
   /* ─────────── Radius ─────────── */
   --smk-r-sm: 8px;
@@ -85,47 +86,184 @@
 
   --ifm-font-family-base: var(--smk-font-body);
   --ifm-heading-font-family: var(--smk-font-display);
+  --ifm-font-color-base: rgb(44, 44, 43);  /* Notion 본문 색상 (light) */
 
   --ifm-code-font-size: 95%;
   --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.1);
 
-  /* ─────────── Notion 스타일 compact spacing ─────────── */
+  /* ─────────── Spacing ─────────── */
   --ifm-line-height-base: 1.5;
   --ifm-leading: 1rem;
-  --ifm-paragraph-margin-bottom: 0.25rem;
+  --ifm-paragraph-margin-bottom: 1rem;  /* 16px — Notion p→p 시각 간격 기준 */
   --ifm-heading-vertical-rhythm-bottom: 0.5;
   --ifm-list-margin: 0.5rem;
   --ifm-list-paragraph-margin: 0.25rem;
 
   /* ─────────── Table: Notion 스타일 ─────────── */
-  --ifm-table-border-color: rgba(0, 0, 0, 0.09);
+  --ifm-table-border-color: rgba(0, 0, 0, 0.12);
   --ifm-table-border-width: 1px;
   --ifm-table-cell-padding: 7px 14px;
-  --ifm-table-head-background: rgba(0, 0, 0, 0.04);
+  --ifm-table-head-background: rgba(73, 79, 223, 0.08);
   --ifm-table-stripe-background: rgba(0, 0, 0, 0.02);
+
+  /* ─────────── Link: design.md 기준 ─────────── */
+  --ifm-link-color: var(--smk-accent-blue-link);       /* #376cd5 */
+  --ifm-link-hover-color: var(--smk-primary-deep);     /* #3a40c4 */
+  --ifm-link-decoration: none;
+  --ifm-link-hover-decoration: underline;
 }
+
+/* ─────────── Heading 간격·행간 — Notion 기준 ─────────── */
+/* Docusaurus가 h1을 CSS 변수 없이 직접 3rem으로 선언하므로 덮어씀 */
+h1 {
+  font-size: 2.5rem !important;  /* 40px — Notion 페이지 제목 (기본 3rem=48px) */
+}
+.markdown h1 {
+  line-height: 1.15;
+  margin-bottom: 1rem;
+}
+.markdown h2 {
+  line-height: 1.2;
+  margin-top: 2rem;      /* 32px: Notion H2 블록 높이(67px) 기준 — 40px는 과도 */
+  margin-bottom: 0.5rem;
+}
+.markdown h3 {
+  line-height: 1.3;
+  margin-top: 1.75rem;   /* 28px */
+  margin-bottom: 0.25rem;
+}
+.markdown h4 {
+  line-height: 1.4;
+  margin-top: 1.25rem;
+  margin-bottom: 0.25rem;
+}
+.markdown h5 {
+  line-height: 1.4;
+  margin-top: 1rem;
+  margin-bottom: 0.25rem;
+}
+/* 페이지 첫 번째 heading은 위 여백 제거 */
+.markdown > h2:first-child,
+.markdown > h3:first-child,
+.markdown > h4:first-child,
+.markdown > h5:first-child {
+  margin-top: 0;
+}
+
+/* ─────────── Admonition: 제목(레이블 + 아이콘) 숨김 ─────────── */
+[class*="admonitionHeading"] {
+  display: none;
+}
+
+/* ─────────── Blockquote: Notion 인용(quote) 스타일 ─────────── */
+/* callout은 :::admonition으로 분리됨 — blockquote는 순수 인용만 */
+.markdown blockquote {
+  border-left: 4px solid var(--ifm-color-emphasis-300);
+  background: transparent;
+  border-radius: 0;
+  padding: 0.5rem 1rem;
+  margin: 0.75rem 0 1rem 0;
+  color: var(--ifm-color-emphasis-700);
+  font-style: italic;
+}
+.markdown blockquote p { margin-bottom: 0.25rem; }
+.markdown blockquote p:last-child { margin-bottom: 0; }
 
 /* Infima 변수가 markdown body에 미적용되는 경우 직접 선택자로 보완 */
 .markdown > p {
-  margin-bottom: 0.25rem;
+  margin-bottom: 1rem;  /* Notion p→p 시각 간격 ~20px 기준: 12px → 16px */
 }
 .markdown > ul,
 .markdown > ol {
-  margin-bottom: 0.5rem;
+  margin-bottom: 1rem;  /* 단락과 동일하게 16px */
+}
+/* 리스트 안 중첩 리스트·단락 간격 */
+.markdown li > p { margin-bottom: 0.25rem; }
+.markdown li > ul,
+.markdown li > ol { margin-top: 0.25rem; margin-bottom: 0.25rem; }
+
+/* ─────────── Inline code: Notion 스타일 ─────────── */
+/* Notion: 따뜻한 회색 배경 + 붉은빛 텍스트 */
+.markdown :not(pre) > code {
+  background: rgba(135, 131, 120, 0.15);
+  color: #e03e2d;
+  border-radius: 3px;
+  padding: 0.15em 0.4em;
+  font-size: 0.875em;
+  border: none;
+}
+
+/* ─────────── Links — Notion 스타일: 회색 + 밑줄 (.markdown 본문 전용) ─────────── */
+.markdown a,
+.markdown a:link,
+.markdown a:visited {
+  color: #6b7280 !important;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  text-decoration-color: rgba(107, 114, 128, 0.5);
+}
+.markdown a:hover {
+  color: #4b5563 !important;
+  text-decoration: underline;
+  text-decoration-color: #4b5563;
+}
+[data-theme='dark'] .markdown a,
+[data-theme='dark'] .markdown a:link,
+[data-theme='dark'] .markdown a:visited {
+  color: rgba(255, 255, 255, 0.5) !important;
+  text-decoration-color: rgba(255, 255, 255, 0.25);
+}
+[data-theme='dark'] .markdown a:hover {
+  color: rgba(255, 255, 255, 0.75) !important;
+  text-decoration-color: rgba(255, 255, 255, 0.5);
+}
+
+/* ─────────── Code block border — Notion 스타일 ─────────── */
+.theme-code-block {
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 6px;
+  margin-bottom: 1.25rem;  /* 12px → 20px */
+  box-shadow: none;
+}
+
+
+/* ─────────── OL 번호 스타일 — Notion 기준 ─────────── */
+/* notion_to_md.py 가 실제 순서 번호(1. 2. 3. …)를 출력하므로
+   HTML <ol start="N"> 속성을 표준 list-style로 그대로 사용한다.
+   코드블록으로 split된 OL은 start="N"으로 연속 번호가 유지됨. */
+.markdown > ol {
+  list-style: decimal;
+  padding-left: 1.75em;
+}
+.markdown > ol > li {
+  padding-left: 0.25em;
+}
+
+/* 중첩 ol: lower-alpha */
+.markdown > ol ol {
+  list-style: lower-alpha;
+  padding-left: 1.5em;
+}
+.markdown > ol ol > li {
+  padding-left: 0.25em;
 }
 
 /* ─────────── Table: Notion 스타일 직접 선택자 ─────────── */
 .markdown table {
-  display: table;
-  width: 100%;
+  display: block;           /* overflow-x 활성화 — 넓은 테이블 가로 스크롤 */
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  width: max-content;       /* 컨텐츠 폭에 맞춤 — Notion처럼 짧은 열은 좁게 */
+  max-width: 100%;          /* 컨테이너 초과 시 스크롤 */
   border-collapse: collapse;
-  margin-bottom: 0.75rem;
-  font-size: 0.9rem;
+  margin-top: 1.25rem;
+  margin-bottom: 1.5rem;
+  font-size: 0.9375rem;     /* 15px — 본문보다 살짝 작아 열 폭 절약 */
 }
 
 .markdown table th,
 .markdown table td {
-  padding: 7px 14px;
+  padding: 6px 12px;
   border: 1px solid var(--ifm-table-border-color);
   text-align: left;
   vertical-align: middle;
@@ -142,7 +280,7 @@
 /* 다크 모드 테이블 */
 [data-theme='dark'] .markdown table {
   --ifm-table-border-color: rgba(255, 255, 255, 0.1);
-  --ifm-table-head-background: rgba(255, 255, 255, 0.05);
+  --ifm-table-head-background: rgba(73, 79, 223, 0.15);
   --ifm-table-stripe-background: rgba(255, 255, 255, 0.02);
 }
 
@@ -169,12 +307,6 @@
 [data-theme='dark'] [data-notion-bg="red_background"]    { background: #361a1a; }
 
 /* ─────────── Code block: Notion 스타일 ─────────── */
-/* 라이트/다크 모두 vsDark 배경 사용 → 흰 배경 오버라이드 불필요 */
-.theme-code-block {
-  border-radius: 6px;
-  margin-bottom: 0.75rem;
-  box-shadow: none;
-}
 
 /* 언어 레이블 (Notion의 상단 언어 표시처럼) */
 .theme-code-block .prism-code {
@@ -199,7 +331,7 @@
   border-left: 2px solid var(--ifm-table-border-color);
   background: transparent;
   padding: 0 0 0 12px;
-  margin-bottom: 0.75rem;
+  margin-bottom: 1rem;  /* 12px → 16px */
   border-radius: 0;
   color: var(--ifm-color-content);
   --docusaurus-details-decoration-color: var(--ifm-color-content-secondary);
@@ -209,24 +341,28 @@
   background: transparent;
   color: var(--ifm-color-content);
   font-weight: 500;
-  padding: 4px 0;
+  padding: 4px 0 4px 1.25em;  /* 왼쪽 padding으로 화살표 공간 확보 */
   cursor: pointer;
   list-style: none;
-  display: flex;
-  align-items: center;
-  gap: 6px;
+  position: relative;
 }
 
 .markdown details summary::before {
-  content: '▶';
-  font-size: 0.65em;
+  content: '';
+  width: 0;
+  height: 0;
+  border-top: 4px solid transparent;
+  border-bottom: 4px solid transparent;
+  border-left: 6px solid var(--ifm-color-content-secondary);
   transition: transform 0.15s;
-  color: var(--ifm-color-content-secondary);
-  flex-shrink: 0;
+  position: absolute;
+  left: 2px;
+  top: 50%;
+  transform: translateY(-50%);
 }
 
 .markdown details[open] > summary::before {
-  transform: rotate(90deg);
+  transform: translateY(-50%) rotate(90deg);
 }
 
 /* WebKit의 기본 disclosure triangle 숨김 */
@@ -251,8 +387,10 @@
   gap: 10px;
 }
 
-/* 다크 모드: cobalt 톤만 한 단계 밝게 — 캔버스/서피스는 Infima 기본을 따름 */
+/* 다크 모드 */
 [data-theme='dark'] {
+  --ifm-font-color-base: rgba(255, 255, 255, 0.88);  /* dark mode 본문: 부드러운 흰색 */
+
   --ifm-color-primary: var(--smk-primary-bright);
   --ifm-color-primary-dark: var(--smk-primary);
   --ifm-color-primary-darker: var(--smk-primary-deep);
@@ -261,5 +399,55 @@
   --ifm-color-primary-lighter: #7c80f6;
   --ifm-color-primary-lightest: #a3a6f9;
 
+  --ifm-link-color: #6b9eff;
+  --ifm-link-hover-color: #93b8ff;
+
+  --ifm-table-border-color: rgba(255, 255, 255, 0.12);
+  --ifm-table-head-background: rgba(73, 79, 223, 0.15);
+
   --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
+}
+
+[data-theme='dark'] .markdown :not(pre) > code {
+  background: rgba(135, 131, 120, 0.25);
+  color: #ff7b72;
+}
+
+[data-theme='dark'] .theme-code-block {
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+/* ─────────── Syntax Token 색상 (Notion 다크 계열) ─────────── */
+.token.keyword                 { color: #e09060 !important; }  /* import·def·return·for 등 — 따뜻한 주황 */
+.token.comment                 { color: #7f848e !important; }  /* 주석 — 중립 회색 */
+.token.property                { color: #e09060; }  /* 키명 — 따뜻한 주황-빨강 */
+.token.string                  { color: #e5a55a; }  /* 문자열 값 — 순수 주황 */
+.token.number                  { color: #61afef; }  /* 숫자 — 파랑 */
+.token.boolean, .token.null    { color: #c678dd; }  /* true/false/null — 보라 */
+
+/* Python 함수명: Notion은 기본 흰색 — 특수 색 제거 */
+.language-python .token.function { color: inherit !important; }
+
+/* ─────────── bash / shell 언어 스코프 오버라이드 ─────────── */
+/* prism-react-renderer가 inline style 적용 → !important 필요 */
+.language-bash .token.function,
+.language-shell .token.function             { color: #61c0d4 !important; }  /* 명령어·함수명 — 청록 */
+.language-bash .token.assign-left.variable,
+.language-shell .token.assign-left.variable { color: #e09060 !important; }  /* PYTHONPATH=, ExecStart= 등 */
+.language-bash .token.operator,
+.language-shell .token.operator             { color: #abb2bf !important; }  /* = 연산자 — 중립 */
+.language-bash .token.comment,
+.language-shell .token.comment              { color: #7f848e !important; }  /* 주석 — 밝은 회색 */
+.language-bash .token.parameter.variable,
+.language-shell .token.parameter.variable   { color: #56b6c2 !important; }  /* --flags — 청록 */
+.language-bash .token.string,
+.language-shell .token.string               { color: #e5a55a !important; }  /* 문자열 — 주황 */
+.language-bash .token.string.variable,
+.language-shell .token.string.variable      { color: #e5a55a !important; }  /* $VAR·$() — 주황 */
+.language-bash .token.number,
+.language-shell .token.number               { color: #d19a66 !important; }  /* 숫자 — 중립 주황 */
+
+[data-theme='dark'] .markdown table th,
+[data-theme='dark'] .markdown table td {
+  border-color: rgba(255, 255, 255, 0.12);
 }

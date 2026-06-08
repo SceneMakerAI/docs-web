@@ -200,3 +200,483 @@ class TestSaveDocPageSkip:
 
         assert any(slug in f for f in written_files), \
             f"last_edited 변경 후 파일 write 없음 (written: {written_files})"
+
+
+# ── TC-6: HTML 엔티티 이중 인코딩 복원 ───────────────────────────────────────
+
+class TestHtmlEntityDecode:
+    """Notion API가 &amp;gt; / &amp;lt; 형태로 이중 인코딩해 반환할 때
+    extract_text_from_rich_text가 온전히 복원하는지 검증."""
+
+    def _rt(self, plain: str, code: bool = False) -> list:
+        return [{"plain_text": plain, "annotations": {"code": code, "bold": False, "italic": False, "strikethrough": False}, "href": None}]
+
+    def test_single_encoded_gt_decoded(self):
+        """`&gt;` (단일 인코딩) → `>`"""
+        result = n.extract_text_from_rich_text(self._rt("&gt;=1.0"))
+        assert result == ">=1.0"
+
+    def test_double_encoded_gt_decoded(self):
+        """`&amp;gt;` (이중 인코딩) → `>` — 현재 버그 재현."""
+        result = n.extract_text_from_rich_text(self._rt("&amp;gt;=1.0"))
+        assert result == ">=1.0"
+
+    def test_double_encoded_lt_decoded(self):
+        """`&amp;lt;` (이중 인코딩) → `<`"""
+        result = n.extract_text_from_rich_text(self._rt("&amp;lt;3.12"))
+        assert result == "<3.12"
+
+    def test_mixed_double_encoded(self):
+        """`&amp;gt;=2.4,&amp;lt;2.9` → `>=2.4,<2.9`"""
+        result = n.extract_text_from_rich_text(self._rt("&amp;gt;=2.4,&amp;lt;2.9"))
+        assert result == ">=2.4,<2.9"
+
+    def test_inline_code_double_encoded(self):
+        """인라인 코드 스팬 내부도 이중 인코딩 복원."""
+        result = n.extract_text_from_rich_text(self._rt("&amp;gt;=1.0", code=True))
+        assert result == "`>=1.0`"
+
+    def test_plain_text_unchanged(self):
+        """이미 올바른 텍스트는 변경 없음."""
+        result = n.extract_text_from_rich_text(self._rt(">=1.0"))
+        assert result == ">=1.0"
+
+
+# ── TC-7: _rich_text_to_html HTML 테이블 엔티티 이중 인코딩 복원 ──────────────
+
+class TestHtmlEntityHtmlTable:
+    """HTML 테이블 경로(_rich_text_to_html)에서 Notion이 &amp;gt; / &amp;lt; 형태로
+    이중 인코딩해 반환할 때 렌더링 가능한 HTML로 올바르게 변환하는지 검증."""
+
+    def _rt(self, plain: str, code: bool = False) -> list:
+        return [{"plain_text": plain, "annotations": {"code": code, "bold": False, "italic": False, "strikethrough": False}, "href": None}]
+
+    def test_single_encoded_gt_in_html_table(self):
+        """`&gt;` (단일 인코딩) → HTML에서 `>` 로 렌더링 가능한 `&gt;` 출력."""
+        result = n._rich_text_to_html(self._rt("&gt;=1.0"))
+        assert result == "&gt;=1.0"
+
+    def test_double_encoded_gt_in_html_table(self):
+        """`&amp;gt;` (이중 인코딩) → 루프 unescape 후 `&gt;` 출력 (not `&amp;gt;`)."""
+        result = n._rich_text_to_html(self._rt("&amp;gt;=1.0"))
+        assert result == "&gt;=1.0"
+
+    def test_double_encoded_lt_in_html_table(self):
+        """`&amp;lt;2.9` → `&lt;2.9`"""
+        result = n._rich_text_to_html(self._rt("&amp;lt;2.9"))
+        assert result == "&lt;2.9"
+
+    def test_mixed_double_encoded_in_html_table(self):
+        """`&amp;gt;=2.4,&amp;lt;2.9` → `&gt;=2.4,&lt;2.9`"""
+        result = n._rich_text_to_html(self._rt("&amp;gt;=2.4,&amp;lt;2.9"))
+        assert result == "&gt;=2.4,&lt;2.9"
+
+    def test_code_span_double_encoded(self):
+        """인라인 코드 내 이중 인코딩 → `<code>&gt;=1.0</code>`"""
+        result = n._rich_text_to_html(self._rt("&amp;gt;=1.0", code=True))
+        assert result == "<code>&gt;=1.0</code>"
+
+    def test_plain_text_unchanged_in_html_table(self):
+        """이미 올바른 텍스트는 변경 없음."""
+        result = n._rich_text_to_html(self._rt(">=1.0"))
+        assert result == "&gt;=1.0"
+
+
+# ── TC-8: callout → Docusaurus 어드모니션 변환 (Notion 배경색 기준) ────────────
+
+class TestCalloutAdmonition:
+    """callout 블록이 Notion 배경색에 맞는 어드모니션 타입으로 변환되는지 검증.
+    레이블(팁/경고 등)은 CSS로 숨기고 색상 배경만 유지."""
+
+    def _block(self, color: str, text: str, emoji: str = "⚡") -> dict:
+        return {
+            "type": "callout",
+            "callout": {
+                "rich_text": [{"plain_text": text, "annotations": {"code": False, "bold": False, "italic": False, "strikethrough": False}, "href": None}],
+                "icon": {"type": "emoji", "emoji": emoji},
+                "color": color,
+            },
+            "has_children": False,
+        }
+
+    def _render(self, block: dict) -> str:
+        return n.block_to_markdown(block, lambda: "", lambda: 1)
+
+    def test_green_background(self):
+        """초록색 배경 → :::tip"""
+        result = self._render(self._block("green_background", "한 번에 실행"))
+        assert result.startswith(":::tip\n")
+
+    def test_blue_background(self):
+        """파란색 배경 → :::info"""
+        result = self._render(self._block("blue_background", "안내"))
+        assert result.startswith(":::info\n")
+
+    def test_purple_background(self):
+        """보라색 배경 → :::info"""
+        result = self._render(self._block("purple_background", "보라"))
+        assert result.startswith(":::info\n")
+
+    def test_yellow_background(self):
+        """노란색 배경 → :::warning"""
+        result = self._render(self._block("yellow_background", "주의"))
+        assert result.startswith(":::warning\n")
+
+    def test_orange_background(self):
+        """주황색 배경 → :::warning"""
+        result = self._render(self._block("orange_background", "주황 주의"))
+        assert result.startswith(":::warning\n")
+
+    def test_red_background(self):
+        """빨간색 배경 → :::caution"""
+        result = self._render(self._block("red_background", "경고"))
+        assert result.startswith(":::caution\n")
+
+    def test_pink_background(self):
+        """분홍색 배경 → :::caution"""
+        result = self._render(self._block("pink_background", "분홍 경고"))
+        assert result.startswith(":::caution\n")
+
+    def test_gray_background(self):
+        """회색 배경 → :::note"""
+        result = self._render(self._block("gray_background", "메모"))
+        assert result.startswith(":::note\n")
+
+    def test_default_color(self):
+        """기본 배경(color 없음) → :::note"""
+        block = {
+            "type": "callout",
+            "callout": {
+                "rich_text": [{"plain_text": "기본", "annotations": {"code": False, "bold": False, "italic": False, "strikethrough": False}, "href": None}],
+                "icon": {},
+            },
+            "has_children": False,
+        }
+        result = self._render(block)
+        assert result.startswith(":::note\n")
+
+    def test_emoji_preserved_in_content(self):
+        """이모지는 color와 무관하게 콘텐츠 앞에 유지"""
+        result = self._render(self._block("green_background", "내용", "🚀"))
+        assert "🚀 내용" in result
+
+
+# ── TC-9: quote → Markdown blockquote 변환 ───────────────────────────────────
+
+class TestQuoteBlockquote:
+    """quote 블록이 표준 Markdown blockquote(>)로 변환되는지 검증."""
+
+    def _block(self, text: str) -> dict:
+        return {
+            "type": "quote",
+            "quote": {
+                "rich_text": [{"plain_text": text, "annotations": {"code": False, "bold": False, "italic": False, "strikethrough": False}, "href": None}],
+            },
+            "has_children": False,
+        }
+
+    def _render(self, block: dict) -> str:
+        return n.block_to_markdown(block, lambda: "", lambda: 1)
+
+    def test_quote_uses_blockquote(self):
+        """quote → > 마크다운 blockquote"""
+        result = self._render(self._block("인용 내용"))
+        assert result.startswith("> ")
+        assert "인용 내용" in result
+
+    def test_quote_not_admonition(self):
+        """quote는 ::: 어드모니션이 아님"""
+        result = self._render(self._block("인용 내용"))
+        assert ":::" not in result
+
+# ── TC-10: 멀티라인 인라인 코드 → fenced code block 변환 ──────────────────────
+
+class TestMultilineInlineCodeToFenced:
+    """paragraph 블록에서 단일 멀티라인 인라인 코드가 fenced code block으로 변환되는지 검증."""
+
+    def _block(self, text: str, code: bool = True) -> dict:
+        return {
+            "type": "paragraph",
+            "paragraph": {
+                "rich_text": [{"plain_text": text, "annotations": {"code": code, "bold": False, "italic": False, "strikethrough": False}, "href": None}],
+            },
+            "has_children": False,
+        }
+
+    def _render(self, block: dict) -> str:
+        return n.block_to_markdown(block, lambda: "", lambda: 1)
+
+    def test_multiline_code_becomes_fenced(self):
+        """멀티라인 인라인 코드 → ``` fenced block"""
+        result = self._render(self._block("line1\nline2\nline3"))
+        assert result.startswith("```\n")
+        assert "line1\nline2\nline3" in result
+        assert result.strip().endswith("```")
+
+    def test_single_line_code_stays_inline(self):
+        """단일 줄 인라인 코드 → 그대로 인라인 코드"""
+        result = self._render(self._block("single line"))
+        assert "`single line`" in result
+        assert "```" not in result
+
+    def test_flowchart_pattern(self):
+        """파이프라인 플로우차트 패턴 → fenced block으로 변환"""
+        flowchart = "원본 wav\n   │\n   ▼\n[1] denoise\n   ↳ output/"
+        result = self._render(self._block(flowchart))
+        assert result.startswith("```\n")
+        assert "원본 wav" in result
+        assert "│" in result
+
+
+# ── TC-11: Notion 페이지 링크 → 내부 docs URL 변환 ───────────────────────────
+
+class TestNotionPageLinkConversion:
+    """_build_page_link_map / _resolve_notion_href / extract_text_from_rich_text
+    연동으로 Notion 페이지 링크가 내부 docs 경로로 변환되는지 검증."""
+
+    def setup_method(self):
+        n._page_id_to_internal_url.clear()
+
+    def teardown_method(self):
+        n._page_id_to_internal_url.clear()
+
+    def _make_sync_map(self):
+        return {
+            "368e15b4-0359-81cb-9b9b-d555dbfd19e3": {
+                "file": "docs/poc/vision-bench/1편-...md",
+                "last_edited": "2026-06-01T00:00:00.000Z",
+                "content_hash": "abc",
+                "order": 1,
+                "parent_id": "vision-bench",
+            },
+            "365e15b4-0359-804b-87c8-f1acee149564": {  # 인덱스 페이지 — parent_id 없음
+                "file": "docs/poc/vision-bench/index.md",
+                "last_edited": "2026-06-01T00:00:00.000Z",
+                "content_hash": "def",
+                "order": 2,
+                "parent_id": None,
+            },
+        }
+
+    def test_build_page_link_map_child_page(self):
+        """자식 페이지(parent_id 있음)는 /save_dir/parent/order 경로로 매핑."""
+        with patch.object(n, "SAVE_DIR", "docs/poc"):
+            n._build_page_link_map(self._make_sync_map())
+        assert n._page_id_to_internal_url["368e15b4-0359-81cb-9b9b-d555dbfd19e3"] == "/docs/poc/vision-bench/1"
+
+    def test_build_page_link_map_index_page_skipped(self):
+        """parent_id 가 None 인 인덱스 페이지는 매핑에 포함하지 않음."""
+        with patch.object(n, "SAVE_DIR", "docs/poc"):
+            n._build_page_link_map(self._make_sync_map())
+        assert "365e15b4-0359-804b-87c8-f1acee149564" not in n._page_id_to_internal_url
+
+    def test_resolve_notion_href_known_page(self):
+        """Notion 페이지 URL → 내부 경로 변환."""
+        n._page_id_to_internal_url["368e15b4-0359-81cb-9b9b-d555dbfd19e3"] = "/docs/poc/vision-bench/1"
+        result = n._resolve_notion_href("https://www.notion.so/368e15b4035981cb9b9bd555dbfd19e3")
+        assert result == "/docs/poc/vision-bench/1"
+
+    def test_resolve_notion_href_unknown_page_returns_original(self):
+        """매핑에 없는 Notion URL은 그대로 반환."""
+        result = n._resolve_notion_href("https://www.notion.so/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
+        assert result == "https://www.notion.so/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+
+    def test_resolve_non_notion_href_unchanged(self):
+        """Notion URL 이 아닌 링크는 변환하지 않음."""
+        result = n._resolve_notion_href("https://github.com/example")
+        assert result == "https://github.com/example"
+
+    def test_extract_text_converts_notion_link(self):
+        """extract_text_from_rich_text 가 Notion href 를 내부 경로로 변환."""
+        n._page_id_to_internal_url["368e15b4-0359-81cb-9b9b-d555dbfd19e3"] = "/docs/poc/vision-bench/1"
+        rt = [{"plain_text": "1편 문서", "annotations": {"code": False, "bold": False, "italic": False, "strikethrough": False},
+                "href": "https://www.notion.so/368e15b4035981cb9b9bd555dbfd19e3"}]
+        result = n.extract_text_from_rich_text(rt)
+        assert result == "[1편 문서](/docs/poc/vision-bench/1)"
+
+    def test_extract_text_unknown_notion_link_kept(self):
+        """매핑에 없는 Notion 링크는 원본 URL 유지."""
+        rt = [{"plain_text": "외부 페이지", "annotations": {"code": False, "bold": False, "italic": False, "strikethrough": False},
+                "href": "https://www.notion.so/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"}]
+        result = n.extract_text_from_rich_text(rt)
+        assert result == "[외부 페이지](https://www.notion.so/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa)"
+
+
+# ── TC-12: 테이블 has_column_header / has_row_header 반영 ─────────────────────
+
+def _make_table_block(has_column_header, has_row_header, rows):
+    """rows: [["셀1", "셀2"], ...] 형태의 문자열 리스트."""
+    def _rt(text):
+        return [{"plain_text": text, "href": None,
+                 "annotations": {"bold": False, "italic": False, "strikethrough": False,
+                                 "underline": False, "code": False, "color": "default"}}]
+    children = [
+        {"type": "table_row", "table_row": {"cells": [_rt(c) for c in row]}}
+        for row in rows
+    ]
+    return (
+        {"type": "table", "table": {"has_column_header": has_column_header,
+                                    "has_row_header": has_row_header}},
+        children,
+    )
+
+
+class TestTableHeaders:
+
+    def _render(self, has_col, has_row, rows):
+        block, children = _make_table_block(has_col, has_row, rows)
+        block["_children"] = children
+        return n.block_to_markdown(block, lambda: "", lambda: 1)
+
+    def test_column_header_only_uses_plain_markdown(self):
+        """has_column_header=True만 있을 때 → plain markdown (| --- | 구분자)."""
+        out = self._render(True, False, [["헤더A", "헤더B"], ["값1", "값2"]])
+        assert "<table>" not in out
+        assert "| --- |" in out
+        assert "| 헤더A | 헤더B |" in out
+
+    def test_row_header_only_first_col_is_th(self):
+        """has_row_header=True → 1열만 <th>, 나머지 <td>."""
+        out = self._render(False, True, [["레이블1", "값1"], ["레이블2", "값2"]])
+        assert "<th>" in out
+        # 두 번째 열은 td
+        assert "<td>" in out
+        # thead 없음 (열 헤더가 없으므로)
+        assert "<thead>" not in out
+
+    def test_both_headers(self):
+        """has_column_header=True, has_row_header=True → 1행+1열 모두 <th>."""
+        out = self._render(True, True, [["구분", "A", "B"], ["X", "1", "2"]])
+        assert "<thead>" in out
+        assert "<th>" in out
+        assert "<td>" in out
+
+    def test_no_header_plain_markdown(self):
+        """헤더 없고 색 없으면 plain markdown."""
+        out = self._render(False, False, [["a", "b"], ["c", "d"]])
+        assert "<table>" not in out
+        assert "| a | b |" in out
+
+    def test_pipe_in_cell_forces_html(self):
+        """셀 내용에 | 포함 시 HTML 테이블로 전환 — markdown 테이블 파싱 깨짐 방지."""
+        out = self._render(True, False, [["단계", "명령"], ["evaluate", ".venv/bin/python evaluate.py [whisper|qwen|all]"]])
+        assert "<table>" in out
+        assert "whisper|qwen|all" in out
+        # markdown 파이프 구분자로 쪼개지지 않음
+        assert "| .venv" not in out
+
+
+# ── TC-13: Shift+Enter (단락 내 줄바꿈) ──────────────────────────────────────
+
+def _make_paragraph_block(text: str):
+    """plain_text로 paragraph 블록 생성. \n은 Shift+Enter를 시뮬레이션."""
+    return {
+        "type": "paragraph",
+        "paragraph": {
+            "rich_text": [{"plain_text": text, "href": None,
+                           "annotations": {"bold": False, "italic": False,
+                                           "strikethrough": False, "underline": False,
+                                           "code": False, "color": "default"}}]
+        },
+        "_children": [],
+    }
+
+
+class TestShiftEnterLineBreak:
+    def _render(self, text):
+        block = _make_paragraph_block(text)
+        return n.block_to_markdown(block, lambda: "", lambda: 1)
+
+    def test_shift_enter_becomes_hard_break(self):
+        """Shift+Enter(\n) → CommonMark hard line break (두 스페이스 + \n)."""
+        out = self._render("첫 줄\n둘째 줄")
+        assert "첫 줄  \n둘째 줄" in out
+
+    def test_plain_paragraph_no_break(self):
+        """일반 단락은 변환 없음."""
+        out = self._render("일반 텍스트")
+        assert "일반 텍스트\n\n" == out
+
+    def test_multiple_shift_enters(self):
+        """여러 Shift+Enter가 모두 hard break으로 변환."""
+        out = self._render("A\nB\nC")
+        assert "A  \nB  \nC" in out
+
+
+# ── TC-14: toggle summary 인라인 마크다운 → HTML 변환 ──────────────────────────
+
+class TestToggleSummaryInlineMarkdown:
+    """toggle summary 안의 bold·italic·code가 HTML 태그로 변환되는지 검증."""
+
+    def _block(self, summary_rich_text: list) -> dict:
+        return {
+            "type": "toggle",
+            "toggle": {"rich_text": summary_rich_text},
+            "_children": [
+                {
+                    "type": "paragraph",
+                    "paragraph": {"rich_text": [{"plain_text": "내용", "href": None,
+                                   "annotations": {"bold": False, "italic": False,
+                                                   "strikethrough": False, "underline": False,
+                                                   "code": False, "color": "default"}}]},
+                    "_children": [],
+                }
+            ],
+        }
+
+    def _render(self, block: dict) -> str:
+        def child_fn():
+            return "내용\n\n"
+        return n.block_to_markdown(block, child_fn, lambda: 1)
+
+    def test_code_in_summary(self):
+        """summary 안 code annotation → <code>태그"""
+        rt = [
+            {"plain_text": "요약 코드 (", "href": None,
+             "annotations": {"bold": False, "italic": False, "strikethrough": False,
+                             "underline": False, "code": False, "color": "default"}},
+            {"plain_text": "batch.py", "href": None,
+             "annotations": {"bold": False, "italic": False, "strikethrough": False,
+                             "underline": False, "code": True, "color": "default"}},
+            {"plain_text": " 핵심부)", "href": None,
+             "annotations": {"bold": False, "italic": False, "strikethrough": False,
+                             "underline": False, "code": False, "color": "default"}},
+        ]
+        result = self._render(self._block(rt))
+        assert "<code>batch.py</code>" in result
+        assert "`batch.py`" not in result
+
+
+# ── TC-15: child_page · link_to_page 블록 → Notion URL 링크 렌더링 ─────────────
+
+class TestChildPageBlock:
+    def _render(self, block):
+        return n.block_to_markdown(block, lambda: "", lambda: 1)
+
+    def test_child_page_renders_link(self):
+        block = {
+            "type": "child_page",
+            "id": "12345678-abcd-ef01-2345-6789abcdef01",
+            "child_page": {"title": "use_audio_in_video 버그 분석"},
+        }
+        result = self._render(block)
+        assert "[use_audio_in_video 버그 분석](https://www.notion.so/12345678abcdef0123456789abcdef01)" in result
+
+    def test_child_page_empty_title(self):
+        block = {
+            "type": "child_page",
+            "id": "aaaabbbb-cccc-dddd-eeee-ffffaaaabbbb",
+            "child_page": {"title": ""},
+        }
+        result = self._render(block)
+        assert result == ""
+
+    def test_link_to_page_renders_link(self):
+        block = {
+            "type": "link_to_page",
+            "id": "00001111-2222-3333-4444-555566667777",
+            "link_to_page": {"type": "page_id", "page_id": "00001111-2222-3333-4444-555566667777"},
+        }
+        result = self._render(block)
+        assert "https://www.notion.so/00001111222233334444555566667777" in result
+        assert "`batch.py`" not in result

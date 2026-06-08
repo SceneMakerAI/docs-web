@@ -1,6 +1,8 @@
 import {themes as prismThemes} from 'prism-react-renderer';
 import type {Config} from '@docusaurus/types';
 import type * as Preset from '@docusaurus/preset-classic';
+import remarkMath from 'remark-math';
+import rehypeKatex from 'rehype-katex';
 
 // This runs in Node.js - Don't use client-side code here (browser APIs, JSX...)
 
@@ -17,7 +19,10 @@ const config: Config = {
 
   markdown: {
     format: 'detect', // .md → 'md' (plain Markdown), .mdx → 'mdx'. blog 플러그인의 MDX ESM-strict 파싱 충돌 방지
+    mermaid: true,
   },
+
+  themes: ['@docusaurus/theme-mermaid'],
 
   // Set the production url of your site here
   url: 'https://doc.scenemaker.solbox.com',
@@ -60,7 +65,7 @@ const config: Config = {
 
   i18n: {
     defaultLocale: 'ko',
-    locales: ['ko', 'en'],
+    locales: ['ko'],
     localeConfigs: {
       ko: {
         label: '한국어',
@@ -69,26 +74,8 @@ const config: Config = {
         calendar: 'gregory',
         path: 'ko',
       },
-      en: {
-        label: 'English',
-        direction: 'ltr',
-        htmlLang: 'en-US',
-        calendar: 'gregory',
-        path: 'en',
-      },
     },
   },
-
-  plugins: [
-    function () {
-      return {
-        name: 'symlinks-webpack-fix',
-        configureWebpack() {
-          return { resolve: { symlinks: false } };
-        },
-      };
-    },
-  ],
 
   presets: [
     [
@@ -97,6 +84,8 @@ const config: Config = {
         docs: {
           sidebarPath: './sidebars.ts',
           editUrl: 'https://github.com/SceneMakerAI/docs-web/edit/main/',
+          remarkPlugins: [remarkMath],
+          rehypePlugins: [rehypeKatex],
         },
         blog: {
           path: 'blog',
@@ -124,9 +113,14 @@ const config: Config = {
           },
           onInlineTags: 'warn',
           onInlineAuthors: 'warn',
+          remarkPlugins: [remarkMath],
+          rehypePlugins: [rehypeKatex],
         },
         theme: {
-          customCss: './src/css/custom.css',
+          customCss: [
+            './src/css/custom.css',
+            require.resolve('katex/dist/katex.min.css'),
+          ],
         },
       } satisfies Preset.Options,
     ],
@@ -186,10 +180,6 @@ const config: Config = {
         {type: 'docSidebar', sidebarId: 'contributeSidebar', position: 'left', label: '오픈소스 기여'},
         {type: 'docSidebar', sidebarId: 'releaseNotesSidebar', position: 'left', label: '릴리즈 노트'},
         {
-          type: 'localeDropdown',
-          position: 'right',
-        },
-        {
           href: 'https://github.com/SceneMakerAI/docs-web',
           label: 'GitHub',
           position: 'right',
@@ -246,9 +236,9 @@ const config: Config = {
       copyright: `Copyright © ${new Date().getFullYear()} SceneMakerAI · Solbox Inc. Built with Docusaurus.`,
     },
     prism: {
-      theme: prismThemes.vsDark,
-      darkTheme: prismThemes.vsDark,
-      additionalLanguages: ['bash', 'shell-session'],
+      theme: prismThemes.oneDark,
+      darkTheme: prismThemes.oneDark,
+      additionalLanguages: ['bash', 'shell-session', 'json'],
     },
   } satisfies Preset.ThemeConfig,
 };
