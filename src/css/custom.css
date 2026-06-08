@@ -408,16 +408,18 @@ article a:hover {
   border-color: rgba(255, 255, 255, 0.08);
 }
 
-/* ─────────── JSON Syntax Token 색상 (oneDark 위 오버라이드) ─────────── */
-.token.property                { color: #e06c75; }  /* 키명 — 빨강 */
-.token.string                  { color: #e5c07b; }  /* 문자열 값 — 주황/노랑 */
+/* ─────────── Syntax Token 색상 (Notion 다크 계열) ─────────── */
+.token.property                { color: #e09060; }  /* 키명 — 따뜻한 주황-빨강 */
+.token.string                  { color: #e5a55a; }  /* 문자열 값 — 순수 주황 */
 .token.number                  { color: #61afef; }  /* 숫자 — 파랑 */
 .token.boolean, .token.null    { color: #c678dd; }  /* true/false/null — 보라 */
 
 /* ─────────── bash / shell 언어 스코프 오버라이드 ─────────── */
 /* prism-react-renderer가 inline style 적용 → !important 필요 */
+.language-bash .token.function,
+.language-shell .token.function             { color: #61c0d4 !important; }  /* 명령어·함수명 — 청록 */
 .language-bash .token.assign-left.variable,
-.language-shell .token.assign-left.variable { color: #e06c75 !important; }  /* PYTHONPATH=, ExecStart= 등 */
+.language-shell .token.assign-left.variable { color: #e09060 !important; }  /* PYTHONPATH=, ExecStart= 등 */
 .language-bash .token.operator,
 .language-shell .token.operator             { color: #abb2bf !important; }  /* = 연산자 — 중립 */
 .language-bash .token.comment,
