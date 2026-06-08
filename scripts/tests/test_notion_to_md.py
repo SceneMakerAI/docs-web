@@ -282,6 +282,95 @@ class TestHtmlEntityHtmlTable:
         assert result == "&gt;=1.0"
 
 
+# ── TC-8: callout → Docusaurus 어드모니션 변환 ────────────────────────────────
+
+class TestCalloutAdmonition:
+    """callout 블록이 이모지에 맞는 어드모니션 타입으로 변환되는지 검증."""
+
+    def _block(self, emoji: str, text: str) -> dict:
+        return {
+            "type": "callout",
+            "callout": {
+                "rich_text": [{"plain_text": text, "annotations": {"code": False, "bold": False, "italic": False, "strikethrough": False}, "href": None}],
+                "icon": {"type": "emoji", "emoji": emoji},
+            },
+            "has_children": False,
+        }
+
+    def _render(self, block: dict) -> str:
+        return n.block_to_markdown(block, lambda: "", lambda: 1)
+
+    def test_warning_emoji(self):
+        """⚠️ → :::warning"""
+        result = self._render(self._block("⚠️", "주의사항"))
+        assert result.startswith(":::warning\n")
+        assert "⚠️ 주의사항" in result
+        assert result.strip().endswith(":::")
+
+    def test_tip_emoji(self):
+        """💡 → :::tip"""
+        result = self._render(self._block("💡", "팁 내용"))
+        assert result.startswith(":::tip\n")
+
+    def test_info_emoji(self):
+        """📍 → :::info"""
+        result = self._render(self._block("📍", "위치 정보"))
+        assert result.startswith(":::info\n")
+
+    def test_caution_emoji(self):
+        """🔒 → :::caution"""
+        result = self._render(self._block("🔒", "보안 주의"))
+        assert result.startswith(":::caution\n")
+
+    def test_unknown_emoji_defaults_to_note(self):
+        """매핑에 없는 이모지 → :::note"""
+        result = self._render(self._block("🐍", "파이썬 관련"))
+        assert result.startswith(":::note\n")
+
+    def test_no_emoji_defaults_to_note(self):
+        """이모지 없는 callout → :::note, prefix 없음"""
+        block = {
+            "type": "callout",
+            "callout": {
+                "rich_text": [{"plain_text": "일반 메모", "annotations": {"code": False, "bold": False, "italic": False, "strikethrough": False}, "href": None}],
+                "icon": {},
+            },
+            "has_children": False,
+        }
+        result = self._render(block)
+        assert result.startswith(":::note\n")
+        assert "일반 메모" in result
+        assert "  " not in result.split("\n")[1]  # 이모지+공백 prefix 없음
+
+
+# ── TC-9: quote → Markdown blockquote 변환 ───────────────────────────────────
+
+class TestQuoteBlockquote:
+    """quote 블록이 표준 Markdown blockquote(>)로 변환되는지 검증."""
+
+    def _block(self, text: str) -> dict:
+        return {
+            "type": "quote",
+            "quote": {
+                "rich_text": [{"plain_text": text, "annotations": {"code": False, "bold": False, "italic": False, "strikethrough": False}, "href": None}],
+            },
+            "has_children": False,
+        }
+
+    def _render(self, block: dict) -> str:
+        return n.block_to_markdown(block, lambda: "", lambda: 1)
+
+    def test_quote_uses_blockquote(self):
+        """quote → > 마크다운 blockquote"""
+        result = self._render(self._block("인용 내용"))
+        assert result.startswith("> ")
+        assert "인용 내용" in result
+
+    def test_quote_not_admonition(self):
+        """quote는 ::: 어드모니션이 아님"""
+        result = self._render(self._block("인용 내용"))
+        assert ":::" not in result
+
 # ── TC-8: Notion 페이지 링크 → 내부 docs URL 변환 ────────────────────────────
 
 class TestNotionPageLinkConversion:
