@@ -104,6 +104,7 @@ LID 전용 모델 후보는 여럿(NeMo TitaNet, ECAPA 포크 등)이지만, Vox
 한국어가 메인이지만 장르별로 외국어 / 배경 소음 양상이 다르다.
 
 | 구분 | 방송 | 재생시간 | URL |
+| --- | --- | --- | --- |
 | 뉴스 | KBS 9 뉴스 | 48:30 | [https://www.youtube.com/watch?v=rX1P-jOoNmM](https://www.youtube.com/watch?v=rX1P-jOoNmM) |
 | 다큐 | 슈퍼피쉬 1부 | 58:40 | [https://www.youtube.com/watch?v=iNbWqC1iqKw](https://www.youtube.com/watch?v=iNbWqC1iqKw) |
 | 드라마 | KBS 겨울 연가 | 1:04:52 | [https://www.youtube.com/watch?v=irVKEhb9g8M](https://www.youtube.com/watch?v=irVKEhb9g8M) |
@@ -222,6 +223,7 @@ poc-lid-bench/
 간단하게 최종 결과를 이야기 하면
 
 |  | Total | whisper_raw | voxlingua_raw | whisper_denoise | voxlingua_denoise |
+| --- | --- | --- | --- | --- | --- |
 | baseball.wav | 1092 | 1073 | 1026 | 1072 | 1020 |
 | docu.wav | 383 | 349 | 330 | 349 | 332 |
 | drama.wav | 314 | 282 | 256 | 279 | 251 |
@@ -238,6 +240,7 @@ poc-lid-bench/
 ### 4.2 비용 (처리시간)
 
 | file | duration | model | vad | denoise | lid | total | total_hour | 차이 |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | docu.wav | 00:58:41  | whisper | 9.97 | - | 20.13 | 30.1 | 30.78 |  |
 |  | (3520.7) | voxlingua | 9.97 | - | 3.26 | 13.23 | 13.53 | 2.3 |
 |  |  | whisper | 9.97 | 10.39 | 20.4 | 40.76 | 41.67 |  |

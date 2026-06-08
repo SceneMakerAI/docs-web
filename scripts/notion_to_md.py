@@ -453,7 +453,7 @@ def block_to_markdown(block, slug, image_counter, item_num=1):
                 for cell in cells
             )
             lines.append(f"| {row_text} |")
-            if i == 0 and col_header:
+            if i == 0:  # GFM 테이블은 구분선 필수 — col_header 여부 무관
                 sep = " | ".join("---" for _ in cells)
                 lines.append(f"| {sep} |")
         return "\n".join(lines) + "\n\n"

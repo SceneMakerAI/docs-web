@@ -85,6 +85,7 @@ last_update:
 한국어가 메인이지만 장르별로 외국어 / 배경 소음 양상이 다르다.
 
 | 구분 | 방송 | 재생시간 | 특징 | URL |
+| --- | --- | --- | --- | --- |
 | 뉴스 | KBS 9 뉴스 | 48:30 | 빠른 발화, 강한 BGM/관중 함성, 가장 긴 콘텐츠 | [https://www.youtube.com/watch?v=rX1P-jOoNmM](https://www.youtube.com/watch?v=rX1P-jOoNmM) |
 | 다큐 | 슈퍼피쉬 1부 | 58:40 | 차분한 내레이션, 외국어 인터뷰 일부 | [https://www.youtube.com/watch?v=iNbWqC1iqKw](https://www.youtube.com/watch?v=iNbWqC1iqKw) |
 | 드라마 | KBS 겨울 연가 | 1:04:52 | 일반 대사, BGM 있음 | [https://www.youtube.com/watch?v=irVKEhb9g8M](https://www.youtube.com/watch?v=irVKEhb9g8M) |
