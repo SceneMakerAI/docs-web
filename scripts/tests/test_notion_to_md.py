@@ -645,3 +645,38 @@ class TestToggleSummaryInlineMarkdown:
         result = self._render(self._block(rt))
         assert "<code>batch.py</code>" in result
         assert "`batch.py`" not in result
+
+
+# ── TC-15: child_page · link_to_page 블록 → Notion URL 링크 렌더링 ─────────────
+
+class TestChildPageBlock:
+    def _render(self, block):
+        return n.block_to_markdown(block, lambda: "", lambda: 1)
+
+    def test_child_page_renders_link(self):
+        block = {
+            "type": "child_page",
+            "id": "12345678-abcd-ef01-2345-6789abcdef01",
+            "child_page": {"title": "use_audio_in_video 버그 분석"},
+        }
+        result = self._render(block)
+        assert "[use_audio_in_video 버그 분석](https://www.notion.so/12345678abcdef0123456789abcdef01)" in result
+
+    def test_child_page_empty_title(self):
+        block = {
+            "type": "child_page",
+            "id": "aaaabbbb-cccc-dddd-eeee-ffffaaaabbbb",
+            "child_page": {"title": ""},
+        }
+        result = self._render(block)
+        assert result == ""
+
+    def test_link_to_page_renders_link(self):
+        block = {
+            "type": "link_to_page",
+            "id": "00001111-2222-3333-4444-555566667777",
+            "link_to_page": {"type": "page_id", "page_id": "00001111-2222-3333-4444-555566667777"},
+        }
+        result = self._render(block)
+        assert "https://www.notion.so/00001111222233334444555566667777" in result
+        assert "`batch.py`" not in result

@@ -553,6 +553,20 @@ def block_to_markdown(block, slug, image_counter, item_num=1):
     elif b_type == "divider":
         return "---\n\n"
 
+    elif b_type == "child_page":
+        title = block.get("child_page", {}).get("title", "")
+        page_id = block.get("id", "").replace("-", "")
+        if not title or not page_id:
+            return ""
+        return f"- [{title}](https://www.notion.so/{page_id})\n\n"
+
+    elif b_type == "link_to_page":
+        link_data = block.get("link_to_page", {})
+        page_id = (link_data.get("page_id") or link_data.get("database_id") or "").replace("-", "")
+        if not page_id:
+            return ""
+        return f"- [페이지 링크](https://www.notion.so/{page_id})\n\n"
+
     return ""
 
 
