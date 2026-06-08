@@ -200,24 +200,28 @@ h1 {
 article a,
 article a:link,
 article a:visited {
-  color: inherit !important;
+  color: #6b7280 !important;
   text-decoration: underline;
   text-underline-offset: 2px;
-  text-decoration-color: rgba(0, 0, 0, 0.3);
+  text-decoration-color: rgba(107, 114, 128, 0.5);
 }
 .markdown a:hover,
 article a:hover {
-  color: inherit !important;
+  color: #4b5563 !important;
   text-decoration: underline;
-  text-decoration-color: rgba(0, 0, 0, 0.6);
+  text-decoration-color: #4b5563;
 }
 [data-theme='dark'] .markdown a,
+[data-theme='dark'] .markdown a:link,
+[data-theme='dark'] .markdown a:visited,
 [data-theme='dark'] article a {
-  text-decoration-color: rgba(255, 255, 255, 0.3);
+  color: rgba(255, 255, 255, 0.5) !important;
+  text-decoration-color: rgba(255, 255, 255, 0.25);
 }
 [data-theme='dark'] .markdown a:hover,
 [data-theme='dark'] article a:hover {
-  text-decoration-color: rgba(255, 255, 255, 0.6);
+  color: rgba(255, 255, 255, 0.75) !important;
+  text-decoration-color: rgba(255, 255, 255, 0.5);
 }
 
 /* ─────────── Code block border — Notion 스타일 ─────────── */
