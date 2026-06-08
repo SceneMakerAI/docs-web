@@ -193,33 +193,33 @@ h1 {
   border: none;
 }
 
-/* ─────────── Links — Notion 스타일: 회색 + 밑줄 ─────────── */
-.markdown a,
-.markdown a:link,
-.markdown a:visited,
-article a,
-article a:link,
-article a:visited {
+/* ─────────── Links — Notion 스타일: 회색 + 밑줄 (카드·편집 링크 제외) ─────────── */
+.markdown a:not(.card):not(.theme-edit-this-page),
+.markdown a:not(.card):not(.theme-edit-this-page):link,
+.markdown a:not(.card):not(.theme-edit-this-page):visited,
+article a:not(.card):not(.theme-edit-this-page),
+article a:not(.card):not(.theme-edit-this-page):link,
+article a:not(.card):not(.theme-edit-this-page):visited {
   color: #6b7280 !important;
   text-decoration: underline;
   text-underline-offset: 2px;
   text-decoration-color: rgba(107, 114, 128, 0.5);
 }
-.markdown a:hover,
-article a:hover {
+.markdown a:not(.card):not(.theme-edit-this-page):hover,
+article a:not(.card):not(.theme-edit-this-page):hover {
   color: #4b5563 !important;
   text-decoration: underline;
   text-decoration-color: #4b5563;
 }
-[data-theme='dark'] .markdown a,
-[data-theme='dark'] .markdown a:link,
-[data-theme='dark'] .markdown a:visited,
-[data-theme='dark'] article a {
+[data-theme='dark'] .markdown a:not(.card):not(.theme-edit-this-page),
+[data-theme='dark'] .markdown a:not(.card):not(.theme-edit-this-page):link,
+[data-theme='dark'] .markdown a:not(.card):not(.theme-edit-this-page):visited,
+[data-theme='dark'] article a:not(.card):not(.theme-edit-this-page) {
   color: rgba(255, 255, 255, 0.5) !important;
   text-decoration-color: rgba(255, 255, 255, 0.25);
 }
-[data-theme='dark'] .markdown a:hover,
-[data-theme='dark'] article a:hover {
+[data-theme='dark'] .markdown a:not(.card):not(.theme-edit-this-page):hover,
+[data-theme='dark'] article a:not(.card):not(.theme-edit-this-page):hover {
   color: rgba(255, 255, 255, 0.75) !important;
   text-decoration-color: rgba(255, 255, 255, 0.5);
 }
