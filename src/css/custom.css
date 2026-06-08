@@ -193,20 +193,31 @@ h1 {
   border: none;
 }
 
-/* ─────────── Links ─────────── */
+/* ─────────── Links — Notion 스타일: 회색 + 밑줄 ─────────── */
 .markdown a,
 .markdown a:link,
 .markdown a:visited,
 article a,
 article a:link,
 article a:visited {
-  color: #376cd5 !important;
-  text-decoration: none;
+  color: inherit !important;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  text-decoration-color: rgba(0, 0, 0, 0.3);
 }
 .markdown a:hover,
 article a:hover {
-  color: #3a40c4 !important;
+  color: inherit !important;
   text-decoration: underline;
+  text-decoration-color: rgba(0, 0, 0, 0.6);
+}
+[data-theme='dark'] .markdown a,
+[data-theme='dark'] article a {
+  text-decoration-color: rgba(255, 255, 255, 0.3);
+}
+[data-theme='dark'] .markdown a:hover,
+[data-theme='dark'] article a:hover {
+  text-decoration-color: rgba(255, 255, 255, 0.6);
 }
 
 /* ─────────── Code block border — Notion 스타일 ─────────── */
