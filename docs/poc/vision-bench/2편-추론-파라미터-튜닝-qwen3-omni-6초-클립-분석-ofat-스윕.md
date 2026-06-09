@@ -74,20 +74,20 @@ SceneMaker의 클립 영상 분석은 영상에 포함된 **시각·청각 정�
 | `frequency_penalty` | 가산형 반복 억제 (등장 횟수 비례) | `[-2, 2]` · `0` =비활성 (기본값 0.0) | **변동** |
 | `repetition_penalty` | 곱셈형 반복 억제 (등장 여부) | `>0` · `1` =비활성 · `>1` =억제 | **변동** |
 | `max_tokens` | completion 토큰 상한 (출력 길이 캡) | `>0` · 남은 컨텍스트 이내 | 고정 512 |
-| `chat_template_kwargs.enable_thinking` | 사고(thinking) 토큰 생성 on/off | `true` / `false` | 고정 off |
+| `chat_template_kwargs.enable_thinking` | 사고(thinking) 토큰 생성 on/off | `true` / `false` | **별도 측정** (품질·지연) |
 | `seed` | 재현성 (고정 시 동일 입력→동일 출력) | 정수 · `<0` =비활성(매번 무작위) | 고정 -1 |
 
 1. **vLLM 입력 처리 파라미터** (*Multimodal Ingestion · Context Conditioning* ) 토큰·지연 축(OFAT 아님)
 
 | **파라미터** | **역할** | **값 범위** | **본 실험** |
 | --- | --- | --- | --- |
-| `media_io_kwargs.video.fps` | 영상 프레임 추출 레이트 | `>0` (예: 0.5, 1.0, 2.0) | **별도 측정** (토큰·지연) |
+| `media_io_kwargs.video.fps` | 영상 프레임 추출 레이트 | `>0` (예: 0.5, 1.0, 2.0) | **별도 측정** (품질·지연) |
 | `use_audio_in_video` | mp4 내 오디오 동시 디코딩 | `true` / `false` | 고정 on |
 
 :::note
 📌 `frequency_penalty` **vs** `repetition_penalty` → 둘 다 반복을 억제하지만 방식이 다르다.
 
-- **frequency** (가산·빼기) : 이미 **많이** 나온 토큰일수록 **더** 깎음(횟수 비례·누적) → 폭주 루프(`공 공 공…` ) 제동에 강함. **출력 토큰만** 카운트.
+- **frequency** (가산·빼기) : 이미 **많이** 나온 토큰일수록 **더** 패널티(횟수 비례·누적) → 반복 (`공 공 공…` ) 제동에 강함. **출력 토큰만** 카운트.
 - **repetition** (곱셈·나눔) : 한 번이라도 나오면 **일정 비율** 로 깎음(등장 여부만, 횟수 무관). vLLM 은 **프롬프트 + 출력** 모두 보므로 프롬프트 어휘까지 억제될 수 있음(recall 손실 소지↑).
 - ⚠️ 둘 다 켜면 **2중 억제(과함)**
 :::
@@ -158,7 +158,18 @@ SceneMaker 프로젝트에서 **대사(STT)분석은 WhisperX의** 별도 모듈
 
 ## 4. 파라미터별 효과
 
+본 절에서 한 번에 하나씩(OFAT) 흔든 대상 파라미터다. 괄호는 격리용 anchor.
+
+- `temperature` : 0.0 / 0.3 / 0.7 / 1.0
+- `top_k` : 1 / 10 / 50 / -1 (temp=0.7)
+- `top_p` : 0.5 / 0.8 / 0.95 / 1.0 (temp=0.7)
+- `frequency_penalty` : 0.0 / 0.5 / 1.0 / 2.0 (greedy)
+- `repetition_penalty` : 1.0 / 1.05 / 1.1 / 1.3 (greedy)
+- `fps` : 0.5 / 1.0 / 2.0 (별도 측정 · 토큰/지연)
+
 표의 약어 — `obj/act/aud` = objects/actions/audio 평균 항목 수, `purity` = 한글 / (한글+라틴), `repeat` = 항목 중복·토큰 루프 레코드 수(/70), `comp_p50` = completion 토큰 중앙값.
+
+### 4.0. 테스트 데이터 준비
 
 ### 4.1. temperature — 낮을수록 가장 깨끗
 
