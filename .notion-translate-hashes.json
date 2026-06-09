@@ -35,7 +35,7 @@
     "sidebar_position": "1"
   },
   "docs/poc/vision-bench/qwen3-omni-baseline-news-stt-없이-30fps-vs-05fps.md": {
-    "body_hash": "0f7c59731c81b3a41eb909a34c0e5575b5f875ef40215013b36802d9865ea76e",
+    "body_hash": "",
     "slug": "2",
     "sidebar_position": "2",
     "frontmatter_hash": "b897ce8d26e33685315c9c86f473ad3fbe8632d8654fb518fda9778259a57dd3"
@@ -96,7 +96,7 @@
     "sidebar_position": "1"
   },
   "docs/poc/audio-bench/한국어-콘텐츠-lid-정확도-비교-whisper-vs-voxlingua107.md": {
-    "body_hash": "6d57d6566928d19c090ad00e8b2999e5b8720201f990e824ee5e29d302fc59fb",
+    "body_hash": "",
     "slug": "2",
     "sidebar_position": "2",
     "frontmatter_hash": "befa22002b78a5d608927ed8066b76b6fbbaaf965a1edae129b5e30e16b4510d"
@@ -107,7 +107,7 @@
     "sidebar_position": "3"
   },
   "docs/poc/vision-bench/1편-멀티모달-llm-한국-방송-6초-클립-영상-이해-벤치마크-파이프라인-구축.md": {
-    "body_hash": "25fed9b896ff517837e89a9a0a79dbd7bdc9a15cb6666c508228bb7828f19325",
+    "body_hash": "",
     "slug": "1",
     "sidebar_position": "1",
     "frontmatter_hash": "fafc1ea43911b6d9e36d0365c33157eb6649687f1356f4dfd824cf70bb93d783"
@@ -135,7 +135,7 @@
     "frontmatter_hash": "95beb651a61af6b790d11a702e74a15ca4587e8e19a3c628eac1c209893cca64"
   },
   "docs/poc/audio-bench/poc-기획안-초고속초고품질-다국어-ai-자막-생성-시스템-구축.md": {
-    "body_hash": "2f280704931a7250492869c09f1b53bdb73e26fb23c193558933098f4e40d7da",
+    "body_hash": "",
     "slug": "1",
     "sidebar_position": "1",
     "frontmatter_hash": "4b57759c2e22e0fde584ad7547b5633e6ff22649876fdd1de2cb546be6717e15"
@@ -177,7 +177,7 @@
     "frontmatter_hash": "2901b66edcdaa817b613633ac6e2f5135b1bede77dc021295d65b46eb6ad7e9a"
   },
   "docs/install/qwen-3x-설치.md": {
-    "body_hash": "25b9a227898cd3307898e444d568928dcaa3f887d76ce06bb2e1ba013fa206d8",
+    "body_hash": "",
     "slug": "1",
     "sidebar_position": "1",
     "frontmatter_hash": "a4a3ace3819ae0f6cd04d8c8e81e790f410d5da23da7c88394840199ff5d40c9"
