@@ -9,11 +9,6 @@
     "slug": "2",
     "sidebar_position": "2"
   },
-  "docs/install/llm-설치.md": {
-    "body_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-    "slug": "2",
-    "sidebar_position": "2"
-  },
   "docs/poc/제목없음.md": {
     "body_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "slug": "5",
@@ -133,12 +128,6 @@
     "sidebar_position": "4",
     "frontmatter_hash": "ce5289e5bb10866cf88a4045a24dbfc69e3b8e4145786389bfb2af92e92ea294"
   },
-  "docs/install/qwen-3x-설치.md": {
-    "body_hash": "25b9a227898cd3307898e444d568928dcaa3f887d76ce06bb2e1ba013fa206d8",
-    "slug": "1",
-    "sidebar_position": "1",
-    "frontmatter_hash": "a4a3ace3819ae0f6cd04d8c8e81e790f410d5da23da7c88394840199ff5d40c9"
-  },
   "docs/contribute/vllm.md": {
     "body_hash": "a376a0ff559597d76dbdc1e771fb5c0834fe2d42745c72a953997ea21ac9f035",
     "slug": "1",
@@ -186,5 +175,11 @@
     "slug": "",
     "sidebar_position": "",
     "frontmatter_hash": "2901b66edcdaa817b613633ac6e2f5135b1bede77dc021295d65b46eb6ad7e9a"
+  },
+  "docs/install/qwen-3x-설치.md": {
+    "body_hash": "25b9a227898cd3307898e444d568928dcaa3f887d76ce06bb2e1ba013fa206d8",
+    "slug": "1",
+    "sidebar_position": "1",
+    "frontmatter_hash": "a4a3ace3819ae0f6cd04d8c8e81e790f410d5da23da7c88394840199ff5d40c9"
   }
 }
