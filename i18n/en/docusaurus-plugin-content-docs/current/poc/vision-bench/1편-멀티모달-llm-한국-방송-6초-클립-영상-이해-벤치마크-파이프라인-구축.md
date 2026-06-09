@@ -581,7 +581,7 @@ x-request-id: 6da1b40a
 
    </details>
 
-details### 3.3.3. Batch Inference (`POST /chat/batch` )
+#### 3.3.3. Batch Inference (`POST /chat/batch` )
 
 Using the same 12 clips and identical parameters (`temperature 0.3`, server default samples at the time of measurement), we compare the processing times for **① one at a time** `/chat` **sequentially** vs. **②** `/chat/batch` **batch** processing. (Reproduction: `experiments/01_pipeline/batch_throughput.py` )
 
@@ -632,7 +632,7 @@ print(f"순차 {seq_ms}ms · 배치 {batch_ms}ms · {seq_ms / batch_ms:.2f}×")
 
 </details>
 
-details Mode | Total Processing Time | Success |
+| Mode | Total Processing Time | Success |
 | --- | --- | --- |
 | Sequential (one at a time `/chat` ) | 37536ms | 12/12 |
 | Batch (`/chat/batch` batch) | 22,603 ms | 12/12 |
