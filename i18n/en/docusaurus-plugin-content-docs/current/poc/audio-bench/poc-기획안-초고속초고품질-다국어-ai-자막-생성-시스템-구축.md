@@ -47,7 +47,9 @@ A Proof of Concept for **comparing STT (Speech-to-Text) systems** to automatical
 - Configuration of hallucination/misrecognition handling gates (5 types on the Whisper side)
 - Recommended architecture for the production phase
 
----### 1.2 Scope
+---
+
+###  1.2 Scope
 
 #### Included (Scope of this POC)
 
@@ -71,7 +73,9 @@ A Proof of Concept for **comparing STT (Speech-to-Text) systems** to automatical
 | Job queue (asyncio.Queue, etc.) | Single-process sequential processing |
 | Concurrent requests / Multiple clients | Resolved via dynamic batching in the production diagram (Chapter 8) |
 
----### 1.3 Evaluation Content Set
+---
+
+###  1.3 Evaluation Content Set
 
 Six types of Korean video content (one per genre) were used. Preprocessed 16 kHz mono WAV files, duration ranging from 30 minutes to 2 hours, no ground truth labels (using the match rate proxy method described in Section 2.3). 
 
@@ -103,7 +107,9 @@ Validation of a subtitling pipeline tailored to complex media audio environments
 Basic accelerated environment based on a single NVIDIA RTX 4090 (24GB)
 
 
----## 2. Pipeline Architecture
+---
+
+##  2. Pipeline Architecture
 
 ### 2.1 Overall Flow
 
@@ -169,7 +175,9 @@ output/
 `S???` is the speaker (currently an unintegrated placeholder). lang is ISO 639-1.
 
 
----## 3. Core Components
+---
+
+##  3. Core Components
 
 Composed of 5 components. All use GPU (cuda:0). Warm-up occurs once at system startup.
 
@@ -182,7 +190,9 @@ Composed of 5 components. All use GPU (cuda:0). Warm-up occurs once at system st
 | ASR (Qwen) | Korean/Multilingual Transcription + Word Timestamp | Qwen3-ASR-1.7B + ForcedAligner-0.6B |
 | Judge | Accuracy Scoring (-3 to 3) | Gemini 3.5 Flash |
 
----### 3.1 Denoise — DeepFilterNet v3
+---
+
+###  3.1 Denoise — DeepFilterNet v3
 
 | Item | Value |
 | --- | --- |
@@ -195,7 +205,9 @@ Composed of 5 components. All use GPU (cuda:0). Warm-up occurs once at system st
 **Why atten_lim_db = -30?**  
 At full power (`None`), singing or soft speech is clipped as noise, causing ASR omissions. Limiting intensity to -30dB = ↑ speech preservation.
 
----### 3.2 VAD — Silero VAD
+---
+
+###  3.2 VAD — Silero VAD
 
 | Item | Value |
 | --- | --- |
@@ -206,7 +218,9 @@ At full power (`None`), singing or soft speech is clipped as noise, causing ASR 
 
 **Role** — First line of defense against hallucinations. Simply preventing silence/BGM segments from being sent to ASR significantly reduces hallucinations (industry standard practice).
 
----### 3.3 LID — Whisper `detect_language`
+---
+
+###  3.3 LID — Whisper `detect_language`
 
 | Item | Value |
 | --- | --- |
@@ -226,7 +240,9 @@ At full power (`None`), singing or soft speech is clipped as noise, causing ASR 
 
 **Qwen also uses the same LID** — more accurate than Voxlingua107.
 
----### 3.4 ASR
+---
+
+###  3.4 ASR
 
 #### 3.4.1 Whisper — faster-whisper large-v3
 
@@ -255,7 +271,9 @@ At full power (`None`), singing or soft speech is clipped as noise, causing ASR 
 
 > Separated into venv to avoid dependency conflicts between Whisper and Qwen (`.venv` / `.venv-qwen` ).
 
----### 3.5 Judge — Gemini 3.5 Flash
+---
+
+###  3.5 Judge — Gemini 3.5 Flash
 
 | Item | Value |
 | --- | --- |
@@ -275,7 +293,9 @@ At full power (`None`), singing or soft speech is clipped as noise, causing ASR 
 - Audio serves as ground truth — Evaluation is possible even if segment segmentation differs across STT systems
 
 
----## 4. System Design + Hallucination Handling
+---
+
+##  4. System Design + Hallucination Handling
 
 The key trial-and-error in the POC was mostly on the Whisper side regarding hallucination handling. The Qwen side focused mainly on language correction patterns.
 
@@ -400,7 +420,9 @@ Since Whisper is trained on different amounts of data for each language, lower t
 
 If we had gone with the original LID result, it would have been transcribed as German → hallucination. Forced normalization to ko.
 
----#### Gate 4 — dual transcribe + MIN_DUAL_LOGPROB (-0.6)
+---
+
+####  Gate 4 — dual transcribe + MIN_DUAL_LOGPROB (-0.6)
 
 <table>
 <tbody>
@@ -432,7 +454,9 @@ If we had gone with the original LID result, it would have been transcribed as G
 
 `max(-0.71, -0.89) = -0.71 < -0.6` → drop. A case where, if the original LID had been zh, it would have resulted in a hallucination like `一观测者来交换`.
 
----#### Gate 5 — Korean character ratio gate (30%)
+---
+
+####  Gate 5 — Korean character ratio gate (30%)
 
 <table>
 <tbody>
@@ -467,7 +491,9 @@ If we had gone with the original LID result, it would have been transcribed as G
 **Case** — The audio is in Korean, but Whisper outputs Japanese tokens even in Korean mode  
 **Principle** — "**Better to omit than to display incorrect subtitles**" → drop
 
----#### Final Flow
+---
+
+####  Final Flow
 
 ```
 audio_raw + audio_denoised
@@ -499,7 +525,9 @@ audio_raw + audio_denoised
 segment 저장 (transcribe MD)
 ```
 
----### 4.2 Qwen Side
+---
+
+###  4.2 Qwen Side
 
 #### Model / Default Settings
 
@@ -542,7 +570,9 @@ Qwen supports approximately 30 languages, but **Qwen3-ForcedAligner, which suppo
 → This is a concept similar to Whisper’s “Hangul character ratio gate,” but **it corrects rather than drops** (Qwen does not forcefully handle LID errors for ko; it simply corrects the language).
 
 
----## 5. Evaluation Method
+---
+
+##  5. Evaluation Method
 
 Gemini 3.5 Flash compares the audio (ground truth) with the STT output segments to score them. System-independent (Whisper and Qwen are each evaluated using the same audio).
 
@@ -569,7 +599,9 @@ Rather than simple match/mismatch, the score reflects whether **"this segment ca
 | **-3 Completely Different** | ✅ Speech present | Text completely different from spoken content |
 
 
----### 5.2 Foreign Language +1 Adjustment
+---
+
+###  5.2 Foreign Language +1 Adjustment
 
 For segments in languages other than Korean (lang ≠ ko), add **+1 point** to the score (max 3 points).
 
@@ -621,7 +653,9 @@ POC results (see Chapter 7) show that all system × content combinations achieve
 - For scores below 0, correction cost > value → drop
 
 
----## 6. Results
+---
+
+##  6. Results
 
 Execution source: [https://github.com/SceneMakerAI/poc-stt-bench](https://github.com/SceneMakerAI/poc-stt-bench)
 
