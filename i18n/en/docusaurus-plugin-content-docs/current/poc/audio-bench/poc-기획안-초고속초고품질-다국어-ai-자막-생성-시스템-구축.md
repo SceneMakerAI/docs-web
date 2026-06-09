@@ -35,7 +35,7 @@ A Proof of Concept for **comparing STT (Speech-to-Text) systems** to automatical
 </tr>
 </tbody></table>
 
-table Initially, Gemini STT was also included in the comparison, but it was deemed unsuitable for subtitling due to an issue where timestamp accuracy drifted by minutes and was subsequently excluded. Gemini is used solely in the role of a judge.
+> Initially, Gemini STT was also included in the comparison, but it was deemed unsuitable for subtitling due to an issue where timestamp accuracy drifted by minutes and was subsequently excluded. Gemini is used solely in the role of a judge.
 
 **Evaluation Method**
 
@@ -352,7 +352,7 @@ Since Whisper is trained on different amounts of data for each language, lower t
 </tr>
 </tbody></table>
 
-table*Why is this effective?** — The primary cause of Whisper hallucinations is **generating subtitle patterns learned from silence/BGM segments** (`ご視聴ありがとうございました`, `Thanks for watching`, etc.). This problem disappears entirely when only speech segments are input. Industry-standard tools like WhisperX and stable-ts follow the same pattern.
+**Why is this effective?** — The primary cause of Whisper hallucinations is **generating subtitle patterns learned from silence/BGM segments** (`ご視聴ありがとうございました`, `Thanks for watching`, etc.). This problem disappears entirely when only speech segments are input. Industry-standard tools like WhisperX and stable-ts follow the same pattern.
 
 #### Gate 2 — MIN_LOGPROB (-1.0)
 
@@ -376,7 +376,7 @@ table*Why is this effective?** — The primary cause of Whisper hallucinations i
 </tr>
 </tbody></table>
 
-table*Meaning of threshold -1.0** — Converted to log probability:
+**Meaning of threshold -1.0** — Converted to log probability:
 
 | `avg_logprob` | Average token probability | Interpretation |
 | --- | --- | --- |
@@ -412,7 +412,7 @@ table*Meaning of threshold -1.0** — Converted to log probability:
 </tr>
 </tbody></table>
 
-table*Why 0.5?** — Cases like LID probability 0.23 = "sounds similar to ko/de/ja/zh" = LID itself is unreliable. Assuming Korean content → assuming ko is natural.
+**Why 0.5?** — Cases like LID probability 0.23 = "sounds similar to ko/de/ja/zh" = LID itself is unreliable. Assuming Korean content → assuming ko is natural.
 
 **Example — Actual baseball.wav log**
 
@@ -451,7 +451,7 @@ If we had used the original LID result as-is, it would have transcribed as Germa
 </tr>
 </tbody></table>
 
-table*Why -0.6?** — Log probability around 50%. If both are below 50%, the model is unsure of either language = higher probability that the short audio is garbled or noise.
+**Why -0.6?** — Log probability around 50%. If both are below 50%, the model is unsure of either language = higher probability that the short audio is garbled or noise.
 
 **Example — Actual baseball.wav log**
 
@@ -479,7 +479,7 @@ table*Why -0.6?** — Log probability around 50%. If both are below 50%, the mod
 </tr>
 </tbody></table>
 
-table*Why 30%?** — Normal Korean speech typically has a Korean character ratio of 70%+ (even when mixed with numbers or English abbreviations). Less than 30% = effectively hallucinated Japanese/Kanji tokens.
+**Why 30%?** — Normal Korean speech typically has a Korean character ratio of 70%+ (even when mixed with numbers or English abbreviations). Less than 30% = effectively hallucinated Japanese/Kanji tokens.
 
 **Calculating Hangul Ratio** — The ratio of Hangul syllables (ga-hit) among characters and numbers, excluding spaces and punctuation.
 

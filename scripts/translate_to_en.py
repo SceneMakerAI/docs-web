@@ -350,6 +350,15 @@ def translate_file(kr_path, hashes):
     body = _pretranslate_code_comments(body)
     body_no_code, code_store = _protect_code_blocks(body)
     body_no_inline, inline_store = _protect_inline_code(body_no_code)
+    # Protect blockquote > markers — DeepL with tag_handling="html" can replace "> " with tag names
+    _bq_store: dict[str, str] = {}
+
+    def _protect_bq(m: re.Match) -> str:
+        key = f'<x id="BQ{len(_bq_store)}"/>'
+        _bq_store[key] = m.group(0)
+        return key
+
+    body_no_inline = re.sub(r'^> ?', _protect_bq, body_no_inline, flags=re.MULTILINE)
     # DeepL converts <hr/> to "---" which merges with next headings
     # Use an HTML tag placeholder: tag_handling="html" preserves <x ...> tags exactly
     _HR = '<x id="HR"/>'
@@ -376,6 +385,8 @@ def translate_file(kr_path, hashes):
     # Safety net: DeepL prepends closing-tag name to following Markdown elements
     _TAG = r'(?:table|tbody|thead|tr|details|div|section|blockquote)'
     en_body = re.sub(rf'^{_TAG}(#{1,6} )', r'\1', en_body, flags=re.MULTILINE)
+    # Bold: "tag*text**" → "**text**" (tag ate one * from opening **)
+    en_body = re.sub(rf'^{_TAG}\*', '**', en_body, flags=re.MULTILINE)
     # Table row: "tag Cell | ..." → "| Cell | ..." (leading | was dropped)
     en_body = re.sub(rf'^{_TAG} ([^\n|]+\|)', r'| \1', en_body, flags=re.MULTILINE)
     # Safety net: DeepL removes blank lines after closing block HTML tags
@@ -386,6 +397,8 @@ def translate_file(kr_path, hashes):
     en_body = re.sub(r'\n{3,}', '\n\n', en_body)
     en_body = _restore_inline_code(en_body, inline_store)
     en_body = _restore_code_blocks(en_body, code_store)
+    for key, val in _bq_store.items():
+        en_body = en_body.replace(key, val)
 
     with open(en_path, "w", encoding="utf-8") as f:
         f.write(en_frontmatter + en_body)

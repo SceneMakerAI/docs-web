@@ -131,7 +131,7 @@ G4dn, G5, G6, Gr6, G6e, P4d, P4de, P5, P5e, P5en, P6-B200, P6-B300
 
 </details>
 
-details*Reasons for Choosing 4xlarge**
+**Reasons for Choosing 4xlarge**
 
 - MoE models with 30–35 billion parameters, such as Qwen3-Coder-30B-A3B and Qwen3.6-35B-A3B, require ~70 GB of VRAM in bf16 → Ample capacity with a single 96 GB card, including KV cache
 - Larger models (80–120B) are also possible with FP8/FP4 quantization
