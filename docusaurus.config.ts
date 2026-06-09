@@ -47,18 +47,27 @@ const config: Config = {
     { tagName: 'link', attributes: { rel: 'preconnect', href: 'https://fonts.gstatic.com', crossorigin: 'anonymous' } },
     { tagName: 'link', attributes: { rel: 'stylesheet', href: 'https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap' } },
 
-    // Organization 구조화 데이터 — Google 리치 결과
+    // 구조화 데이터 — Google 리치 결과 (Organization + WebSite)
     {
       tagName: 'script',
       attributes: { type: 'application/ld+json' },
       innerHTML: JSON.stringify({
         '@context': 'https://schema.org',
-        '@type': 'Organization',
-        name: 'SceneMakerAI',
-        description: '오픈소스 AI(멀티모달 LLM)로 방송 콘텐츠를 재가공하는 플랫폼',
-        url: 'https://doc.scenemaker.solbox.com',
-        sameAs: ['https://github.com/SceneMakerAI'],
-        parentOrganization: { '@type': 'Organization', name: '솔박스(Solbox Inc.)' },
+        '@graph': [
+          {
+            '@type': 'Organization',
+            name: 'SceneMakerAI',
+            description: '오픈소스 AI(멀티모달 LLM)로 방송 콘텐츠를 재가공하는 플랫폼',
+            url: 'https://doc.scenemaker.solbox.com',
+            sameAs: ['https://github.com/SceneMakerAI'],
+            parentOrganization: { '@type': 'Organization', name: '솔박스(Solbox Inc.)' },
+          },
+          {
+            '@type': 'WebSite',
+            name: 'SceneMakerAI Docs',
+            url: 'https://doc.scenemaker.solbox.com',
+          },
+        ],
       }),
     },
   ],

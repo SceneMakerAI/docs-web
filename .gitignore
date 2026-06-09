@@ -87,6 +87,7 @@ desktop.ini
 .aidocs/
 .playwright-mcp/
 .claude/
+.firecrawl/
 
 # ──────────────────────────────────────────────────────────
 # 일회성 작업 캡처 / 후보 디렉토리
