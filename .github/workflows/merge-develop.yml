@@ -48,9 +48,13 @@ jobs:
         if: steps.diff.outputs.has_changes == 'true'
         run: npm ci
 
-      - name: Checkout docs/ from main (빌드용 콘텐츠)
+      - name: Checkout docs/ from main (빌드용 콘텐츠 완전 교체)
         if: steps.diff.outputs.has_changes == 'true'
-        run: git checkout origin/main -- docs/ blog/ static/img/
+        # rm -rf 없이 git checkout만 하면 develop에만 있고 main엔 없는 파일이 그대로 남아,
+        # 옛 콘텐츠가 새 authors.yml·sidebar와 충돌해 빌드 게이트가 깨진다.
+        run: |
+          rm -rf docs blog static/img
+          git checkout origin/main -- docs blog static/img
 
       - name: Build gate
         if: steps.diff.outputs.has_changes == 'true'
