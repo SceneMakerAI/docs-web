@@ -36,4 +36,5 @@ jobs:
           git add i18n/en/ .notion-translate-hashes.json
           git diff --cached --quiet && echo "번역 변경 없음" && exit 0
           git commit -m "chore: EN 번역 자동 업데이트 [skip-notion]"
+          git pull --rebase origin main
           git push origin main

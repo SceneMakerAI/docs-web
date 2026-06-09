@@ -1,0 +1,190 @@
+{
+  "docs/architecture/추가-테스트.md": {
+    "body_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "slug": "2",
+    "sidebar_position": "2"
+  },
+  "docs/release-notes/페이지-추가-테스트.md": {
+    "body_hash": "aa64f5ba70d05c8ad3d6afeb6c0a0e6575984aa7591be9a65c52f8ee6060211f",
+    "slug": "2",
+    "sidebar_position": "2"
+  },
+  "docs/install/llm-설치.md": {
+    "body_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "slug": "2",
+    "sidebar_position": "2"
+  },
+  "docs/poc/제목없음.md": {
+    "body_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "slug": "5",
+    "sidebar_position": "5"
+  },
+  "docs/poc/qwen3-omni-baseline-news-stt-없이.md": {
+    "body_hash": "e23df2cd765388193ce6fe5f4870ef8e434cd3b1c0d09682e503bbbb2e17fa62",
+    "slug": "5",
+    "sidebar_position": "5"
+  },
+  "docs/poc/qwen3-omni-baseline-news-stt-없이-30fps-vs-05fps.md": {
+    "body_hash": "afee6602e7460b45ebc24b5f04a4d1886a030871ce96a73b3c63e6cb65ab10c7",
+    "slug": "5",
+    "sidebar_position": "5"
+  },
+  "docs/poc/vision-bench/index.md": {
+    "body_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "slug": "/",
+    "sidebar_position": "3"
+  },
+  "docs/poc/vision-bench/poc-기획안-멀티모달-llm-한국-방송-6초-클립-영상-이해-벤치마크.md": {
+    "body_hash": "72f4c96e752bb07e12486f8d446438c97bd87031a2f292dd107033f35e4f747c",
+    "slug": "1",
+    "sidebar_position": "1"
+  },
+  "docs/poc/vision-bench/qwen3-omni-baseline-news-stt-없이-30fps-vs-05fps.md": {
+    "body_hash": "0f7c59731c81b3a41eb909a34c0e5575b5f875ef40215013b36802d9865ea76e",
+    "slug": "2",
+    "sidebar_position": "2",
+    "frontmatter_hash": "b897ce8d26e33685315c9c86f473ad3fbe8632d8654fb518fda9778259a57dd3"
+  },
+  "docs/poc/vision-bench/멀티모달-llm-한국-방송-6초-클립-영상-이해-벤치마크.md": {
+    "body_hash": "72f4c96e752bb07e12486f8d446438c97bd87031a2f292dd107033f35e4f747c",
+    "slug": "1",
+    "sidebar_position": "1"
+  },
+  "docs/about/테스트.md": {
+    "body_hash": "ecc5672f396e9b3588fc87cd811f24b0e1c73e7777650753f6bf66b2699fa983",
+    "slug": "3",
+    "sidebar_position": "3"
+  },
+  "docs/about/sbin.md": {
+    "body_hash": "f7b145ead66805ed4012475b87a4709c2f478de0a5750e3b031fe6c905e3f45b",
+    "slug": "1",
+    "sidebar_position": "1"
+  },
+  "docs/about/이름-수정-테스트.md": {
+    "body_hash": "adb4921510a4919dbfae2d89903400fbc238f4e7ef79b1630eb80a9c6efaed5b",
+    "slug": "1",
+    "sidebar_position": "1"
+  },
+  "docs/poc/vision-bench/제목없음.md": {
+    "body_hash": "d81414e2e29b87f67eef3007ea7020b2f29dc79d0c89e84c464ea7bf3cfb65b3",
+    "slug": "2",
+    "sidebar_position": "2"
+  },
+  "docs/architecture/overview.md": {
+    "body_hash": "1d7d0112c7cc12f9492ca40f271348fef6ab4a6e0aaca71c373feb6714a1affd",
+    "slug": "1",
+    "sidebar_position": "1"
+  },
+  "docs/blog/overview.md": {
+    "body_hash": "1d7d0112c7cc12f9492ca40f271348fef6ab4a6e0aaca71c373feb6714a1affd",
+    "slug": "1",
+    "sidebar_position": "1"
+  },
+  "docs/blog/제목없음.md": {
+    "body_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "slug": "1",
+    "sidebar_position": "1"
+  },
+  "docs/blog/scenemakerai-오픈소스-ai-방송-콘텐츠-재가공-플랫폼.md": {
+    "body_hash": "bb3f8dde1d89f8f80b92a1acf76aa3677256d55afdbd8768a7e21973a9c5c7bb",
+    "slug": "1",
+    "sidebar_position": "1"
+  },
+  "docs/blog/테스트-오픈소스-ai-방송-콘텐츠-재가공-플랫폼.md": {
+    "body_hash": "bb3f8dde1d89f8f80b92a1acf76aa3677256d55afdbd8768a7e21973a9c5c7bb",
+    "slug": "1",
+    "sidebar_position": "1"
+  },
+  "docs/poc/audio-bench/index.md": {
+    "body_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "slug": "/",
+    "sidebar_position": "1"
+  },
+  "docs/poc/audio-bench/한국어-콘텐츠-lid-정확도-비교-whisper-vs-voxlingua107.md": {
+    "body_hash": "6d57d6566928d19c090ad00e8b2999e5b8720201f990e824ee5e29d302fc59fb",
+    "slug": "2",
+    "sidebar_position": "2",
+    "frontmatter_hash": "befa22002b78a5d608927ed8066b76b6fbbaaf965a1edae129b5e30e16b4510d"
+  },
+  "docs/poc/vision-bench/추론-파라미터-튜닝-qwen3-omni-6초-클립-분석-ofat-스윕.md": {
+    "body_hash": "91ac91dadb1b140b5c0670b29a25d89fc584f43667bb1557fc5617e153db0c2e",
+    "slug": "3",
+    "sidebar_position": "3"
+  },
+  "docs/poc/vision-bench/1편-멀티모달-llm-한국-방송-6초-클립-영상-이해-벤치마크-파이프라인-구축.md": {
+    "body_hash": "25fed9b896ff517837e89a9a0a79dbd7bdc9a15cb6666c508228bb7828f19325",
+    "slug": "1",
+    "sidebar_position": "1",
+    "frontmatter_hash": "fafc1ea43911b6d9e36d0365c33157eb6649687f1356f4dfd824cf70bb93d783"
+  },
+  "docs/contribute/오픈소스-기여.md": {
+    "body_hash": "ec9874c3627f856f0ab5fafd6bcee398ae2c095bba38038cfd8cabd69d39636e",
+    "slug": "1",
+    "sidebar_position": "1"
+  },
+  "docs/release-notes/릴리즈-노트.md": {
+    "body_hash": "7c811edcdff1927ac5ed0cd27d9548bf26cd84a83d0da0347b76a20c6c216f06",
+    "slug": "1",
+    "sidebar_position": "1"
+  },
+  "docs/poc/vision-bench/3편-추론-파라미터-상세-조정-및-품질-평가.md": {
+    "body_hash": "4ba851abff1ad1efa9f87884b1aec2adc5b6ce070f60eb5f2af7995e1fdda5ef",
+    "slug": "4",
+    "sidebar_position": "4",
+    "frontmatter_hash": "ce5289e5bb10866cf88a4045a24dbfc69e3b8e4145786389bfb2af92e92ea294"
+  },
+  "docs/install/qwen-3x-설치.md": {
+    "body_hash": "25b9a227898cd3307898e444d568928dcaa3f887d76ce06bb2e1ba013fa206d8",
+    "slug": "1",
+    "sidebar_position": "1",
+    "frontmatter_hash": "a4a3ace3819ae0f6cd04d8c8e81e790f410d5da23da7c88394840199ff5d40c9"
+  },
+  "docs/contribute/vllm.md": {
+    "body_hash": "a376a0ff559597d76dbdc1e771fb5c0834fe2d42745c72a953997ea21ac9f035",
+    "slug": "1",
+    "sidebar_position": "1",
+    "frontmatter_hash": "95beb651a61af6b790d11a702e74a15ca4587e8e19a3c628eac1c209893cca64"
+  },
+  "docs/poc/audio-bench/poc-기획안-초고속초고품질-다국어-ai-자막-생성-시스템-구축.md": {
+    "body_hash": "2f280704931a7250492869c09f1b53bdb73e26fb23c193558933098f4e40d7da",
+    "slug": "1",
+    "sidebar_position": "1",
+    "frontmatter_hash": "4b57759c2e22e0fde584ad7547b5633e6ff22649876fdd1de2cb546be6717e15"
+  },
+  "docs/architecture/placeholder.md": {
+    "body_hash": "9c3c6fc3d407d5f72357eba0a1d4a19225debf92e023b664be415835ae8fc01b",
+    "slug": "placeholder",
+    "sidebar_position": "1",
+    "frontmatter_hash": "007727c458d7f9d57b9c5314565fdd592a8e86a292ddaabd6f52b9ee1ec3b18f"
+  },
+  "docs/release-notes/placeholder.md": {
+    "body_hash": "9c3c6fc3d407d5f72357eba0a1d4a19225debf92e023b664be415835ae8fc01b",
+    "slug": "placeholder",
+    "sidebar_position": "1",
+    "frontmatter_hash": "007727c458d7f9d57b9c5314565fdd592a8e86a292ddaabd6f52b9ee1ec3b18f"
+  },
+  "docs/poc/vision-bench/2편-추론-파라미터-튜닝-qwen3-omni-6초-클립-분석-ofat-스윕.md": {
+    "body_hash": "f1f826facd9304ff92167d13d67213f21558536f68efd5ae49417fb74c305a84",
+    "slug": "3",
+    "sidebar_position": "3",
+    "frontmatter_hash": "3fdb6f2d54df25d356656ffb0cb66afa548d65625d0e0b6b62ce8b987b9dfb41"
+  },
+  "docs/guide/scenemakerai-문서.md": {
+    "body_hash": "78fecbe8088c45ab98f1e36c1bb7bb6863019a7892a590101a1031398b55d0b0",
+    "slug": "1",
+    "sidebar_position": "1",
+    "frontmatter_hash": "4b57759c2e22e0fde584ad7547b5633e6ff22649876fdd1de2cb546be6717e15"
+  },
+  "docs/about/placeholder.md": {
+    "body_hash": "9c3c6fc3d407d5f72357eba0a1d4a19225debf92e023b664be415835ae8fc01b",
+    "slug": "placeholder",
+    "sidebar_position": "1",
+    "frontmatter_hash": "007727c458d7f9d57b9c5314565fdd592a8e86a292ddaabd6f52b9ee1ec3b18f"
+  },
+  "blog/2026-05-27-오픈소스-ai-방송-콘텐츠-재가공-플랫폼.md": {
+    "body_hash": "4bb1385336fc4d0caf4918ab8be18fa8eb5043bcfa3fec873d076a426c60874d",
+    "slug": "",
+    "sidebar_position": "",
+    "frontmatter_hash": "2901b66edcdaa817b613633ac6e2f5135b1bede77dc021295d65b46eb6ad7e9a"
+  }
+}
