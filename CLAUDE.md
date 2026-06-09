@@ -136,18 +136,17 @@ main (콘텐츠 자동화 전용)
      └─ feat/<이름> (단위 작업, 완료 후 design으로 머지 → 삭제)
 ```
 
-| 작업 유형 | 시작 브랜치 | 머지 대상 | dev 서버 포트 |
-|----------|------------|----------|--------------|
-| 콘텐츠 (Notion 자동 동기화) | — | `main` 직접 커밋 *(자동화 전용)* | 3000 |
-| **모든 코드 변경** (CSS·컴포넌트·설정·버그픽스) | `design` | `feat/<이름>` → `design` | 3002 |
-| develop 검증 | — | develop 체크아웃 후 별도 포트 | 3001 |
+| 작업 유형 | 시작 브랜치 | 머지 대상 | dev 서버 포트 | 담당 |
+|----------|------------|----------|--------------|------|
+| 콘텐츠 (Notion 자동 동기화) | — | `main` 직접 커밋 *(자동화 전용)* | 3000 | 서버 crontab |
+| **모든 코드 변경** | `design` | `feat/<이름>` → `design` → `develop` | 3002 | **Claude** |
+| **main 반영** | — | `design` 또는 `develop` → `main` | 3000 | **사용자** |
 
-**작업 흐름:**
+**작업 흐름 (Claude 담당 부분):**
 
 ```bash
 # 1. design 최신화
-git checkout design
-git merge origin/main --ff-only
+git checkout design && git merge origin/main --ff-only
 
 # 2. feat 브랜치 생성 (design 기점)
 git checkout -b feat/<이름>
@@ -156,19 +155,19 @@ git checkout -b feat/<이름>
 git commit -m "feat(...): ... [skip-notion]"
 
 # 4. design으로 머지 후 feat 삭제
-git checkout design
-git merge feat/<이름>
-git branch -d feat/<이름>
+git checkout design && git merge feat/<이름> && git branch -d feat/<이름>
+git push origin design
 
-# 5. design → main 머지 후 push
-git checkout main
-git merge design -m "chore: design → main 머지 [skip-notion]"
-git push origin main
+# 5. develop으로도 머지
+git checkout develop && git merge design && git push origin develop
+
+# → 이후 main 머지는 사용자가 직접 수행
 ```
 
 **절대 금지:**
 - `main` 또는 `develop`에 직접 커밋 ❌
 - `feat` 브랜치를 `main`에 직접 머지 ❌ (design 경유 필수)
+- Claude가 `main`에 머지·push ❌ (사용자 전용)
 
 **design 브랜치:** 장기 유지 (삭제 금지). 작업 전 반드시 `git merge origin/main --ff-only` 실행.
 **feat 브랜치:** design으로 머지 완료 후 로컬 삭제. 원격 push 불필요.
