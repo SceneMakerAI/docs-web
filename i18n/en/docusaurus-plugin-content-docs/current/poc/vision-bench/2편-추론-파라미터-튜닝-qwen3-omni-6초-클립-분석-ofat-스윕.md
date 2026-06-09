@@ -28,7 +28,7 @@ SceneMaker's clip analysis aims to **reliably extract visual and auditory inform
 The key issue here is **stability**. In a benchmark test batch-processing 700 clips, if the output fluctuates or breaks down with each run—even when using the same clip and the same prompt—the quality score itself cannot be trusted. Part 1(Pipeline Construction) During the validation process, four patterns of quality degradation were intermittently identified.
 
 1. **Premature EOS**: Outputs EOS (End of Sentence) from the very first token, resulting in content ending as an empty string. This occurs when the model “runs out of things to say” and shuts down immediately, often due to excessive constraints from a strict JSON schema.
-2. ****Text Degeneration**: The model loses its normal probability distribution, spews out random characters and system tokens, and crashes before completing the JSON (Gibberish Generation).
+2. **Text Degeneration**: The model loses its normal probability distribution, spews out random characters and system tokens, and crashes before completing the JSON (Gibberish Generation).
 3. **Repetition Loop**: The model gets stuck in a probability trap, endlessly looping and generating the same words, items, or JSON structures.
 4. **Latency Jitter**: Due to runaway generation—where collapse and repetition block normal EOS, causing output to stretch all the way to `max_tokens`—the minimum-to-maximum variance in inference time per clip is extreme.
 

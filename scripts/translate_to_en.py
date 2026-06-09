@@ -378,6 +378,8 @@ def translate_file(kr_path, hashes):
     # Safety net: HRHR variants left when old null-byte placeholder was stripped by DeepL
     _HRHR = r'(?:\*\*HRHR\*\*|#HRHR#|-HRHR-|—HRHR—|\|HRHR\||HRHR)'
     en_body = re.sub(rf'^{_HRHR}$', '---', en_body, flags=re.MULTILINE)
+    # Safety net: "****word" → "**word" — DeepL drops Korean in "**KO (EN)**" and adjacent ** merge
+    en_body = re.sub(r'\*{4,}(\w)', r'**\1', en_body)
     # Safety net: DeepL prepends closing-tag name to following Markdown elements
     _TAG = r'(?:table|tbody|thead|tr|details|div|section|blockquote)'
     en_body = re.sub(rf'^{_TAG}(#{1,6} )', r'\1', en_body, flags=re.MULTILINE)
