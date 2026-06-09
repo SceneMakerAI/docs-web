@@ -260,6 +260,8 @@ def translate_file(kr_path, hashes):
     # Safety net: DeepL removes blank lines after closing block HTML tags
     _BLOCK_CLOSE = r'</(table|tbody|thead|tr|details|div|section|blockquote)>'
     en_body = re.sub(rf'({_BLOCK_CLOSE})([^\n<])', r'\1\n\n\2', en_body)
+    # Safety net: DeepL inserts blank lines after <br> inside table cells, breaking the row
+    en_body = re.sub(r'(<br>)\n\n(?=[^|\n])', r'\1', en_body)
     en_body = re.sub(r'\n{3,}', '\n\n', en_body)
     en_body = _restore_inline_code(en_body, inline_store)
     en_body = _restore_code_blocks(en_body, code_store)

@@ -732,17 +732,9 @@ Output by processing stage
 
 | Component | Whisper | Qwen | Notes |
 | --- | --- | --- | --- |
-| **ASR Model** | 3 GB<br>
-
-(`Systran/faster-whisper-large-v3` , CT2 float16) | 3.5 GB<br>
-
-(`Qwen3-ASR-1.7B` , bfloat16, batch=8) |  |
-| **Timestamp Model** | — (Included in ASR) | 1.5 GB<br>
-
-(`Qwen3-ForcedAligner-0.6B` ) | Word-level timestamp |
-| **LID Model** | — (Reuses same instance as ASR) | 1.5 GB<br>
-
-(`large-v3-turbo` , float16) | Whisper claims that the ASR model also processes LID |
+| **ASR Model** | 3 GB<br>(`Systran/faster-whisper-large-v3` , CT2 float16) | 3.5 GB<br>(`Qwen3-ASR-1.7B` , bfloat16, batch=8) |  |
+| **Timestamp Model** | — (Included in ASR) | 1.5 GB<br>(`Qwen3-ForcedAligner-0.6B` ) | Word-level timestamp |
+| **LID Model** | — (Reuses same instance as ASR) | 1.5 GB<br>(`large-v3-turbo` , float16) | Whisper claims that the ASR model also processes LID |
 | **Denoise** | 0.5 GB (DeepFilterNet v3) | 0.5 GB (DeepFilterNet v3) | Common to both |
 | **VAD** | 10 MB (Silero VAD) | 10 MB (Silero VAD) | Common to both |
 | **Total** | **~3.5 GB** | **~7 GB** |  |
