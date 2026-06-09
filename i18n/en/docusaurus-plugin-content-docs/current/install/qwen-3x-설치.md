@@ -10,7 +10,9 @@ last_update:
 
 ### Configuring an EC2 Instance
 
----#### Basic Information (Summary)
+---
+
+#### Basic Information (Summary)
 
 | Category | Selection |
 | --- | --- |
@@ -26,10 +28,9 @@ New GPU instance types (G7e, P5, P6, etc.) are currently in a state where **supp
 For this reason, region selection should not be based solely on "proximity," but must consider the following **two factors together**.
 
 1. **Capacity Availability** — Can the instance actually be launched when needed?
-1. **Response Time in Korea** — Network latency perceived by the user 
+1. **Response Time in Korea** — Network latency as perceived by the user 
 
-
-**Comparison of Regions Offering G7e** (Measured on 2026-05-19)
+**Comparison of G7e Regions** (Measured on 2026-05-19)
 
 | Region | Capacity Score | Korea TCP RTT | Overall |
 | --- | --- | --- | --- |
@@ -43,8 +44,8 @@ For this reason, region selection should not be based solely on "proximity," but
 **Score Interpretation**
 
 - Capacity score (g7e.12xl, 1–10) = AWS **Spot Placement Score** (1=Very scarce / 10=Very abundant). Strong correlation with On-Demand availability
-- Scores are generally low across all 6 regions offering G7e (a common phenomenon with newer GPUs) → Among these, **a score of 3 is currently the best available**
-- Scores vary by time zone and day of the week → We recommend re-measuring manually before deployment
+- Scores are generally low across all 6 regions offering G7e (a common phenomenon with newer GPUs) → Among them, **a score of 3 is currently the best available**
+- Scores vary by time zone and day of the week → We recommend re-measuring directly before deployment
 
 **Check the Spot Placement Score Yourself**
 
@@ -61,7 +62,7 @@ aws ec2 get-spot-placement-scores \
 - Required permissions: `ec2:GetSpotPlacementScores`
 - Cost: Free, Evaluation period: Next 1 hour
 
-**(1) Capacity Perspective**
+**(1) Capacity Aspect**
 
 - The Korea and Japan regions (Seoul and Tokyo) have a score of **1** → Frequent provisioning failures are expected during weekday business hours
 - The three US regions (us-east-1 / us-east-2 / us-west-2) have a score of **3**
@@ -78,7 +79,9 @@ aws ec2 get-spot-placement-scores \
 >
 > - When scaling for interactive serving to Korean users, consider ap-northeast-1 (Tokyo) multi-region deployment or **Capacity Block for ML / Capacity Reservation**
 
----#### 1. Application and OS Image (Amazon Machine Image)
+---
+
+#### 1. Application and OS Image (Amazon Machine Image)
 
 **Selected AMI**
 
@@ -97,7 +100,9 @@ G4dn, G5, G6, Gr6, G6e, P4d, P4de, P5, P5e, P5en, P6-B200, P6-B300
 
 > ℹ️ **G7e is not listed** in the official list. However, actual testing confirmed that the Blackwell driver and CUDA function normally. When recreating the AMI in the future, we recommend using the **Deep Learning Base OSS Nvidia Driver GPU AMI** (AL2023), which explicitly supports G7e.
 
----#### 2. Instance Type
+---
+
+#### 2. Instance Type
 
 **Selected Instance** : `g7e.4xlarge`
 
@@ -123,7 +128,6 @@ G4dn, G5, G6, Gr6, G6e, P4d, P4de, P5, P5e, P5en, P6-B200, P6-B300
 | g7e.24xlarge | 96 | 1 TB | 4 | 384 GB | 800 Gbps |
 | g7e.48xlarge | 192 | 2 TB | 8 | 768 GB | 1600 Gbps |
 
-
 </details>**Reasons for Choosing 4xlarge**
 
 - MoE models with 30–35 billion parameters, such as Qwen3-Coder-30B-A3B and Qwen3.6-35B-A3B, require ~70 GB of VRAM in bf16 → Ample capacity with a single 96 GB card, including KV cache
@@ -139,7 +143,9 @@ Based on 32k contexts and a single sequence. Since vLLM dynamically allocates pa
 | Qwen3.5-122B-A10B-GPTQ-Int4 | 122B / 10B (MoE) | Int4 (GPTQ) | ~63 GB | ~3 GB | ~69 GB |
 | Qwen3.6-27B-FP8 | 27B (Dense) | FP8 (block 128) | ~29 GB | ~8 GB | ~40 GB |
 
----#### 3. Storage Configuration
+---
+
+#### 3. Storage Configuration
 
 **1) Root EBS Volume (Persistent Storage)**
 
@@ -173,15 +179,16 @@ Based on 32k contexts and a single sequence. Since vLLM dynamically allocates pa
 > | Terminate | Deleted |
 > | Hardware Failure | Deleted |
 
-**Separation of Use Cases Recommended**
+**Recommended Use Case Separation**
 
 - **EBS (** `/` **)** : Model weights, persistent data → Data that must never be lost
 - **Instance Store (** `/mnt/nvme` **)** : KV cache, temporary builds, swap, inference logs → Data that can be lost
 
+---
 
----### NVMe Configuration
+### NVMe Configuration
 
-- In a cloud environment, NVMe has the following characteristics that differ from those of a standard physical server:
+- In a cloud environment, NVMe has the following characteristics that differ from those of a typical physical server:
   - Data is retained upon reboot
 
   - Data is lost when the instance is stopped→started or terminated
@@ -199,8 +206,7 @@ nvme1n1       259:1    0  1.7T  0 disk
 > 
 ```
 
-
-#### 2. Disk Format and Mount
+#### 2. Disk Formatting and Mounting
 
 ```shell
 > sudo mkfs.xfs -f /dev/nvme1n1
@@ -226,9 +232,9 @@ Filesystem      Size  Used Avail Use% Mounted on
 >
 ```
 
+---
 
-
----## Model Installation
+## Model Installation
 
 Given that renting A100 or H100 hardware is not practical, we will compare the following two models on a server capable of running on a single GPU. (Comparison documentation will be released later)
 
@@ -242,7 +248,6 @@ Given that renting A100 or H100 hardware is not practical, we will compare the f
 - Configure VLLM
 - Configure models
 
-
 ### Install required packages
 
 ##### Installing huggingface-cli
@@ -250,7 +255,6 @@ Given that renting A100 or H100 hardware is not practical, we will compare the f
 ```shell
 > pip install -U "huggingface_hub[cli]" hf_transfer 
 ```
-
 
 ##### Setting Environment Variables
 
@@ -262,7 +266,6 @@ export HF_XET_HIGH_PERFORMANCE=1
 export HF_HOME=/mnt/nvme/hf-cache      # 빠르지만 stop 시 소실
 # export HF_HOME=/root/hf-cache        # 또는 EBS (영구)
 ```
-
 
 ### Downloading the Model
 
@@ -290,12 +293,9 @@ drwxr-xr-x. 4 root root    92 May 19 18:45 hub
 drwxr-xr-x. 4 root root    59 May 19 17:28 xet
 ```
 
-
-
 ### Installing VLLM
 
 Since VLLM requires many package dependencies, it is recommended to install the packages in an isolated UV environment.
-
 
 #### Installing UV
 
@@ -312,7 +312,6 @@ uv 0.11.15 (x86_64-unknown-linux-gnu)
 >
 ```
 
-
 #### Creating and Installing a Dedicated VLLM Project
 
 ```shell
@@ -327,8 +326,6 @@ Activate with: source .venv/bin/activate
 > source .venv/bin/activate
 (vllm-svc) > uv pip install vllm --torch-backend=auto
 ```
-
-
 
 ##### Testing
 
@@ -345,7 +342,6 @@ Activate with: source .venv/bin/activate
   --trust-remote-code
 ```
 
-
 ```shell
 (vllm-svc) >  curl http://localhost:8000/v1/chat/completions \
   -H "Content-Type: application/json" \
@@ -360,11 +356,9 @@ Activate with: source .venv/bin/activate
 {"id":"chatcmpl-89cf9de14d6fdfd2","object":"chat.completion","created":1779181606,"prompt_routed_experts":null,"model":"qwen","choices":[{"index":0,"message":{"role":"assistant","content":"안녕하세요! 반갑습니다. 😊\n오늘 어떤 도움이 필요하신가요? 궁금한 점이 있거나 대화하고 싶은 주제가 있다면 언제든지 말씀해 주세요.","refusal":null,"annotations":null,"audio":null,"function_call":null,"tool_calls":[],"reasoning":null},"logprobs":null,"finish_reason":"stop","stop_reason":null,"token_ids":null,"routed_experts":null}],"service_tier":null,"system_fingerprint":"vllm-0.21.0-2426ae93","usage":{"prompt_tokens":14,"total_tokens":49,"completion_tokens":35,"prompt_tokens_details":null},"prompt_logprobs":null,"prompt_token_ids":null,"prompt_text":null,"kv_transfer_params":null}[root@ip-172-31-22-41 models]#
 ```
 
-
 #### Service Registration
 
 At runtime, /stg/models/Qwen3.5-122B-A10B-GPTQ-Int ⇒ /mnt/nvme/models/Qwen3.5-122B-A10B-GPTQ-Int4 and loads the model from the NVMe drive.
-
 
 - Qwen3.5-122B-A10B-GPTQ-Int4 
 
@@ -422,7 +416,6 @@ LimitNPROC=1048576
 WantedBy=multi-user.target
 ```
 
-
 - Qwen3.6-27B-FP8
 
 ```shell
@@ -479,11 +472,11 @@ WantedBy=multi-user.target
 
 ```
 
+---
 
+## Qwen3-Omni-30B-A3B-Instruct (Multimodal)
 
----## Qwen3-Omni-30B-A3B-Instruct (Multimodal)
-
-Unlike the text models mentioned earlier (Qwen3.5 / 3.6), this is an omni model that **accepts video, images, and audio as input together**. It is used for the 6-second video understanding benchmark (vision-bench). The installation process is the same as above, but **audio decoder dependencies** and **multimodal serving flags** are added. (For vLLM installation, **reuse the same venv** as in the **VLLM Installation** section above; here, only the audio dependencies are added.)
+Unlike the text models mentioned earlier (Qwen3.5 / 3.6), this is an omni model that **accepts video, images, and audio as input together**. It is used for the 6-second video understanding benchmark (vision-bench). The installation process is the same as above, but **audio decoder dependencies** and **multimodal serving flags** are added. (For vLLM installation, **reuse the same venv** as in the **vLLM Installation** section above; here, only the audio dependencies are added.)
 
 ### Model Download
 
@@ -492,7 +485,6 @@ Unlike the text models mentioned earlier (Qwen3.5 / 3.6), this is an omni model 
   --local-dir /stg/models/Qwen3-Omni-30B-A3B-Instruct \
   --max-workers 16
 ```
-
 
 ### Audio Input Support (Required)
 
@@ -506,10 +498,9 @@ Unlike the text models mentioned earlier (Qwen3.5 / 3.6), this is an omni model 
 - **You must restart the service** after installation for the changes to take effect (`sudo systemctl restart vllm_omni_i`)
 - You must include `mm_processor_kwargs: {"use_audio_in_video": true}` in the client request body for the audio in the MP4 to be processed
 
-
 ### Service Registration
 
-**Note:** To use audio input, `--limit-mm-per-prompt` must include `audio`, and the audio dependencies listed above must be installed in the venv.
+**Note:** To use audio input, `--limit-mm-per-prompt` must include `audio`, and the audio dependencies must be installed in the venv.
 
 ```shell
 [Unit]
@@ -550,7 +541,6 @@ LimitNPROC=1048576
 [Install]
 WantedBy=multi-user.target
 ```
-
 
 Thank you.
 

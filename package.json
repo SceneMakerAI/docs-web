@@ -12,6 +12,7 @@
     "start": "docusaurus start --host 0.0.0.0",
     "start:develop": "docusaurus start --host 0.0.0.0 --port 3001",
     "start:design": "docusaurus start --host 0.0.0.0 --port 3002",
+    "start:en": "docusaurus start --host 0.0.0.0 --port 3003 --locale en",
     "build": "docusaurus build",
     "swizzle": "docusaurus swizzle",
     "deploy": "docusaurus deploy",

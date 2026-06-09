@@ -252,7 +252,8 @@ def translate_file(kr_path, hashes):
     body_no_inline, inline_store = _protect_inline_code(body_no_code)
     body_protected = re.sub(r'(?m)^---$', '<hr/>', body_no_inline)
     translated = translate_with_deepl(body_protected) if body_no_inline.strip() else body_protected
-    en_body = html.unescape(re.sub(r'<hr/>', '---', translated))
+    en_body = html.unescape(re.sub(r'<hr\s*/?>', '\n\n---\n\n', translated))
+    en_body = re.sub(r'\n{3,}', '\n\n', en_body)
     en_body = _restore_inline_code(en_body, inline_store)
     en_body = _restore_code_blocks(en_body, code_store)
 
