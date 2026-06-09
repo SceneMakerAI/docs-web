@@ -10,8 +10,9 @@
 **SceneMakerAI** — 오픈소스 AI(멀티모달 LLM)로 방송 콘텐츠를 재가공하는 솔박스 사내 프로젝트.
 
 - 운영 URL: `https://doc.scenemaker.solbox.com`
-- 스택: **Docusaurus 3.x** (React 19, TypeScript), 한국어 단일 로케일
+- 스택: **Docusaurus 3.x** (React 19, TypeScript), **한국어(기본)·영어 이중 로케일**
 - 파이프라인: Notion DB → 서버 crontab(30분, `server-sync.sh`) → GH Pages (`deploy.yml`)
+- 번역 파이프라인: `docs/`·`blog/` KR → DeepL → `i18n/en/` EN (매월 1·15일, `weekly-translate.yml`)
 - 참고: https://docusaurus.io/ko/docs
 
 ---

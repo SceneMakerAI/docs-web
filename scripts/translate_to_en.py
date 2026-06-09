@@ -29,7 +29,15 @@ _PROG_LANG_PROTECT = {
     'sql', 'css', 'scss', 'html', 'xml', 'java', 'cpp', 'c',
     'csharp', 'go', 'rust', 'ruby', 'php', 'swift', 'kotlin',
     'r', 'diff', 'dockerfile', 'makefile',
+    'mermaid',  # 사전 번역 후 이중 번역 방지
 }
+
+# 주석이 # 으로 시작하는 언어 (한국어 주석만 번역)
+_HASH_COMMENT_LANGS = {'bash', 'sh', 'shell', 'python', 'py', 'r', 'makefile'}
+# 주석이 // 로 시작하는 언어
+_SLASH_COMMENT_LANGS = {'javascript', 'js', 'typescript', 'ts', 'java', 'cpp', 'c', 'csharp', 'go', 'rust', 'swift', 'kotlin'}
+
+_KO_RE = re.compile(r'[가-힣]')
 
 
 def log(msg):
@@ -94,6 +102,95 @@ def translate_with_deepl(text):
         log(f"DeepL 오류 {resp.status_code}: {resp.text[:200]}")
         return text
     return resp.json()["translations"][0]["text"]
+
+
+def translate_with_deepl_plain(text):
+    """tag_handling 없이 번역 — mermaid·코드 주석용."""
+    if not text.strip():
+        return text
+    endpoint = (
+        "https://api-free.deepl.com/v2/translate"
+        if DEEPL_API_KEY.endswith(":fx")
+        else "https://api.deepl.com/v2/translate"
+    )
+    resp = requests.post(
+        endpoint,
+        headers={"Authorization": f"DeepL-Auth-Key {DEEPL_API_KEY}"},
+        json={"text": [text], "source_lang": "KO", "target_lang": "EN-US"},
+    )
+    if resp.status_code != 200:
+        log(f"DeepL 오류 {resp.status_code}: {resp.text[:200]}")
+        return text
+    return resp.json()["translations"][0]["text"]
+
+
+def _protect_inline_in_line(line):
+    """한 줄 내 인라인 코드를 플레이스홀더로 보호. (store, protected_line) 반환."""
+    store = {}
+
+    def _sub(m):
+        key = f'\x01INLN{len(store)}\x01'
+        store[key] = m.group(0)
+        return key
+
+    protected = re.sub(r'``[^`]+``|`[^`\n]+`', _sub, line)
+    return store, protected
+
+
+def _pretranslate_mermaid_blocks(body):
+    """Mermaid 블록 내 한국어를 사전 번역. 인라인 코드는 보호."""
+    def _handle(m):
+        content = m.group(1)
+        if not _KO_RE.search(content):
+            return m.group(0)
+        inline_store = {}
+
+        def _sub(im):
+            key = f'\x01INMER{len(inline_store)}\x01'
+            inline_store[key] = im.group(0)
+            return key
+
+        protected = re.sub(r'``[^`]+``|`[^`\n]+`', _sub, content)
+        translated = translate_with_deepl_plain(protected)
+        for key, val in inline_store.items():
+            translated = translated.replace(key, val)
+        return f'```mermaid\n{translated.rstrip()}\n```'
+
+    return re.sub(r'```mermaid\n([\s\S]*?)\n```', _handle, body)
+
+
+def _pretranslate_code_comments(body):
+    """코드 블록 내 한국어 주석 줄만 사전 번역. 코드 자체와 인라인 코드는 보호."""
+    def _handle(m):
+        lang = m.group(1).strip().lower()
+        content = m.group(2)
+        if not _KO_RE.search(content):
+            return m.group(0)
+
+        lines = content.split('\n')
+        changed = False
+        for i, line in enumerate(lines):
+            stripped = line.lstrip()
+            is_comment = (
+                (lang in _HASH_COMMENT_LANGS and stripped.startswith('#')) or
+                (lang in _SLASH_COMMENT_LANGS and (
+                    stripped.startswith('//') or stripped.startswith('/*') or stripped.startswith('* ')
+                ))
+            )
+            if not is_comment or not _KO_RE.search(line):
+                continue
+            inline_store, protected = _protect_inline_in_line(line)
+            translated = translate_with_deepl_plain(protected)
+            for key, val in inline_store.items():
+                translated = translated.replace(key, val)
+            lines[i] = translated
+            changed = True
+
+        if not changed:
+            return m.group(0)
+        return f'```{m.group(1)}\n' + '\n'.join(lines) + '```'
+
+    return re.sub(r'```(\w+)\n([\s\S]*?)```', _handle, body)
 
 
 def load_hashes():
@@ -248,6 +345,9 @@ def translate_file(kr_path, hashes):
         en_desc = translate_with_deepl(kr_desc)
         en_frontmatter = en_frontmatter.replace(f'description: "{kr_desc}"', f'description: "{en_desc}"', 1)
 
+    # 사전 번역: mermaid 블록 + 코드 블록 주석 (인라인 코드는 보호됨)
+    body = _pretranslate_mermaid_blocks(body)
+    body = _pretranslate_code_comments(body)
     body_no_code, code_store = _protect_code_blocks(body)
     body_no_inline, inline_store = _protect_inline_code(body_no_code)
     # DeepL converts <hr/> to "---" which merges with next headings — use opaque placeholder
