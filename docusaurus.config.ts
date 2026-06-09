@@ -16,7 +16,7 @@ const config: Config = {
     v4: true,
     // Rspack/SWC/Lightning CSS 기반 가속 빌드 — Docusaurus 3.10 stable.
     // 로컬 서버 환경에서는 네이티브 바이너리 SIGBUS가 보고된 적 있어, 필요 시 false로 롤백.
-    faster: true,
+    faster: false, // 네이티브 바이너리(Rspack/SWC/lightningcss)가 이 환경에서 SIGBUS 발생
   },
 
   markdown: {
