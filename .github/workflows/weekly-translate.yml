@@ -2,7 +2,7 @@ name: Weekly EN Translation
 
 on:
   schedule:
-    - cron: '0 2 * * 1'  # 매주 월요일 KST 11:00
+    - cron: '0 2 1,15 * *'  # 매월 1일·15일 KST 11:00 (약 2주 간격)
   workflow_dispatch:
 
 jobs:
