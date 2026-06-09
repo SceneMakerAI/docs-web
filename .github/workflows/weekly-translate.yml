@@ -1,0 +1,40 @@
+name: Weekly EN Translation
+
+on:
+  schedule:
+    - cron: '0 2 * * 1'  # 매주 월요일 KST 11:00
+  workflow_dispatch:
+
+jobs:
+  translate:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - run: pip install requests
+
+      - name: Translate KR → EN
+        continue-on-error: true
+        env:
+          DEEPL_API_KEY: ${{ secrets.DEEPL_API_KEY }}
+        run: python3 scripts/translate_to_en.py
+
+      - name: Commit translated files
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add i18n/en/ .notion-translate-hashes.json
+          git diff --cached --quiet && echo "번역 변경 없음" && exit 0
+          git commit -m "chore: EN 번역 자동 업데이트 [skip-notion]"
+          git pull --rebase origin main
+          git push origin main

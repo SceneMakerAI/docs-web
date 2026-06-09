@@ -65,7 +65,7 @@ const config: Config = {
 
   i18n: {
     defaultLocale: 'ko',
-    locales: ['ko'],
+    locales: ['ko', 'en'],
     localeConfigs: {
       ko: {
         label: '한국어',
@@ -73,6 +73,13 @@ const config: Config = {
         htmlLang: 'ko-KR',
         calendar: 'gregory',
         path: 'ko',
+      },
+      en: {
+        label: 'English',
+        direction: 'ltr',
+        htmlLang: 'en-US',
+        calendar: 'gregory',
+        path: 'en',
       },
     },
   },

@@ -1,0 +1,14 @@
+{
+  "title": {
+    "message": "SceneMakerAI 블로그",
+    "description": "The title for the blog used in SEO"
+  },
+  "description": {
+    "message": "SceneMakerAI 기술 블로그 — 오픈소스 AI로 방송 콘텐츠를 재가공하는 플랫폼 개발 이야기",
+    "description": "The description for the blog used in SEO"
+  },
+  "sidebar.title": {
+    "message": "전체 글",
+    "description": "The label for the left sidebar"
+  }
+}

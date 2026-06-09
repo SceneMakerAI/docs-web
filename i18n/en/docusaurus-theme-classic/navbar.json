@@ -1,0 +1,46 @@
+{
+  "title": {
+    "message": "SceneMakerAI",
+    "description": "The title in the navbar"
+  },
+  "logo.alt": {
+    "message": "SceneMakerAI Logo",
+    "description": "The alt text of navbar logo"
+  },
+  "item.label.프로젝트 소개": {
+    "message": "About",
+    "description": "Navbar item with label 프로젝트 소개"
+  },
+  "item.label.아키텍처": {
+    "message": "Architecture",
+    "description": "Navbar item with label 아키텍처"
+  },
+  "item.label.설치": {
+    "message": "Install",
+    "description": "Navbar item with label 설치"
+  },
+  "item.label.PoC": {
+    "message": "PoC",
+    "description": "Navbar item with label PoC"
+  },
+  "item.label.문서": {
+    "message": "Docs",
+    "description": "Navbar item with label 문서"
+  },
+  "item.label.블로그": {
+    "message": "Blog",
+    "description": "Navbar item with label 블로그"
+  },
+  "item.label.오픈소스 기여": {
+    "message": "Contribute",
+    "description": "Navbar item with label 오픈소스 기여"
+  },
+  "item.label.릴리즈 노트": {
+    "message": "Release Notes",
+    "description": "Navbar item with label 릴리즈 노트"
+  },
+  "item.label.GitHub": {
+    "message": "GitHub",
+    "description": "Navbar item with label GitHub"
+  }
+}
