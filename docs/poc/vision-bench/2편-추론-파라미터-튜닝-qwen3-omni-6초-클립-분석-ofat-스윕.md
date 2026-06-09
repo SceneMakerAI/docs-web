@@ -171,6 +171,17 @@ SceneMaker 프로젝트에서 **대사(STT)분석은 WhisperX의** 별도 모듈
 
 ### 4.0. 테스트 데이터 준비
 
+모든 설정이 **동일한 70클립** 을 본다 — 7장르(news·docu·baseball·entertain·drama·hist_drama·esports) × 카테고리당 10클립. 카테고리 폴더를 `sorted` 후 등간격(`step = len // 10` )으로 뽑아, 한 장르 안에서도 앞·중간·뒤가 고르 섮이는 결정론적 표본이다.
+
+`make_sample.py` 가 원본 mp4 를 복사·재인코딩하지 않고 **symlink 로만** `data/sample70/` 에 모은다. 영상 파생물을 `data/` **한 곳에서만** 관리해, 저작권상 `data/` 하나만 지우면 일괄 정리된다(symlink 는 `*.mp4` 라 gitignore 로 커밋되지 않음).
+
+```bash
+# 카테고리당 10개 등간격 → data/sample70/ 에 symlink (총 70)
+python make_sample.py
+# 그 표본으로 단건/배치 테스트 (experiments/02_param_sweep/ 에서)
+python run.py ../../data/sample70 -o out.json
+```
+
 ### 4.1. temperature — 낮을수록 가장 깨끗
 
 | **temp** | **ok** | **comp_p50** | **obj/act/aud** | **purity** | **repeat** |
