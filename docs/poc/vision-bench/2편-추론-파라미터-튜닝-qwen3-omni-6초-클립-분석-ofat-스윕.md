@@ -28,22 +28,33 @@ SceneMaker의 클립 영상 분석은 영상에 포함된 **시각·청각 정�
 
 여기서 관건은 **안정성** 이다. 700개 클립을 일괄 처리하는 벤치마크에서 같은 클립·같은 프롬프트인데도 실행마다 출력이 흔들리거나 무너지면 품질 점수 자체를 신뢰할 수 없다. 1편(파이프라인 구축) 검증 과정에서 네 가지 품질저하 패턴이 간헐적으로 식별됐다.
 
-1. **조기 종료 (Premature EOS)** : 첫 토큰부터 EOS(문장 종료)를 뱉어 content가 빈 문자열로 끝난다. strict JSON schema의 과도한 압박 등으로 모델이 "할 말 없이" 바로 닫아버리는 경우.
+1. **조기 종료 (Premature EOS)** : 첫 토큰부터 EOS(문장 종료)를 출력해 content가 빈 문자열로 끝난다. strict JSON schema의 과도한 압박 등으로 모델이 "할 말 없이" 바로 닫아버리는 경우.
 2. **붕괴 (Text Degeneration)** : 정상 확률분포를 잃고 이종문자·시스템 토큰을 쏟아내다 JSON을 완성 못 하고 터진다(Gibberish Generation).
-3. **반복 (Repetition Loop)** : 같은 단어·항목·JSON 구조를 확률 갇힘으로 맴돌며 반복 생성한다(Self-Repetition).
+3. **반복 (Repetition Loop)** : 같은 단어·항목·JSON 구조를 확률 갇힘으로 맴돌며 반복 생성한다.
 4. **추론 시간 편차 (Latency Jitter)** : 붕괴·반복이 정상 EOS를 막아 출력이 `max_tokens` 까지 늘어지는 탈주 생성(Runaway Generation) 때문에, 클립당 추론 시간의 최소\~최대 격차가 극심하다.
 
-이 패턴들은 1편에서 **관찰·식별** 됐을 뿐, 추론 파라미터로 **통제 가능한지는 다루지 않았다** . 본 편(2편)은 출력을 strict JSON Schema로 고정한 상태를 전제로 한다. 그 위에서 두드러지는 **반복·degeneration 등** 추론 파라미터로 통제되는지를 한 번에 하나씩(OFAT, one-factor-at-a-time) 크게 흔들어 규명한 **1단계 스크리닝** 의 기록한다.
+이 패턴들은 1편에서 **관찰·식별** 됐을 뿐, 추론 파라미터로 **통제 가능한지는 다루지 않았다** . 본 편(2편)은 출력을 strict JSON Schema로 고정한 상태를 전제로 한다. 그 위에서 두드러지는 **반복·degeneration 등** 이 추론 파라미터로 통제되는지를 한 번에 하나씩(OFAT, one-factor-at-a-time) 크게 흔들어 규명한 **1단계 스크리닝** 의 기록이다.
 
-## 2. 테스트 환경
+## 2. 실험 환경
 
-벤치마크와 **동일한 모델·서빙·호출 경로** 에서 수행했다. 파라미터 효과를 운영 환경 그대로 관찰하기 위함이다. 환경 구성의 상세는 1편 「멀티모달 LLM 한국 방송 6초 클립 영상 이해 벤치마크 파이프라인 구축」 에 있으므로, 여기서는 핵심 요약과 본 실험의 **튜닝 대상 파라미터** 만 다룬다.
+벤치마크와 **동일한 모델·서빙·호출 경로** 에서 수행했다. 파라미터 효과를 그 환경 그대로 관찰하기 위함이다. 환경 구성의 상세는 1편 「멀티모달 LLM 한국 방송 6초 클립 영상 이해 벤치마크 파이프라인 구축」 에 있으므로, 여기서는 핵심 요약과 본 실험의 **튜닝 대상 파라미터** 만 다룬다.
 
 ### 2.1. 환경 요약
 
-- **모델** — Qwen3-Omni-30B-A3B-Instruct (Thinker–Talker MoE, 추론 코어 총 30B·활성 3B). Image·Video·Audio·Text 4 모달리티를 단일 모델로 처리하며, 본 PoC 는 텍스트 출력만 사용한다.
-- **서빙** — AWS g7e.4xlarge 단일 GPU(NVIDIA RTX PRO 6000 Blackwell, 96 GB)에서 vLLM(OpenAI 호환)으로 서빙. 실서빙 `--max-model-len` 은 16,384 라 고 fps 에서 컨텍스트 천장에 유의한다.
-- **호출 경로** — vLLM 앞단 얇은 게이트웨이(FastAPI)를 거친다. 추론 본문을 변형 없이 패스하고 동시성 게이트(기본 4)·배치 NDJSON 스트리밍만 부가한다. 본 스윕은 고정 70 클립을 `/chat/batch` 한 요청으로 보내 완료 순서로 수집하며, 이를 18개 설정에 반복한다.
+- **모델** 
+  - Qwen3-Omni-30B-A3B-Instruct (Thinker–Talker MoE, 추론 코어 총 30B·활성 3B). 
+
+  - Image·Video·Audio·Text 4 모달리티를 단일 모델로 처리하며, 본 PoC 는 텍스트 출력만 사용.
+
+- **서빙**
+  - AWS g7e.4xlarge 단일 GPU(NVIDIA RTX PRO 6000 Blackwell, 96 GB)에서 vLLM 서빙.
+
+  - 실서빙 `--max-model-len` 은 16,384로 고해상도나 큰 fps 에서 컨텍스트 초과에 유의한다.
+
+- **호출 경로**
+  - 클라이언트(추론 요청) → 게이트웨이(1편의 게이트웨이와 동일) → vLLM → Qwen 3 Omni
+
+  - vLLM 앞단 얇은 게이트웨이(FastAPI)를 거친다. 추론 본문을 변형 없이 패스하고 동시성 게이트(기본 4)·배치 NDJSON 스트리밍만 부가한다. 본 스윕은 고정 70 클립을 `/chat/batch` 한 요청으로 보내 완료 순서로 수집.
 
 :::note
 📎 모델 스펙·서빙 설정·게이트웨이 라우트의 상세는 시리즈 1편 [멀티모달 LLM 한국 방송 6초 클립 영상 이해 벤치마크 파이프라인 구축](/docs/poc/vision-bench/1) 문서를 참조한다.
@@ -53,24 +64,24 @@ SceneMaker의 클립 영상 분석은 영상에 포함된 **시각·청각 정�
 
 추론 매개변수는 서버 설정이 아니라 **클라이언트가 요청 본문에 직접 명시** 한다. 파라미터는 작동 레이어에 따라 두 갈래로 나뉜다 — **vLLM 입력 처리** (미디어를 모델에 넣기 전 준비)와 **Qwen3-Omni 생성 샘플링** (모델이 출력을 뽑는 디코딩). 본 실험의 OFAT 스윕은 *생성 샘플링* 그룹만 한 번에 하나씩(변동) 흔들고, 나머지는 전 구간 고정한다.
 
-**(A) Qwen3-Omni 생성 샘플링 파라미터** — *Autoregressive Decoding · Sampling Strategies* · OFAT 변동 대상
+1. **Qwen3-Omni 생성 샘플링 파라미터** (*Autoregressive Decoding · Sampling Strategies* ) (OFAT 변동)
 
 | **파라미터** | **역할** | **값 범위** | **본 실험** |
 | --- | --- | --- | --- |
-| `temperature` | 샘플링 온도, 낮을수록 결정론적 | `[0, 2]` · `0` =greedy(argmax) | **변동** |
-| `top_k` | 후보를 확률 상위 k개로 제한 | `-1` =비활성 / `≥1` · `temp>0` 일 때만 | **변동** |
-| `top_p` | nucleus 컷오프, 누적확률 상위만 후보 | `[0, 1]` · `temp>0` 일 때만 | **변동** |
+| `temperature` | 샘플링 온도, 낮을수록 결정론적 | `[0, 2]` (기본값 1.0) | **변동** |
+| `top_k` | 후보를 확률 상위 k개로 제한 | `-1` =비활성 / `≥1` (기본값 -1) `0 < temperature` 일 때만 작동 | **변동** |
+| `top_p` | nucleus 컷오프, 누적확률 상위만 후보 | `(0, 1]` (기본값 1.0) `0 < temperature` 일 때만 작동 | **변동** |
 | `frequency_penalty` | 가산형 반복 억제 (등장 횟수 비례) | `[-2, 2]` · `0` =비활성 | **변동** |
 | `repetition_penalty` | 곱셈형 반복 억제 (등장 여부) | `>0` · `1` =비활성 · `>1` =억제 | **변동** |
 | `max_tokens` | completion 토큰 상한 (출력 길이 캡) | `>0` · 남은 컨텍스트 이내 | 고정 512 |
 | `chat_template_kwargs.enable_thinking` | 사고(thinking) 토큰 생성 on/off | `true` / `false` | 고정 off |
 | `seed` | 재현성 (고정 시 동일 입력→동일 출력) | 정수 · `<0` =비활성(매번 무작위) | 고정 -1 |
 
-**(B) vLLM 입력 처리 파라미터** — *Multimodal Ingestion · Context Conditioning* · 토큰·지연 축(OFAT 아님)
+1. **vLLM 입력 처리 파라미터** (*Multimodal Ingestion · Context Conditioning* ) 토큰·지연 축(OFAT 아님)
 
 | **파라미터** | **역할** | **값 범위** | **본 실험** |
 | --- | --- | --- | --- |
-| `media_io_kwargs.video.fps` | 영상 프레임 추출 레이트 — fps↑ → 프레임↑ → 입력 토큰·디테일·지연↑ | `>0` (예: 0.5, 1.0, 2.0) | **별도 측정** (토큰·지연) |
+| `media_io_kwargs.video.fps` | 영상 프레임 추출 레이트 | `>0` (예: 0.5, 1.0, 2.0) | **별도 측정** (토큰·지연) |
 | `use_audio_in_video` | mp4 내 오디오 동시 디코딩 | `true` / `false` | 고정 on |
 
 :::note

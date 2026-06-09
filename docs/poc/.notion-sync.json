@@ -29,8 +29,8 @@
   },
   "373e15b4-0359-8150-88f3-eedc5ebd727b": {
     "file": "docs/poc/vision-bench/2편-추론-파라미터-튜닝-qwen3-omni-6초-클립-분석-ofat-스윕.md",
-    "last_edited": "2026-06-09T03:28:00.000Z",
-    "content_hash": "2ea85c5f4c703ea8cd341023360a3369fffbd62defd2fdf7b86128d251ff384c",
+    "last_edited": "2026-06-09T04:29:00.000Z",
+    "content_hash": "b45bb749cbc9c524ab92d284504ba2207f19788d25e3786e98e39e1e775ba590",
     "order": 3,
     "parent_id": "vision-bench"
   },
