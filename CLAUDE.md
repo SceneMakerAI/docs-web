@@ -12,7 +12,7 @@
 - 운영 URL: `https://doc.scenemaker.solbox.com`
 - 스택: **Docusaurus 3.x** (React 19, TypeScript), **한국어(기본)·영어 이중 로케일**
 - 파이프라인: Notion DB → 서버 crontab(3시간, `server-sync.sh`) → GH Pages (`deploy.yml`)
-- 번역 파이프라인: `docs/`·`blog/` KR → DeepL → `i18n/en/` EN (매월 1일, `weekly-translate.yml`)
+- 번역 파이프라인: `docs/`·`blog/` KR → DeepL → `i18n/en/` EN (매월 1일, `monthly-translate.yml`)
 - 참고: https://docusaurus.io/ko/docs
 
 ---
@@ -54,7 +54,7 @@ docs-web/
 │   └── tests/                # notion_to_md.py·md_to_notion.py 단위 테스트
 └── .github/workflows/
     ├── deploy.yml
-    ├── weekly-translate.yml  # 매월 1일 EN 번역 자동 실행 (실패 시 빌드 영향 없음)
+    ├── monthly-translate.yml  # 매월 1일 EN 번역 자동 실행 (실패 시 빌드 영향 없음)
     ├── md-to-notion.yml
     ├── merge-develop.yml
     ├── pr-build.yml
@@ -78,7 +78,7 @@ docs-web/
 | `NOTION_CONTRIBUTE` | "오픈소스 기여" DB ID → `docs/contribute/` |
 | `NOTION_RELEASE` | "릴리즈 노트" DB ID → `docs/release-notes/` |
 | `NOTION_INSTALL` | "설치" DB ID → `docs/install/` |
-| `DEEPL_API_KEY` | DeepL Free API 키 — `translate_to_en.py` 및 `weekly-translate.yml` Secret |
+| `DEEPL_API_KEY` | DeepL Free API 키 — `translate_to_en.py` 및 `monthly-translate.yml` Secret |
 
 `server-sync.sh`는 `[ -n "$NOTION_XXX" ]` 조건으로 변수가 없으면 해당 DB sync를 건너뜀.
 
@@ -118,7 +118,7 @@ docs/poc/vision-bench/child.md  (slug: "1")  →  /docs/poc/vision-bench/1
 | 파일 | 트리거 | 역할 |
 |------|--------|------|
 | `deploy.yml` | main push | npm build → GH Pages 배포 |
-| `weekly-translate.yml` | 매월 1일 KST 11:00 / 수동 | KR docs·blog → DeepL → `i18n/en/` 번역, main에 커밋. 번역 실패해도 워크플로우 green |
+| `monthly-translate.yml` | 매월 1일 KST 11:00 / 수동 | KR docs·blog → DeepL → `i18n/en/` 번역, main에 커밋. 번역 실패해도 워크플로우 green |
 | `sync-develop.yml` | 매일 KST 03:00 | main 콘텐츠를 develop으로 머지 (`.notion-sync.json` 충돌 자동 해소) |
 | `merge-develop.yml` | 매일 KST 11:00 | develop 코드 변경을 main으로 머지 (콘텐츠 디렉토리 제외, 빌드 게이트 포함) |
 | `md-to-notion.yml` | `docs/**/*.md` push | 수동 편집된 md → Notion DB 역업로드 |
@@ -228,7 +228,7 @@ git push origin design
 
 ### 개요
 
-`scripts/translate_to_en.py`가 `docs/`·`blog/` 의 KR Markdown을 DeepL Free API로 번역해 `i18n/en/` 에 저장한다. `weekly-translate.yml`이 매월 1일 자동 실행한다.
+`scripts/translate_to_en.py`가 `docs/`·`blog/` 의 KR Markdown을 DeepL Free API로 번역해 `i18n/en/` 에 저장한다. `monthly-translate.yml`이 매월 1일 자동 실행한다.
 
 ### 동작 방식
 
@@ -248,7 +248,7 @@ python3 scripts/translate_to_en.py
 
 - `DEEPL_API_KEY`는 `.env` (로컬) + GitHub Secrets `DEEPL_API_KEY` (CI) 모두 필요.
 - DeepL Free API 한도: 500,000자/월. 전체 재번역 시 소진 주의.
-- `weekly-translate.yml`은 `continue-on-error: true`로 번역 실패 시에도 워크플로우 green.
+- `monthly-translate.yml`은 `continue-on-error: true`로 번역 실패 시에도 워크플로우 green.
 
 ---
 
