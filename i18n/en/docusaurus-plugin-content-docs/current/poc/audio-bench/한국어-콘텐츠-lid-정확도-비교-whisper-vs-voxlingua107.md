@@ -40,7 +40,9 @@ audio → VAD → 각 발화 구간 → [Whisper | VoxLingua] → LID
 ```
 
 
----## 2. Comparison Design
+---
+
+## 2. Comparison Design
 
 ### 2.1 Models
 
@@ -112,7 +114,9 @@ Although Korean is the primary language, the presence of foreign languages and b
 The reason for selecting one example per genre is to avoid conclusions biased toward a single genre and to observe patterns between content characteristics (BGM intensity, foreign language usage) and LID results.
 
 
----## 3. Implementation
+---
+
+## 3. Implementation
 
 See the URL below for the source code
 
@@ -203,7 +207,9 @@ modify the code to change the path to your own or use the SpeechBrain default ca
 
 
 
----## 4. Results
+---
+
+## 4. Results
 
 ### 4.1 Accuracy
 

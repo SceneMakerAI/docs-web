@@ -250,9 +250,13 @@ def translate_file(kr_path, hashes):
 
     body_no_code, code_store = _protect_code_blocks(body)
     body_no_inline, inline_store = _protect_inline_code(body_no_code)
-    body_protected = re.sub(r'(?m)^---$', '<hr/>', body_no_inline)
+    # DeepL converts <hr/> to "---" which merges with next headings — use opaque placeholder
+    _HR = "\x00HRHR\x00"
+    body_protected = re.sub(r'(?m)^---$', _HR, body_no_inline)
     translated = translate_with_deepl(body_protected) if body_no_inline.strip() else body_protected
-    en_body = html.unescape(re.sub(r'<hr\s*/?>', '\n\n---\n\n', translated))
+    en_body = html.unescape(translated.replace(_HR, '\n\n---\n\n'))
+    # Safety net: fix any ---# produced by DeepL converting <hr/> in older translations
+    en_body = re.sub(r'^---(?=#{1,6} )', '---\n\n', en_body, flags=re.MULTILINE)
     en_body = re.sub(r'\n{3,}', '\n\n', en_body)
     en_body = _restore_inline_code(en_body, inline_store)
     en_body = _restore_code_blocks(en_body, code_store)
