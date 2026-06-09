@@ -9,7 +9,7 @@ last_update:
 > Baseline analysis of **100 clips from the news category** using Qwen3-Omni without STT (Speech-to-Text) context.
 Measured using two scenarios: **30fps (original) vs. 0.5fps (low-frame-rate converted version)** — comparing the impact of video frame rate on analysis performance.
 
-**HRHR**
+---
 
 #### 1. Execution Environment
 

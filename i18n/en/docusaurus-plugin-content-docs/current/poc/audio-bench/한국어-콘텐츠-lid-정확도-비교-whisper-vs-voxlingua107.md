@@ -39,7 +39,7 @@ audio → VAD → 각 발화 구간 → denoise → [Whisper | VoxLingua] → LI
 audio → VAD → 각 발화 구간 → [Whisper | VoxLingua] → LID
 ```
 
-HRHR
+---
 
 ## 2. Comparison Design
 
@@ -112,7 +112,7 @@ Although Korean is the primary language, the presence of foreign languages and b
 
 The reason for selecting one clip per genre was to avoid conclusions biased toward a single genre and to observe patterns between content characteristics (BGM intensity, foreign language usage) and LID results.
 
-HRHR
+---
 
 ## 3. Implementation
 
@@ -200,7 +200,7 @@ modify the code to change the path to your own or use the SpeechBrain default ca
 > .venv/bin/python main.py
 ```
 
--HRHR-
+---
 
 ## 4. Results
 

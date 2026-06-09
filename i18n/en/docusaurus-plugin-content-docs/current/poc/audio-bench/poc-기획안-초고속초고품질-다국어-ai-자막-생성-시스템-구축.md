@@ -49,7 +49,7 @@ table Initially, Gemini STT was also included in the comparison, but it was deem
 - Configuration of hallucination/misrecognition handling gates (5 types on the Whisper side)
 - Recommended architecture for the production phase
 
-**HRHR**
+---
 
 ### 1.2 Scope
 
@@ -75,7 +75,7 @@ table Initially, Gemini STT was also included in the comparison, but it was deem
 | Job queue (asyncio.Queue, etc.) | Single-process sequential processing |
 | Concurrent requests / Multiple clients | Resolved via dynamic batching in the production diagram (Chapter 8) |
 
-HRHR
+---
 
 ### 1.3 Evaluation Content Set
 
@@ -107,7 +107,7 @@ Validation of a subtitling pipeline tailored to complex media audio environments
 
 Base accelerated environment based on a single NVIDIA RTX 4090 (24GB)
 
-HRHR
+---
 
 ## 2. Pipeline Architecture
 
@@ -156,7 +156,7 @@ Entry point:
 </tr>
 </tbody></table>
 
-table## 2.2 Directory / Output Structure
+## 2.2 Directory / Output Structure
 
 ```
 output/
@@ -189,7 +189,7 @@ Composed of 5 components. All use GPU (cuda:0). Warm-up runs once at system star
 | ASR (Qwen) | Korean/Multilingual Transcription + Word Timestamp | Qwen3-ASR-1.7B + ForcedAligner-0.6B |
 | Judge | Accuracy Scoring (-3 to 3) | Gemini 3.5 Flash |
 
-|HRHR|
+---
 
 ### 3.1 Denoise — DeepFilterNet v3
 
@@ -204,7 +204,7 @@ Composed of 5 components. All use GPU (cuda:0). Warm-up runs once at system star
 **Why atten_lim_db = -30?**  
 At full power (`None` ), singing or soft speech is cut off as noise, causing ASR omissions. Limiting intensity to -30dB = ↑ speech preservation.
 
-|HRHR|
+---
 
 ### 3.2 VAD — Silero VAD
 
@@ -217,7 +217,7 @@ At full power (`None` ), singing or soft speech is cut off as noise, causing ASR
 
 **Role** — The first line of defense against hallucination. Simply preventing silence/BGM segments from being sent to ASR significantly reduces hallucinations (industry standard practice).
 
-|HRHR|
+---
 
 ### 3.3 LID — Whisper `detect_language`
 
@@ -239,7 +239,7 @@ At full power (`None` ), singing or soft speech is cut off as noise, causing ASR
 
 **Qwen also uses the same LID** — more accurate than Voxlingua107.
 
-**HRHR**
+---
 
 ### 3.4 ASR
 
@@ -270,7 +270,7 @@ At full power (`None` ), singing or soft speech is cut off as noise, causing ASR
 
 > Separated into venv to avoid dependency conflicts between Whisper and Qwen (`.venv` / `.venv-qwen` ).
 
-HRHR
+---
 
 ### 3.5 Judge — Gemini 3.5 Flash
 
@@ -291,7 +291,7 @@ HRHR
 - Meaning-based scoring is closer to subtitle usability than text matching (e.g., WER)
 - Audio is the ground truth — Evaluation is possible even if segment segmentation differs across STT systems
 
-|HRHR|
+---
 
 ## 4. System Design + Hallucination Handling
 
@@ -423,7 +423,7 @@ table*Why 0.5?** — Cases like LID probability 0.23 = "sounds similar to ko/de/
 
 If we had used the original LID result as-is, it would have transcribed as German → hallucination. Forced normalization to ko.
 
-—HRHR—
+---
 
 #### Gate 4 — dual transcribe + MIN_DUAL_LOGPROB (-0.6)
 
@@ -459,7 +459,7 @@ table*Why -0.6?** — Log probability around 50%. If both are below 50%, the mod
 
 `max(-0.71, -0.89) = -0.71 < -0.6` → drop. A case where, if the original LID had been zh, it would have resulted in a hallucination like `一观测者来交换`.
 
-**HRHR**
+---
 
 #### Gate 5 — Korean character ratio gate (30%)
 
@@ -498,7 +498,7 @@ table*Why 30%?** — Normal Korean speech typically has a Korean character ratio
 **Case** — The audio is in Korean, but Whisper outputs Japanese tokens even in Korean mode  
 **Principle** — "**Better to drop than to have incorrect subtitles**" → drop
 
-**HRHR**
+---
 
 #### Final Flow
 
@@ -532,7 +532,7 @@ audio_raw + audio_denoised
 segment 저장 (transcribe MD)
 ```
 
-**HRHR**
+---
 
 ### 4.2 Qwen Side
 
@@ -576,7 +576,7 @@ Qwen supports approximately 30 languages, but **Qwen3-ForcedAligner, which suppo
 
 → Similar concept to Whisper’s “Hangul character ratio gate,” but **correction instead of dropping** (Qwen does not forcefully handle LID errors as ko; it simply corrects the lang).
 
-HRHR
+---
 
 ## 5. Evaluation Method
 
@@ -603,7 +603,7 @@ Rather than simple match/mismatch, the score reflects whether **"this segment ca
 | **-2 Hallucination** | ❌ No speech (silence/BGM) | Generates natural sentences resembling subtitles |
 | **-3 Completely Different** | ✅ Speech present | Text completely different from spoken content |
 
-|HRHR|
+---
 
 ### 5.2 Foreign Language +1 Adjustment
 
@@ -656,7 +656,7 @@ POC results (see Chapter 7) show that all system × content combinations achieve
 - During production, attempted to actually retain segments with 20%+ probability at the Gemini correct stage
 - For scores below 0, correction cost > value → drop
 
-#HRHR#
+---
 
 ## 6. Results
 

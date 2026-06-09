@@ -653,7 +653,7 @@ Batch is faster than sequential (approx. **1.7x**; fan-out parallelism limited b
 
 Confirmed that all core mechanisms of the client → `poc-vision-bench` → vLLM pipeline (text pass-through, concurrency gate, completion-order batch streaming, and integrated video/audio processing) are functioning normally.
 
-|HRHR|
+---
 
 ## 4. References
 

@@ -370,10 +370,14 @@ def translate_file(kr_path, hashes):
     en_body = html.unescape(translated.replace(_HR, '\n\n---\n\n'))
     # Safety net: fix any ---# produced by DeepL converting <hr/> in older translations
     en_body = re.sub(r'^---(?=#{1,6} )', '---\n\n', en_body, flags=re.MULTILINE)
-    # Safety net: DeepL prepends "details" to various Markdown elements after </details> context
-    en_body = re.sub(r'^details(#{1,6} )', r'\1', en_body, flags=re.MULTILINE)
-    # Table row: "details Cell | ..." → "| Cell | ..."  (leading | was dropped)
-    en_body = re.sub(r'^details ([^\n|]+\|)', r'| \1', en_body, flags=re.MULTILINE)
+    # Safety net: HRHR variants left when old null-byte placeholder was stripped by DeepL
+    _HRHR = r'(?:\*\*HRHR\*\*|#HRHR#|-HRHR-|—HRHR—|\|HRHR\||HRHR)'
+    en_body = re.sub(rf'^{_HRHR}$', '---', en_body, flags=re.MULTILINE)
+    # Safety net: DeepL prepends closing-tag name to following Markdown elements
+    _TAG = r'(?:table|tbody|thead|tr|details|div|section|blockquote)'
+    en_body = re.sub(rf'^{_TAG}(#{1,6} )', r'\1', en_body, flags=re.MULTILINE)
+    # Table row: "tag Cell | ..." → "| Cell | ..." (leading | was dropped)
+    en_body = re.sub(rf'^{_TAG} ([^\n|]+\|)', r'| \1', en_body, flags=re.MULTILINE)
     # Safety net: DeepL removes blank lines after closing block HTML tags
     _BLOCK_CLOSE = r'</(table|tbody|thead|tr|details|div|section|blockquote)>'
     en_body = re.sub(rf'({_BLOCK_CLOSE})([^\n<])', r'\1\n\n\2', en_body)
