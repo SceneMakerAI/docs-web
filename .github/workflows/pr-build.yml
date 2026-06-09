@@ -29,7 +29,7 @@ jobs:
       - name: Checkout docs/ from main (콘텐츠는 main에서 관리됨)
         run: |
           git fetch origin main
-          git checkout origin/main -- docs/ docs_en/ static/img/
+          git checkout origin/main -- docs/ blog/ static/img/
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
