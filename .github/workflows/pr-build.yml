@@ -24,7 +24,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0
+          fetch-depth: 1
 
       - name: Checkout docs/ from main (콘텐츠 완전 교체)
         # rm -rf 없이 git checkout만 하면 PR 브랜치에만 있고 main엔 없는 파일이 그대로 남아,
