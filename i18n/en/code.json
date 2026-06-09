@@ -325,5 +325,87 @@
   "theme.tags.tagsPageTitle": {
     "message": "Tags",
     "description": "The title of the tag list page"
+  },
+
+  "homepage.meta.title": {
+    "message": "SceneMakerAI — Reprocessing Broadcast Content with Open-Source AI"
+  },
+  "homepage.meta.description": {
+    "message": "A Solbox in-house project that reprocesses broadcast content (dramas, variety shows, documentaries) using open-source multimodal LLMs. 4 services: Highlights, Remix, Ads, Batch — plus 30+ open-source contributions."
+  },
+  "homepage.hero.eyebrow": {
+    "message": "2026 NIPA Open-Source AI·SW Support Program"
+  },
+  "homepage.hero.title.line1": {
+    "message": "Reprocessing Broadcast Content"
+  },
+  "homepage.hero.title.line2": {
+    "message": "with Open-Source AI."
+  },
+  "homepage.hero.subtitle": {
+    "message": "Automatically analyze and recompose dramas, variety shows, and documentaries with multimodal LLMs. A Solbox in-house project — 4 services · 30+ open-source contributions."
+  },
+  "homepage.hero.cta.docs": {
+    "message": "Get Started"
+  },
+  "homepage.features.section.title": {
+    "message": "4 AI Services"
+  },
+  "homepage.features.section.subtitle": {
+    "message": "Four broadcast-domain services built on top of multimodal LLMs."
+  },
+  "homepage.features.highlight.title": {
+    "message": "Highlights"
+  },
+  "homepage.features.highlight.desc": {
+    "message": "Automatically selects highlight scenes from long broadcasts using multimodal LLMs."
+  },
+  "homepage.features.remix.title": {
+    "message": "Remix"
+  },
+  "homepage.features.remix.desc": {
+    "message": "Recomposes full episodes into short-form clips and summaries based on subtitles and scene analysis."
+  },
+  "homepage.features.ad.title": {
+    "message": "Ads"
+  },
+  "homepage.features.ad.desc": {
+    "message": "Matches the most contextually relevant ads to content using embedding and search."
+  },
+  "homepage.features.batch.title": {
+    "message": "Batch"
+  },
+  "homepage.features.batch.desc": {
+    "message": "Bulk-analyzes broadcast archives overnight. Reprocessing and re-indexing pipeline."
+  },
+  "homepage.kpi.section.title": {
+    "message": "2026 Goals"
+  },
+  "homepage.kpi.section.subtitle": {
+    "message": "Public deliverables through open-source contributions and a technical blog — and inference performance targets."
+  },
+  "homepage.kpi.oss.label": {
+    "message": "OSS Contributions"
+  },
+  "homepage.kpi.oss.note": {
+    "message": "PRs · Issues · Datasets (cumulative)"
+  },
+  "homepage.kpi.blog.label": {
+    "message": "Tech Blog Posts"
+  },
+  "homepage.kpi.blog.note": {
+    "message": "Biweekly posts (cumulative)"
+  },
+  "homepage.kpi.infer.label": {
+    "message": "Inference Time"
+  },
+  "homepage.kpi.infer.note": {
+    "message": "1-hour broadcast → under 20 min"
+  },
+  "homepage.kpi.f1.label": {
+    "message": "Scene Classification F1"
+  },
+  "homepage.kpi.f1.note": {
+    "message": "Based on 40–60 min content"
   }
 }
