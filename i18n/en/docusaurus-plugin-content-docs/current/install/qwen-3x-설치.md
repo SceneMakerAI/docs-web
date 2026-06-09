@@ -8,11 +8,11 @@ last_update:
 
 ## AWS Server Setup
 
-###
+### Configuring an EC2 Instance
 
 ---
 
-Configuring an EC2 Instance#### Basic Information (Summary)
+#### Basic Information (Summary)
 
 | Category | Selection |
 | --- | --- |
@@ -185,11 +185,11 @@ Based on 32k contexts and a single sequence. Since vLLM dynamically allocates pa
 **Recommended Use Case Separation**
 
 - **EBS (** `/` **)** : Model weights, persistent data → Data that must never be lost
-- **Instance Store (** `/` **)**: KV cache, temporary builds, swap, inference logs → Data that can
+- **Instance Store (** `/mnt/nvme` **)**: KV cache, temporary builds, swap, inference logs → Data that can be lost
 
 ---
 
-be lost### NVMe Settings
+### NVMe Settings
 
 - In a cloud environment, NVMe has the following characteristics that differ from those of a standard physical server:
   - Data is retained upon reboot

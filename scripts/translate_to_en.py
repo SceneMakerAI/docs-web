@@ -359,6 +359,15 @@ def translate_file(kr_path, hashes):
     # Use an HTML tag placeholder: tag_handling="html" preserves <x ...> tags exactly
     _HR = '<x id="HR"/>'
     body_protected = re.sub(r'(?m)^---$', _HR, body_no_inline)
+    # Protect heading markers (# ## ### etc.) — DeepL separates them from content, leaving empty headings
+    _hdr_store: dict[str, str] = {}
+
+    def _protect_hdr(m: re.Match) -> str:
+        key = f'<x id="HDR{len(_hdr_store)}"/>'
+        _hdr_store[key] = m.group(1)
+        return f'{key} '
+
+    body_protected = re.sub(r'(?m)^(#{1,6}) ', _protect_hdr, body_protected)
     # Protect ordered list markers (e.g. "2. **item**") — DeepL can corrupt them to "details." etc.
     # after </details> context; <x> tags are preserved exactly by tag_handling="html"
     _ol_store: dict[str, str] = {}
@@ -372,6 +381,8 @@ def translate_file(kr_path, hashes):
     translated = translate_with_deepl(body_protected) if body_no_inline.strip() else body_protected
     for key, num in _ol_store.items():
         translated = translated.replace(key, num)
+    for key, markers in _hdr_store.items():
+        translated = translated.replace(key, markers)
     en_body = html.unescape(translated.replace(_HR, '\n\n---\n\n'))
     # Safety net: fix any ---# produced by DeepL converting <hr/> in older translations
     en_body = re.sub(r'^---(?=#{1,6} )', '---\n\n', en_body, flags=re.MULTILINE)
