@@ -439,7 +439,7 @@ x-request-id: 6da1b40a
 
    </details>
 
-details. **Video + Prompt**
+2. **Video + Prompt**
    <details>
    <summary>Request (curl)</summary>
 
@@ -510,7 +510,7 @@ details. **Video + Prompt**
 
    </details>
 
-details. **Blackout Video + Prompt** (Control Experiment — Screen only black, audio maintained)
+3. **Blackout Video + Prompt** (Control Experiment — Screen only black, audio maintained)
    <details>
    <summary>Request (curl)</summary>
 

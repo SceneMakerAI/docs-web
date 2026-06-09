@@ -350,10 +350,23 @@ def translate_file(kr_path, hashes):
     body = _pretranslate_code_comments(body)
     body_no_code, code_store = _protect_code_blocks(body)
     body_no_inline, inline_store = _protect_inline_code(body_no_code)
-    # DeepL converts <hr/> to "---" which merges with next headings — use opaque placeholder
-    _HR = "\x00HRHR\x00"
+    # DeepL converts <hr/> to "---" which merges with next headings
+    # Use an HTML tag placeholder: tag_handling="html" preserves <x ...> tags exactly
+    _HR = '<x id="HR"/>'
     body_protected = re.sub(r'(?m)^---$', _HR, body_no_inline)
+    # Protect ordered list markers (e.g. "2. **item**") — DeepL can corrupt them to "details." etc.
+    # after </details> context; <x> tags are preserved exactly by tag_handling="html"
+    _ol_store: dict[str, str] = {}
+
+    def _protect_ol(m: re.Match) -> str:
+        key = f'<x id="OL{len(_ol_store)}"/>'
+        _ol_store[key] = m.group(1)
+        return f'{key}. '
+
+    body_protected = re.sub(r'(?m)^( *)(\d+)\. ', lambda m: m.group(1) + _protect_ol(m), body_protected)
     translated = translate_with_deepl(body_protected) if body_no_inline.strip() else body_protected
+    for key, num in _ol_store.items():
+        translated = translated.replace(key, num)
     en_body = html.unescape(translated.replace(_HR, '\n\n---\n\n'))
     # Safety net: fix any ---# produced by DeepL converting <hr/> in older translations
     en_body = re.sub(r'^---(?=#{1,6} )', '---\n\n', en_body, flags=re.MULTILINE)

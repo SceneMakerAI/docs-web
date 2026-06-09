@@ -106,7 +106,7 @@ docs/poc/vision-bench/child.md  (slug: "1")  →  /docs/poc/vision-bench/1
 ### 서버 crontab (콘텐츠 동기화 주체)
 
 ```
-*/30 * * * * /root/docs-web/scripts/server-sync.sh >> /var/log/notion-sync.log 2>&1
+0 * * * * /root/docs-web/scripts/server-sync.sh >> /var/log/notion-sync.log 2>&1
 ```
 
 `server-sync.sh` 실행 흐름: `git checkout main` → `git pull --rebase` → Notion 8개 DB 병렬 동기화 → `git commit` (커미터: `server-cron`) → `push` → `deploy.yml` 트리거
