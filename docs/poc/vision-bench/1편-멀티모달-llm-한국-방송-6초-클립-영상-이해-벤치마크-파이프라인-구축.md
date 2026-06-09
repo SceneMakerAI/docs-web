@@ -4,7 +4,7 @@ title: "[1편] 멀티모달 LLM 한국 방송 6초 클립 영상 이해 벤치�
 sidebar_position: 1
 slug: "1"
 last_update:
-  date: 2026-06-08
+  date: 2026-06-09
 ---
 
 
@@ -668,8 +668,6 @@ print(f"순차 {seq_ms}ms · 배치 {batch_ms}ms · {seq_ms / batch_ms:.2f}×")
 | 단일·영상 | POST /chat | 영상+음성 통합 분석 | 한국어 장면 분석 | ✅ PASS |
 | 단일·블랙아웃 | POST /chat | 화면 가려도 음성 반영(통제) | 검은 화면 인식 + 중계 음성 포착 | ✅ PASS |
 | 배치 | POST /chat/batch | 다건 동시·완료순 스트리밍 | 완료순≠입력순, 배치처리가 약 1.7배 빠름 | ✅ PASS |
-
-**결론** 
 
 클라이언트 → `poc-vision-bench` → vLLM 파이프라인의 핵심 메커니즘(본문 패스스루·동시성 게이트·완료순 배치 스트리밍·영상 내 오디오 통합)이 모두 정상 동작함을 확인.
 
