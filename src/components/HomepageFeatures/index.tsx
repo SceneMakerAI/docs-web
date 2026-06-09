@@ -1,5 +1,6 @@
 import type {ReactNode} from 'react';
 import clsx from 'clsx';
+import Translate, {translate} from '@docusaurus/Translate';
 import Heading from '@theme/Heading';
 import styles from './styles.module.css';
 
@@ -15,34 +16,42 @@ type FeatureItem = {
 const FeatureList: FeatureItem[] = [
   {
     number: '01',
-    title: '모아보기',
+    title: translate({id: 'homepage.features.highlight.title', message: '모아보기'}),
     accent: 'teal',
     description: (
-      <>긴 방송에서 하이라이트 장면을 멀티모달 LLM으로 자동 선별합니다.</>
+      <Translate id="homepage.features.highlight.desc">
+        긴 방송에서 하이라이트 장면을 멀티모달 LLM으로 자동 선별합니다.
+      </Translate>
     ),
   },
   {
     number: '02',
-    title: '리믹스',
+    title: translate({id: 'homepage.features.remix.title', message: '리믹스'}),
     accent: 'pink',
     description: (
-      <>본편 영상을 숏폼·요약본으로 재구성합니다. 자막·장면 분석 기반.</>
+      <Translate id="homepage.features.remix.desc">
+        본편 영상을 숏폼·요약본으로 재구성합니다. 자막·장면 분석 기반.
+      </Translate>
     ),
   },
   {
     number: '03',
-    title: '광고',
+    title: translate({id: 'homepage.features.ad.title', message: '광고'}),
     accent: 'warning',
     description: (
-      <>콘텐츠 맥락에 가장 어울리는 광고를 매칭합니다. 임베딩·검색 기반.</>
+      <Translate id="homepage.features.ad.desc">
+        콘텐츠 맥락에 가장 어울리는 광고를 매칭합니다. 임베딩·검색 기반.
+      </Translate>
     ),
   },
   {
     number: '04',
-    title: 'Batch',
+    title: translate({id: 'homepage.features.batch.title', message: 'Batch'}),
     accent: 'light-green',
     description: (
-      <>방송 아카이브를 야간 배치로 일괄 분석합니다. 재처리·재인덱싱 파이프라인.</>
+      <Translate id="homepage.features.batch.desc">
+        방송 아카이브를 야간 배치로 일괄 분석합니다. 재처리·재인덱싱 파이프라인.
+      </Translate>
     ),
   },
 ];
@@ -76,10 +85,12 @@ export default function HomepageFeatures(): ReactNode {
       <div className="container">
         <div className={styles.sectionHeader}>
           <Heading as="h2" className={styles.sectionTitle}>
-            4대 AI 서비스
+            <Translate id="homepage.features.section.title">4대 AI 서비스</Translate>
           </Heading>
           <p className={styles.sectionSubtitle}>
-            멀티모달 LLM 위에 방송 도메인 4가지 서비스를 제공합니다.
+            <Translate id="homepage.features.section.subtitle">
+              멀티모달 LLM 위에 방송 도메인 4가지 서비스를 제공합니다.
+            </Translate>
           </p>
         </div>
         <div className="row">
