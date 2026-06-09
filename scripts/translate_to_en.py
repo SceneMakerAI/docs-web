@@ -29,7 +29,15 @@ _PROG_LANG_PROTECT = {
     'sql', 'css', 'scss', 'html', 'xml', 'java', 'cpp', 'c',
     'csharp', 'go', 'rust', 'ruby', 'php', 'swift', 'kotlin',
     'r', 'diff', 'dockerfile', 'makefile',
+    'mermaid',  # 사전 번역 후 이중 번역 방지
 }
+
+# 주석이 # 으로 시작하는 언어 (한국어 주석만 번역)
+_HASH_COMMENT_LANGS = {'bash', 'sh', 'shell', 'python', 'py', 'r', 'makefile'}
+# 주석이 // 로 시작하는 언어
+_SLASH_COMMENT_LANGS = {'javascript', 'js', 'typescript', 'ts', 'java', 'cpp', 'c', 'csharp', 'go', 'rust', 'swift', 'kotlin'}
+
+_KO_RE = re.compile(r'[가-힣]')
 
 
 def log(msg):
@@ -94,6 +102,91 @@ def translate_with_deepl(text):
         log(f"DeepL 오류 {resp.status_code}: {resp.text[:200]}")
         return text
     return resp.json()["translations"][0]["text"]
+
+
+def translate_with_deepl_plain(text):
+    """tag_handling 없이 번역 — mermaid·코드 주석용."""
+    if not text.strip():
+        return text
+    endpoint = (
+        "https://api-free.deepl.com/v2/translate"
+        if DEEPL_API_KEY.endswith(":fx")
+        else "https://api.deepl.com/v2/translate"
+    )
+    resp = requests.post(
+        endpoint,
+        headers={"Authorization": f"DeepL-Auth-Key {DEEPL_API_KEY}"},
+        json={"text": [text], "source_lang": "KO", "target_lang": "EN-US"},
+    )
+    if resp.status_code != 200:
+        log(f"DeepL 오류 {resp.status_code}: {resp.text[:200]}")
+        return text
+    return resp.json()["translations"][0]["text"]
+
+
+def _protect_inline_in_line(line):
+    """한 줄 내 인라인 코드를 플레이스홀더로 보호. (store, protected_line) 반환."""
+    store = {}
+
+    def _sub(m):
+        key = f'\x01INLN{len(store)}\x01'
+        store[key] = m.group(0)
+        return key
+
+    protected = re.sub(r'``[^`]+``|`[^`\n]+`', _sub, line)
+    return store, protected
+
+
+def _pretranslate_mermaid_blocks(body):
+    """Mermaid 블록 내 한국어를 사전 번역. 인라인 코드는 보호."""
+    def _handle(m):
+        content = m.group(1)
+        if not _KO_RE.search(content):
+            return m.group(0)
+        inline_store = {}
+
+        def _sub(im):
+            key = f'\x01INMER{len(inline_store)}\x01'
+            inline_store[key] = im.group(0)
+            return key
+
+        protected = re.sub(r'``[^`]+``|`[^`\n]+`', _sub, content)
+        translated = translate_with_deepl_plain(protected)
+        for key, val in inline_store.items():
+            translated = translated.replace(key, val)
+        return f'```mermaid\n{translated.rstrip()}\n```'
+
+    return re.sub(r'```mermaid\n([\s\S]*?)\n```', _handle, body)
+
+
+def _pretranslate_all_code_korean(body):
+    """모든 코드 블록 (no-lang 포함, mermaid 제외) 내 한국어가 포함된 줄을 사전 번역."""
+    def _handle(m):
+        lang = m.group(1).strip().lower()
+        if lang == 'mermaid':
+            return m.group(0)
+        content = m.group(2)
+        if not _KO_RE.search(content):
+            return m.group(0)
+
+        lines = content.split('\n')
+        changed = False
+        for i, line in enumerate(lines):
+            if not _KO_RE.search(line):
+                continue
+            inline_store, protected = _protect_inline_in_line(line)
+            translated = translate_with_deepl_plain(protected)
+            for key, val in inline_store.items():
+                translated = translated.replace(key, val)
+            if translated.strip():
+                lines[i] = translated
+                changed = True
+
+        if not changed:
+            return m.group(0)
+        return f'```{m.group(1)}\n' + '\n'.join(lines) + '```'
+
+    return re.sub(r'```(\w*)\n([\s\S]*?)```', _handle, body)
 
 
 def load_hashes():
@@ -248,15 +341,63 @@ def translate_file(kr_path, hashes):
         en_desc = translate_with_deepl(kr_desc)
         en_frontmatter = en_frontmatter.replace(f'description: "{kr_desc}"', f'description: "{en_desc}"', 1)
 
+    # 사전 번역: mermaid 블록 + 모든 코드 블록 한국어 줄 (인라인 코드는 보호됨)
+    body = _pretranslate_mermaid_blocks(body)
+    body = _pretranslate_all_code_korean(body)
     body_no_code, code_store = _protect_code_blocks(body)
     body_no_inline, inline_store = _protect_inline_code(body_no_code)
-    # DeepL converts <hr/> to "---" which merges with next headings — use opaque placeholder
-    _HR = "\x00HRHR\x00"
+    # Protect blockquote > markers — DeepL with tag_handling="html" can replace "> " with tag names
+    _bq_store: dict[str, str] = {}
+
+    def _protect_bq(m: re.Match) -> str:
+        key = f'<x id="BQ{len(_bq_store)}"/>'
+        _bq_store[key] = m.group(0)
+        return key
+
+    body_no_inline = re.sub(r'^> ?', _protect_bq, body_no_inline, flags=re.MULTILINE)
+    # DeepL converts <hr/> to "---" which merges with next headings
+    # Use an HTML tag placeholder: tag_handling="html" preserves <x ...> tags exactly
+    _HR = '<x id="HR"/>'
     body_protected = re.sub(r'(?m)^---$', _HR, body_no_inline)
+    # Protect heading markers (# ## ### etc.) — DeepL separates them from content, leaving empty headings
+    _hdr_store: dict[str, str] = {}
+
+    def _protect_hdr(m: re.Match) -> str:
+        key = f'<x id="HDR{len(_hdr_store)}"/>'
+        _hdr_store[key] = m.group(1)
+        return f'{key} '
+
+    body_protected = re.sub(r'(?m)^(#{1,6}) ', _protect_hdr, body_protected)
+    # Protect ordered list markers (e.g. "2. **item**") — DeepL can corrupt them to "details." etc.
+    # after </details> context; <x> tags are preserved exactly by tag_handling="html"
+    _ol_store: dict[str, str] = {}
+
+    def _protect_ol(m: re.Match) -> str:
+        key = f'<x id="OL{len(_ol_store)}"/>'
+        _ol_store[key] = m.group(2)          # group 2 = the number
+        return f'{m.group(1)}{key}. '        # group 1 = leading spaces
+
+    body_protected = re.sub(r'(?m)^( *)(\d+)\. ', _protect_ol, body_protected)
     translated = translate_with_deepl(body_protected) if body_no_inline.strip() else body_protected
+    for key, num in _ol_store.items():
+        translated = translated.replace(key, num)
+    for key, markers in _hdr_store.items():
+        translated = translated.replace(key, markers)
     en_body = html.unescape(translated.replace(_HR, '\n\n---\n\n'))
     # Safety net: fix any ---# produced by DeepL converting <hr/> in older translations
     en_body = re.sub(r'^---(?=#{1,6} )', '---\n\n', en_body, flags=re.MULTILINE)
+    # Safety net: HRHR variants left when old null-byte placeholder was stripped by DeepL
+    _HRHR = r'(?:\*\*HRHR\*\*|#HRHR#|-HRHR-|—HRHR—|\|HRHR\||HRHR)'
+    en_body = re.sub(rf'^{_HRHR}$', '---', en_body, flags=re.MULTILINE)
+    # Safety net: "****word" → "**word" — DeepL drops Korean in "**KO (EN)**" and adjacent ** merge
+    en_body = re.sub(r'\*{4,}(\w)', r'**\1', en_body)
+    # Safety net: DeepL prepends closing-tag name to following Markdown elements
+    _TAG = r'(?:table|tbody|thead|tr|details|div|section|blockquote)'
+    en_body = re.sub(rf'^{_TAG}(#{1,6} )', r'\1', en_body, flags=re.MULTILINE)
+    # Bold: "tag*text**" → "**text**" (tag ate one * from opening **)
+    en_body = re.sub(rf'^{_TAG}\*', '**', en_body, flags=re.MULTILINE)
+    # Table row: "tag Cell | ..." → "| Cell | ..." (leading | was dropped)
+    en_body = re.sub(rf'^{_TAG} ([^\n|]+\|)', r'| \1', en_body, flags=re.MULTILINE)
     # Safety net: DeepL removes blank lines after closing block HTML tags
     _BLOCK_CLOSE = r'</(table|tbody|thead|tr|details|div|section|blockquote)>'
     en_body = re.sub(rf'({_BLOCK_CLOSE})([^\n<])', r'\1\n\n\2', en_body)
@@ -265,6 +406,8 @@ def translate_file(kr_path, hashes):
     en_body = re.sub(r'\n{3,}', '\n\n', en_body)
     en_body = _restore_inline_code(en_body, inline_store)
     en_body = _restore_code_blocks(en_body, code_store)
+    for key, val in _bq_store.items():
+        en_body = en_body.replace(key, val)
 
     with open(en_path, "w", encoding="utf-8") as f:
         f.write(en_frontmatter + en_body)

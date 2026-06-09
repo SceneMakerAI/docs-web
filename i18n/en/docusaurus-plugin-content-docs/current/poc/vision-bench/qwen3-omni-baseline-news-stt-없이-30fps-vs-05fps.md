@@ -7,11 +7,11 @@ last_update:
 ---
 
 > Baseline analysis of **100 clips from the news category** using Qwen3-Omni without STT (Speech-to-Text) context.
-Measured using two scenarios: **30 fps (original) vs. 0.5 fps (low-frame-rate converted version)** — comparing the impact of video frame rate on analysis performance.
+Measured using two scenarios: **30fps (original) vs. 0.5fps (low-frame-rate converted version)** — comparing the impact of video frame rate on analysis performance.
 
 ---
 
-####  1. Execution Environment
+#### 1. Execution Environment
 
 | Item | Value |
 | --- | --- |
@@ -19,7 +19,7 @@ Measured using two scenarios: **30 fps (original) vs. 0.5 fps (low-frame-rate co
 | Serving | vLLM (OpenAI-compatible endpoint, single GPU) |
 | Client | FastAPI server (`POST /analyze/by-clip-path` ) |
 | Concurrency | 4 (server-side `asyncio.Semaphore` ) |
-| STT Context | **None** — Dialogue sections from the prompt removed (for baseline measurement) |
+| STT Context | **None** — dialogue section of the prompt removed (for baseline measurement) |
 | Measurement Date | 2026-05-22 |
 
 #### 2. Data
@@ -80,7 +80,7 @@ Most prompt tokens consist of MP4 Base64 encoding (video frames + audio). At 0.5
 
 #### 6. Processing Speed Compared to Real-Time
 
-| variant | Total video | wall-time | Real-time ratio |
+| variant | Total Video | Wall-time | Real-time Ratio |
 | --- | --- | --- | --- |
 | 30fps | 600 sec | 191 sec | **3.14×** |
 | 0.5fps | 600 sec | 78 sec | **7.69×** |
@@ -94,7 +94,7 @@ Most prompt tokens consist of MP4 Base64 encoding (video frames + audio). At 0.5
 | Qwen p95 | 7,985ms | 3,470ms | 2.30× faster |
 | Prompt tokens avg | 11,791 | 1,711 | **6.89× reduction** |
 | Completion Tokens (avg) | 153 | 136 | -11% |
-| Real-time Comparison | 3.14× | 7.69× | 2.45× improvement |
+| Compared to real-time | 3.14× | 7.69× | 2.45× improvement |
 | ok/fail | 97/3 | 99/1 | Stability ↑ |
 
 #### 8. Qualitative Comparison of Analysis Quality
@@ -109,7 +109,7 @@ Analysis results for the same clip (0050 — industrial statistics graphic scene
 
 > Graphics visualizing raw materials such as steel and aluminum, as well as derivative products like automobile and aircraft parts, are displayed against an industrial site background. A man waving his hand is visible in the lower right corner.
 
-→ The key graphics and caption content are accurately depicted in both fps. **The difference lies in the dynamic element in the bottom right corner** — 30fps accurately depicts "a sign language interpreter performing sign language," while 0.5fps shows "a man waving his hand," **misinterpreting the meaning of the continuous motion**.
+→ The key graphics and subtitle content are accurately depicted in both fps. **The difference lies in the dynamic element in the bottom right corner** — 30fps accurately depicts "a sign language interpreter performing sign language," while 0.5fps shows "a man waving his hand," **misinterpreting the meaning of the continuous motion**.
 
 #### 8.1 Summary of Observations
 
@@ -118,9 +118,9 @@ Analysis results for the same clip (0050 — industrial statistics graphic scene
 | Graphics / Captions / Static Visual Elements | Accurate | Accurate (3 frames are sufficient) |
 | Character clothing / background details | Accurate | Some details missing |
 | Scene transition recognition | Accurate | Increased frequency of omissions |
-| Continuous motion (sign language, etc.) | Accurate depiction | Simplified or misinterpreted (e.g., sign language → hand gesture) |
-| Hallucinations (Generation of Non-Existent Elements) | Low | Slightly ↑ |
-| `actions` Diversity | More Diverse on Average | Significantly Less |
+| Continuous motion (sign language, etc.) | Accurate depiction | Simplified or misinterpreted (e.g., sign language → hand gestures) |
+| Hallucinations (generating non-existent elements) | Low | Slightly ↑ |
+| `actions` Diversity | More diverse on average | Significantly lower |
 
 #### 9. Conclusion
 
@@ -133,28 +133,28 @@ Analysis results for the same clip (0050 — industrial statistics graphic scene
 #### 10. Next Steps
 
 - Measure the remaining 6 categories under the same conditions (especially `baseball` and `lol`, which involve a lot of motion—the 0.5fps gap is expected to be even larger)
-- Retest failed cases + analyze causes
+- Retry failed cases + analyze causes
 - Re-measure the same 100 clips after adding STT context → Quantitatively compare quality improvements relative to the baseline
 - Perform parallel measurements on Gemini with the same input → Compare models
 
 #### 11. Reproduction Instructions
 
 ```bash
-# FastAPI 서버 기동
+# Starting the FastAPI server
 ./script/start.sh
 
-# 30fps 측정 (baseline)
+# 30 fps Measurement (Baseline)
 PYTHONPATH=src uv run script/run_batch.py news news --no-script --model qwen_no_script
 
-# 0.5fps 측정
+# Measuring 0.5 fps
 PYTHONPATH=src uv run script/run_batch.py news news_0.5fps --no-script --model qwen_no_script_0.5fps
 
-# 사람 보기용 markdown
+# Markdown for human readers
 PYTHONPATH=src uv run script/render_summary.py qwen_no_script news news
 PYTHONPATH=src uv run script/render_summary.py qwen_no_script_0.5fps news news_0.5fps
 ```
 
-Deliverables:
+Outputs:
 
 - `predictions/{model}/news/{source}/{clip_id}.json` — Envelope per request
 - `predictions/{model}/news/{source}/_meta.json` — Raw time and token statistics
