@@ -33,7 +33,9 @@ A Proof of Concept for **comparing STT (Speech-to-Text) systems** to automatical
 <td><code>Qwen3-ASR-1.7B</code> + <code>Qwen3-ForcedAligner-0.6B</code></td>
 <td>Alibaba, ASR + separate word timestamps</td>
 </tr>
-</tbody></table>> Initially, Gemini STT was also included in the comparison, but it was deemed unsuitable for subtitling due to an issue where timestamp accuracy drifted by minutes and was subsequently excluded. Gemini is used solely in the role of a judge.
+</tbody></table>
+
+> Initially, Gemini STT was also included in the comparison, but it was deemed unsuitable for subtitling due to an issue where timestamp accuracy drifted by minutes and was subsequently excluded. Gemini is used solely in the role of a judge.
 
 **Evaluation Method**
 
@@ -154,7 +156,9 @@ Entry point:
 <td>report</td>
 <td><code>.venv/bin/python report.py</code></td>
 </tr>
-</tbody></table>### 2.2 Directory / Output Structure
+</tbody></table>
+
+### 2.2 Directory / Output Structure
 
 ```
 output/
@@ -353,7 +357,9 @@ Since Whisper is trained on different amounts of data for each language, lower t
 <th>Action</th>
 <td>Non-speech segments (silence/BGM/sound effects) are not sent to ASR</td>
 </tr>
-</tbody></table>**Why is this effective?** — The primary cause of Whisper hallucinations is **generating subtitle patterns learned from silence/BGM segments** (`ご視聴ありがとうございました`, `Thanks for watching`, etc.). This problem disappears entirely when only speech segments are input. Industry-standard tools like WhisperX and stable-ts follow the same pattern.
+</tbody></table>
+
+**Why is this effective?** — The primary cause of Whisper hallucinations is **generating subtitle patterns learned from silence/BGM segments** (`ご視聴ありがとうございました`, `Thanks for watching`, etc.). This problem disappears entirely when only speech segments are input. Industry-standard tools like WhisperX and stable-ts follow the same pattern.
 
 #### Gate 2 — MIN_LOGPROB (-1.0)
 
@@ -375,7 +381,9 @@ Since Whisper is trained on different amounts of data for each language, lower t
 <th>Cases detected</th>
 <td>Hallucination catch-all (final defense line for hallucinations not caught by gates 1/3/4)</td>
 </tr>
-</tbody></table>**Meaning of threshold -1.0** — Converted to log probability:
+</tbody></table>
+
+**Meaning of threshold -1.0** — Converted to log probability:
 
 | `avg_logprob` | Average token probability | Interpretation |
 | --- | --- | --- |
@@ -409,7 +417,9 @@ Since Whisper is trained on different amounts of data for each language, lower t
 <th>Action</th>
 <td><code>lang_code</code> to <code>MAIN_LANG (ko)</code> . Subsequently, transcribe as a single ko</td>
 </tr>
-</tbody></table>**Why 0.5?** — Cases like LID probability 0.23 = "sounds similar to ko/de/ja/zh" = LID itself is unreliable. Assuming Korean content → assuming ko is natural.
+</tbody></table>
+
+**Why 0.5?** — Cases like LID probability 0.23 = "sounds similar to ko/de/ja/zh" = LID itself is unreliable. Assuming Korean content → assuming ko is natural.
 
 **Example — Actual baseball.wav log**
 
@@ -446,7 +456,9 @@ If we had gone with the original LID result, it would have been transcribed as G
 <th>Cases where it is captured</th>
 <td>ja/zh short hallucinations (1–2 second LID misclassification cases)</td>
 </tr>
-</tbody></table>**Why -0.6?** — Log probability around 50%. If both are below 50%, the model is unsure of either language = higher probability that the short audio is garbled or noise.
+</tbody></table>
+
+**Why -0.6?** — Log probability around 50%. If both are below 50%, the model is unsure of either language = higher probability that the short audio is garbled or noise.
 
 **Example — Actual baseball.wav log**
 
@@ -472,7 +484,9 @@ If we had gone with the original LID result, it would have been transcribed as G
 <th>Cases Detected</th>
 <td>ko Forced transcription resulted in Japanese tokens (Whisper limitation)</td>
 </tr>
-</tbody></table>**Why 30%?** — Normal Korean speech typically has a Korean character ratio of 70%+ (even when mixed with numbers or English abbreviations). Less than 30% = effectively hallucinating Japanese/Kanji tokens.
+</tbody></table>
+
+**Why 30%?** — Normal Korean speech typically has a Korean character ratio of 70%+ (even when mixed with numbers or English abbreviations). Less than 30% = effectively hallucinating Japanese/Kanji tokens.
 
 **Calculating Hangul Ratio** — The ratio of Hangul syllables (가-힣) among characters and numbers, excluding spaces and punctuation.
 
