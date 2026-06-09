@@ -1,6 +1,6 @@
 #!/bin/bash
 # Notion → docs/ 동기화 → git push
-# 서버 crontab에서 30분마다 실행
+# 서버 crontab에서 3시간마다 실행 (0 */3 * * *)
 
 set -e
 

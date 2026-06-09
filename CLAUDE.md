@@ -11,8 +11,8 @@
 
 - 운영 URL: `https://doc.scenemaker.solbox.com`
 - 스택: **Docusaurus 3.x** (React 19, TypeScript), **한국어(기본)·영어 이중 로케일**
-- 파이프라인: Notion DB → 서버 crontab(30분, `server-sync.sh`) → GH Pages (`deploy.yml`)
-- 번역 파이프라인: `docs/`·`blog/` KR → DeepL → `i18n/en/` EN (매월 1·15일, `weekly-translate.yml`)
+- 파이프라인: Notion DB → 서버 crontab(3시간, `server-sync.sh`) → GH Pages (`deploy.yml`)
+- 번역 파이프라인: `docs/`·`blog/` KR → DeepL → `i18n/en/` EN (매월 1일, `weekly-translate.yml`)
 - 참고: https://docusaurus.io/ko/docs
 
 ---
@@ -54,7 +54,7 @@ docs-web/
 │   └── tests/                # notion_to_md.py·md_to_notion.py 단위 테스트
 └── .github/workflows/
     ├── deploy.yml
-    ├── weekly-translate.yml  # 매월 1·15일 EN 번역 자동 실행 (실패 시 빌드 영향 없음)
+    ├── weekly-translate.yml  # 매월 1일 EN 번역 자동 실행 (실패 시 빌드 영향 없음)
     ├── md-to-notion.yml
     ├── merge-develop.yml
     ├── pr-build.yml
@@ -106,7 +106,7 @@ docs/poc/vision-bench/child.md  (slug: "1")  →  /docs/poc/vision-bench/1
 ### 서버 crontab (콘텐츠 동기화 주체)
 
 ```
-0 * * * * /root/docs-web/scripts/server-sync.sh >> /var/log/notion-sync.log 2>&1
+0 */3 * * * /root/docs-web/scripts/server-sync.sh >> /var/log/notion-sync.log 2>&1
 ```
 
 `server-sync.sh` 실행 흐름: `git checkout main` → `git pull --rebase` → Notion 8개 DB 병렬 동기화 → `git commit` (커미터: `server-cron`) → `push` → `deploy.yml` 트리거
@@ -118,7 +118,7 @@ docs/poc/vision-bench/child.md  (slug: "1")  →  /docs/poc/vision-bench/1
 | 파일 | 트리거 | 역할 |
 |------|--------|------|
 | `deploy.yml` | main push | npm build → GH Pages 배포 |
-| `weekly-translate.yml` | 매월 1·15일 KST 11:00 / 수동 | KR docs·blog → DeepL → `i18n/en/` 번역, main에 커밋. 번역 실패해도 워크플로우 green |
+| `weekly-translate.yml` | 매월 1일 KST 11:00 / 수동 | KR docs·blog → DeepL → `i18n/en/` 번역, main에 커밋. 번역 실패해도 워크플로우 green |
 | `sync-develop.yml` | 매일 KST 03:00 | main 콘텐츠를 develop으로 머지 (`.notion-sync.json` 충돌 자동 해소) |
 | `merge-develop.yml` | 매일 KST 11:00 | develop 코드 변경을 main으로 머지 (콘텐츠 디렉토리 제외, 빌드 게이트 포함) |
 | `md-to-notion.yml` | `docs/**/*.md` push | 수동 편집된 md → Notion DB 역업로드 |
@@ -187,7 +187,7 @@ git push origin develop
 
 ### crontab 충돌 처리
 
-crontab이 30분마다 main에 push하므로 `non-fast-forward` 에러 시:
+crontab이 3시간마다 main에 push하므로 `non-fast-forward` 에러 시:
 
 ```bash
 git pull --rebase origin main
@@ -228,7 +228,7 @@ git push origin design
 
 ### 개요
 
-`scripts/translate_to_en.py`가 `docs/`·`blog/` 의 KR Markdown을 DeepL Free API로 번역해 `i18n/en/` 에 저장한다. `weekly-translate.yml`이 매월 1·15일 자동 실행한다.
+`scripts/translate_to_en.py`가 `docs/`·`blog/` 의 KR Markdown을 DeepL Free API로 번역해 `i18n/en/` 에 저장한다. `weekly-translate.yml`이 매월 1일 자동 실행한다.
 
 ### 동작 방식
 
