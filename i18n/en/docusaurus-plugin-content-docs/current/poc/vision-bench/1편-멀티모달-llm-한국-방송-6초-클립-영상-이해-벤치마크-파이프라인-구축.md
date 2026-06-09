@@ -143,8 +143,8 @@ The original file from the table above can be downloaded using the procedure bel
 1. **Download the Original** — Save each URL from the table to its corresponding category folder
 
 ```bash
-cd "$(git rev-parse --show-toplevel)"   # 작업 루트(레포 최상위)로 이동
-CAT=<카테고리>; NAME=<원본명>; URL=<테스트 대상 URL>
+cd "$(git rev-parse --show-toplevel)"   # Change to the working directory (top level of the repo)
+CAT=<Category>; NAME=<Original Name>; URL=<URL to Test>
 uvx yt-dlp -f "bv*[ext=mp4]+ba[ext=m4a]/b[ext=mp4]/b" \
 --merge-output-format mp4 \
 -o "data/raw/$CAT/$NAME.%(ext)s" "$URL"
@@ -156,11 +156,11 @@ uvx yt-dlp -f "bv*[ext=mp4]+ba[ext=m4a]/b[ext=mp4]/b" \
 
 ```bash
 cd "$(git rev-parse --show-toplevel)"
-CAT=<카테고리>; NAME=<원본명>
+CAT=<Category>; NAME=<Original Name>
 SRC="data/raw/$CAT/$NAME.mp4"
 OUT="data/clips/$CAT/$NAME"; mkdir -p "$OUT"
 for i in $(seq 0 99); do
-  start=$((600 + i*6)); end=$((start + 6))  # 절대초 600,606,…,1194
+  start=$((600 + i*6)); end=$((start + 6))  # Absolute seconds: 600, 606, …, 1194
   name=$(printf "%04d_%04d-%04d" $((i+1)) "$start" "$end")  # 0001_0600-0606
   ffmpeg -nostdin -ss "$start" -i "$SRC" -t 6 -c:v libopenh264 -b:v 1500k -c:a aac -movflags +faststart "$OUT/$name.mp4"
 done
@@ -173,9 +173,9 @@ done
 
 ```bash
 cd "$(git rev-parse --show-toplevel)"
-CAT=<카테고리>; NAME=<원본명>
+CAT=<Category>; NAME=<Original Name>
 OUT="data/clips/$CAT/$NAME"
-FIRST=$(ls "$OUT"/*.mp4 | head -1)          # 분할된 클립 한 개만
+FIRST=$(ls "$OUT"/*.mp4 | head -1) # Only one split clip
 BLACK="data/blackout/$CAT/$NAME"; mkdir -p "$BLACK"
 ffmpeg -nostdin -i "$FIRST" \
   -vf "drawbox=0:0:iw:ih:color=black:t=fill" \
@@ -258,7 +258,7 @@ Request Body:
 
 ```json
 {"items": [
-  {"id": "0001_0600-0606", "body": {<vLLM chat.completions body — /chat 와 동일>}},
+  {"id": "0001_0600-0606", "body": {<vLLM chat.completions body — same as /chat>}},
   {"id": "0002_0606-0612", "body": {<...>}}
 ]}
 ```
@@ -266,8 +266,8 @@ Request Body:
 Response (1 line = 1 JSON object, separated by line breaks):
 
 ```json
-{"id": "0001_0600-0606", "status": 200, "elapsed_ms": 3104, "body": {<vLLM 응답>}}
-{"id": "0002_0606-0612", "status": 500, "elapsed_ms": 0, "error": "<메시지>"}
+{"id": "0001_0600-0606", "status": 200, "elapsed_ms": 3104, "body": {<vLLM response>}}
+{"id": "0002_0606-0612", "status": 500, "elapsed_ms": 0, "error": "<message>"}
 ```
 
 | **Field** | **Meaning** |
@@ -284,8 +284,8 @@ Response (1 line = 1 JSON object, separated by line breaks):
 The gateway is managed via `script/service.sh`.
 
 ```bash
-./script/service.sh start      # 백그라운드 기동 (healthz OK 까지 대기)
-./script/service.sh status     # PID·healthz·포트 확인
+./script/service.sh start # Start in the background (wait until healthz returns OK)
+./script/service.sh status     # Check PID, health status, and port
 ./script/service.sh restart    # stop → start
 ./script/service.sh stop
 ```
@@ -315,10 +315,10 @@ The gateway is managed via `script/service.sh`.
   "model": "qwen",
   "messages": [{"role": "user", "content": [
     {"type": "video_url", "video_url": {"url": "data:video/mp4;base64,<...>"}},
-    {"type": "text", "text": "<프롬프트>"}
+    {"type": "text", "text": "<Prompt>"}
   ]}],
   "temperature": 0.3, "max_tokens": 1024,
-  "response_format": {"type": "json_schema", "json_schema": {"name": "clip_analysis", "strict": true, "schema": "<AnalysisResult 4필드>"}},
+  "response_format": {"type": "json_schema", "json_schema": {"name": "clip_analysis", "strict": true, "schema": "<AnalysisResult 4 fields>"}},
   "media_io_kwargs": {"video": {"fps": 2.0}},
   "mm_processor_kwargs": {"use_audio_in_video": true},
   "chat_template_kwargs": {"enable_thinking": false}
@@ -330,7 +330,7 @@ The gateway is managed via `script/service.sh`.
 ```json
 {
   "id": "chatcmpl-...",
-  "choices": [{"message": {"role": "assistant", "content": "<아래 JSON>"}, "finish_reason": "stop"}]
+  "choices": [{"message": {"role": "assistant", "content": "<JSON below>"}, "finish_reason": "stop"}]
 }
 ```
 
@@ -340,7 +340,7 @@ The gateway is managed via `script/service.sh`.
 
 ```json
 {"items": [
-  {"id": "0001_0600-0606", "body": {"<②와 동일>"}},
+  {"id": "0001_0600-0606", "body": {"Same as ②"}},
   {"id": "0002_0606-0612", "body": {"..."}}
 ]}
 ```
@@ -348,8 +348,8 @@ The gateway is managed via `script/service.sh`.
 Output: `application/x-ndjson` — One line per completion order (field details 3.2.3):
 
 ```javascript
-{"id":"0001_0600-0606","status":200,"elapsed_ms":3104,"body":{<vLLM 응답>}}
-{"id":"0002_0606-0612","status":500,"elapsed_ms":0,"error":"<메시지>"}
+{"id":"0001_0600-0606","status":200,"elapsed_ms":3104,"body":{<vLLM response>}}
+{"id":"0002_0606-0612","status":500,"elapsed_ms":0,"error":"<message>"}
 ```
 
 > Execution: `./script/curl_examples.sh batch`
@@ -385,7 +385,7 @@ x-request-id: 6da1b40a
      -d '{
        "model": "qwen",
        "messages": [{"role": "user", "content": [
-         {"type": "text", "text": "한국어로 자기소개를 한 문장으로 해줘."}
+         {"type": "text", "text": "Please introduce yourself in one sentence in Korean."}
        ]}]
      }' | jq
    ```
@@ -407,7 +407,7 @@ x-request-id: 6da1b40a
          "index": 0,
          "message": {
            "role": "assistant",
-           "content": "안녕하세요, 저는 한국어 모국어 화자이며 다양한 주제에 대해 자연스럽고 흥미로운 대화를 나누는 것을 좋아합니다.",
+           "content": "Hello, I am a native Korean speaker and I enjoy having natural and interesting conversations on a variety of topics.",
            "refusal": null,
            "annotations": null,
            "audio": null,
@@ -453,7 +453,7 @@ x-request-id: 6da1b40a
    b = base64.b64encode(open(sys.argv[1],"rb").read()).decode()
    json.dump({"model":"qwen","messages":[{"role":"user","content":[
        {"type":"video_url","video_url":{"url":"data:video/mp4;base64,"+b}},
-       {"type":"text","text":"이 영상의 시각과 음성을 한국어로 분석해줘."}]}],
+       {"type":"text","text":"Analyze the visuals and audio of this video in Korean."}]}],
      "temperature":0.3,
      "mm_processor_kwargs":{"use_audio_in_video":True},
      "chat_template_kwargs":{"enable_thinking":False}}, open("/tmp/req.json","w"), ensure_ascii=False)
@@ -478,7 +478,7 @@ x-request-id: 6da1b40a
          "index": 0,
          "message": {
            "role": "assistant",
-           "content": "assistant>\n이 영상은 야구 경기 중 한 장면을 담고 있습니다. 경기장 내부에서 촬영되었으며, 주로 투수와 타자, 그리고 포수의 위치가 보입니다. 투수와 포수는 모두 빨간색 유니폼을 입고 있으며, 타자도 빨간색 유니폼을 입고 있습니다. 배경에는 광고판이 보이며, \"Pocari Sweat\"와 \"Super Dong\" 등의 광고가 있습니다. 경기장의 분위기는 활기차며, 관중들의 함성 소리가 들립니다. \n\n음성은 한국어로 진행되며, 경기 중계 방송의 목소리가 들립니다. 중계 방송에서는 경기의 진행 상황을 설명하고 있으며, 특정 선수의 활약에 대해 언급합니다. \"MVP를 줄 수밖에 없지 않나\"라는 말이 들리며, 이는 특정 선수의 훌륭한 활약에 대한 평가로 보입니다. 또한 \"기아의 반격이 또 나왔습니다\"라는 말이 들리며, 이는 경기 중 상대 팀이 반격을 시도하고 있음을 나타냅니다. \n\n전반적으로 이 영상은 야구 경기의 긴박한 순간을 포착한 것으로, 팀의 활약과 경기의 흐름을 중계 방송을 통해 관객들에게 전달하고 있습니다.",
+           "content": "assistant>\nThis video captures a scene from a baseball game. It was filmed inside the stadium and primarily shows the pitcher, batter, and catcher. Both the pitcher and catcher are wearing red uniforms, and the batter is also wearing a red uniform. Advertising boards are visible in the background, featuring ads for "Pocari Sweat" and "Super Dong." The atmosphere in the stadium is lively, and the cheers of the crowd can be heard. \n\nThe audio is in Korean, and the voice of the game broadcast can be heard. The broadcast explains the progress of the game and mentions the performance of specific players. The comment, “Don’t you think he deserves the MVP?” is heard, which appears to be an assessment of a specific player’s outstanding performance. Additionally, the comment “Kia is mounting another counterattack” is heard, indicating that the opposing team is attempting a comeback during the game. \n\nOverall, this video captures the tense moments of a baseball game, conveying the team’s performance and the flow of the game to the audience through the broadcast commentary.",
            "refusal": null,
            "annotations": null,
            "audio": null,
@@ -524,7 +524,7 @@ x-request-id: 6da1b40a
    b = base64.b64encode(open(sys.argv[1],"rb").read()).decode()
    json.dump({"model":"qwen","messages":[{"role":"user","content":[
        {"type":"video_url","video_url":{"url":"data:video/mp4;base64,"+b}},
-       {"type":"text","text":"이 영상의 시각과 음성을 한국어로 분석해줘."}]}],
+       {"type":"text","text":"Analyze the visuals and audio of this video in Korean."}]}],
      "temperature":0.3,
      "mm_processor_kwargs":{"use_audio_in_video":True},
      "chat_template_kwargs":{"enable_thinking":False}}, open("/tmp/req.json","w"), ensure_ascii=False)
@@ -549,7 +549,7 @@ x-request-id: 6da1b40a
          "index": 0,
          "message": {
            "role": "assistant",
-           "content": "assistant\n이 영상은 흑백으로 전환된 장면을 보여줍니다. 화면에는 아무런 시각적 정보가 없으며, 오직 검은색 배경만 존재합니다. 이는 아마도 비디오의 일부가 손상되었거나, 또는 의도적으로 흑백으로 처리된 것으로 보입니다. \n\n음성은 한국어로 되어 있으며, 두 명의 남성이 대화를 나누고 있습니다. 첫 번째 남성은 \"MVP를 줄 수밖에 없지 않나?\"라고 말하며, 두 번째 남성은 \"그렇죠.\"라고 동의합니다. 이 대화는 아마도 스포츠 경기에 대한 논의일 수 있습니다. \n\n그러나 이 대화는 비디오의 시각적 정보와 연결되지 않으며, 시청자가 비디오의 내용을 이해하기 위해 음성 정보에만 의존해야 합니다. 이는 비디오의 시각적 정보가 부족하거나, 의도적으로 시청자의 주의를 음성 정보에 집중시키기 위한 전략일 수 있습니다.",
+           "content": "assistant\nThis video shows a scene that has been converted to black and white. There is no visual information on the screen; only a black background is visible. This likely means that part of the video is damaged or was intentionally converted to black and white. \n\nThe audio is in Korean, and two men are having a conversation. The first man says, "Don’t we have to give him the MVP?" and the second man agrees, saying, "That’s right." This conversation is likely a discussion about a sports game. \n\nHowever, this dialogue is not connected to the visual content of the video, forcing viewers to rely solely on the audio to understand what is happening. This could be due to a lack of visual information or a deliberate strategy to draw the viewer’s attention to the audio.",
            "refusal": null,
            "annotations": null,
            "audio": null,
@@ -599,18 +599,18 @@ CLIPS_ROOT = _DATA / "clips"
 
 SVR = "http://localhost:8001"
 _SCENE = CLIPS_ROOT / "baseball/baseball"
-CLIPS = [str(p.relative_to(CLIPS_ROOT)) for p in sorted(_SCENE.glob("*.mp4"))[:12]]  # 연속 12클립 (0001~0012)
+CLIPS = [str(p.relative_to(CLIPS_ROOT)) for p in sorted(_SCENE.glob("*.mp4"))[:12]]  # 12 consecutive clips (0001–0012)
 
 def chat_body(clip):
     b64 = base64.b64encode(clip.read_bytes()).decode()
     return {"model": "qwen", "temperature": 0.3,
             "messages": [{"role": "user", "content": [
                 {"type": "video_url", "video_url": {"url": f"data:video/mp4;base64,{b64}"}},
-                {"type": "text", "text": "이 영상의 시각과 음성을 한국어로 분석해줘."}]}],
+                {"type": "text", "text": "Analyze the visuals and audio of this video in Korean."}]}],
             "mm_processor_kwargs": {"use_audio_in_video": True},
             "chat_template_kwargs": {"enable_thinking": False}}
 
-items = [{"id": Path(c).name, "body": chat_body(CLIPS_ROOT / c)} for c in CLIPS]  # base64 1회 인코딩 → 양 모드 재사용
+items = [{"id": Path(c).name, "body": chat_body(CLIPS_ROOT / c)} for c in CLIPS]  # Encoded once in base64 → Reused in both modes
 
 with httpx.Client(timeout=600) as cli:
     # ① Sequence: One at a time /chat (Proceed to the next after completing the previous one)
@@ -624,10 +624,10 @@ with httpx.Client(timeout=600) as cli:
     with cli.stream("POST", f"{SVR}/chat/batch", json={"items": items}) as r:
         for line in r.iter_lines():
             if line:
-                json.loads(line)  # 라인 = {id, status, elapsed_ms, body|error}
+                json.loads(line)  # line = {id, status, elapsed_ms, body|error}
     batch_ms = int((time.monotonic() - t) * 1000)
 
-print(f"순차 {seq_ms}ms · 배치 {batch_ms}ms · {seq_ms / batch_ms:.2f}×")
+print(f"Sequential {seq_ms} ms · Batch {batch_ms} ms · {seq_ms / batch_ms:.2f}×")
 ```
 
 </details>

@@ -159,10 +159,12 @@ def _pretranslate_mermaid_blocks(body):
     return re.sub(r'```mermaid\n([\s\S]*?)\n```', _handle, body)
 
 
-def _pretranslate_code_comments(body):
-    """코드 블록 내 한국어 주석 줄만 사전 번역. 코드 자체와 인라인 코드는 보호."""
+def _pretranslate_all_code_korean(body):
+    """모든 코드 블록 (no-lang 포함, mermaid 제외) 내 한국어가 포함된 줄을 사전 번역."""
     def _handle(m):
         lang = m.group(1).strip().lower()
+        if lang == 'mermaid':
+            return m.group(0)
         content = m.group(2)
         if not _KO_RE.search(content):
             return m.group(0)
@@ -170,27 +172,21 @@ def _pretranslate_code_comments(body):
         lines = content.split('\n')
         changed = False
         for i, line in enumerate(lines):
-            stripped = line.lstrip()
-            is_comment = (
-                (lang in _HASH_COMMENT_LANGS and stripped.startswith('#')) or
-                (lang in _SLASH_COMMENT_LANGS and (
-                    stripped.startswith('//') or stripped.startswith('/*') or stripped.startswith('* ')
-                ))
-            )
-            if not is_comment or not _KO_RE.search(line):
+            if not _KO_RE.search(line):
                 continue
             inline_store, protected = _protect_inline_in_line(line)
             translated = translate_with_deepl_plain(protected)
             for key, val in inline_store.items():
                 translated = translated.replace(key, val)
-            lines[i] = translated
-            changed = True
+            if translated.strip():
+                lines[i] = translated
+                changed = True
 
         if not changed:
             return m.group(0)
         return f'```{m.group(1)}\n' + '\n'.join(lines) + '```'
 
-    return re.sub(r'```(\w+)\n([\s\S]*?)```', _handle, body)
+    return re.sub(r'```(\w*)\n([\s\S]*?)```', _handle, body)
 
 
 def load_hashes():
@@ -345,9 +341,9 @@ def translate_file(kr_path, hashes):
         en_desc = translate_with_deepl(kr_desc)
         en_frontmatter = en_frontmatter.replace(f'description: "{kr_desc}"', f'description: "{en_desc}"', 1)
 
-    # 사전 번역: mermaid 블록 + 코드 블록 주석 (인라인 코드는 보호됨)
+    # 사전 번역: mermaid 블록 + 모든 코드 블록 한국어 줄 (인라인 코드는 보호됨)
     body = _pretranslate_mermaid_blocks(body)
-    body = _pretranslate_code_comments(body)
+    body = _pretranslate_all_code_korean(body)
     body_no_code, code_store = _protect_code_blocks(body)
     body_no_inline, inline_store = _protect_inline_code(body_no_code)
     # Protect blockquote > markers — DeepL with tag_handling="html" can replace "> " with tag names

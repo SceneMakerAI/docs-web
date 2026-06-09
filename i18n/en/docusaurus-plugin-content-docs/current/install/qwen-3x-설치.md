@@ -264,7 +264,7 @@ Given that renting A100 or H100 hardware is not practical, we will compare the f
 export HF_XET_HIGH_PERFORMANCE=1
 
 # Save Location - Choose one of the two
-export HF_HOME=/mnt/nvme/hf-cache      # 빠르지만 stop 시 소실
+export HF_HOME=/mnt/nvme/hf-cache # Fast, but data is lost when the process stops
 # export HF_HOME=/root/hf-cache # or EBS (persistent)
 ```
 
@@ -348,13 +348,13 @@ Activate with: source .venv/bin/activate
   -H "Content-Type: application/json" \
   -d '{
     "model": "qwen",
-    "messages": [{"role":"user","content":"안녕"}],
+    "messages": [{"role":"user","content":"Hello"}],
     "max_tokens": 100,
     "chat_template_kwargs": {"enable_thinking": false}
   }'
   
   
-{"id":"chatcmpl-89cf9de14d6fdfd2","object":"chat.completion","created":1779181606,"prompt_routed_experts":null,"model":"qwen","choices":[{"index":0,"message":{"role":"assistant","content":"안녕하세요! 반갑습니다. 😊\n오늘 어떤 도움이 필요하신가요? 궁금한 점이 있거나 대화하고 싶은 주제가 있다면 언제든지 말씀해 주세요.","refusal":null,"annotations":null,"audio":null,"function_call":null,"tool_calls":[],"reasoning":null},"logprobs":null,"finish_reason":"stop","stop_reason":null,"token_ids":null,"routed_experts":null}],"service_tier":null,"system_fingerprint":"vllm-0.21.0-2426ae93","usage":{"prompt_tokens":14,"total_tokens":49,"completion_tokens":35,"prompt_tokens_details":null},"prompt_logprobs":null,"prompt_token_ids":null,"prompt_text":null,"kv_transfer_params":null}[root@ip-172-31-22-41 models]#
+{"id":"chatcmpl-89cf9de14d6fdfd2","object":"chat.completion","created":1779181606,"prompt_routed_experts":null,"model":"qwen","choices":[{"index":0,"message":{"role":"assistant","content":"Hello! Nice to meet you. 😊\nHow can I help you today? If you have any questions or topics you’d like to discuss, please let me know anytime.","refusal":null,"annotations":null,"audio":null,"function_call":null,"tool_calls":[],"reasoning":null},"logprobs":null,"finish_reason":"stop","stop_reason":null,"token_ids":null,"routed_experts":null}],"service_tier":null,"system_fingerprint":"vllm-0.21.0-2426ae93","usage":{"prompt_tokens":14,"total_tokens":49,"completion_tokens":35,"prompt_tokens_details":null},"prompt_logprobs":null,"prompt_token_ids":null,"prompt_text":null,"kv_transfer_params":null}[root@ip-172-31-22-41 models]#
 ```
 
 #### Register Service

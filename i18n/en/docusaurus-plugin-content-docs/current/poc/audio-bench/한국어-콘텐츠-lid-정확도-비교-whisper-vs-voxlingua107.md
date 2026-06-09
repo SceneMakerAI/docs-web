@@ -32,11 +32,11 @@ As this is a proof-of-concept (POC) verification tool, simplicity was prioritize
 ### 1.4 Processing Flow
 
 ```javascript
-[Denoise 적용시]
-audio → VAD → 각 발화 구간 → denoise → [Whisper | VoxLingua] → LID
+[When applying Denoise]
+audio → VAD → individual speech segments → denoise → [Whisper | VoxLingua] → LID
 
-[Denoise 미 적용시]
-audio → VAD → 각 발화 구간 → [Whisper | VoxLingua] → LID
+[Without Denoise]
+audio → VAD → individual speech segments → [Whisper | VoxLingua] → LID
 ```
 
 ---
@@ -128,20 +128,20 @@ See the URL below for the source code
 poc-lid-bench/
 ├── CLAUDE.md
 ├── pyproject.toml
-├── conf.py                # MODEL_DIR 등 경로 상수
-├── log.py                 # 파일 로거 (lid_bench.log)
-├── main.py                # 진입점: wav 목록 순회 + 결과 저장
+├── conf.py # Path constants such as MODEL_DIR
+├── log.py # File logger (lid_bench.log)
+├── main.py # Entry point: Iterate through the list of WAV files and save the results
 ├── lib/
 │   ├── denoise.py         # DeepFilterNet v3 wrapper
 │   ├── vad.py             # Silero VAD wrapper
 │   ├── whisper_lid.py     # faster-whisper detect_language wrapper
 │   ├── voxlingua_lid.py   # SpeechBrain VoxLingua107 wrapper
-│   └── bench.py           # 4-way 비교 실행 + 결과 출력/저장
-└── output/                   # 산출물 (gitignore 권장)
+│   └── bench.py # Run 4-way comparison + output/save results
+└── output/ # Output (gitignore recommended)
     ├── denoise/
-    │   └── <stem>.wav        # denoise 결과 (48kHz int16) — 입력 wav 1개당 1개
-    ├── <stem>.csv            # per-segment LID 결과 — 입력 wav 1개당 1개
-    └── timings.csv           # 모든 입력 파일의 단계별 처리 시간 통합 1개
+    │   └── <stem>.wav # Denoising result (48 kHz, 16-bit integer) — One file per input WAV
+    ├── <stem>.csv # Per-segment LID results — One file per input WAV
+    └── timings.csv # A single file containing the aggregated processing times for each step of all input files
 ```
 
 #### Notes on External Environment (for Git users)
@@ -196,7 +196,7 @@ modify the code to change the path to your own or use the SpeechBrain default ca
 ### 3.3 How to Run
 
 ```javascript
-# log.py 에서 로그파일 위치 적절히 수정
+# Update the log file path in log.py as appropriate
 > .venv/bin/python main.py
 ```
 

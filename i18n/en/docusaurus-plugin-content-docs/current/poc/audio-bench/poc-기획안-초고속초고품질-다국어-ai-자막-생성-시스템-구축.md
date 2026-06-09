@@ -114,19 +114,19 @@ Base accelerated environment based on a single NVIDIA RTX 4090 (24GB)
 ### 2.1 Overall Flow
 
 ```
-원본 wav (mono, 16kHz)
+Original WAV (mono, 16 kHz)
    │
    ▼
 [1] denoise — DeepFilterNet v3
-   │   ↳ output/1_denoise/<stem>.wav  (캐시, 양쪽 시스템 공유)
+   │   ↳ output/1_denoise/<stem>.wav  (Cache, shared by both systems)
    ▼
-[2] transcribe — 시스템별 (Whisper / Qwen)
+[2] Transcribe — By system (Whisper / Qwen)
    │   ↳ output/{system}/2_transcribe/<stem>.md
    ▼
 [3] evaluate — Gemini judge
    │   ↳ output/{system}/evaluate/<stem>.csv
    ▼
-[4] report — 시스템 비교 집계
+[4] Report — System Comparison Summary
        ↳ output/report.csv
 ```
 
@@ -160,14 +160,14 @@ Entry point:
 
 ```
 output/
-├── 1_denoise/<stem>.wav          # DF 결과 (양쪽 공유, 캐시)
+├── 1_denoise/<stem>.wav # DF results (shared by both, cached)
 ├── whisper/
-│   ├── 2_transcribe/<stem>.md    # STT 결과
-│   ├── evaluate/<stem>.csv       # Gemini 채점
+│   ├── 2_transcribe/<stem>.md    # STT results
+│   ├── evaluate/<stem>.csv # Gemini scoring
 │   └── timings.csv               # duration / transcribe time / RTF
 ├── qwen/
-│   └── (동일 구조)
-└── report.csv                    # 시스템 × 콘텐츠 종합 비교
+│   └── (same structure)
+└── report.csv # Comprehensive Comparison of Systems and Content
 ```
 
 **transcribe MD** — 1 line = 1 segment, custom format:
@@ -418,7 +418,7 @@ Since Whisper is trained on different amounts of data for each language, lower t
 
 ```
 [01:18:43.3~01:18:44.4] LID de=0.23 → pass
-    LID de=0.23 < 0.5 → ko 강제      ← 게이트 3 발동
+    LID de=0.23 < 0.5 → ko forced ← Gate 3 activated
 ```
 
 If we had used the original LID result as-is, it would have transcribed as German → hallucination. Forced normalization to ko.
@@ -507,29 +507,29 @@ audio_raw + audio_denoised
    │
    ▼  16kHz resample
    │
-[VAD 게이트]  raw audio → 발화 구간 [(start, end), ...]
+[VAD Gate] raw audio → speech segments [(start, end), ...]
    │
-   ▼  각 발화 chunk 마다
+   ▼  For each speech chunk
 [LID]  Whisper.detect_language(raw chunk) → (lang, prob)
    │
-   ▼  ALLOWED_LANGS 게이트 (Tier 1+2+3 외 skip)
+   ▼  ALLOWED_LANGS gate (Skip Tier 1, 2, and 3)
    │
-[LID_TRUST_PROB]  prob<0.5 + 비-ko → ko 강제
+[LID_TRUST_PROB]  prob < 0.5 + non-ko → ko forced
    │
    ▼
-[transcribe 분기]
-   ├─ 짧음(<3s) + 비-ko → dual (ko + lid)
-   │   └─ max lp 채택. 양쪽 < -0.6 → drop
-   └─ 그 외 → single (lid 그대로)
+[transcribe branch]
+   ├─ Short (<3s) + non-ko → dual (ko + lid)
+   │   └─ Adopted max LP. Both sides < -0.6 → drop
+   └─ Others → single (with lid)
    │
-   ▼  결과 segment loop
-[후처리 게이트]
+   ▼  Result: segment loop
+[Post-Processing Gate]
    ├─ avg_logprob < -1.0 → drop
    ├─ duration < 0.2s → drop
-   └─ chosen=ko + 한글 < 30% → drop
+   └─ chosen=ko + Korean < 30% → drop
    │
    ▼
-segment 저장 (transcribe MD)
+Save segment (transcribe MD)
 ```
 
 ---
@@ -628,9 +628,9 @@ For segments in languages other than Korean (lang ≠ ko), add **+1 point** to t
 
 ```
 audio: "I go to school"
-STT  : "I go to the school"   ← 사소한 단어 추가
-원래 점수: 2 (의미동일, 표현 다름)
-보정 후 : 3 (외국어 +1)
+STT: "I go to school"   ← Added a minor word
+Original score: 2 (Same meaning, different wording)
+After adjustment: 3 (Foreign language +1)
 ```
 
 ### 5.3 Subtitle Usability Rate (≥0 points)
@@ -667,20 +667,20 @@ Execution source: [https://github.com/SceneMakerAI/poc-stt-bench](https://github
 ```javascript
 cd /usr/service/source/scenemaker/poc/poc-stt-bench
 
-# (필요시) 기존 결과 정리 — denoise 캐시는 유지
+# (If necessary) Summarize existing results — Keep the denoise cache
 \rm -rf output/whisper/2_transcribe output/whisper/evaluate output/whisper/timings.csv
 \rm -rf output/qwen/2_transcribe output/qwen/evaluate output/qwen/timings.csv
 
 # 1. Whisper STT
 .venv/bin/python main.py
 
-# 2. Qwen STT (별도 venv)
+# 2. Qwen STT (separate venv)
 .venv-qwen/bin/python main_qwen.py
 
-# 3. Gemini judge 평가 (whisper + qwen)
+# 3. Gemini Judge Evaluation (Whisper + Qwen)
 .venv/bin/python evaluate.py all
 
-# 4. 종합 비교 리포트
+# 4. Comprehensive Comparison Report
 .venv/bin/python report.py
 ```
 
