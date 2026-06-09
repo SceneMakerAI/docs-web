@@ -126,33 +126,52 @@ docs/poc/vision-bench/child.md  (slug: "1")  →  /docs/poc/vision-bench/1
 ## 브랜치 전략
 
 > ⚠️ **핵심 규칙: `main`·`develop`에 코드를 직접 커밋하지 않는다.**
-> 모든 코드 변경은 반드시 별도 브랜치에서 작업 후 merge한다.
+> feat 브랜치는 항상 작업 대상 브랜치(보통 `design`)에서 따고, 해당 브랜치로 머지한다.
 
-| 작업 유형 | 브랜치 | dev 서버 포트 |
-|----------|--------|--------------|
-| 콘텐츠 (Notion 자동 동기화) | `main` 직접 커밋 *(자동화 전용)* | 3000 |
-| **UI 변경** (CSS·컴포넌트·디자인) | `design` 브랜치 → main merge | 3002 |
-| **기능·버그픽스·설정 변경** | `feat/<이름>` 브랜치 → main merge 후 삭제 | — |
-| develop 검증 | develop 체크아웃 후 별도 포트 | 3001 |
+### 브랜치 흐름
 
-**수동 작업 시 절대 금지:**
-- `git commit` 을 `main` 또는 `develop` 에서 직접 실행 ❌
-- 작업 시작 전 항상 `git checkout feat/<이름>` 또는 `git checkout design` 먼저
+```
+main (콘텐츠 자동화 전용)
+ └─ design (장기 유지, UI·CSS·설정)
+     └─ feat/<이름> (단위 작업, 완료 후 design으로 머지 → 삭제)
+```
 
-**design 브랜치:** 장기 유지 (삭제 금지). 작업 전 반드시 `git merge origin/main --ff-only` 실행.
-**feat 브랜치:** 작업 완료 후 main에 merge → 로컬·원격 브랜치 삭제.
+| 작업 유형 | 시작 브랜치 | 머지 대상 | dev 서버 포트 |
+|----------|------------|----------|--------------|
+| 콘텐츠 (Notion 자동 동기화) | — | `main` 직접 커밋 *(자동화 전용)* | 3000 |
+| **모든 코드 변경** (CSS·컴포넌트·설정·버그픽스) | `design` | `feat/<이름>` → `design` | 3002 |
+| develop 검증 | — | develop 체크아웃 후 별도 포트 | 3001 |
 
-### ⚠️ feat → design 머지 금지 — cherry-pick 사용
-
-feat 브랜치는 main을 기점으로 생성되므로 `git merge feat/<이름>`을 design에 실행하면 main 커밋이 딸려온다.
+**작업 흐름:**
 
 ```bash
-# 잘못된 방법 (main 커밋이 따라옴)
-git checkout design && git merge feat/something  # ❌
+# 1. design 최신화
+git checkout design
+git merge origin/main --ff-only
 
-# 올바른 방법 (해당 커밋만 적용)
-git checkout design && git cherry-pick <feat-commit-hash>  # ✅
+# 2. feat 브랜치 생성 (design 기점)
+git checkout -b feat/<이름>
+
+# 3. 작업 후 커밋 ([skip-notion] 포함)
+git commit -m "feat(...): ... [skip-notion]"
+
+# 4. design으로 머지 후 feat 삭제
+git checkout design
+git merge feat/<이름>
+git branch -d feat/<이름>
+
+# 5. design → main 머지 후 push
+git checkout main
+git merge design -m "chore: design → main 머지 [skip-notion]"
+git push origin main
 ```
+
+**절대 금지:**
+- `main` 또는 `develop`에 직접 커밋 ❌
+- `feat` 브랜치를 `main`에 직접 머지 ❌ (design 경유 필수)
+
+**design 브랜치:** 장기 유지 (삭제 금지). 작업 전 반드시 `git merge origin/main --ff-only` 실행.
+**feat 브랜치:** design으로 머지 완료 후 로컬 삭제. 원격 push 불필요.
 
 ### crontab 충돌 처리
 
