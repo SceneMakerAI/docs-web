@@ -6,8 +6,8 @@ import rehypeKatex from 'rehype-katex';
 import fs from 'fs';
 import path from 'path';
 
-// Notion DB가 비어있으면 (placeholder.md만 있으면) navbar에서 해당 섹션을 숨긴다.
-// 서브디렉토리 구조(poc 등)도 재귀 탐색.
+// docs/{dirName} 내에 placeholder.md 이외의 .md 파일이 있으면 true.
+// 빈 섹션의 navbar 항목을 docSidebar(doc 필요) → href(URL) 로 전환하기 위해 사용.
 function hasNotionContent(dirName: string): boolean {
   function scan(dir: string): boolean {
     try {
@@ -189,17 +189,26 @@ const config: Config = {
         srcDark: '/img/logo-dark.svg',
       },
       items: [
-        ...(hasNotionContent('about')        ? [{type: 'docSidebar' as const, sidebarId: 'aboutSidebar',        label: '프로젝트 소개', position: 'left' as const}] : []),
-        ...(hasNotionContent('architecture') ? [{type: 'docSidebar' as const, sidebarId: 'architectureSidebar', label: '아키텍처',      position: 'left' as const}] : []),
-        ...(hasNotionContent('install')      ? [{type: 'docSidebar' as const, sidebarId: 'installSidebar',      label: '설치',          position: 'left' as const}] : []),
-        ...(hasNotionContent('poc')          ? [{type: 'docSidebar' as const, sidebarId: 'pocSidebar',          label: 'PoC',           position: 'left' as const}] : []),
-        ...(hasNotionContent('guide')        ? [{type: 'docSidebar' as const, sidebarId: 'docsSidebar',         label: '문서',          position: 'left' as const}] : []),
+        // docSidebar는 실제 doc이 있어야 crash 없이 렌더됨.
+        // 빈 섹션(placeholder.md만 있음)은 {to} 링크로 generated-index URL을 직접 지정.
+        ...(hasNotionContent('about')
+          ? [{type: 'docSidebar' as const, sidebarId: 'aboutSidebar',        label: '프로젝트 소개', position: 'left' as const}]
+          : [{to: '/docs/about',         label: '프로젝트 소개', position: 'left' as const}]),
+        ...(hasNotionContent('architecture')
+          ? [{type: 'docSidebar' as const, sidebarId: 'architectureSidebar', label: '아키텍처',      position: 'left' as const}]
+          : [{to: '/docs/architecture',  label: '아키텍처',      position: 'left' as const}]),
+        {type: 'docSidebar', sidebarId: 'installSidebar',      label: '설치',          position: 'left'},
+        {type: 'docSidebar', sidebarId: 'pocSidebar',          label: 'PoC',           position: 'left'},
+        ...(hasNotionContent('guide')
+          ? [{type: 'docSidebar' as const, sidebarId: 'docsSidebar',         label: '문서',          position: 'left' as const}]
+          : [{to: '/docs/guide',           label: '문서',          position: 'left' as const}]),
         {to: '/blog', label: '블로그', position: 'left'},
-        ...(hasNotionContent('contribute')   ? [{type: 'docSidebar' as const, sidebarId: 'contributeSidebar',   label: '오픈소스 기여', position: 'left' as const}] : []),
-        ...(hasNotionContent('release-notes')? [{type: 'docSidebar' as const, sidebarId: 'releaseNotesSidebar', label: '릴리즈 노트',   position: 'left' as const}] : []),
+        {type: 'docSidebar', sidebarId: 'contributeSidebar',   label: '오픈소스 기여', position: 'left'},
+        ...(hasNotionContent('release-notes')
+          ? [{type: 'docSidebar' as const, sidebarId: 'releaseNotesSidebar', label: '릴리즈 노트',   position: 'left' as const}]
+          : [{to: '/docs/release-notes', label: '릴리즈 노트',   position: 'left' as const}]),
         {href: 'https://github.com/SceneMakerAI', label: 'GitHub', position: 'right'},
-        {type: 'localeDropdown', position: 'right',
-        },
+        {type: 'localeDropdown', position: 'right'},
       ],
     },
     footer: {
@@ -210,9 +219,9 @@ const config: Config = {
           items: [
             {
               label: '시작하기',
-              to: '/docs/guide/1',
+              to: hasNotionContent('guide') ? '/docs/guide/1' : '/docs/guide',
             },
-            ...(hasNotionContent('architecture') ? [{ label: '아키텍처', to: '/docs/architecture' }] : []),
+            {label: '아키텍처', to: '/docs/architecture'},
           ],
         },
         {
