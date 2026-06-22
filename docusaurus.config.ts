@@ -3,6 +3,27 @@ import type {Config} from '@docusaurus/types';
 import type * as Preset from '@docusaurus/preset-classic';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
+import fs from 'fs';
+import path from 'path';
+
+// Notion DB가 비어있으면 (placeholder.md만 있으면) navbar에서 해당 섹션을 숨긴다.
+// 서브디렉토리 구조(poc 등)도 재귀 탐색.
+function hasNotionContent(dirName: string): boolean {
+  function scan(dir: string): boolean {
+    try {
+      for (const f of fs.readdirSync(dir)) {
+        const full = path.join(dir, f);
+        if (fs.statSync(full).isDirectory()) {
+          if (scan(full)) return true;
+        } else if (f.endsWith('.md') && f !== 'placeholder.md') {
+          return true;
+        }
+      }
+    } catch {}
+    return false;
+  }
+  return scan(path.join(__dirname, 'docs', dirName));
+}
 
 // This runs in Node.js - Don't use client-side code here (browser APIs, JSX...)
 
@@ -168,42 +189,16 @@ const config: Config = {
         srcDark: '/img/logo-dark.svg',
       },
       items: [
-        {type: 'docSidebar', sidebarId: 'aboutSidebar', label: '프로젝트 소개', position: 'left'},
-        {
-          type: 'docSidebar',
-          sidebarId: 'architectureSidebar',
-          position: 'left',
-          label: '아키텍처',
-        },
-        {
-          type: 'docSidebar',
-          sidebarId: 'installSidebar',
-          position: 'left',
-          label: '설치',
-        },
-        {
-          type: 'docSidebar',
-          sidebarId: 'pocSidebar',
-          position: 'left',
-          label: 'PoC',
-        },
-        {
-          type: 'docSidebar',
-          sidebarId: 'docsSidebar',
-          position: 'left',
-          label: '문서',
-        },
+        ...(hasNotionContent('about')        ? [{type: 'docSidebar' as const, sidebarId: 'aboutSidebar',        label: '프로젝트 소개', position: 'left' as const}] : []),
+        ...(hasNotionContent('architecture') ? [{type: 'docSidebar' as const, sidebarId: 'architectureSidebar', label: '아키텍처',      position: 'left' as const}] : []),
+        ...(hasNotionContent('install')      ? [{type: 'docSidebar' as const, sidebarId: 'installSidebar',      label: '설치',          position: 'left' as const}] : []),
+        ...(hasNotionContent('poc')          ? [{type: 'docSidebar' as const, sidebarId: 'pocSidebar',          label: 'PoC',           position: 'left' as const}] : []),
+        ...(hasNotionContent('guide')        ? [{type: 'docSidebar' as const, sidebarId: 'docsSidebar',         label: '문서',          position: 'left' as const}] : []),
         {to: '/blog', label: '블로그', position: 'left'},
-        {type: 'docSidebar', sidebarId: 'contributeSidebar', position: 'left', label: '오픈소스 기여'},
-        {type: 'docSidebar', sidebarId: 'releaseNotesSidebar', position: 'left', label: '릴리즈 노트'},
-        {
-          href: 'https://github.com/SceneMakerAI',
-          label: 'GitHub',
-          position: 'right',
-        },
-        {
-          type: 'localeDropdown',
-          position: 'right',
+        ...(hasNotionContent('contribute')   ? [{type: 'docSidebar' as const, sidebarId: 'contributeSidebar',   label: '오픈소스 기여', position: 'left' as const}] : []),
+        ...(hasNotionContent('release-notes')? [{type: 'docSidebar' as const, sidebarId: 'releaseNotesSidebar', label: '릴리즈 노트',   position: 'left' as const}] : []),
+        {href: 'https://github.com/SceneMakerAI', label: 'GitHub', position: 'right'},
+        {type: 'localeDropdown', position: 'right',
         },
       ],
     },
@@ -217,10 +212,7 @@ const config: Config = {
               label: '시작하기',
               to: '/docs/guide/1',
             },
-            {
-              label: '아키텍처',
-              to: '/docs/architecture',
-            },
+            ...(hasNotionContent('architecture') ? [{ label: '아키텍처', to: '/docs/architecture' }] : []),
           ],
         },
         {
