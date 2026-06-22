@@ -270,7 +270,7 @@ python3 scripts/translate_to_en.py
 `onBrokenLinks: 'throw'` — CI에서 아래 시 빌드 실패:
 - **깨진 내부 링크** — PR 전 `npm run build` 로컬 통과 필수
 - **MDX 컴파일 오류** — frontmatter·JSX 문법 오류
-- **사이드바 비어있음** — Notion DB에 콘텐츠가 없는 섹션은 `placeholder.md` 필수 (현재: `about/`, `release-notes/`)
+- **사이드바 비어있음** — Notion DB에 콘텐츠가 없는 섹션은 `placeholder.md` 필수 (현재: `about/`, `architecture/`, `release-notes/`)
 
 ---
 
@@ -279,7 +279,7 @@ python3 scripts/translate_to_en.py
 | 사이드바 ID | `docs/` 경로 | 환경변수 | Notion 콘텐츠 유무 |
 |------------|-------------|----------|-------------------|
 | `aboutSidebar` | `about/` | `NOTION_ABOUT` | ❌ placeholder.md 필요 |
-| `architectureSidebar` | `architecture/` | `NOTION_ARCHITECTURE` | ✅ |
+| `architectureSidebar` | `architecture/` | `NOTION_ARCHITECTURE` | ❌ placeholder.md 필요 |
 | `installSidebar` | `install/` | `NOTION_INSTALL` | ✅ |
 | `pocSidebar` | `poc/` | `NOTION_POC` | ✅ |
 | `docsSidebar` | `guide/` | `NOTION_DOCS` | ✅ |
