@@ -193,5 +193,17 @@
     "slug": "3",
     "sidebar_position": "3",
     "frontmatter_hash": "52140b6fb78670aecc238df70efd33a542752501c94375d7e687c36bb1775d6a"
+  },
+  "docs/guide/placeholder.md": {
+    "body_hash": "9c3c6fc3d407d5f72357eba0a1d4a19225debf92e023b664be415835ae8fc01b",
+    "slug": "placeholder",
+    "sidebar_position": "1",
+    "frontmatter_hash": "007727c458d7f9d57b9c5314565fdd592a8e86a292ddaabd6f52b9ee1ec3b18f"
+  },
+  "blog/2026-06-22-블로그-개설.md": {
+    "body_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "slug": "",
+    "sidebar_position": "",
+    "frontmatter_hash": "e17ebaabeab008f51d5859f5e5a792e261a9a1687d35fedc25478d77acd81bff"
   }
 }
