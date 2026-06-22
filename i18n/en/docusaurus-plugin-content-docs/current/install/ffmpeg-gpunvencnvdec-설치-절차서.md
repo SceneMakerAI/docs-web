@@ -68,7 +68,7 @@ $FF -y -f lavfi -i testsrc=size=1024x768:rate=30:duration=3 -c:v h264_nvenc /tmp
   && echo ">>> NVENC OK" || echo ">>> NVENC rejected → Replaced with an older autobuild"
 ```
 
-If an>  `Required: 13.x ... minimum driver 6xx` error occurs, that build is too new for this machine. (Set the test input to a sufficiently large resolution, such as 1024x768—small sizes like 64x64 may trigger false positives because they fall below nvenc’s minimum resolution)
+> If an `Required: 13.x ... minimum driver 6xx` error occurs, that build is too new for this machine. (Set the test input to a sufficiently large resolution, such as 1024x768—small sizes like 64x64 may trigger false positives because they fall below nvenc’s minimum resolution)
 
 ### 4. Verify the entire GPU pipeline using the actual source code
 

@@ -410,6 +410,9 @@ def translate_file(kr_path, hashes):
     en_body = _restore_code_blocks(en_body, code_store)
     for key, val in _bq_store.items():
         en_body = en_body.replace(key, val)
+    # Safety net: DeepL relocates blockquote '> ' marker mid-sentence
+    # e.g. "If an>  `code` ..." → "> If an `code` ..."
+    en_body = re.sub(r'^([A-Za-z][^>\n]*\S)(> +)(\S)', r'> \1 \3', en_body, flags=re.MULTILINE)
 
     with open(en_path, "w", encoding="utf-8") as f:
         f.write(en_frontmatter + en_body)
