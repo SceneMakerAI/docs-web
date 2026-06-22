@@ -110,7 +110,7 @@ docs/poc/vision-bench/child.md  (slug: "1")  →  /docs/poc/vision-bench/1
 0 */3 * * * /root/docs-web/scripts/server-sync.sh >> /var/log/notion-sync.log 2>&1
 ```
 
-`server-sync.sh` 실행 흐름: `git checkout main` → `git pull --rebase` → Notion 8개 DB 병렬 동기화 → `git commit` (커미터: `server-cron`) → `push` → `deploy.yml` 트리거
+`server-sync.sh` 실행 흐름: `git checkout main` → `git pull --rebase` → Notion 8개 DB 병렬 동기화 → `git commit` → `translate_to_en.py` (변경 파일만 DeepL 번역) → `git commit` → `push` → `deploy.yml` 트리거
 
 로그 확인: `tail -f /var/log/notion-sync.log`
 
@@ -122,7 +122,7 @@ docs/poc/vision-bench/child.md  (slug: "1")  →  /docs/poc/vision-bench/1
 | 파일                      | 트리거                  | 역할                                                                  |
 | ----------------------- | -------------------- | ------------------------------------------------------------------- |
 | `deploy.yml`            | main push            | npm build → GH Pages 배포                                             |
-| `monthly-translate.yml` | 매월 1일 KST 11:00 / 수동 | KR docs·blog → DeepL → `i18n/en/` 번역, main에 커밋. 번역 실패해도 워크플로우 green |
+| `monthly-translate.yml` | 매월 1일 KST 11:00 / 수동 | KR docs·blog → DeepL → `i18n/en/` 번역, main에 커밋 (전체 재검사용 백업) |
 | `sync-develop.yml`      | 매일 KST 03:00         | main 콘텐츠를 develop으로 머지 (`.notion-sync.json` 충돌 자동 해소)               |
 | `merge-develop.yml`     | 매일 KST 11:00         | develop 코드 변경을 main으로 머지 (콘텐츠 디렉토리 제외, 빌드 게이트 포함)                   |
 | `md-to-notion.yml`      | `docs/**/*.md` push  | 수동 편집된 md → Notion DB 역업로드                                          |
