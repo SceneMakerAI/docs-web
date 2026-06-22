@@ -27,10 +27,10 @@ SceneMaker’s video clip analysis aims to **reliably extract visual and auditor
 
 The key factor here is **stability**. In a benchmark batch-processing 700 clips, if the output fluctuates or breaks down from run to run—even with the same clip and the same prompt—the quality score itself cannot be trusted. During the validation process in Part 1 (Pipeline Construction), four patterns of quality degradation were intermittently identified.
 
-1. **Premature EOS**: The model outputs EOS (end-of-sentence) starting with the very first token, resulting in content that ends as an empty string. This occurs when the model “runs out of things to say” and shuts down immediately
-2, often due to excessive constraints imposed by a strict JSON schema. **Text Degeneration**: The model loses its normal probability distribution, spews out random characters and system tokens, and crashes before completing the JSON (Gibberish Generation).
-3. **Repetition Loop**: The model gets trapped in a probability loop, repeatedly generating the same words,
-4items, or JSON structures. **Inference Time Variation (Latency Jitter)**: Due to runaway generation—where collapse and repetition prevent the model from reaching a normal EOS, causing the output to extend all the way to `max_tokens`—there is an extreme disparity between the minimum and maximum inference times per clip.
+1. **Premature EOS**: The model outputs EOS (end-of-sentence) starting with the very first token, resulting in content that ends as an empty string. This occurs when the model “runs out of things to say” and shuts down immediately, often due to excessive constraints imposed by a strict JSON schema.
+2. **Text Degeneration**: The model loses its normal probability distribution, spews out random characters and system tokens, and crashes before completing the JSON (Gibberish Generation).
+3. **Repetition Loop**: The model gets trapped in a probability loop, repeatedly generating the same words, items, or JSON structures.
+4. **Inference Time Variation (Latency Jitter)**: Due to runaway generation—where collapse and repetition prevent the model from reaching a normal EOS, causing the output to extend all the way to `max_tokens`—there is an extreme disparity between the minimum and maximum inference times per clip.
 
 These patterns were merely **observed and identified** in Part 1; **whether they can be controlled via inference parameters was not addressed**. This part (Part 2) assumes that the output is fixed to a strict JSON Schema. This is a record of the **Phase 1 Screening**, in which we investigated whether **notable phenomena such as repetition and degeneration** can be controlled via inference parameters by significantly varying them one at a time (OFAT, one-factor-at-a-time).
 
