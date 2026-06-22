@@ -10,8 +10,13 @@ last_update:
 
 ## 1. 개요
 
+- AWS Linux 설치
+- Mulvus Compose 버전 설치
+- Attu 설치
 
 
+
+---
 
 ## 2. Docker 설치
 
@@ -23,9 +28,6 @@ last_update:
 
 # 2. 내장된 Docker 패키지 설치
 > dnf install -y docker
-
-# 3. Docker 서비스 활성화 및 즉시 시작
-> systemctl enable --now docker
 
 # 4. Docker 정상 작동 확인 (버전이 출력되면 성공)
 > docker --version
@@ -58,6 +60,8 @@ Docker Compose version v5.1.4
 ```
 
 
+
+---
 
 ## 3. Milvus 설치
 
@@ -100,6 +104,77 @@ affc1daa2946   quay.io/coreos/etcd:v3.5.25                "etcd -advertise-cli�
 
 
 
-### 3.3 정지
+### 3.3 부팅시 자동 설정
+
+#### Docker 재 시작
+
+```javascript
+> systemctl enable docker
+```
+
+
+
+#### Milvus 재시작
+
+Docker Compose로 묶인 서비스들은 서버가 꺼졌다가 켜졌을 때 자동으로 안 일어나는 경우가 종종 있음.
+
+공식 `docker-compose.yml` 파일 내부의 각 서비스들에 `restart: always` 옵션이 확실하게 들어있는지 확인하고 적용
+
+```javascript
+> cd /usr/service/milvus-standalone  # 아까 컴포즈가 있던 폴더 경로
+> vi docker-compose.yml
+# docker-compose.yml 편집 예시
+services:
+  etcd:
+    container_name: milvus-etcd
+    image: quay.io/coreos/etcd:v3.5.25
+    restart: always  # 👈 여기에 추가!
+    # ... 하단 생략 ...
+
+  minio:
+    container_name: milvus-minio
+    image: minio/minio:RELEASE.2024-12-18T13-15-44Z
+    restart: always  # 👈 여기에 추가!
+    # ... 하단 생략 ...
+
+  standalone:
+    container_name: milvus-standalone
+    image: milvusdb/milvus:v2.6.18
+    restart: always  # 👈 여기에 추가!
+    # ... 하단 생략 ...
+    
+```
+
+
+
+#### Attu 재시작
+
+```javascript
+# 아래 restart always 명령어 확인
+> docker run -d -p 8000:3000 --name milvus-attu --restart always zilliz/attu:v2.4.11
+```
+
+
+
+---
+
+## 4. 설정
+
+### 4.1 Attu 설정
+
+- AWS 방화벽 Open
+- 접근 : [http://<HOST_IP>:8000/](http://54.116.216.7:8000/#/connect)
+- docker 로 서로 격리된 상태라  127.0.0.1 은 안됨.
+
+![image](/img/install/milvus-설치-aws-linux-docker-compose/img-00.png)
+
+
+
+### 4.2 데이터 Backup 디렉토리
+
+```javascript
+# 주기적으로 Backup 필요
+> /usr/service/milvus-standalone/volumes
+```
 
 
