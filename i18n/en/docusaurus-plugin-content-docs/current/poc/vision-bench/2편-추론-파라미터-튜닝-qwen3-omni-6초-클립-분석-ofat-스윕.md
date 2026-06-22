@@ -219,7 +219,7 @@ python run.py ../../data/sample70 -o out.json
 
 </details>
 
-detailshe existing hypothesis that “low temperature (temp 0.0) is safe” has been refuted by the average data from three rounds of cross-validation. Greedy does not operate deterministically, and the **optimal morphological sweet spot** is `Temperature 0.7`.
+The existing hypothesis that "low temperature (temp 0.0) is safe" was refuted by the average data from three cross-validations. Greedy does not operate deterministically, and the **optimal morphological sweet spot** is `Temperature 0.7`.
 
 ####
 
@@ -231,17 +231,13 @@ detailshe existing hypothesis that “low temperature (temp 0.0) is safe” has 
 | **P95 / Max Latency** | 8.9k / 9.4k ms | **5.8k / 7.4k ms** | - |
 | **Mismatch Rate** | 0% | **0%** (sporadic cross-series 0–1%) | 26% (explosive) |
 
-####
-
-1. Completion Rate and Latency: The “Runaway” Phenomenon in Greedy
+#### 1. Completion Rate and Latency: The “Runaway” Phenomenon in Greedy
 
 - **Critical flaw in Greedy (0.0):** A “runaway” phenomenon frequently occurred, where the algorithm got trapped in an infinite loop (repeated generation) and failed to reach `max_tokens`. (Termination rate due to length limit: `finish_len` 13%)
 - **Reduction in Tail Latency:** In `temp 0.7`, these runaway incidents decreased sharply, with the P95 latency improving from **8.9k ms ➡️ 5.8k ms** and the maximum latency significantly improving from **9.4k ms ➡️ 7.4k ms**.
 - **Consistency of P50 (Median):** The P50 latency remained consistent at approximately 3.5k ms, unaffected by temperature. In other words, while the typical speed remains the same, **outliers (runaway phenomena) are better controlled at higher temperatures**.
 
-####
-
-2. Misconceptions Regarding the Explosion of Non-Standard Characters and Repetition Rates
+#### 2. Misconceptions Regarding the Explosion of Non-Standard Characters and Repetition Rates
 
 - **Risks of Temp 1.0:** In a 1.0 high-temperature environment, the outlier character occurrence rate skyrockets to 26%, making it impossible to deploy in live service.
 - **Stability at 0.7:** This series recorded 0%. However, in tests on a cross-series with identical settings (top_k -1, top_p 1.0, 840 records), sporadic outliers at the 0–1% level were found; nevertheless, this is a safe level that differs from 1.0 by an order of magnitude.
