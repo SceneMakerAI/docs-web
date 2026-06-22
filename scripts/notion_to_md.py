@@ -775,6 +775,10 @@ def save_doc_page(page, position, existing_map, parent_slug=None, is_parent=Fals
             if _existing_slug_m:
                 safe_slug = _existing_slug_m.group(1)
 
+        # Notion slug도 없고 기존 파일 slug도 없으면 순서 번호를 기본값으로 사용
+        if not safe_slug:
+            safe_slug = str(order)
+
         lines = ["---", f'title: "{safe_title}"', f"date: {date_str}"]
         if safe_slug:
             lines.append(f"slug: {safe_slug}")

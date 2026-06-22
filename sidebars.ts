@@ -1,12 +1,5 @@
 import type {SidebarsConfig} from '@docusaurus/plugin-content-docs';
 
-/**
- * Multi-sidebar layout
- *  - docsSidebar         → "Docs" navbar item          (intro, guide/)
- *  - architectureSidebar → "Architecture" navbar item
- *  - contributeSidebar   → "Open Source" navbar item
- *  - releaseNotesSidebar → "Release Notes" navbar item
- */
 const sidebars: SidebarsConfig = {
   docsSidebar: [
     {

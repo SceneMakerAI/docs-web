@@ -12,7 +12,7 @@ minsung:
 sbin:
   name: sbin
   title: SceneMakerAI 팀
-  description: SceneMakerAI 프로젝트 리드 · 인프라·오픈소스 기여 담당
+  description: SceneMakerAI 멀티모달 AI 파이프라인 개발자
   url: https://github.com/sb
   image_url: https://avatars.githubusercontent.com/u/219066026?v=4&size=64
   email: sbin@solbox.com
@@ -23,7 +23,7 @@ sbin:
 jplee:
   name: jplee
   title: SceneMakerAI 팀
-  description: SceneMakerAI 백엔드 개발자
+  description: SceneMakerAI 멀티모달 AI 파이프라인 팀장
   url: https://github.com/jp
   image_url: https://avatars.githubusercontent.com/u/219066026?v=4&size=64
   email: jplee@solbox.com
@@ -34,7 +34,7 @@ jplee:
 김주홍:
   name: 김주홍
   title: SceneMakerAI 팀
-  description: SceneMakerAI 백엔드 개발자
+  description: SceneMakerAI 멀티모달 AI 파이프라인 개발자
   url: https://github.com/jay
   image_url: https://avatars.githubusercontent.com/u/219066026?v=4&size=64
   email: jay@solbox.com

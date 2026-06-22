@@ -3,6 +3,27 @@ import type {Config} from '@docusaurus/types';
 import type * as Preset from '@docusaurus/preset-classic';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
+import fs from 'fs';
+import path from 'path';
+
+// docs/{dirName} 내에 placeholder.md 이외의 .md 파일이 있으면 true.
+// 빈 섹션의 navbar 항목을 docSidebar(doc 필요) → href(URL) 로 전환하기 위해 사용.
+function hasNotionContent(dirName: string): boolean {
+  function scan(dir: string): boolean {
+    try {
+      for (const f of fs.readdirSync(dir)) {
+        const full = path.join(dir, f);
+        if (fs.statSync(full).isDirectory()) {
+          if (scan(full)) return true;
+        } else if (f.endsWith('.md') && f !== 'placeholder.md') {
+          return true;
+        }
+      }
+    } catch {}
+    return false;
+  }
+  return scan(path.join(__dirname, 'docs', dirName));
+}
 
 // This runs in Node.js - Don't use client-side code here (browser APIs, JSX...)
 
@@ -168,43 +189,26 @@ const config: Config = {
         srcDark: '/img/logo-dark.svg',
       },
       items: [
-        {type: 'docSidebar', sidebarId: 'aboutSidebar', label: '프로젝트 소개', position: 'left'},
-        {
-          type: 'docSidebar',
-          sidebarId: 'architectureSidebar',
-          position: 'left',
-          label: '아키텍처',
-        },
-        {
-          type: 'docSidebar',
-          sidebarId: 'installSidebar',
-          position: 'left',
-          label: '설치',
-        },
-        {
-          type: 'docSidebar',
-          sidebarId: 'pocSidebar',
-          position: 'left',
-          label: 'PoC',
-        },
-        {
-          type: 'docSidebar',
-          sidebarId: 'docsSidebar',
-          position: 'left',
-          label: '문서',
-        },
+        // docSidebar는 실제 doc이 있어야 crash 없이 렌더됨.
+        // 빈 섹션(placeholder.md만 있음)은 {to} 링크로 generated-index URL을 직접 지정.
+        ...(hasNotionContent('about')
+          ? [{type: 'docSidebar' as const, sidebarId: 'aboutSidebar',        label: '프로젝트 소개', position: 'left' as const}]
+          : [{to: '/docs/about',         label: '프로젝트 소개', position: 'left' as const}]),
+        ...(hasNotionContent('architecture')
+          ? [{type: 'docSidebar' as const, sidebarId: 'architectureSidebar', label: '아키텍처',      position: 'left' as const}]
+          : [{to: '/docs/architecture',  label: '아키텍처',      position: 'left' as const}]),
+        {type: 'docSidebar', sidebarId: 'installSidebar',      label: '설치',          position: 'left'},
+        {type: 'docSidebar', sidebarId: 'pocSidebar',          label: 'PoC',           position: 'left'},
+        ...(hasNotionContent('guide')
+          ? [{type: 'docSidebar' as const, sidebarId: 'docsSidebar',         label: '문서',          position: 'left' as const}]
+          : [{to: '/docs/guide',           label: '문서',          position: 'left' as const}]),
         {to: '/blog', label: '블로그', position: 'left'},
-        {type: 'docSidebar', sidebarId: 'contributeSidebar', position: 'left', label: '오픈소스 기여'},
-        {type: 'docSidebar', sidebarId: 'releaseNotesSidebar', position: 'left', label: '릴리즈 노트'},
-        {
-          href: 'https://github.com/SceneMakerAI',
-          label: 'GitHub',
-          position: 'right',
-        },
-        {
-          type: 'localeDropdown',
-          position: 'right',
-        },
+        {type: 'docSidebar', sidebarId: 'contributeSidebar',   label: '오픈소스 기여', position: 'left'},
+        ...(hasNotionContent('release-notes')
+          ? [{type: 'docSidebar' as const, sidebarId: 'releaseNotesSidebar', label: '릴리즈 노트',   position: 'left' as const}]
+          : [{to: '/docs/release-notes', label: '릴리즈 노트',   position: 'left' as const}]),
+        {href: 'https://github.com/SceneMakerAI', label: 'GitHub', position: 'right'},
+        {type: 'localeDropdown', position: 'right'},
       ],
     },
     footer: {
@@ -215,12 +219,9 @@ const config: Config = {
           items: [
             {
               label: '시작하기',
-              to: '/docs/guide/1',
+              to: hasNotionContent('guide') ? '/docs/guide/1' : '/docs/guide',
             },
-            {
-              label: '아키텍처',
-              to: '/docs/architecture',
-            },
+            {label: '아키텍처', to: '/docs/architecture'},
           ],
         },
         {
