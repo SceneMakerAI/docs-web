@@ -386,6 +386,11 @@ def translate_file(kr_path, hashes):
     en_body = html.unescape(translated.replace(_HR, '\n\n---\n\n'))
     # Safety net: fix any ---# produced by DeepL converting <hr/> in older translations
     en_body = re.sub(r'^---(?=#{1,6} )', '---\n\n', en_body, flags=re.MULTILINE)
+    # Safety net: DeepL strips space after heading markers (e.g. ###3. → ### 3.)
+    en_body = re.sub(r'^(#{1,6})([^ #\n])', r'\1 \2', en_body, flags=re.MULTILINE)
+    # Safety net: DeepL displaces heading marker to end of prior line
+    # e.g. "content###\n\n 3.3. Title" → "content\n\n### 3.3. Title"
+    en_body = re.sub(r'([^#\n])(#{1,6})\n+[ \t]*(\S)', r'\1\n\n\2 \3', en_body)
     # Safety net: HRHR variants left when old null-byte placeholder was stripped by DeepL
     _HRHR = r'(?:\*\*HRHR\*\*|#HRHR#|-HRHR-|—HRHR—|\|HRHR\||HRHR)'
     en_body = re.sub(rf'^{_HRHR}$', '---', en_body, flags=re.MULTILINE)
@@ -408,6 +413,9 @@ def translate_file(kr_path, hashes):
     en_body = _restore_code_blocks(en_body, code_store)
     for key, val in _bq_store.items():
         en_body = en_body.replace(key, val)
+    # Safety net: DeepL relocates blockquote '> ' marker mid-sentence
+    # e.g. "If an>  `code` ..." → "> If an `code` ..."
+    en_body = re.sub(r'^([A-Za-z][^>\n]*\S)(> +)(\S)', r'> \1 \3', en_body, flags=re.MULTILINE)
 
     with open(en_path, "w", encoding="utf-8") as f:
         f.write(en_frontmatter + en_body)

@@ -27,14 +27,14 @@ SceneMaker’s video clip analysis aims to **reliably extract visual and auditor
 
 The key factor here is **stability**. In a benchmark batch-processing 700 clips, if the output fluctuates or breaks down from run to run—even with the same clip and the same prompt—the quality score itself cannot be trusted. During the validation process in Part 1 (Pipeline Construction), four patterns of quality degradation were intermittently identified.
 
-1. **Premature EOS**: The model outputs EOS (end-of-sentence) starting with the very first token, resulting in content that ends as an empty string. This occurs when the model “runs out of things to say” and shuts down immediately
-2, often due to excessive constraints imposed by a strict JSON schema. **Text Degeneration**: The model loses its normal probability distribution, spews out random characters and system tokens, and crashes before completing the JSON (Gibberish Generation).
-3. **Repetition Loop**: The model gets trapped in a probability loop, repeatedly generating the same words,
-4items, or JSON structures. **Inference Time Variation (Latency Jitter)**: Due to runaway generation—where collapse and repetition prevent the model from reaching a normal EOS, causing the output to extend all the way to `max_tokens`—there is an extreme disparity between the minimum and maximum inference times per clip.
+1. **Premature EOS**: The model outputs EOS (end-of-sentence) starting with the very first token, resulting in content that ends as an empty string. This occurs when the model “runs out of things to say” and shuts down immediately, often due to excessive constraints imposed by a strict JSON schema.
+2. **Text Degeneration**: The model loses its normal probability distribution, spews out random characters and system tokens, and crashes before completing the JSON (Gibberish Generation).
+3. **Repetition Loop**: The model gets trapped in a probability loop, repeatedly generating the same words, items, or JSON structures.
+4. **Inference Time Variation (Latency Jitter)**: Due to runaway generation—where collapse and repetition prevent the model from reaching a normal EOS, causing the output to extend all the way to `max_tokens`—there is an extreme disparity between the minimum and maximum inference times per clip.
 
 These patterns were merely **observed and identified** in Part 1; **whether they can be controlled via inference parameters was not addressed**. This part (Part 2) assumes that the output is fixed to a strict JSON Schema. This is a record of the **Phase 1 Screening**, in which we investigated whether **notable phenomena such as repetition and degeneration** can be controlled via inference parameters by significantly varying them one at a time (OFAT, one-factor-at-a-time).
 
-##2. Experimental Environment
+## 2. Experimental Environment
 
 The experiments were conducted using **the same model, serving environment, and invocation path** as the benchmark. This was done to observe the effects of parameters in that exact environment. Detailed information on the environment configuration can be found in Part 1 “Building a Benchmark Pipeline for Multimodal LLM Understanding of 6-Second Korean Broadcast Video Clips,” so this section covers only a key summary and the **parameters tuned** in this experiment.
 
@@ -89,9 +89,9 @@ Inference parameters are not configured on the server but are **specified direct
 - **frequency** (addition·subtraction): The **more** a token has already appeared, the **greater** the penalty (proportional to frequency·cumulative) → Strong at suppressing repetition (`공 공 공…`). **Only output tokens** are counted.
 - **repetition** (multiplication/division): If a token appears even once, it is reduced by a **fixed ratio** (based solely on presence, regardless of frequency). Since vLLMs consider both the **prompt and output**, even prompt vocabulary may be suppressed(potential increase in recall loss).
 - ⚠️ Enabling both results in **double suppression (over-suppression)**
-:::###
+:::
 
- 2.3. Output Schema / Hallucination Guard
+### 2.3. Output Schema / Hallucination Guard
 
 This experiment **fixes** the output contract below **without modification** and only varies the parameters (the prompt remains the same). Responses are **strictly** fixed to `{summary, objects, ocr, actions, bgm, sfx}` **6 fields**
 
@@ -139,9 +139,9 @@ This experiment deals only with **what can be evaluated without a ground truth**
 | **Adherence** | Is it in Korean? · Is the JSON format correct? · Are the items short? · Are there no repetitions? (All *rules specified in the prompt*) | Not required | **This document (Stage 1)** |
 | **Quality** | Completeness (no omissions) · Accuracy (no hallucinations) | **Required** | **Next stage (Gemini objective function)** |
 
-Adherence is based on rules explicitly stated in the prompt, so it can be assessed simply by looking at the output. In contrast, quality can only be evaluated if there is a “correct answer.” **Compliance is a necessary but not sufficient condition**, so the distinction is clear-cut. Following the rules does not guarantee that the content is correct, but we establish compliance first and then improve quality.###
+Adherence is based on rules explicitly stated in the prompt, so it can be assessed simply by looking at the output. In contrast, quality can only be evaluated if there is a “correct answer.” **Compliance is a necessary but not sufficient condition**, so the distinction is clear-cut. Following the rules does not guarantee that the content is correct, but we establish compliance first and then improve quality.
 
- 3.3. Metrics
+### 3.3. Metrics
 
 To detect and quantify the four quality degradation patterns identified in Part 1 (**premature termination, collapse, repetition, and inference time variance**) **using only the output, without a reference answer** , we aggregate the following metrics from the 70 outputs of each configuration. Each metric targets one or more of the anomalies listed above; all are compliance and structural metrics that can be reliably captured in a single pass (n=70), and `fields` ·`score` (repeat·degen) are expressed as decimal ratios between 0 and 1 (1.0 = 100%).
 
@@ -245,9 +245,9 @@ detailshe existing hypothesis that “low temperature (temp 0.0) is safe” has 
 
 - **Risks of Temp 1.0:** In a 1.0 high-temperature environment, the outlier character occurrence rate skyrockets to 26%, making it impossible to deploy in live service.
 - **Stability at 0.7:** This series recorded 0%. However, in tests on a cross-series with identical settings (top_k -1, top_p 1.0, 840 records), sporadic outliers at the 0–1% level were found; nevertheless, this is a safe level that differs from 1.0 by an order of magnitude.
-- **Repeat Rate is Independent of Temperature:** Contrary to the intuition that lowering the temperature would reduce repetition, the rate remained **flat at 11–13%** across the entire range. In other words, repetition cannot be controlled by temperature.####
+- **Repeat Rate is Independent of Temperature:** Contrary to the intuition that lowering the temperature would reduce repetition, the rate remained **flat at 11–13%** across the entire range. In other words, repetition cannot be controlled by temperature.
 
- 3. The Pitfall of BGM/SFX Coverage
+#### 3. The Pitfall of BGM/SFX Coverage
 
 - Although coverage increased as temperature rose (44% ➡️ 60%), this cannot be considered a positive factor.
 - There is a directional hypothesis that **the risk of overgeneration and hallucinations** increases at higher temperatures, but it is difficult to trust this in the absence of ground truth data.
@@ -406,9 +406,9 @@ detailsop_k and top_p are **secondary parameters** that are largely unaffected b
 | **Completion Rate** | 62/70 (similar to greedy) | **67–68/70** |
 | **Incompletion (finish_len)** | 11% | **3–4%** |
 | **Repetition Rate (repeat)** | 13–17% | 14–18% (no difference) |
-| **Foreign Characters (foreign)** | 0% | 0–1% (negligible) |####
+| **Foreign Characters (foreign)** | 0% | 0–1% (negligible) |
 
- 1. Tightening the criteria causes the algorithm to revert to a greedy approach
+#### 1. Tightening the criteria causes the algorithm to revert to a greedy approach
 
 - **Decrease in completion rate:** Narrowing down candidates—such as top_k = 1 and top_p = 0.5—worsens the results to finish_len 11% and 62/8 completions — This is the same runaway pattern as the greedy algorithm in §4.1. Reproduced in all three runs.
 - **Safe range:** The looser settings (k ≥ 10, p ≥ 0.95) are safe, and within that range, there are no significant differences between the settings.
@@ -437,15 +437,15 @@ Five key findings emerged from the three sweeps and validation runs. Findings 1 
 
 - **greedy(0.0) is the weakest:** 61/70 completions, 13% runaway — it gets stuck in an infinite loop and runs away up to `max_tokens`. **temp 0.7 yields 68/70 completions and 1% runaway**.
 - **greedy is not even deterministic:** In the current implementation, the same settings fluctuate from run to run, so it lacks even the “stability” that was supposed to be a benefit of low temperatures.
-- **The only cost of high temperature is mixed characters:** It spikes to 26% only at 1.0, while 0.0–0.7 shows sporadic fluctuations of 0–1% ➡️ The structural sweet spot is **temp 0.7** (98% clean after deduplication).####
+- **The only cost of high temperature is mixed characters:** It spikes to 26% only at 1.0, while 0.0–0.7 shows sporadic fluctuations of 0–1% ➡️ The structural sweet spot is **temp 0.7** (98% clean after deduplication).
 
- 2. Repetition is not controlled by sampling parameters
+#### 2. Repetition is not controlled by sampling parameters
 
 - **Flat across all ranges:** No matter how much you change temperature, top_k, or top_p, the repetition rate remains constant at 13–18% (no trend observed in all three runs).
 - **Main sources:** `ocr` (repeated subtitles and logos) and `objects` (duplicate object names).
-- **The metric is a lower bound:** Since it counts only exact duplicates, the estimated +23% for near-duplicates and partial inclusions is not included in the metric.####
+- **The metric is a lower bound:** Since it counts only exact duplicates, the estimated +23% for near-duplicates and partial inclusions is not included in the metric.
 
- 3. The primary solution for repetition is deduplication, not penalties
+#### 3. The primary solution for repetition is deduplication, not penalties
 
 - **Lossless removal:** Exact duplicates are removed via normalization, resulting in zero information loss.
 - **Role of penalties:** Penalties remain only as a secondary option for residual cases (fragmentation and token loops) that dedup cannot resolve.
@@ -464,9 +464,9 @@ Five key findings emerged from the three sweeps and validation runs. Findings 1 
 
 - **Possibility of hallucination:** While BGM and SFX coverage increases under high-temperature, no-penalty conditions, this could be overgeneration; therefore, it is treated as neutral at this stage where there is no definitive answer.
 - **Evaluation Principle:** The criterion is not “expressiveness” but **“minimizing obvious defects”** — even if the expression is somewhat lacking, we choose the more accurate option.
-- **Final Judgment:** Determining whether hallucination occurred is the responsibility of the next stage (Gemini F1’s precision).##
+- **Final Judgment:** Determining whether hallucination occurred is the responsibility of the next stage (Gemini F1’s precision).
 
- 6. Conclusion
+## 6. Conclusion
 
 ###
 
@@ -479,9 +479,9 @@ We calculated the leverage of each parameter based on compliance violations (mix
 | 1 | **temperature** | 74 ➡️ **98%** (high) | **0.7 confirmed** — simultaneously avoids greedy runaway and 1.0 mixed characters |
 | 2 | **freq / rep penalty** | 89 ➡️ 100% (medium) | **OFF confirmed** — No benefit at 0.7; rep is eliminated due to causing mixed characters. Only a small amount of freq will be verified in the next step |
 | 3 | top_k / top_p | 89 ➡️ 96% (low) | **Keep default values (1.0 / -1)** — Tightening settings only lowers completion rate |
-| - | fps · enable_thinking | (measured separately) | Decide after re-measuring with temp fixed at 0.7 (to be done last) |###
+| - | fps · enable_thinking | (measured separately) | Decide after re-measuring with temp fixed at 0.7 (to be done last) |
 
- 6.2. Finalized Input Parameters (Baseline)
+### 6.2. Finalized Input Parameters (Baseline)
 
 This is the **baseline**, finalized based on the above analysis, prior to the quality objective function (next step).
 

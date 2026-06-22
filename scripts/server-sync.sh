@@ -16,6 +16,10 @@ LOCKFILE="/tmp/docs-web-sync.lock"
 exec 200>"$LOCKFILE"
 flock -n 200 || { echo "[$(date)] 이미 다른 sync가 실행 중, 스킵"; exit 0; }
 
+# 시작 브랜치 저장 — 스크립트 종료 시 복귀 (dev 서버 파일 보호)
+ORIG_BRANCH=$(git symbolic-ref --short HEAD 2>/dev/null || echo "")
+trap 'if [ -n "$ORIG_BRANCH" ] && [ "$ORIG_BRANCH" != "main" ]; then git checkout "$ORIG_BRANCH" --quiet 2>/dev/null || true; fi' EXIT
+
 # 진행 중인 rebase 중단 (이전 실행 충돌로 잠긴 경우 해제)
 git rebase --abort 2>/dev/null || true
 
