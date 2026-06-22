@@ -11,14 +11,14 @@ Procedure for replacing FFmpeg to offload video chunk encoding for pre_svc to th
 
 > **Verification complete** on actual hardware (RTX 4090 x2, driver 580). 2-hour VP9: CPU ~4 minutes → **GPU 28 seconds** (~8.5x faster); 1,154 chunks, each taking 6.0 seconds—same as before.
 
-###0. Background / Key Pitfalls
+### 0. Background / Key Pitfalls
 
 - Even with `r 1` (1 fps), ffmpeg **decodes all** original 30 fps frames and then discards them (2h ≈ 200,000 frames). The bottleneck is this software decoding → passing it to GPU decode (NVDEC) + encode (NVENC), which takes tens of seconds.
 - There is no separate product called “nvidia ffmpeg.” You simply need **ffmpeg built with nvenc enabled**.
 - ⚠ **Pitfall 1 — Driver vs. NVENC API Version**: The latest build of BtbN `master/latest` requires NVENC SDK 13.1 (driver **610+**). This box uses driver **580**, so it is rejected: `Driver does not support the required nvenc API version. Required: 13.1 Found: 13.0` → You must use an **outdated autobuild**. (Verified: `autobuild-2026-01-31`)
 - ⚠ **Pitfall 2 — Keyframes**: With the nvenc + fps filter combination, `force_key_frames` does not work, so segments are split only in GOP units (hundreds of seconds). **At 1 fps**, this is resolved using `g 6 -forced-idr 1` (IDR every 6 frames = 6 seconds).
 
-###Environment (at time of verification)
+### Environment (at time of verification)
 
 | Item | Value |
 | --- | --- |
@@ -30,7 +30,7 @@ Procedure for replacing FFmpeg to offload video chunk encoding for pre_svc to th
 
 > NVENC/NVDEC is provided by the **driver** → No need to install the CUDA Toolkit separately. As long as `nvidia-smi` is available, it works.
 
-###1. Preliminary Check
+### 1. Preliminary Check
 
 ```
 nvidia-smi --query-gpu=name,driver_version --format=csv,noheader
@@ -53,7 +53,7 @@ rm -rf build && mkdir build && tar xf btbn.tar.xz -C build --strip-components=1
 
 > If on a closed network, download the tar.xz file from outside and bring it in. If the driver version differs from 580, verify it using the nvenc test in step 3; if it fails, downgrade to an older `autobuild-YYYY-MM-DD` version and retry.
 
-###3. Verify build functionality + driver compatibility (★ both)
+### 3. Verify build functionality + driver compatibility (★ both)
 
 ```
 FF=/root/down/ffmpeg-install/build/bin/ffmpeg
@@ -70,7 +70,7 @@ $FF -y -f lavfi -i testsrc=size=1024x768:rate=30:duration=3 -c:v h264_nvenc /tmp
 
 If an>  `Required: 13.x ... minimum driver 6xx` error occurs, that build is too new for this machine. (Set the test input to a sufficiently large resolution, such as 1024x768—small sizes like 64x64 may trigger false positives because they fall below nvenc’s minimum resolution)
 
-###4. Verify the entire GPU pipeline using the actual source code
+### 4. Verify the entire GPU pipeline using the actual source code
 
 ```
 FF=/root/down/ffmpeg-install/build/bin/ffmpeg
@@ -86,7 +86,7 @@ ffprobe -v error -show_entries format=duration -of csv=p=0 /tmp/gpu/seg00000.mp4
 
 > Success if chunks are split every 6 seconds and the count matches. If `-g 6 -forced-idr 1` is missing, segments are split only by GOP (Pitfall 2).
 
-###5. Navigate to the installation directory
+### 5. Navigate to the installation directory
 
 ```
 sudo mkdir -p /opt/ffmpeg-nvidia
@@ -126,7 +126,7 @@ cmd = (
 
 > Replace `force_key_frames` with `-g 6 -forced-idr 1` (Pitfall 2). `-threads 1` is unnecessary for the CPU. If the chunk contains audio, add `-map 0:a -c:a aac` to output 2. Also change ffprobe in `_duration()` to `/opt/ffmpeg-nvidia/ffprobe`. ⚠ `-c:v vp9_cuvid` is only used when the input is VP9—if codecs are mixed, remove it and let `-hwaccel cuda` handle the selection automatically.
 
-###7. Speed Measurement / Rollback
+### 7. Speed Measurement / Rollback
 
 ```#
  Measurement: Add `time` to command #4 to compare it with the CPU time (about 4 minutes)
@@ -136,7 +136,7 @@ FFMPEG_BIN=ffmpeg
 
 → Immediately revert to the existing `/usr/bin/ffmpeg` (CPU). It’s fine not to delete the new binary.
 
-###Troubleshooting
+### Troubleshooting
 
 - `Unknown encoder 'h264_nvenc'`  → nvenc not included in the build (3-1 failed). Try a different build.
 - `Required: 13.1 ... minimum driver 610`  → Build is newer than the driver (Pitfall 1). Use an older autobuild.
@@ -144,7 +144,7 @@ FFMPEG_BIN=ffmpeg
 - `swscaler ... nv12 csp:gbr ... Unsupported`  → Color space quirk when passing from GPU decode to CPU filters. This does not occur if everything is processed on the GPU (`scale_cuda` + `nvenc`).
 - **GPU memory contention (STT conflict)**  → Use `hwaccel_device` to specify a GPU different from the one used for STT.
 
-###Safety Notes
+### Safety Notes
 
 - FFmpeg is a **standalone static binary** — it is independent of Python packages such as uv, venv, torch, or CUDA. Installing them will not break FFmpeg.
 - Keep the existing `/usr/bin/ffmpeg` → Always fallback.
