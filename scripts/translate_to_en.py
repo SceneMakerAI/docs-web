@@ -386,6 +386,8 @@ def translate_file(kr_path, hashes):
     en_body = html.unescape(translated.replace(_HR, '\n\n---\n\n'))
     # Safety net: fix any ---# produced by DeepL converting <hr/> in older translations
     en_body = re.sub(r'^---(?=#{1,6} )', '---\n\n', en_body, flags=re.MULTILINE)
+    # Safety net: DeepL strips space after heading markers (e.g. ###3. → ### 3.)
+    en_body = re.sub(r'^(#{1,6})([^ #\n])', r'\1 \2', en_body, flags=re.MULTILINE)
     # Safety net: HRHR variants left when old null-byte placeholder was stripped by DeepL
     _HRHR = r'(?:\*\*HRHR\*\*|#HRHR#|-HRHR-|—HRHR—|\|HRHR\||HRHR)'
     en_body = re.sub(rf'^{_HRHR}$', '---', en_body, flags=re.MULTILINE)

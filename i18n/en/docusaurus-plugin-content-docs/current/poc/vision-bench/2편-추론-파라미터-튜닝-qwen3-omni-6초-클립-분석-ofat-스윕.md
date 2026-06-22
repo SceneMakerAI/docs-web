@@ -34,7 +34,7 @@ The key factor here is **stability**. In a benchmark batch-processing 700 clips,
 
 These patterns were merely **observed and identified** in Part 1; **whether they can be controlled via inference parameters was not addressed**. This part (Part 2) assumes that the output is fixed to a strict JSON Schema. This is a record of the **Phase 1 Screening**, in which we investigated whether **notable phenomena such as repetition and degeneration** can be controlled via inference parameters by significantly varying them one at a time (OFAT, one-factor-at-a-time).
 
-##2. Experimental Environment
+## 2. Experimental Environment
 
 The experiments were conducted using **the same model, serving environment, and invocation path** as the benchmark. This was done to observe the effects of parameters in that exact environment. Detailed information on the environment configuration can be found in Part 1 “Building a Benchmark Pipeline for Multimodal LLM Understanding of 6-Second Korean Broadcast Video Clips,” so this section covers only a key summary and the **parameters tuned** in this experiment.
 
