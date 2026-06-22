@@ -388,6 +388,9 @@ def translate_file(kr_path, hashes):
     en_body = re.sub(r'^---(?=#{1,6} )', '---\n\n', en_body, flags=re.MULTILINE)
     # Safety net: DeepL strips space after heading markers (e.g. ###3. → ### 3.)
     en_body = re.sub(r'^(#{1,6})([^ #\n])', r'\1 \2', en_body, flags=re.MULTILINE)
+    # Safety net: DeepL displaces heading marker to end of prior line
+    # e.g. "content###\n\n 3.3. Title" → "content\n\n### 3.3. Title"
+    en_body = re.sub(r'([^#\n])(#{1,6})\n+[ \t]*(\S)', r'\1\n\n\2 \3', en_body)
     # Safety net: HRHR variants left when old null-byte placeholder was stripped by DeepL
     _HRHR = r'(?:\*\*HRHR\*\*|#HRHR#|-HRHR-|—HRHR—|\|HRHR\||HRHR)'
     en_body = re.sub(rf'^{_HRHR}$', '---', en_body, flags=re.MULTILINE)

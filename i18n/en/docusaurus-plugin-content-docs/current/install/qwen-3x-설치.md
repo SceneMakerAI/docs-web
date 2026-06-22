@@ -144,9 +144,9 @@ Based on 32k contexts and a single sequence. Since vLLM dynamically allocates pa
 | Model | Total/Active Parameters | Precision | Weight VRAM | KV Cache (32k×1) | Total VRAM |
 | --- | --- | --- | --- | --- | --- |
 | Qwen3.5-122B-A10B-GPTQ-Int4 | 122B / 10B (MoE) | Int4 (GPTQ) | ~63 GB | ~3 GB | ~69 GB |
-| Qwen3.6-27B-FP8 | 27B (Dense) | FP8 (block 128) | ~29 GB | ~8 GB | ~40 GB |####
+| Qwen3.6-27B-FP8 | 27B (Dense) | FP8 (block 128) | ~29 GB | ~8 GB | ~40 GB |
 
----
+#### ---
 
 3. Storage Configuration
 
@@ -354,8 +354,9 @@ Activate with: source .venv/bin/activate
   }'
   
   
-{"id":"chatcmpl-89cf9de14d6fdfd2","object":"chat.completion","created":1779181606,"prompt_routed_experts":null,"model":"qwen","choices":[{"index":0,"message":{"role":"assistant","content":"Hello! Nice to meet you. 😊\nHow can I help you today? If you have any questions or topics you’d like to discuss, please let me know anytime.","refusal":null,"annotations":null,"audio":null,"function_call":null,"tool_calls":[],"reasoning":null},"logprobs":null,"finish_reason":"stop","stop_reason":null,"token_ids":null,"routed_experts":null}],"service_tier":null,"system_fingerprint":"vllm-0.21.0-2426ae93","usage":{"prompt_tokens":14,"total_tokens":49,"completion_tokens":35,"prompt_tokens_details":null},"prompt_logprobs":null,"prompt_token_ids":null,"prompt_text":null,"kv_transfer_params":null}[root@ip-172-31-22-41 models]#
-```
+{"id":"chatcmpl-89cf9de14d6fdfd2","object":"chat.completion","created":1779181606,"prompt_routed_experts":null,"model":"qwen","choices":[{"index":0,"message":{"role":"assistant","content":"Hello! Nice to meet you. 😊\nHow can I help you today? If you have any questions or topics you’d like to discuss, please let me know anytime.","refusal":null,"annotations":null,"audio":null,"function_call":null,"tool_calls":[],"reasoning":null},"logprobs":null,"finish_reason":"stop","stop_reason":null,"token_ids":null,"routed_experts":null}],"service_tier":null,"system_fingerprint":"vllm-0.21.0-2426ae93","usage":{"prompt_tokens":14,"total_tokens":49,"completion_tokens":35,"prompt_tokens_details":null},"prompt_logprobs":null,"prompt_token_ids":null,"prompt_text":null,"kv_transfer_params":null}[root@ip-172-31-22-41 models]
+
+# ```
 
 #### Register Service
 

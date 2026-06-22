@@ -128,8 +128,9 @@ cmd = (
 
 ### 7. Speed Measurement / Rollback
 
-```#
- Measurement: Add `time` to command #4 to compare it with the CPU time (about 4 minutes)
+```
+
+# Measurement: Add `time` to command #4 to compare it with the CPU time (about 4 minutes)
 # Rollback: Set FFMPEG_BIN to the default value in .env
 FFMPEG_BIN=ffmpeg
 ```
