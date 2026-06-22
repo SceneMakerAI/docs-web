@@ -250,14 +250,10 @@ The existing hypothesis that "low temperature (temp 0.0) is safe" was refuted by
 - Therefore, the rationale for choosing `0.7` lies not in increased coverage, but in “minimizing defects” (increasing completion rates and suppressing mixed characters).
 - *(Note: The Summary, Objects, and Actions metrics achieved a fixed 100% across all intervals)*
 
-> 
-
-**Temperature set to 0.7**
+> **Temperature set to 0.7**
 Greedy(0.0) has the highest rate of incomplete runs and a long tail of latency; given the current serving structure, results fluctuate significantly from run to run, meaning even the benefit of low temperature—namely, “deterministic stability”—cannot be guaranteed. In contrast, `0.7` is the most balanced option, simultaneously achieving a top-tier completion rate, minimized latency, and protection against foreign characters.
 
-###
-
-4.2. Frequency / Repetition Penalty
+### 4.2. Frequency / Repetition Penalty
 
 **Average per Run** (Runs 1, 2, 3 · greedy temp=0.0 · n=70 each)
 
@@ -302,9 +298,7 @@ Greedy(0.0) has the highest rate of incomplete runs and a long tail of latency; 
 
 detailshe penalty has been confirmed to be the most powerful lever for controlling repetition and runaway behavior in a greedy environment. However, as the penalty strength increases, auditory information (BGM and SFX) is lost proportionally, and in the temperature 0.7 reinforcement experiment, the utility itself disappears. **The conclusion is to turn the penalty OFF**, and when exploring the penalty magnitude, only the *freq* axis is advanced to the next step.
 
-####
-
-**Key Metrics Comparison Table** (based on greedy algorithm)
+#### **Key Metrics Comparison Table** (based on greedy algorithm)
 
 | **Evaluation Metric** | **Baseline (Penalty OFF)** | **freq 0.5** | **freq 2.0** | **rep 1.3** |
 | --- | --- | --- | --- | --- |
@@ -313,38 +307,28 @@ detailshe penalty has been confirmed to be the most powerful lever for controlli
 | **BGM / SFX Coverage** | **44% / 41%** | 17% / 21% | 7% / 8% (crash) | 4% / 30% (crash) |
 | **P95 Latency** | 8.8k ms | **4.0k ms** | - | - |
 
-####
-
-1. Benefits: Prevention of repetition and runaway (based on greedy algorithm)
+#### 1. Benefits: Prevention of repetition and runaway (based on greedy algorithm)
 
 - **Normalized completion rate:** With a freq of just 0.5, fails dropped from 8 to 0, and runaway behavior was eliminated, improving P95 latency from **8.8k ms to 4.0k ms**. Reproduced in all three runs.
 - **Repetition Suppression:** The repetition rate decreases from 14% to 2% at freq 2.0, and from 1.3% to 1%.
 - **Actual Correction Effect:** There was a case where three fragmented pieces of narration were restored to a single complete sentence, confirming that the effect is not merely “hiding” repetitions but actually “correcting” them.
 
-####
-
-2. Trade-off: Concurrent Degradation of Auditory Information (BGM/SFX)
+#### 2. Trade-off: Concurrent Degradation of Auditory Information (BGM/SFX)
 
 - **Loss Proportional to Intensity:** BGM and SFX coverage drops from 44%/41% ➡️ to 7%/8% at freq 2.0 and 4%/30% at rep 1.3. OCR accuracy also drops from 72% to 66% at rep.
 - **The barrier of indecipherability:** Without a reference answer key, it is impossible to distinguish whether this reduction represents “redundancy removal (good)” or “information loss (bad).” ➡️ The penalty magnitude is determined by the quality objective function (next step).
 - *(Note: The Summary, Objects, and Actions metrics consistently achieve 100% across all intervals)*
 
-####
-
-3. Reinforcement Metrics: Utility disappears in the baseline (temp 0.7)
+#### 3. Reinforcement Metrics: Utility disappears in the baseline (temp 0.7)
 
 - **Utility Disappearance:** The utility mentioned above (fail ➡️ 0·runaway elimination) is based on the greedy criterion. When remeasured at temp 0.7 (average across runs, n=70 for each of runs 1, 2, and 3), the baseline has already reached 69/1·finish_len 1% completion, meaning **there are almost no defects left for the penalty to eliminate.**
 - **The only remaining effect is repeat suppression:** repeat decreases from 17% ➡️ 7–8%, but this is handled by deduplication post-processing without any information loss. Only the trade-off (halving of BGM and SFX: 49%/51% ➡️ 21%/25% at freq 0.5) remains.
 - **New defects introduced by rep:** When the rep series is combined with temp 0.7, it **introduces new foreign characters** that were not present in the greedy algorithm (base 0% ➡️ rep 1.05 2% ➡️ rep 1.1 4%; dose-response relationship; reproduced 3 times) ➡️ **rep eliminated**.
 
-> 
-
-**Penalty OFF (freq 0.0 · rep 1.0)**
+> **Penalty OFF (freq 0.0 · rep 1.0)**
 The benefits observed in the greedy algorithm are already negligible at temperature 0.7, and the remaining repetition suppression is replaced by lossless deduplication. There is no reason to accept the loss of auditory information or the introduction of heterogeneous characters by rep. We will only verify in the next step whether a small amount of freq (0–0.5) might be advantageous in terms of quality.
 
-###
-
-4.3. top_k / top_p
+### 4.3. top_k / top_p
 
 **Average per Iteration** (Iterations 1, 2, 3 · anchor temp=0.7 · n=70 each)
 
@@ -393,9 +377,7 @@ The benefits observed in the greedy algorithm are already negligible at temperat
 
 detailsop_k and top_p are **secondary parameters** that are largely unaffected by iteration and collapse. In fact, as the number of candidates is narrowed down, they behave like a greedy algorithm, causing only the completion rate to drop. **The conclusion is to keep the default values —** `top_p 1.0 · top_k -1`.
 
-####
-
-**Key Metrics Comparison Table** (anchor temp=0.7)
+#### **Key Metrics Comparison Table** (anchor temp=0.7)
 
 | **Evaluation Metric** | **Tight (top_k 1 · top_p 0.5)** | **Loose (top_k -1 · top_p 0.95–1.0)** |
 | --- | --- | --- |
@@ -409,27 +391,19 @@ detailsop_k and top_p are **secondary parameters** that are largely unaffected b
 - **Decrease in completion rate:** Narrowing down candidates—such as top_k = 1 and top_p = 0.5—worsens the results to finish_len 11% and 62/8 completions — This is the same runaway pattern as the greedy algorithm in §4.1. Reproduced in all three runs.
 - **Safe range:** The looser settings (k ≥ 10, p ≥ 0.95) are safe, and within that range, there are no significant differences between the settings.
 
-####
-
-2. Not a means of controlling repetition
+#### 2. Not a means of controlling repetition
 
 - **repeat: flat, no trend:** It remains flat across the entire range at 13–18% (no trend in all three runs), so repetition cannot be controlled using top_k or top_p. The lever for controlling repetition is the penalty (§4.2).
 - *(Note: “foreign” is negligible at 0–1% across the entire range; the “Summary,” “Objects,” and “Actions” items consistently achieve 100% across the entire range)*
 
-> 
-
-**top_p 1.0 · top_k -1 (maintain default values)**
+> **top_p 1.0 · top_k -1 (maintain default values)**
 If you narrow down candidates at temp 0.7 anchor, you only lose completion rate and gain nothing. Maintain the default full sampling settings, and unify diversity control using temperature alone.
 
-##
-
-5. Key Findings
+## 5. Key Findings
 
 Five key findings emerged from the three sweeps and validation runs. Findings 1 and 2 challenge conventional wisdom; 3 and 4 are recommendations; and 5 is a decision principle.
 
-####
-
-1. Completion rate increases with temperature (challenging conventional wisdom)
+#### 1. Completion rate increases with temperature (challenging conventional wisdom)
 
 - **greedy(0.0) is the weakest:** 61/70 completions, 13% runaway — it gets stuck in an infinite loop and runs away up to `max_tokens`. **temp 0.7 yields 68/70 completions and 1% runaway**.
 - **greedy is not even deterministic:** In the current implementation, the same settings fluctuate from run to run, so it lacks even the “stability” that was supposed to be a benefit of low temperatures.
@@ -446,17 +420,13 @@ Five key findings emerged from the three sweeps and validation runs. Findings 1 
 - **Lossless removal:** Exact duplicates are removed via normalization, resulting in zero information loss.
 - **Role of penalties:** Penalties remain only as a secondary option for residual cases (fragmentation and token loops) that dedup cannot resolve.
 
-####
-
-4. The utility of penalties disappears at the baseline (temp 0.7)
+#### 4. The utility of penalties disappears at the baseline (temp 0.7)
 
 - **Loss of benefit:** The benefit in the greedy algorithm (fail ➡️ 0, elimination of runaway behavior) is meaningless at 0.7 because there are no defects to remove, and the remaining iteration suppression is handled by dedup. Only the trade-off (halving of BGM and SFX) remains.
 - **Rep elimination:** When the rep series encounters 0.7, it **introduces new heterogeneous characters** that were not present in the greedy algorithm (0% ➡️ 2% ➡️ 4%, dose-response·replicated 3 times).
 - **Remaining suppression:** Only one potential quality improvement at low frequencies (0–0.5) remains to be verified in the next phase.
 
-####
-
-5. Increased coverage is not a bonus (accuracy takes priority)
+#### 5. Increased coverage is not a bonus (accuracy takes priority)
 
 - **Possibility of hallucination:** While BGM and SFX coverage increases under high-temperature, no-penalty conditions, this could be overgeneration; therefore, it is treated as neutral at this stage where there is no definitive answer.
 - **Evaluation Principle:** The criterion is not “expressiveness” but **“minimizing obvious defects”** — even if the expression is somewhat lacking, we choose the more accurate option.
@@ -464,9 +434,7 @@ Five key findings emerged from the three sweeps and validation runs. Findings 1 
 
 ## 6. Conclusion
 
-###
-
-6.1. Parameter Leverage Rankings and Directions
+### 6.1. Parameter Leverage Rankings and Directions
 
 We calculated the leverage of each parameter based on compliance violations (mixed characters, incompleteness, token loops) that remain even after applying dedup. `clean%` = Percentage of records with 0 violations; the range represents the worst ➡️ best on that axis.
 
@@ -500,24 +468,14 @@ This is the **baseline**, finalized based on the above analysis, prior to the qu
 - ⚠️ **Next Step** (Answer Key Required): Determine whether there is a quality gain with low freq (0–0.5) · Cross-validation of hallucination (precision) at temp 0.3 vs. 0.7 · fps · thinking · Overall quality (completeness · accuracy)
 :::
 
-###
-
-6.3. Handoff to the Next Step
+### 6.3. Handoff to the Next Step
 
 After defining the quality objective function (Gemini ground truth), we only perform the search narrowed down by this step.
 
-1
-
-. **Start with fixed baseline:** `temp 0.7 · top_p 1.0 · top_k -1 · 페널티 OFF · dedup ON · max_tokens 512` — This is the confirmed value for this
-2
-
-stage.. **1D sweep on only the freq axis:** Determine the optimal size by testing freq 0–0.5 against Gemini F1. Since rep was eliminated due to heteroglyph-induced issues, it is not re-enabled (including the prohibition on double suppression)
-3
-
-.. **Cross-validation of temp 0.3 vs. 0.7:** We use F1 precision to test the directional hypothesis that “higher temperatures lead to increased hallucinations.” This serves as a safeguard to verify whether the
-4
-
-performance advantage at 0.7 comes at the cost of accuracy. **Separate measurements for fps and enable_thinking:** Re-measure using temp 0.7 as the anchor and add the results to §4. The trade-off between tokens/latency and detail is evaluated using the ground truth.
+1. **Start with fixed baseline:** `temp 0.7 · top_p 1.0 · top_k -1 · 페널티 OFF · dedup ON · max_tokens 512` — This is the confirmed value for this. 
+2. **1D sweep on only the freq axis:** Determine the optimal size by testing freq 0–0.5 against Gemini F1. Since rep was eliminated due to heteroglyph-induced issues, it is not re-enabled (including the prohibition on double suppression).
+3. **Cross-validation of temp 0.3 vs. 0.7:** We use F1 precision to test the directional hypothesis that “higher temperatures lead to increased hallucinations.” This serves as a safeguard to verify whether the
+4. **Separate measurement for FPS and enable_thinking** Re-measure with a temp of 0.7 and an anchor, then add it to §4. The trade-off between tokens/latency vs. detail will be evaluated using the ground truth
 
 This stage has drawn conclusions up to the limit of what can be determined without an answer key—**the baseline has been established**, and the trade-offs between quality (hallucinations and completeness) and minor penalties and fps will be addressed in the next stage. The principle of drawing conclusions only on measurable factors remains unchanged.
 

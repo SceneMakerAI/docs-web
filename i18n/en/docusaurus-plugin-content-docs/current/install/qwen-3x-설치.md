@@ -354,9 +354,8 @@ Activate with: source .venv/bin/activate
   }'
   
   
-{"id":"chatcmpl-89cf9de14d6fdfd2","object":"chat.completion","created":1779181606,"prompt_routed_experts":null,"model":"qwen","choices":[{"index":0,"message":{"role":"assistant","content":"Hello! Nice to meet you. 😊\nHow can I help you today? If you have any questions or topics you’d like to discuss, please let me know anytime.","refusal":null,"annotations":null,"audio":null,"function_call":null,"tool_calls":[],"reasoning":null},"logprobs":null,"finish_reason":"stop","stop_reason":null,"token_ids":null,"routed_experts":null}],"service_tier":null,"system_fingerprint":"vllm-0.21.0-2426ae93","usage":{"prompt_tokens":14,"total_tokens":49,"completion_tokens":35,"prompt_tokens_details":null},"prompt_logprobs":null,"prompt_token_ids":null,"prompt_text":null,"kv_transfer_params":null}[root@ip-172-31-22-41 models]
-
-# ```
+{"id":"chatcmpl-89cf9de14d6fdfd2","object":"chat.completion","created":1779181606,"prompt_routed_experts":null,"model":"qwen","choices":[{"index":0,"message":{"role":"assistant","content":"Hello! Nice to meet you. 😊\nHow can I help you today? If you have any questions or topics you’d like to discuss, please let me know anytime.","refusal":null,"annotations":null,"audio":null,"function_call":null,"tool_calls":[],"reasoning":null},"logprobs":null,"finish_reason":"stop","stop_reason":null,"token_ids":null,"routed_experts":null}],"service_tier":null,"system_fingerprint":"vllm-0.21.0-2426ae93","usage":{"prompt_tokens":14,"total_tokens":49,"completion_tokens":35,"prompt_tokens_details":null},"prompt_logprobs":null,"prompt_token_ids":null,"prompt_text":null,"kv_transfer_params":null}[root@ip-172-31-22-41 models]# 
+```
 
 #### Register Service
 
@@ -474,7 +473,9 @@ LimitNPROC=1048576
 [Install]
 WantedBy=multi-user.target
 
-```## Qwen3-Omni-30B-A3B-Instruct (Multimodal)
+```
+
+## Qwen3-Omni-30B-A3B-Instruct (Multimodal)
 
 Unlike the text models mentioned earlier (Qwen3.5 / 3.6), this is an **omni model** that accepts **video, images, and audio as input**. It is used for the 6-second video understanding benchmark (vision-bench). The installation process is the same as above, but **audio decoder dependencies** and **multimodal serving flags** are added. (For vLLM installation, **reuse the same venv** as in the **VLLM Installation** section above; here, only the audio dependencies are added.)
 
