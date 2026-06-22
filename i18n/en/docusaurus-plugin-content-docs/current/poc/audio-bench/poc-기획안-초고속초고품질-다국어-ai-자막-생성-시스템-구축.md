@@ -176,6 +176,8 @@ output/
 
 `S???` is the speaker (currently an unintegrated placeholder). lang is ISO 639-1.
 
+---
+
 ## 3. Core Components
 
 Composed of 5 components. All use GPU (cuda:0). Warm-up runs once at system startup.
@@ -548,7 +550,7 @@ Save segment (transcribe MD)
 
 #### Supported Languages
 
-Qwen supports approximately 30 languages, but **Qwen3-ForcedAligner, which supports timestamps, can only distinguish 11 languages**
+Qwen supports approximately 30 languages, but **Qwen3-ForcedAligner, can only distinguish 11 languages** which supports timestamps
 
 - Korean, Japanese, Chinese (Mandarin), Cantonese, English, Italian, Spanish, French, German, Portuguese, Russian
 
@@ -562,7 +564,7 @@ Qwen supports approximately 30 languages, but **Qwen3-ForcedAligner, which suppo
 
 #### Script-based automatic language correction
 
-**Post-processing language correction based on character types in transcribed text** — Corrects language errors in LID/Qwen.
+**Post-processing language correction based on character types**  in transcribed text— Corrects language errors in LID/Qwen.
 
 | Detected script | Corrected language |
 | --- | --- |
