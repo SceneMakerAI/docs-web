@@ -197,7 +197,7 @@ const config: Config = {
         {type: 'docSidebar', sidebarId: 'contributeSidebar', position: 'left', label: '오픈소스 기여'},
         {type: 'docSidebar', sidebarId: 'releaseNotesSidebar', position: 'left', label: '릴리즈 노트'},
         {
-          href: 'https://github.com/SceneMakerAI/docs-web',
+          href: 'https://github.com/SceneMakerAI',
           label: 'GitHub',
           position: 'right',
         },
@@ -245,7 +245,7 @@ const config: Config = {
             },
             {
               label: 'GitHub',
-              href: 'https://github.com/SceneMakerAI/docs-web',
+              href: 'https://github.com/SceneMakerAI',
             },
             {
               label: 'Solbox',
