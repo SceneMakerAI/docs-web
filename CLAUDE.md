@@ -53,7 +53,7 @@ docs-web/
 │   └── tests/                # notion_to_md.py·md_to_notion.py 단위 테스트
 └── .github/workflows/
     ├── deploy.yml
-    ├── monthly-translate.yml  # 매월 1일 EN 번역 자동 실행 (실패 시 빌드 영향 없음)
+    ├── monthly-translate.yml  # 매월 1일 EN 번역 자동 실행
     ├── md-to-notion.yml
     ├── merge-develop.yml
     ├── pr-build.yml
@@ -65,7 +65,6 @@ docs-web/
 ## 환경변수 (.env)
 
 서버와 로컬 모두 프로젝트 루트 `.env` 에서 로드. GitHub Actions는 Secrets로 동일 값 등록.
-
 
 | 변수                    | 역할                                                                       |
 | --------------------- | ------------------------------------------------------------------------ |
@@ -79,7 +78,6 @@ docs-web/
 | `NOTION_RELEASE`      | "릴리즈 노트" DB ID → `docs/release-notes/`                                   |
 | `NOTION_INSTALL`      | "설치" DB ID → `docs/install/`                                             |
 | `DEEPL_API_KEY`       | DeepL Free API 키 — `translate_to_en.py` 및 `monthly-translate.yml` Secret |
-
 
 `server-sync.sh`는 `[ -n "$NOTION_XXX" ]` 조건으로 변수가 없으면 해당 DB sync를 건너뜀.
 
@@ -110,35 +108,36 @@ docs/poc/vision-bench/child.md  (slug: "1")  →  /docs/poc/vision-bench/1
 0 */3 * * * /root/docs-web/scripts/server-sync.sh >> /var/log/notion-sync.log 2>&1
 ```
 
-`server-sync.sh` 실행 흐름: `git checkout main` → `git pull --rebase` → Notion 8개 DB 병렬 동기화 → `git commit` → `translate_to_en.py` (변경 파일만 DeepL 번역) → `git commit` → `push` → `deploy.yml` 트리거
+`server-sync.sh` 실행 흐름:
+1. ORIG_BRANCH 저장 + `trap EXIT` 등록 (종료 시 원래 브랜치 복귀 — dev 서버 파일 보호)
+2. `git checkout main` → `git pull --rebase`
+3. Notion 8개 DB 병렬 동기화
+4. `git commit` → `git push origin main` → `deploy.yml` 트리거
+5. 스크립트 종료 → trap이 자동으로 원래 브랜치(develop 등)로 복귀
 
 로그 확인: `tail -f /var/log/notion-sync.log`
 
-> ⚠️ **staged files 주의:** git index에 스테이징된 파일(커밋 안 한 `git add`)이 있으면 `git pull --rebase`가 실패해 crontab이 멈춘다. Claude가 main에서 작업할 때는 반드시 커밋까지 완료하고 떠나야 한다. 확인: `git diff --staged --quiet || echo "STAGED"` — 출력이 있으면 커밋 또는 `git restore --staged .` 후 종료.
+> ⚠️ **staged files 주의:** git index에 스테이징된 파일(커밋 안 한 `git add`)이 있으면 `git pull --rebase`가 실패해 crontab이 멈춘다. Claude가 작업 후에는 반드시 커밋까지 완료하고 떠나야 한다. 확인: `git diff --staged --quiet || echo "STAGED"` — 출력이 있으면 커밋 또는 `git restore --staged .` 후 종료.
 
 ### GitHub Actions 워크플로우
-
 
 | 파일                      | 트리거                  | 역할                                                                  |
 | ----------------------- | -------------------- | ------------------------------------------------------------------- |
 | `deploy.yml`            | main push            | npm build → GH Pages 배포                                             |
-| `monthly-translate.yml` | 매월 1일 KST 11:00 / 수동 | KR docs·blog → DeepL → `i18n/en/` 번역, main에 커밋 (전체 재검사용 백업) |
+| `monthly-translate.yml` | 매월 1일 KST 11:00 / 수동 | KR docs·blog → DeepL → `i18n/en/` 번역, main에 커밋                     |
 | `sync-develop.yml`      | 매일 KST 03:00         | main 콘텐츠를 develop으로 머지 (`.notion-sync.json` 충돌 자동 해소)               |
 | `merge-develop.yml`     | 매일 KST 11:00         | develop 코드 변경을 main으로 머지 (콘텐츠 디렉토리 제외, 빌드 게이트 포함)                   |
 | `md-to-notion.yml`      | `docs/**/*.md` push  | 수동 편집된 md → Notion DB 역업로드                                          |
 | `pr-build.yml`          | main·develop PR      | 프로덕션 빌드 검증 (깨진 링크·MDX 오류 차단)                                        |
 
-
 ### 커밋 메시지 태그 규칙
-
 
 | 태그                 | 효과                    |
 | ------------------ | --------------------- |
 | `[skip-notion]`    | `md-to-notion.yml` 스킵 |
 | 커미터가 `server-cron` | `md-to-notion.yml` 스킵 |
 
-
-`**[skip-notion]` 필수 상황:** Notion에서 내려받은 내용을 다시 올리면 무한 루프가 된다.
+**`[skip-notion]` 필수 상황:** Notion에서 내려받은 내용을 다시 올리면 무한 루프가 된다.
 
 - 서버 crontab 커밋 → 자동 부여됨
 - Claude가 수동 커밋할 때 `.notion-sync.json`·`docs/` Notion 원본 포함 시 → 반드시 추가
@@ -146,13 +145,11 @@ docs/poc/vision-bench/child.md  (slug: "1")  →  /docs/poc/vision-bench/1
 
 ### 외부 검색 최적화 (SEO) — 2026-06-22 적용
 
-
 | 항목                    | 내용                                      | 파일                                   |
 | --------------------- | --------------------------------------- | ------------------------------------ |
 | Google Search Console | 소유권 인증 완료, `sitemap.xml` 제출됨            | `static/google8226dc54aa85a9f0.html` |
 | JSON-LD 구조화 데이터       | `@graph`: Organization + WebSite 타입     | `docusaurus.config.ts` → `headTags`  |
 | GitHub 링크             | navbar·footer 모두 `SceneMakerAI` org로 변경 | `docusaurus.config.ts`               |
-
 
 JSON-LD 스키마 참고: [schema.org/WebSite](https://schema.org/WebSite) · [schema.org/Organization](https://schema.org/Organization)  
 Google Rich Results Test: [https://search.google.com/test/rich-results](https://search.google.com/test/rich-results)
@@ -173,13 +170,11 @@ main (콘텐츠 자동화 전용)
  └─ design (장기 유지, UI·CSS·설정 전용)
 ```
 
-
 | 작업 유형               | 시작 브랜치    | 머지 대상                   | dev 서버 포트 | 담당         |
 | ------------------- | --------- | ----------------------- | --------- | ---------- |
 | 콘텐츠 (Notion 자동 동기화) | —         | `main` 직접 커밋 *(자동화 전용)* | 3000      | 서버 crontab |
 | **모든 코드 변경**        | `develop` | `feat/<이름>` → `develop` | 3001      | **Claude** |
 | **main 반영**         | —         | `develop` → `main`      | 3000      | **사용자**    |
-
 
 **작업 흐름 (Claude 담당 부분):**
 
@@ -232,7 +227,6 @@ git push origin design
 
 ## 자주 쓰는 명령어
 
-
 | 명령어                     | 용도                                                              |
 | ----------------------- | --------------------------------------------------------------- |
 | `npm start`             | main 브랜치 dev 서버 (port 3000, KO+EN)                              |
@@ -240,7 +234,6 @@ git push origin design
 | `npm run build`         | 프로덕션 빌드 — **PR 전 통과 필수**                                        |
 | `npm run clear`         | Docusaurus 캐시 정리                                                |
 | `npm run typecheck`     | TypeScript 검사 (빌드와 무관, IDE 보조)                                  |
-
 
 **dev 서버 404 / 브랜치 전환 후 캐시 꼬임:** `npm run clear` 후 재시작.
 
@@ -252,13 +245,15 @@ git push origin design
 
 ### 개요
 
-`scripts/translate_to_en.py`가 `docs/`·`blog/` 의 KR Markdown을 DeepL Free API로 번역해 `i18n/en/` 에 저장한다. `monthly-translate.yml`이 매월 1일 자동 실행한다.
+`scripts/translate_to_en.py`가 `docs/`·`blog/` 의 KR Markdown을 DeepL Free API로 번역해 `i18n/en/` 에 저장한다. **`monthly-translate.yml`이 매월 1일 자동 실행**한다 (서버 crontab은 번역 미포함).
 
 ### 동작 방식
 
 - **해시 캐시** (`.notion-translate-hashes.json`): SHA-256으로 변경된 파일만 번역. 미변경 파일 스킵.
 - **에러 격리**: 파일 하나 실패해도 나머지 계속 진행 (try-except per file).
-- `**<hr/>` 버그 방지**: DeepL이 `<hr/>` 앞뒤 줄바꿈을 제거하는 문제를 `\n\n---\n\n`으로 복원.
+- **`<hr/>` 버그 방지**: DeepL이 `<hr/>` 앞뒤 줄바꿈을 제거하는 문제를 `\n\n---\n\n`으로 복원.
+- **heading 공백 복원**: DeepL이 `###3.` 처럼 공백을 제거하는 경우 정규식으로 복원.
+- **blockquote 마커 복원**: DeepL이 `> ` 마커를 문장 중간으로 이동시키는 경우 복원.
 - **빌드 안전**: EN 번역 파일 없어도 Docusaurus는 KO fallback — 번역 실패가 배포 실패로 이어지지 않음.
 
 ### 수동 번역 실행
@@ -286,19 +281,25 @@ python3 scripts/translate_to_en.py
 
 ---
 
+## navbar 자동 숨김 — `hasNotionContent`
+
+`docusaurus.config.ts`에 빌드 타임 함수 `hasNotionContent(dirName)`가 있다. `docs/<dir>/` 안에 `placeholder.md` 외 `.md` 파일이 없으면 navbar 항목을 숨긴다.
+
+- Notion 콘텐츠가 없는 섹션: navbar에서 자동 제거 (빌드 시 평가)
+- Notion 콘텐츠 도착 → sync → `.md` 파일 생성 → 다음 빌드에서 자동 복원
+- `placeholder.md`는 사이드바 비어있음 빌드 에러 방지용 (Notion 콘텐츠가 없는 섹션에 필수)
+
 ## 사이드바 ID ↔ Notion DB 매핑
 
-
-| 사이드바 ID               | `docs/` 경로       | 환경변수                  | Notion 콘텐츠 유무       |
-| --------------------- | ---------------- | --------------------- | ------------------- |
-| `aboutSidebar`        | `about/`         | `NOTION_ABOUT`        | ❌ placeholder.md 필요 |
-| `architectureSidebar` | `architecture/`  | `NOTION_ARCHITECTURE` | ❌ placeholder.md 필요 |
-| `installSidebar`      | `install/`       | `NOTION_INSTALL`      | ✅                   |
-| `pocSidebar`          | `poc/`           | `NOTION_POC`          | ✅                   |
-| `docsSidebar`         | `guide/`         | `NOTION_DOCS`         | ✅                   |
-| `contributeSidebar`   | `contribute/`    | `NOTION_CONTRIBUTE`   | ✅                   |
-| `releaseNotesSidebar` | `release-notes/` | `NOTION_RELEASE`      | ❌ placeholder.md 필요 |
-
+| 사이드바 ID               | `docs/` 경로       | 환경변수                  | Notion 콘텐츠 유무                  |
+| --------------------- | ---------------- | --------------------- | ------------------------------- |
+| `aboutSidebar`        | `about/`         | `NOTION_ABOUT`        | ❌ placeholder.md 필요 (navbar 숨김) |
+| `architectureSidebar` | `architecture/`  | `NOTION_ARCHITECTURE` | ❌ placeholder.md 필요 (navbar 숨김) |
+| `installSidebar`      | `install/`       | `NOTION_INSTALL`      | ✅                               |
+| `pocSidebar`          | `poc/`           | `NOTION_POC`          | ✅                               |
+| `docsSidebar`         | `guide/`         | `NOTION_DOCS`         | ✅                               |
+| `contributeSidebar`   | `contribute/`    | `NOTION_CONTRIBUTE`   | ✅                               |
+| `releaseNotesSidebar` | `release-notes/` | `NOTION_RELEASE`      | ❌ placeholder.md 필요 (navbar 숨김) |
 
 블로그는 `sidebars.ts` 미포함 — navbar에 `{to: '/blog'}` 방식.
 
@@ -313,7 +314,6 @@ HTML `<ol start="N">`이 자동 생성되어 코드블록으로 분리된 OL도 
 
 **카운터 리셋 기준 (`_OL_RESET_TYPES`):**
 
-
 | 블록 타입                                                       | 동작                      |
 | ----------------------------------------------------------- | ----------------------- |
 | `heading_1~4`                                               | **리셋** (섹션 경계)          |
@@ -321,14 +321,13 @@ HTML `<ol start="N">`이 자동 생성되어 코드블록으로 분리된 OL도 
 | `code`, `paragraph`, `image`, `divider`, `quote`, `callout` | **유지** (split-OL 연속 번호) |
 | `bulleted_list_item`, `to_do`                               | **유지**                  |
 
-
 ### HTML 엔티티 처리
 
 Notion API가 `&gt;` 형태로 이중 인코딩할 때 `extract_text_from_rich_text`에서 안정될 때까지 반복 unescape.
 
 ### 꺾쇠 이스케이프 (`escape_mdx_angle_brackets`)
 
-`<한글>` 패턴을 `<한글>`으로 변환해 MDX JSX 파싱 오류 방지. 코드 블록·인라인 코드 안은 건드리지 않는다.
+`<한글>` 패턴을 `\<한글>`으로 변환해 MDX JSX 파싱 오류 방지. 코드 블록·인라인 코드 안은 건드리지 않는다.
 
 ### child_page · link_to_page 블록
 
@@ -343,7 +342,7 @@ Notion 인라인 서브페이지(`child_page`)와 페이지 링크(`link_to_page
 1. GitHub `secrets.NOTION_XXX` 등록 + `.env`에 추가
 2. `scripts/server-sync.sh`에 DB 동기화 블록 추가
 3. `docs/new-section/_category_.json` 생성
-4. `sidebars.ts` + `docusaurus.config.ts` navbar 추가
+4. `sidebars.ts` + `docusaurus.config.ts` navbar 추가 (hasNotionContent 조건부 포함)
 5. Notion DB에 콘텐츠가 없으면 `placeholder.md` 즉시 생성 (빌드 실패 방지)
 
 **수동 Notion 동기화 (단일 섹션):**
@@ -384,4 +383,3 @@ with open('docs/poc/.notion-sync.json', 'w') as f:
 - 한 섹션 내 두 파일에 동일 slug 부여 금지 — 사이드바 이중 하이라이트 버그 발생
 - `i18n/en/` 파일 수동 편집 금지 — `translate_to_en.py` 실행 시 덮어씌워짐. EN 번역 수정은 스크립트 로직 수정으로.
 - `.notion-translate-hashes.json` 삭제·gitignore 금지 — 삭제 시 다음 CI 실행에서 전체 파일 재번역 (DeepL 한도 소진 위험)
-

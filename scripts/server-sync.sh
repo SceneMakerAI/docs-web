@@ -87,17 +87,3 @@ if ! git diff --staged --quiet; then
 else
   echo "[$(date)] 동기화 완료 — 변경사항 없음"
 fi
-
-# EN 번역 — 변경된 파일만 (hash cache로 미변경 스킵, DeepL quota 절약)
-if [ -n "$DEEPL_API_KEY" ]; then
-  python3 scripts/translate_to_en.py || echo "[$(date)] WARN: 번역 중 오류 발생 (배포는 계속)"
-  git add i18n/en/ .notion-translate-hashes.json
-  if ! git diff --staged --quiet; then
-    git -c user.name="server-cron" -c user.email="sbin@solbox.com" \
-      commit -m "chore: EN 번역 자동 동기화 $(date +'%Y-%m-%d %H:%M')"
-    git push origin main
-    echo "[$(date)] EN 번역 완료 — 변경사항 push됨"
-  else
-    echo "[$(date)] EN 번역 완료 — 변경사항 없음"
-  fi
-fi
