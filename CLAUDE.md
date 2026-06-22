@@ -113,6 +113,8 @@ docs/poc/vision-bench/child.md  (slug: "1")  →  /docs/poc/vision-bench/1
 
 로그 확인: `tail -f /var/log/notion-sync.log`
 
+> ⚠️ **staged files 주의:** git index에 스테이징된 파일(커밋 안 한 `git add`)이 있으면 `git pull --rebase`가 실패해 crontab이 멈춘다. Claude가 main에서 작업할 때는 반드시 커밋까지 완료하고 떠나야 한다. 확인: `git diff --staged --quiet || echo "STAGED"` — 출력이 있으면 커밋 또는 `git restore --staged .` 후 종료.
+
 ### GitHub Actions 워크플로우
 
 | 파일 | 트리거 | 역할 |
@@ -135,6 +137,17 @@ docs/poc/vision-bench/child.md  (slug: "1")  →  /docs/poc/vision-bench/1
 - 서버 crontab 커밋 → 자동 부여됨
 - Claude가 수동 커밋할 때 `.notion-sync.json`·`docs/` Notion 원본 포함 시 → 반드시 추가
 - `design → main` 등 머지 커밋이 `docs/` 파일 포함 시 → 머지 커밋 메시지에도 추가
+
+### 외부 검색 최적화 (SEO) — 2026-06-22 적용
+
+| 항목 | 내용 | 파일 |
+|------|------|------|
+| Google Search Console | 소유권 인증 완료, `sitemap.xml` 제출됨 | `static/google8226dc54aa85a9f0.html` |
+| JSON-LD 구조화 데이터 | `@graph`: Organization + WebSite 타입 | `docusaurus.config.ts` → `headTags` |
+| GitHub 링크 | navbar·footer 모두 `SceneMakerAI` org로 변경 | `docusaurus.config.ts` |
+
+JSON-LD 스키마 참고: [schema.org/WebSite](https://schema.org/WebSite) · [schema.org/Organization](https://schema.org/Organization)  
+Google Rich Results Test: https://search.google.com/test/rich-results
 
 ---
 
