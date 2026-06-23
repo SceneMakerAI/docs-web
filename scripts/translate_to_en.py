@@ -400,6 +400,9 @@ def translate_file(kr_path, hashes):
     # Safety net: DeepL displaces heading marker to end of prior line
     # e.g. "content###\n\n 3.3. Title" → "content\n\n### 3.3. Title"
     en_body = re.sub(r'([^#\n])(#{1,6})\n+[ \t]*(\S)', r'\1\n\n\2 \3', en_body)
+    # Safety net: DeepL separates heading marker from content with blank lines
+    # e.g. "##\n\n2. Install Docker" → "## 2. Install Docker"
+    en_body = re.sub(r'^(#{1,6})\n{1,3}([^#\n])', r'\1 \2', en_body, flags=re.MULTILINE)
     # Safety net: HRHR variants left when old null-byte placeholder was stripped by DeepL
     _HRHR = r'(?:\*\*HRHR\*\*|#HRHR#|-HRHR-|—HRHR—|\|HRHR\||HRHR)'
     en_body = re.sub(rf'^{_HRHR}$', '---', en_body, flags=re.MULTILINE)
