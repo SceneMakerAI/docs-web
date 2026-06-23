@@ -7,17 +7,13 @@ last_update:
 ---
 
 
-##
-
-1. Overview
+## 1. Overview
 
 - Install AWS Linux
 - Install Mulvus Compose
 - Install Attu
 
 ---
-
-##
 
 ## 2. Install Docker
 
