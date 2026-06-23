@@ -169,7 +169,7 @@ services:
 - Access: [http://<host_ip>:8000/](http://54.116.216.7:8000/#/connect)
 - Since they are isolated from each other via Docker, 127.0.0.1 will not work.
 
-![image](/img/install/milvus-installation-aws-linux-docker-compose/img-00.png)
+![image](/img/install/milvus-설치-aws-linux-docker-compose/img-00.png)
 
 ### 4.2 Data Backup Directory
 
