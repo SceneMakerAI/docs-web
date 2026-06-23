@@ -183,10 +183,10 @@
     "frontmatter_hash": "a4a3ace3819ae0f6cd04d8c8e81e790f410d5da23da7c88394840199ff5d40c9"
   },
   "docs/install/ffmpeg-gpunvencnvdec-설치-절차서.md": {
-    "body_hash": "f185a04cd6997f1d000b076935b915ab6dc24d87f346ebcb3251458e10cf496f",
+    "body_hash": "92e979cf6f10dd8a4b5798f3675bda57fff7ac8bb5aa89f90d503af17e5dcac2",
     "slug": "2",
     "sidebar_position": "2",
-    "frontmatter_hash": "ea9ec7ebfb5a56527f2f541f60cfe23af63f4813b72bc562bbb9ca9ac6c57737"
+    "frontmatter_hash": "c07d044af0d99e4c656a4ab55afc5721f234aded452f1db505c3f0d54ca6daea"
   },
   "docs/install/제목없음.md": {
     "body_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
@@ -214,6 +214,12 @@
   },
   "docs/install/milvus.md": {
     "body_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "slug": "3",
+    "sidebar_position": "3",
+    "frontmatter_hash": "e408bdeed7b790240044d4398030d8d1b7c88b0020bb2976c24e032f934685a2"
+  },
+  "docs/install/milvus-설치-aws-linux-docker-compose.md": {
+    "body_hash": "4d6b14b5c292015bc99f3d6967a95603ea6a2d5069559f2952ea38cfc0e2d1f9",
     "slug": "3",
     "sidebar_position": "3",
     "frontmatter_hash": "e408bdeed7b790240044d4398030d8d1b7c88b0020bb2976c24e032f934685a2"
