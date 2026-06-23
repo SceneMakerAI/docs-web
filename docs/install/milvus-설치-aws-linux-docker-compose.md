@@ -4,7 +4,7 @@ title: "Milvus 설치 (AWS Linux + Docker Compose)"
 sidebar_position: 3
 slug: "3"
 last_update:
-  date: 2026-06-22
+  date: 2026-06-23
 ---
 
 
@@ -56,7 +56,8 @@ docker-compose 를 별도 설치 한다.
 # 4. Docker Compose 정상 작동 확인
 > docker compose version
 Docker Compose version v5.1.4
-> 
+> systemctl start docker
+> systemctl enable docker
 ```
 
 
@@ -163,7 +164,7 @@ services:
 ### 4.1 Attu 설정
 
 - AWS 방화벽 Open
-- 접근 : [http://<HOST_IP>:8000/](http://54.116.216.7:8000/#/connect)
+- 접근 : http://<HOST_IP>:8000/
 - docker 로 서로 격리된 상태라  127.0.0.1 은 안됨.
 
 ![image](/img/install/milvus-설치-aws-linux-docker-compose/img-00.png)
