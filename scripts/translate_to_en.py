@@ -378,6 +378,15 @@ def translate_file(kr_path, hashes):
         return f'{m.group(1)}{key}. '        # group 1 = leading spaces
 
     body_protected = re.sub(r'(?m)^( *)(\d+)\. ', _protect_ol, body_protected)
+    # Protect image URLs — DeepL translates Korean path segments (e.g. /img/milvus-설치-.../)
+    _img_store: dict[str, str] = {}
+
+    def _protect_img(m: re.Match) -> str:
+        key = f'<x id="IMG{len(_img_store)}"/>'
+        _img_store[key] = m.group(2)
+        return f'![{m.group(1)}]({key})'
+
+    body_protected = re.sub(r'!\[([^\]]*)\]\((/[^)]+)\)', _protect_img, body_protected)
     translated = translate_with_deepl(body_protected) if body_no_inline.strip() else body_protected
     for key, num in _ol_store.items():
         translated = translated.replace(key, num)
@@ -413,6 +422,8 @@ def translate_file(kr_path, hashes):
     en_body = _restore_code_blocks(en_body, code_store)
     for key, val in _bq_store.items():
         en_body = en_body.replace(key, val)
+    for key, url in _img_store.items():
+        en_body = en_body.replace(key, url)
     # Safety net: DeepL relocates blockquote '> ' marker mid-sentence
     # e.g. "If an>  `code` ..." → "> If an `code` ..."
     en_body = re.sub(r'^([A-Za-z][^>\n]*\S)(> +)(\S)', r'> \1 \3', en_body, flags=re.MULTILINE)
