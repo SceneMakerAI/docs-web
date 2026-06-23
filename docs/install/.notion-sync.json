@@ -8,15 +8,15 @@
   },
   "380e15b4-0359-80e3-bb36-c9bb17c7fbbd": {
     "file": "docs/install/ffmpeg-gpunvencnvdec-설치-절차서.md",
-    "last_edited": "2026-06-15T12:35:00.000Z",
-    "content_hash": "f185a04cd6997f1d000b076935b915ab6dc24d87f346ebcb3251458e10cf496f",
+    "last_edited": "2026-06-22T08:37:00.000Z",
+    "content_hash": "92e979cf6f10dd8a4b5798f3675bda57fff7ac8bb5aa89f90d503af17e5dcac2",
     "order": 2,
     "parent_id": null
   },
   "380e15b4-0359-80f6-afaf-c6c721774491": {
-    "file": "docs/install/milvus.md",
-    "last_edited": "2026-06-22T07:57:00.000Z",
-    "content_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "file": "docs/install/milvus-설치-aws-linux-docker-compose.md",
+    "last_edited": "2026-06-22T10:20:00.000Z",
+    "content_hash": "4d6b14b5c292015bc99f3d6967a95603ea6a2d5069559f2952ea38cfc0e2d1f9",
     "order": 3,
     "parent_id": null
   }
