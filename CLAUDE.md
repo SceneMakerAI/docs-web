@@ -10,7 +10,7 @@
 
 - 운영 URL: `https://doc.scenemaker.solbox.com`
 - 스택: **Docusaurus 3.x** (React 19, TypeScript), **한국어(기본)·영어 이중 로케일**
-- 파이프라인: Notion DB → 서버 crontab(3시간, `server-sync.sh`) → GH Pages (`deploy.yml`)
+- 파이프라인: Notion DB → 서버 crontab(1시간, `server-sync.sh`) → GH Pages (`deploy.yml`)
 - 번역 파이프라인: `docs/`·`blog/` KR → DeepL → `i18n/en/` EN (매월 1일, `monthly-translate.yml`)
 - 참고: [https://docusaurus.io/ko/docs](https://docusaurus.io/ko/docs)
 
@@ -105,7 +105,7 @@ docs/poc/vision-bench/child.md  (slug: "1")  →  /docs/poc/vision-bench/1
 ### 서버 crontab (콘텐츠 동기화 주체)
 
 ```
-0 */3 * * * /root/docs-web/scripts/server-sync.sh >> /var/log/notion-sync.log 2>&1
+0 */1 * * * /root/docs-web/scripts/server-sync.sh >> /var/log/notion-sync.log 2>&1
 ```
 
 `server-sync.sh` 실행 흐름:
@@ -206,7 +206,7 @@ git push origin develop
 
 ### crontab 충돌 처리
 
-crontab이 3시간마다 main에 push하므로 `non-fast-forward` 에러 시:
+crontab이 1시간마다 main에 push하므로 `non-fast-forward` 에러 시:
 
 ```bash
 git pull --rebase origin main
