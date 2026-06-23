@@ -4,7 +4,7 @@ title: "Qwen 3.x 설치"
 sidebar_position: 1
 slug: "1"
 last_update:
-  date: 2026-06-04
+  date: 2026-06-23
 ---
 
 ## AWS 서버 세팅
@@ -75,11 +75,12 @@ aws ec2 get-spot-placement-scores \
 - LLM 서빙은 모델 자체의 첫 토큰 생성에 200\~500 ms 소요 → 네트워크 +150\~200 ms는 실사용자 체감 차이가 거의 없는 수준
 - 한국 인접 우선이라면 도쿄가 sweet spot이지만 capacity 제약이 큼
 
-> 🎯 **결론**
->
-> - **점유 안정성** 을 우선 고려해 **us-west-2(오레곤) 선택**
->
-> - 한국 사용자 인터랙티브 서빙으로 확장 시 ap-northeast-1(도쿄) 멀티리전 또는 **Capacity Block for ML / Capacity Reservation** 예약 검토
+:::tip
+🎯 **결론**
+
+- **점유 안정성** 을 우선 고려해 **us-west-2(오레곤) 선택**
+- 한국 사용자 인터랙티브 서빙으로 확장 시 ap-northeast-1(도쿄) 멀티리전 또는 **Capacity Block for ML / Capacity Reservation** 예약 검토
+:::
 
 ---
 
@@ -100,7 +101,9 @@ aws ec2 get-spot-placement-scores \
 G4dn, G5, G6, Gr6, G6e, P4d, P4de, P5, P5e, P5en, P6-B200, P6-B300
 ```
 
-> ℹ️ 공식 목록에 **G7e가 없음** . 다만 실측 결과 Blackwell 드라이버·CUDA가 정상 작동 확인. 향후 재생성 시에는 G7e를 명시 지원하는 **Deep Learning Base OSS Nvidia Driver GPU AMI** (AL2023) 사용 권장.
+:::warning
+ℹ️ 공식 목록에 **G7e가 없음** . 다만 실측 결과 Blackwell 드라이버·CUDA가 정상 작동 확인. 향후 재생성 시에는 G7e를 명시 지원하는 **Deep Learning Base OSS Nvidia Driver GPU AMI** (AL2023) 사용 권장.
+:::
 
 ---
 
@@ -175,14 +178,16 @@ G4dn, G5, G6, Gr6, G6e, P4d, P4de, P5, P5e, P5en, P6-B200, P6-B300
 | 타입 | NVMe SSD (인스턴스 로컬) |
 | 마운트 | `/mnt/nvme` (XFS, 수동 마운트 필요 — 아래 NVME 설정 참고) |
 
-> ⚠️ **인스턴스 스토어 데이터 영속성**
->
-> | 작업 | 데이터 |
-> | --- | --- |
-> | Reboot (재부팅) | 유지 |
-> | **Stop / Start** | **삭제** |
-> | Terminate | 삭제 |
-> | 하드웨어 장애 | 삭제 |
+:::caution
+⚠️ **인스턴스 스토어 데이터 영속성**
+
+| 작업 | 데이터 |
+| --- | --- |
+| Reboot (재부팅) | 유지 |
+| **Stop / Start** | **삭제** |
+| Terminate | 삭제 |
+| 하드웨어 장애 | 삭제 |
+:::
 
 **용도 분리 권장**
 
