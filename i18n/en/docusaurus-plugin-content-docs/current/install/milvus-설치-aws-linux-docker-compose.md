@@ -19,11 +19,9 @@ last_update:
 
 ##
 
-2. Install Docker
+## 2. Install Docker
 
-###
-
-2.1 Install and Start Docker Engine
+### 2.1 Install and Start Docker Engine
 
 ```javascript
 # 1. Package System Update
@@ -62,13 +60,9 @@ Docker Compose version v5.1.4
 
 ---
 
-##
+##  3. Install Milvus
 
- 3. Install Milvus
-
-###
-
-3.1 Install Mulvus
+### 3.1 Install Mulvus
 
 ```javascript
 > mkdir -p /usr/service/milvus-standalone
@@ -89,9 +83,7 @@ milvus-standalone   milvusdb/milvus:v2.6.18                    "/tini -- milvus 
 
 ```
 
-###
-
-3.2 Install Attu
+### 3.2 Install Attu
 
 ```javascript
 > docker run -d -p 8000:3000 --name milvus-attu --restart always zilliz/attu:v2.4.11
@@ -105,13 +97,9 @@ affc1daa2946   quay.io/coreos/etcd:v3.5.25                "etcd -advertise-cliâ€
 
 ```
 
-###
+### 3.3 Configure for Automatic Startup
 
-3.3 Configure for Automatic Startup
-
-####
-
-Restart Docker
+#### Restart Docker
 
 ```javascript
 > systemctl enable docker
@@ -157,13 +145,9 @@ services:
 
 ---
 
-##
+## 4. Configuration
 
-4. Configuration
-
-###
-
-4.1 Attu Configuration
+### 4.1 Attu Configuration
 
 - Open the AWS firewall
 - Access: [http://<host_ip>:8000/](http://54.116.216.7:8000/#/connect)
