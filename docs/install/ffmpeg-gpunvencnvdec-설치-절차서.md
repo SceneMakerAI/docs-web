@@ -4,7 +4,7 @@ title: "Ffmpeg GPU(NVENC/NVDEC) 설치 절차서"
 sidebar_position: 2
 slug: "2"
 last_update:
-  date: 2026-06-22
+  date: 2026-06-24
 ---
 
 ## 1. 개념
@@ -27,20 +27,29 @@ last_update:
 
 
 
-## 3. **nvenc 켜진 빌드 받기 (가장 쉬움: BtbN)**
+## 3. **nvenc 켜진 빌드 받기**
 
 ```javascript
 # BtbN/FFmpeg-Builds 의 linux64-gpl static 빌드에 nvenc/cuvid/scale_cuda 가 포함돼 있다.
 
 
-> mkdir -p ~/ffmpeg-gpu && cd ~/ffmpeg-gpu
-> curl -L -o ffmpeg.tar.xz \
-  https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-linux64-gpl.tar.xz
-tar xf ffmpeg.tar.xz --strip-components=1
+> mkdir -p /usr/local/ffmpeg-gpu && cd /usr/local/ffmpeg-gpu
+> curl -L -o ff.tar.xz \
+  https://github.com/BtbN/FFmpeg-Builds/releases/download/autobuild-2026-01-31-12-57/ffmpeg-N-122607-g50bcc96a75-linux64-gpl.tar.xz
+tar xf ff.tar.xz --strip-components=1
 
 # bin/ffmpeg, bin/ffprobe 생성
 # 대안: 직접 컴파일(nv-codec-headers 설치 후 --enable-nvenc --enable-cuda --enable-cuvid --enable-libnpp),
 # 또는 jellyfin-ffmpeg 같은 nvenc 포함 패키지.
+
+> ls -al bin/
+total 578564
+drwxr-xr-x. 2 1001 1001        49 Jan 31 21:55 .
+drwxr-xr-x. 6 root root        90 Jun 24 15:58 ..
+-rwxr-xr-x. 1 1001 1001 196915400 Jan 31 21:55 ffmpeg
+-rwxr-xr-x. 1 1001 1001 198827688 Jan 31 21:55 ffplay
+-rwxr-xr-x. 1 1001 1001 196698312 Jan 31 21:55 ffprobe
+> 
 
 
 ```
@@ -49,18 +58,32 @@ tar xf ffmpeg.tar.xz --strip-components=1
 
 ## 4. 빌드 + 드라이버 호환 확인
 
-```javascript
-FF=~/ffmpeg-gpu/bin/ffmpeg
-
+```bash
 # 기능 포함 확인
-> FF -hide_banner -hwaccels  | grep cuda
-> FF -hide_banner -encoders  | grep -i nvenc     # h264_nvenc, hevc_nvenc, av1_nvenc
-> FF -hide_banner -decoders  | grep -i cuvid     # h264_cuvid, hevc_cuvid, vp9_cuvid ...
-> FF -hide_banner -filters   | grep scale_cuda
+> bin/ffmpeg -hide_banner -hwaccels  | grep cuda
+cuda
+> bin/ffmpeg -hide_banner -encoders  | grep -i nvenc   
+ V....D av1_nvenc            NVIDIA NVENC av1 encoder (codec av1)
+ V....D h264_nvenc           NVIDIA NVENC H.264 encoder (codec h264)
+ V....D hevc_nvenc           NVIDIA NVENC hevc encoder (codec hevc) 
+> bin/ffmpeg -hide_banner -decoders  | grep -i cuvid
+ V..... av1_cuvid            Nvidia CUVID AV1 decoder (codec av1)
+ V..... h264_cuvid           Nvidia CUVID H264 decoder (codec h264)
+ V..... hevc_cuvid           Nvidia CUVID HEVC decoder (codec hevc)
+ V..... mjpeg_cuvid          Nvidia CUVID MJPEG decoder (codec mjpeg)
+ V..... mpeg1_cuvid          Nvidia CUVID MPEG1VIDEO decoder (codec mpeg1video)
+ V..... mpeg2_cuvid          Nvidia CUVID MPEG2VIDEO decoder (codec mpeg2video)
+ V..... mpeg4_cuvid          Nvidia CUVID MPEG4 decoder (codec mpeg4)
+ V..... vc1_cuvid            Nvidia CUVID VC1 decoder (codec vc1)
+ V..... vp8_cuvid            Nvidia CUVID VP8 decoder (codec vp8)
+ V..... vp9_cuvid            Nvidia CUVID VP9 decoder (codec vp9)
+ 
+ > bin/ffmpeg -hide_banner -filters   | grep scale_cuda
+ .. scale_cuda        V->V       GPU accelerated video resizer
 
 
 # 드라이버에서 nvenc 가 실제로 열리는지 (중요)
-$FF -y -f lavfi -i testsrc=size=1280x720:rate=30:duration=3 -c:v h264_nvenc /tmp/t.mp4 \
+> bin/ffmpeg -y -f lavfi -i testsrc=size=1280x720:rate=30:duration=3 -c:v h264_nvenc /tmp/t.mp4 \
   && echo "NVENC OK" || echo "NVENC 실패"
 
 ```
