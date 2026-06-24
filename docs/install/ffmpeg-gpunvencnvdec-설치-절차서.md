@@ -26,8 +26,17 @@ last_update:
 ```
 
 
-
 ## 3. **nvenc 켜진 빌드 받기**
+
+- H.264 (가장 대중적인 포맷)
+  - **일반(CPU 사용):** `c:v libx264`
+
+  - **NVENC(GPU 가속):** `c:v h264_nvenc`
+
+- H.265 / HEVC (고화질 고압축 포맷)
+  - **일반(CPU 사용):** `c:v libx265`
+
+  - **NVENC(GPU 가속):** `c:v hevc_nvenc`
 
 ```javascript
 # BtbN/FFmpeg-Builds 의 linux64-gpl static 빌드에 nvenc/cuvid/scale_cuda 가 포함돼 있다.
@@ -85,7 +94,10 @@ cuda
 # 드라이버에서 nvenc 가 실제로 열리는지 (중요)
 > bin/ffmpeg -y -f lavfi -i testsrc=size=1280x720:rate=30:duration=3 -c:v h264_nvenc /tmp/t.mp4 \
   && echo "NVENC OK" || echo "NVENC 실패"
-
+...
+...
+NVENC OK
+> 
 ```
 
 

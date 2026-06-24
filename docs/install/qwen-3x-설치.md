@@ -473,7 +473,7 @@ Wants=network-online.target
 
 [Service]
 Type=simple
-User=root
+User=vllm
 WorkingDirectory=/usr/service/vllm-svc
 
 Environment="PATH=/usr/service/vllm-svc/.venv/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin"
@@ -586,32 +586,45 @@ vllm serve /mnt/nvme/models/Qwen3-Omni-30B-A3B-Instruct \
 ```shell
 [Unit]
 Description=vLLM Qwen3-Omni-30B-A3B-Instruct Service
-After=network-online.target
+After=network-online.target nvme-prep.service
 Wants=network-online.target
+Requires=nvme-prep.service
 
 [Service]
 Type=simple
-User=root
+User=vllm
 WorkingDirectory=/usr/service/vllm-svc
-Environment="PATH=/usr/service/vllm-svc/.venv/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin"
 
-ExecStart=/usr/service/vllm-svc/.venv/bin/vllm serve \
-    /stg/models/Qwen3-Omni-30B-A3B-Instruct \
+Environment="PATH=/usr/service/vllm-svc/.venv/bin:/usr/local/bin:/usr/local/sbin:/usr/sbin:/usr/bin:/sbin:/bin"
+Environment="HOME=/root"
+Environment="HF_HOME=/usr/service/cache/hf-cache"
+Environment="VLLM_CACHE_ROOT=/usr/service/cache/vllm-cache"
+Environment="FLASHINFER_WORKSPACE_BASE=/usr/service/cache"
+
+# Nvme 디렉토리 검사 및 s3 -> nvme 로 모델 복사
+ExecStartPre=/bin/bash -c 'mountpoint -q /mnt/nvme || (echo "NVMe not mounted" && exit 1)'
+ExecStartPre=/bin/bash /usr/service/start_server/s3_sync_omni.sh
+
+ExecStart=/usr/service/vllm-svc/.venv/bin/vllm serve /mnt/nvme/models/Qwen3-Omni-30B-A3B-Instruct \
     --served-model-name qwen \
     --port 8000 \
     --host 0.0.0.0 \
     --dtype bfloat16 \
     --max-model-len 16384 \
     --max-num-seqs 8 \
-    --gpu-memory-utilization 0.85 \
-    --limit-mm-per-prompt '{"image":3,"video":3,"audio":3}' \
-    --allowed-local-media-path / \
+    --gpu-memory-utilization 0.82 \
+    --mm-encoder-attn-backend TORCH_SDPA \
+    --moe-backend triton \
+    --allowed-local-media-path /mnt/nvme/vod \
+    --limit-mm-per-prompt "{\"image\":1,\"video\":1,\"audio\":1}" \
     --tensor-parallel-size 1 \
     --trust-remote-code
 
+ExecStartPost=/bin/bash /usr/service/start_server/vllm_warmup.sh
+
 StandardOutput=append:/usr/service/logs/vllm/qwen_omni.log
 StandardError=append:/usr/service/logs/vllm/qwen_omni.log
-TimeoutStartSec=900
+TimeoutStartSec=1800
 TimeoutStopSec=60
 Restart=on-failure
 RestartSec=10
@@ -625,4 +638,5 @@ WantedBy=multi-user.target
 
 
 감사합니다.
+
 
