@@ -367,14 +367,66 @@ Python 3.12.13
 ```
 
 
-#### 
+#### Torch 설치
 
-```javascript
+- sm_120 미포함이면 절대 진행 금지 (Balckwell GPU 에서 필요)
+
 ```bash
-uv pip install \
+(vllm-svc) > uv pip install \
     torch==2.11.0 torchaudio==2.11.0 torchvision==0.26.0 \
     --index-url https://download.pytorch.org/whl/cu130
+    
+(vllm-svc) > python - <<'PY'
+import torch
+al = torch.cuda.get_arch_list()
+print("torch", torch.__version__, "| cuda", torch.version.cuda)
+print("arch_list", al)
+assert torch.__version__.endswith("+cu130"), "❌ cu130 휠 아님"
+assert "sm_120" in al, "❌ sm_120 미포함 → Blackwell 커널 없음"
+print("✅ torch OK")
+PY
+
+torch 2.11.0+cu130 | cuda 13.0
+arch_list ['sm_75', 'sm_80', 'sm_86', 'sm_90', 'sm_100', 'sm_120']
+✅ torch OK
+(vllm-svc) >
+
+
+# VLLM 이 torch 버전을 변경할 수 있으니, 고정 시켜서 설치한다.
+(vllm-svc) > cat > /tmp/torch-constraint.txt <<'EOF'
+torch==2.11.0+cu130
+torchaudio==2.11.0+cu130
+torchvision==0.26.0+cu130
+EOF
+
+(vllm-svc) > uv pip install vllm==0.22.0 \
+    --constraint /tmp/torch-constraint.txt \
+    --extra-index-url https://download.pytorch.org/whl/cu130 \
+    --index-strategy unsafe-best-match
+
+# 최종 버전 확인
+(vllm-svc) > .venv/bin/vllm --version
+0.22.0
+(vllm-svc) >
 ```
+
+
+#### 멀티모달 기능 추가
+
+```bash
+(vllm-svc) > uv pip install ninja 
+(vllm-svc) > which ninja
+/usr/service/vllm-svc/.venv/bin/ninja
+(vllm-svc) > 
+```
+
+
+#### Cache 디렉토리 생성
+
+```bash
+(vllm-svc) > mkdir -p /usr/service/cache/flashinfer
+(vllm-svc) > mkdir -p /usr/service/cache/vllm-cache
+(vllm-svc) > mkdir -p /usr/service/cache/hf-cache
 ```
 
 
@@ -410,66 +462,6 @@ uv pip install \
 
 
 #### Service 등록
-
-실행시 /stg/models/Qwen3.5-122B-A10B-GPTQ-Int ⇒ /mnt/nvme/models/Qwen3.5-122B-A10B-GPTQ-Int4 로 모델을 옮기고 nvme 에 있는 모델을 로드 한다.
-
-
-- Qwen3.5-122B-A10B-GPTQ-Int4 
-
-```shell
-[Unit]
-Description=vLLM Qwen3.5-122B-A10B-GPTQ-Int4 Service
-After=network-online.target
-Wants=network-online.target
-
-[Service]
-Type=simple
-User=root
-WorkingDirectory=/usr/service/vllm-svc
-
-Environment="PATH=/usr/service/vllm-svc/.venv/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin"
-Environment="HF_HOME=/mnt/nvme/hf-cache"
-Environment="VLLM_CACHE_ROOT=/mnt/nvme/vllm-cache"
-
-# NVMe 마운트 확인
-ExecStartPre=/bin/bash -c 'mountpoint -q /mnt/nvme || (echo "NVMe not mounted" && exit 1)'
-
-# 모델/캐시 디렉토리 준비
-ExecStartPre=/bin/mkdir -p /mnt/nvme/models /mnt/nvme/hf-cache /mnt/nvme/vllm-cache
-
-# EBS → NVMe 동기화
-ExecStartPre=/usr/bin/rsync -a --delete \
-    /stg/models/Qwen3.5-122B-A10B-GPTQ-Int4/ \
-    /mnt/nvme/models/Qwen3.5-122B-A10B-GPTQ-Int4/
-
-ExecStart=/usr/service/vllm-svc/.venv/bin/vllm serve \
-    /mnt/nvme/models/Qwen3.5-122B-A10B-GPTQ-Int4 \
-    --served-model-name qwen \
-    --port 8000 \
-    --tensor-parallel-size 1 \
-    --quantization moe_wna16 \
-    --max-model-len 32768 \
-    --max-num-seqs 8 \
-    --gpu-memory-utilization 0.90 \
-    --reasoning-parser qwen3 \
-    --trust-remote-code
-
-StandardOutput=append:/usr/service/logs/vllm/qwen_122.log
-StandardError=append:/usr/service/logs/vllm/qwen_122.log
-
-TimeoutStartSec=600
-TimeoutStopSec=60
-Restart=on-failure
-RestartSec=10
-KillMode=mixed
-
-LimitNOFILE=1048576
-LimitNPROC=1048576
-
-[Install]
-WantedBy=multi-user.target
-```
-
 
 - Qwen3.6-27B-FP8
 
@@ -549,12 +541,42 @@ WantedBy=multi-user.target
 `uv pip install vllm` 기본 설치엔 오디오 디코더가 빠져 있어, 오디오 입력 요청 시 `400 "Invalid or unsupported audio file"` 가 발생한다 (비디오 단독 요청은 정상이라 증상이 헷갈림). 아래 3개를 venv 에 추가해야 한다.
 
 ```shell
+(vllm-svc) > uv pip install ninja 
+(vllm-svc) > which ninja
+/usr/service/vllm-svc/.venv/bin/ninja
+(vllm-svc) > 
 (vllm-svc) > uv pip install soundfile librosa av
 ```
 
 - `soundfile` (libsndfile 바인딩) · `librosa` (리샘플링) · `av` (PyAV, 컨테이너 demux) — 셋 다 필요
 - 설치 후 **서비스 재기동해야 적용** 된다 (`sudo systemctl restart vllm_omni_i` )
 - 클라이언트 요청 본문에 `mm_processor_kwargs: {"use_audio_in_video": true}` 를 넣어야 mp4 안 오디오가 함께 처리된다
+
+
+#### 수동 테스트
+
+- venv 쉘이 적용된 상태에서 실행 한다.
+
+```bash
+(vllm-svc) > export VLLM_CACHE_ROOT=/usr/service/cache/vllm-cache
+export HF_HOME=/usr/service/cache/cache/hf-cache
+
+PATH="/usr/service/vllm-svc/.venv/bin:$PATH" \
+vllm serve /mnt/nvme/models/Qwen3-Omni-30B-A3B-Instruct \
+    --served-model-name qwen \
+    --port 8000 --host 0.0.0.0 \
+    --dtype bfloat16 \
+    --max-model-len 16384 \
+    --max-num-seqs 8 \
+    --gpu-memory-utilization 0.90 \
+    --mm-encoder-attn-backend TORCH_SDPA \
+    --moe-backend triton \
+    --allowed-local-media-path /mnt/nvme/vod \
+    --limit-mm-per-prompt '{"image":1,"video":1,"audio":1}' \
+    --tensor-parallel-size 1 \
+    --trust-remote-code
+```
+
 
 
 ### Service 등록
