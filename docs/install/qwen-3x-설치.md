@@ -4,7 +4,7 @@ title: "Qwen 3.x 설치"
 sidebar_position: 1
 slug: "1"
 last_update:
-  date: 2026-06-23
+  date: 2026-06-24
 ---
 
 ## AWS 서버 세팅
@@ -288,6 +288,7 @@ export HF_HOME=/mnt/nvme/hf-cache      # 빠르지만 stop 시 소실
 ### 모델 다운로드
 
 - 모델을 로컬 디렉토리에 다운로드
+- 모델은 다운로드 후, S3 에 올려 두어도 된다.
 
 ```shell
 ## 첫번째 모델 다운로드
@@ -317,6 +318,17 @@ drwxr-xr-x. 4 root root    59 May 19 17:28 xet
 
 vllm 은 패키지 의존성을 많이 요구하기 때문에 uv 환경에서 격리 하여 패키지 설치를 권장 함
 
+- 대상: RTX PRO 6000 Blackwell(sm_120) / CUDA 13.0 / Python 3.12 / AL2023 
+
+```text
+vllm==0.22.0
+torch==2.11.0+cu130
+torchaudio==2.11.0+cu130
+torchvision==0.26.0+cu130
+flashinfer-python==0.6.12
+transformers==5.8.1
+```
+
 
 #### uv 설치
 
@@ -334,21 +346,36 @@ uv 0.11.15 (x86_64-unknown-linux-gnu)
 ```
 
 
-#### vllm 전용 프로젝트 생성 및 설치
+#### 환경 설치 
 
 ```shell
+# 디렉토리 생성
 > mkdir -p /usr/service/vllm-svc
 > cd /usr/service/vllm-svc
 
+# UV 새엉
 > uv venv --python 3.12
 Using CPython 3.12.13 interpreter at: /usr/bin/python3.12
 Creating virtual environment at: .venv
 Activate with: source .venv/bin/activate
 
+# 확인
 > source .venv/bin/activate
-(vllm-svc) > uv pip install vllm --torch-backend=auto
+(vllm-svc) > python --version
+Python 3.12.13
+(vllm-svc) > 
 ```
 
+
+#### 
+
+```javascript
+```bash
+uv pip install \
+    torch==2.11.0 torchaudio==2.11.0 torchvision==0.26.0 \
+    --index-url https://download.pytorch.org/whl/cu130
+```
+```
 
 
 ##### 테스트
