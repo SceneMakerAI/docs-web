@@ -7,9 +7,9 @@
     "parent_id": "audio-bench"
   },
   "368e15b4-0359-81cb-9b9b-d555dbfd19e3": {
-    "file": "docs/poc/vision-bench/1편-멀티모달-llm-한국-방송-6초-클립-영상-이해-벤치마크-파이프라인-구축.md",
-    "last_edited": "2026-06-09T02:08:00.000Z",
-    "content_hash": "25fed9b896ff517837e89a9a0a79dbd7bdc9a15cb6666c508228bb7828f19325",
+    "file": "docs/poc/vision-bench/1편-멀티모달-llm-한국-방송-6초-클립-영상-이해-벤치마크파이프라인-구축.md",
+    "last_edited": "2026-06-25T09:55:00.000Z",
+    "content_hash": "f67eab1bcee44f5f1a167dccca1430792068ac162d231db4a48c9160e6a37e7d",
     "order": 1,
     "parent_id": "vision-bench"
   },

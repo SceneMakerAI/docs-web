@@ -1,10 +1,10 @@
 ---
-id: 1편-멀티모달-llm-한국-방송-6초-클립-영상-이해-벤치마크-파이프라인-구축
-title: "[1편] 멀티모달 LLM 한국 방송 6초 클립 영상 이해 벤치마크 — 파이프라인 구축"
+id: 1편-멀티모달-llm-한국-방송-6초-클립-영상-이해-벤치마크파이프라인-구축
+title: "[1편] 멀티모달 LLM 한국 방송 6초 클립 영상 이해 벤치마크[파이프라인 구축]"
 sidebar_position: 1
 slug: "1"
 last_update:
-  date: 2026-06-09
+  date: 2026-06-25
 ---
 
 
@@ -27,12 +27,12 @@ graph LR
     A["클라이언트<br/>(클립·프롬프트 조립)"] -->|POST| B["poc-vision-bench<br/>(API 게이트웨이)<br/>(passthrough·동시성·배치)"] -->|중계| C["vLLM<br/>(Qwen3-Omni)<br/>(멀티모달 추론)"]
 ```
 
-- **본 편에서 확인하는 것 — API 3종:**
-  1. **상태 조회** — `/healthz`
+- **본 편에서 확인하는 API 3종:**
+  1. **상태 조회** : `/healthz`
 
-  1. **단일 호출** — `/chat` (텍스트 추론, 영상 추론, 화면 블랙아웃 음성 분석 검증)
+  1. **단일 호출** : `/chat`
 
-  1. **배치 처리** — `/chat/batch`
+  1. **배치 처리 :** `/chat/batch`
 
 ## 2. 사전 조사
 
@@ -48,7 +48,7 @@ graph LR
 | 구조 | Thinker–Talker MoE (네이티브 옴니모달 end-to-end) |
 | 파라미터 | 추론 코어(Thinker) 총 30B / 활성 3B · Talker·인코더 포함 전체 ≈ 35B |
 | 입력 | 텍스트 · 이미지 · 오디오 · 비디오 |
-| 출력 | 텍스트(+음성) — 본 PoC는 텍스트만 사용 (Talker 미사용) |
+| 출력 | 텍스트(+음성). 본 PoC는 텍스트만 사용(Talker 미사용) |
 | 컨텍스트 | 네이티브 32,768 토큰 (실서빙은 16,384 운용) |
 | 다국어 지원 | 텍스트 119개 / 음성입력 19개 / 음성출력 10개 → 한국어 모두 지원 |
 | 라이선스 | Apache 2.0 (상용 가능) |
@@ -92,7 +92,6 @@ graph LR
 | **전처리 산출물 용량** | 6초 mp4 (\~1\~3 MB / 클립) | frames JPG 3 장 + wav (\~수백 KB / 클립) |
 | **환각 영향** | 영상·오디오 정렬·맥락 자연 유지 | 키프레임 사이 동작 누락 가능성 |
 
-
 ## 3. 테스트
 
 ### 3.0. 테스트 방법
@@ -112,7 +111,7 @@ graph LR
 
    1. 영상 + 프롬프트 
 
-   1. 화면만 블랙아웃(ⓑ와 동일 프롬프트) — 음성 반영 확인
+   1. 화면만 블랙아웃(ⓑ와 동일 프롬프트)  음성 반영 확인
 
 4. **배치 추론 호출** (`/chat/batch` )
    - 여러 클립(영상 + 프롬프트)을 한 요청으로 보내 다건 동시 처리를 확인한다.
@@ -138,22 +137,16 @@ graph LR
 | 2009 프로야구 한국시리즈 7차전 | 1 :55:22 | [https://www.youtube.com/watch?v=fP1QEs1Uj5U](https://www.youtube.com/watch?v=fP1QEs1Uj5U) |
 | **2024 LCK SUMMER 결승전 GEN vs HLE** | 2 :11:23 | [https://www.youtube.com/watch?v=_A_I75nJMF8](https://www.youtube.com/watch?v=_A_I75nJMF8) |
 
-**원본 다운로드 (재현 절차)**
+데이터 준비 절차
 
-위 표의 원본은 아래 절차로 내려받아 `data/raw/{category}/` 에 위치.
+위 표의 영상 데이터를 준비합니다.
 
-- **전제** : `uv` (→ `uvx` )·`ffmpeg` 설치 (ffmpeg는 영상+오디오 스트림 병합에 필요)
-1. **원본 다운로드** — 표의 각 URL을 해당 카테고리 폴더로
+1. 원본 데이터 준비
+   - 작업 루트(repository 최상위)의 `data/raw/{category}` 에 각 영상 준비.
 
-```bash
-cd "$(git rev-parse --show-toplevel)"   # 작업 루트(레포 최상위)로 이동
-CAT=<카테고리>; NAME=<원본명>; URL=<테스트 대상 URL>
-uvx yt-dlp -f "bv*[ext=mp4]+ba[ext=m4a]/b[ext=mp4]/b" \
---merge-output-format mp4 \
--o "data/raw/$CAT/$NAME.%(ext)s" "$URL"
-```
+   - 카테고리는 다음과 같다. baseball(야구), docu(다큐멘터리), drama (드라마), entertain(예능), esports(e스포츠), hist_drama(사극), news(뉴스)
 
-2. **6초 클립 분할** (사전 준비)
+2. **6초 클립 분할**
 - `00:10:00~00:20:00` (원본 600\~1200s) 구간을 6초 100클립으로 분할. 파일명에 원본 절대초 인코딩
 - `data/clips/{category}/{원본명}/{seq}_{start}-{end}.mp4`
 
@@ -169,7 +162,7 @@ for i in $(seq 0 99); do
 done
 ```
 
-3. **화면 블랙아웃** (음성-전용 검증용)
+3. **화면 블랙아웃** (음성 전용 검증용)
    - 분할된 첫 클립의 화면만 검게 가리고 오디오는 그대로 둔 클립 1개 생성
 
    - `data/blackout/{category}/{원본명}/`
