@@ -183,9 +183,9 @@ ffmpeg -nostdin -i "$FIRST" \
 
 - 위  작업을 자동화한 스크립트
 
-`./script/prepare_data.sh <카테고리> <파일명> <URL>`
+`./script/prepare_data.sh <카테고리> <파일명>`
 
-- 원본이 이미 있으면 다운로드를 건너뜀(원본 보호).
+- 이미 확보한 `data/raw` 원본을 대상으로 클립 분할·블랙아웃만 수행(원본은 손대지 않음).
 :::
 
 
