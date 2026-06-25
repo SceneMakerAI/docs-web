@@ -7,7 +7,7 @@ description: "vLLM 멀티모달 프로세서 캐시 버그 — Qwen3-Omni use_au
 tags: [ai]
 keywords: [vllm, qwen3-omni, use_audio_in_video, mm_processor_cache, StopIteration]
 last_update:
-  date: 2026-06-04
+  date: 2026-06-25
 ---
 
 vLLM(`vllm-project/vllm` ) 오픈소스 기여 모음. 각 이슈/PR 는 하위 페이지로 정리한다.
