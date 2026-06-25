@@ -567,6 +567,15 @@ def block_to_markdown(block, slug, image_counter, item_num=1):
             return ""
         return f"- [페이지 링크](https://www.notion.so/{page_id})\n\n"
 
+    elif b_type == "bookmark":
+        url = block.get("bookmark", {}).get("url", "")
+        if not url:
+            return ""
+        caption_parts = block.get("bookmark", {}).get("caption", [])
+        caption = extract_text_from_rich_text(caption_parts) if caption_parts else ""
+        label = caption if caption else url
+        return f"[{label}]({url})\n\n"
+
     return ""
 
 

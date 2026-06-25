@@ -680,3 +680,33 @@ class TestChildPageBlock:
         result = self._render(block)
         assert "https://www.notion.so/00001111222233334444555566667777" in result
         assert "`batch.py`" not in result
+
+    def test_bookmark_url_only(self):
+        block = {
+            "type": "bookmark",
+            "id": "aabbccdd-0000-0000-0000-000000000000",
+            "bookmark": {"url": "https://github.com/vllm-project/vllm/pull/46708", "caption": []},
+        }
+        result = self._render(block)
+        assert "[https://github.com/vllm-project/vllm/pull/46708](https://github.com/vllm-project/vllm/pull/46708)" in result
+
+    def test_bookmark_with_caption(self):
+        block = {
+            "type": "bookmark",
+            "id": "aabbccdd-0000-0000-0000-000000000001",
+            "bookmark": {
+                "url": "https://github.com/vllm-project/vllm/pull/46708",
+                "caption": [{"type": "text", "text": {"content": "PR #46708"}, "plain_text": "PR #46708", "annotations": {"bold": False, "italic": False, "strikethrough": False, "underline": False, "code": False, "color": "default"}}],
+            },
+        }
+        result = self._render(block)
+        assert "[PR #46708](https://github.com/vllm-project/vllm/pull/46708)" in result
+
+    def test_bookmark_empty_url(self):
+        block = {
+            "type": "bookmark",
+            "id": "aabbccdd-0000-0000-0000-000000000002",
+            "bookmark": {"url": "", "caption": []},
+        }
+        result = self._render(block)
+        assert result == ""
