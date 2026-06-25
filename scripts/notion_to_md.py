@@ -807,7 +807,8 @@ def save_doc_page(page, position, existing_map, parent_slug=None, is_parent=Fals
         if _tags:
             _lines.append(f"tags: [{', '.join(_tags)}]")
         # keywords: Notion keywords 속성 우선, 없으면 tags에서 파생
-        _kw_list = [k.strip() for k in _kw.split(",")] if _kw else _tags
+        # '-'만 있는 항목은 Notion 빈값 표시자 — YAML 파싱 오류 방지를 위해 필터링
+        _kw_list = [k.strip() for k in _kw.split(",") if k.strip() and k.strip() != '-'] if _kw else _tags
         if _kw_list:
             _lines.append(f"keywords: [{', '.join(_kw_list)}]")
         if _last_edit:
@@ -825,7 +826,8 @@ def save_doc_page(page, position, existing_map, parent_slug=None, is_parent=Fals
         if _tags:
             _lines.append(f"tags: [{', '.join(_tags)}]")
         # keywords: Notion keywords 속성 우선, 없으면 tags에서 파생
-        _kw_list = [k.strip() for k in _kw.split(",")] if _kw else _tags
+        # '-'만 있는 항목은 Notion 빈값 표시자 — YAML 파싱 오류 방지를 위해 필터링
+        _kw_list = [k.strip() for k in _kw.split(",") if k.strip() and k.strip() != '-'] if _kw else _tags
         if _kw_list:
             _lines.append(f"keywords: [{', '.join(_kw_list)}]")
         if _last_edit:
