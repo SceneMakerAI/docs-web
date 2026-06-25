@@ -576,6 +576,12 @@ def block_to_markdown(block, slug, image_counter, item_num=1):
         label = caption if caption else url
         return f"[{label}]({url})\n\n"
 
+    elif b_type == "link_preview":
+        url = block.get("link_preview", {}).get("url", "")
+        if not url:
+            return ""
+        return f"[{url}]({url})\n\n"
+
     return ""
 
 

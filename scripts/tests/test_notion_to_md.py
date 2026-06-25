@@ -710,3 +710,21 @@ class TestChildPageBlock:
         }
         result = self._render(block)
         assert result == ""
+
+    def test_link_preview(self):
+        block = {
+            "type": "link_preview",
+            "id": "aabbccdd-0000-0000-0000-000000000003",
+            "link_preview": {"url": "https://github.com/vllm-project/vllm/pull/46708"},
+        }
+        result = self._render(block)
+        assert "[https://github.com/vllm-project/vllm/pull/46708](https://github.com/vllm-project/vllm/pull/46708)" in result
+
+    def test_link_preview_empty_url(self):
+        block = {
+            "type": "link_preview",
+            "id": "aabbccdd-0000-0000-0000-000000000004",
+            "link_preview": {"url": ""},
+        }
+        result = self._render(block)
+        assert result == ""
