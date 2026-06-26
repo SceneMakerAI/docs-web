@@ -8,16 +8,23 @@
   },
   "38ae15b4-0359-804a-a378-d45e377e5898": {
     "file": "docs/contribute/역슬래시-이스케이프-예외처리-수정.md",
-    "last_edited": "2026-06-25T09:14:00.000Z",
-    "content_hash": "e42b83f584a9a280a2fda9240e1647d775c66fe49d0df77fe1afbdd07299e990",
+    "last_edited": "2026-06-26T04:38:00.000Z",
+    "content_hash": "babdf303a40b178812c4dca33531f3ccba5817e6d057c70e1c76c18baa4a8eb6",
     "order": 2,
     "parent_id": null
   },
   "38be15b4-0359-809e-b2f8-f28527769213": {
     "file": "docs/contribute/프런트엔드-test-cli-argspy에서-잘못된-cli-인자-유효성-검사-테스트를-수정.md",
-    "last_edited": "2026-06-26T01:10:00.000Z",
+    "last_edited": "2026-06-26T04:37:00.000Z",
     "content_hash": "fe69133f1ae3a605070d2a13974d084e53fa9147e3a8effb301c666c91bee1c3",
     "order": 3,
+    "parent_id": null
+  },
+  "38be15b4-0359-80e3-8888-cbb1deee98a2": {
+    "file": "docs/contribute/프런트엔드-v1completions-엔드포인트에서-bad-words를-지원.md",
+    "last_edited": "2026-06-26T04:19:00.000Z",
+    "content_hash": "9ccd6e68baa3072671c27596d0667a7054d1b50958e7a2ba3a0cb41ed979f32a",
+    "order": 4,
     "parent_id": null
   }
 }

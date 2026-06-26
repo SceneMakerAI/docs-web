@@ -3,6 +3,8 @@ id: 프런트엔드-test-cli-argspy에서-잘못된-cli-인자-유효성-검사-
 title: "[프런트엔드] test_cli_args.py에서 잘못된 CLI 인자 유효성 검사 테스트를 수정"
 sidebar_position: 3
 slug: "3"
+tags: [PR]
+keywords: [PR]
 last_update:
   date: 2026-06-26
 ---
