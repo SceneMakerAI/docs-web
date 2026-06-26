@@ -12,5 +12,12 @@
     "content_hash": "e42b83f584a9a280a2fda9240e1647d775c66fe49d0df77fe1afbdd07299e990",
     "order": 2,
     "parent_id": null
+  },
+  "38be15b4-0359-809e-b2f8-f28527769213": {
+    "file": "docs/contribute/프런트엔드-test-cli-argspy에서-잘못된-cli-인자-유효성-검사-테스트를-수정.md",
+    "last_edited": "2026-06-26T01:10:00.000Z",
+    "content_hash": "fe69133f1ae3a605070d2a13974d084e53fa9147e3a8effb301c666c91bee1c3",
+    "order": 3,
+    "parent_id": null
   }
 }
