@@ -7,7 +7,7 @@
     "parent_id": null
   },
   "38ae15b4-0359-804a-a378-d45e377e5898": {
-    "file": "docs/contribute/툴-파서.md",
+    "file": "docs/contribute/툴-파서-역슬래시-이스케이프-예외처리-수정.md",
     "last_edited": "2026-06-26T06:15:00.000Z",
     "content_hash": "babdf303a40b178812c4dca33531f3ccba5817e6d057c70e1c76c18baa4a8eb6",
     "order": 2,
@@ -22,7 +22,7 @@
   },
   "38be15b4-0359-80e3-8888-cbb1deee98a2": {
     "file": "docs/contribute/ci빌드-v1completions-엔드포인트에서-bad-words를-지원.md",
-    "last_edited": "2026-06-26T06:14:00.000Z",
+    "last_edited": "2026-06-26T07:11:00.000Z",
     "content_hash": "9ccd6e68baa3072671c27596d0667a7054d1b50958e7a2ba3a0cb41ed979f32a",
     "order": 4,
     "parent_id": null

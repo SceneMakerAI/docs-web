@@ -216,7 +216,7 @@ def read_title_plain(props, prop_name):
             return None
     inner = p.get("title", [])
     try:
-        return inner[0]["plain_text"]
+        return "".join(t.get("plain_text", "") for t in inner) or None
     except (IndexError, KeyError, TypeError):
         return None
 
