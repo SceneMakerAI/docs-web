@@ -1,6 +1,6 @@
 ---
-id: 프런트엔드-v1completions-엔드포인트에서-bad-words를-지원
-title: "[프런트엔드] /v1/completions 엔드포인트에서 bad_words를 지원"
+id: ci빌드-v1completions-엔드포인트에서-bad-words를-지원
+title: "[CI/빌드]  /v1/completions 엔드포인트에서 bad_words를 지원"
 sidebar_position: 4
 slug: "4"
 last_update:
