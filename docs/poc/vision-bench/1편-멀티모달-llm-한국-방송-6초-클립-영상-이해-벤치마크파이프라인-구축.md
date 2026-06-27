@@ -4,7 +4,7 @@ title: "[1편] 멀티모달 LLM 한국 방송 6초 클립 영상 이해 벤치�
 sidebar_position: 1
 slug: "1"
 last_update:
-  date: 2026-06-25
+  date: 2026-06-27
 ---
 
 
@@ -27,7 +27,7 @@ graph LR
     A["클라이언트<br/>(클립·프롬프트 조립)"] -->|POST| B["poc-vision-bench<br/>(API 게이트웨이)<br/>(passthrough·동시성·배치)"] -->|중계| C["vLLM<br/>(Qwen3-Omni)<br/>(멀티모달 추론)"]
 ```
 
-- **본 편에서 확인하는 API 3종:**
+- **본 편에서 확인하는** `poc-vision-bench` **API 3종:**
   1. **상태 조회** : `/healthz`
 
   1. **단일 호출** : `/chat`
@@ -74,10 +74,9 @@ graph LR
 - `--max-num-seqs 8` **:** vLLM 이 동시에 처리하는 요청(시퀀스) 최대 수 = 내부 배치 상한. 게이트웨이(API Server) 동시성(4)보다 커서 vLLM 에 여유가 있다.
 
 :::note
-📍 **이 설정들은 어디에 있나 - 두 곳을 구분**
+📍 **이 설정들은 어디에 있나**
 
-- 위 `--dtype` ·`--gpu-memory-utilization` ·`--tensor-parallel-size` ·`--max-num-seqs` 는 **vLLM 서버 기동 인자** 다 → 서빙 호스트에서 vLLM 을 띄우는 서비스의 `vllm serve …` 명령에 있음 (우리 게이트웨이 repo 가 아니라 **vLLM 서빙 측** ).
-- 우리 게이트웨이(`poc-vision-bench` )의 자체 설정(`VLLM_BASE_URL` ·`VLLM_CONCURRENCY` 등)은 별개로 `.env` **→** `src/config.py` **의** `Settings` 에 있음.
+`--dtype` , `--gpu-memory-utilization` , `--tensor-parallel-size` , `--max-num-seqs` 는 **vLLM 서버 기동 인자.**
 :::
 
 #### **2.2. 입력 방식:** `from_video` **(mp4 단일 입력) vs** `from_frames_audio` **(분리 입력)**
@@ -94,9 +93,9 @@ graph LR
 
 ## 3. 테스트
 
-### 3.0. 테스트 방법
+### 3.1. 테스트 방법
 
-클라이언트 → API 서버 → vLLM 의 **기본 동작** 을 아래 6단계로 확인한다. (분석 *품질* 평가는 추후.)
+클라이언트 → API 서버 → vLLM 의 **기본 동작** 을 아래 6단계로 확인한다.
 
 1. **샘플 데이터 준비**
    - 테스트 영상 데이터를 준비하고 10분 구간을 6초 클립 100개로 분할한다.
@@ -104,14 +103,14 @@ graph LR
    - ffmpeg 으로 **오디오는 남기고 화면만 검게 가린** 클립을 만들어 둔다(음성-전용 분석 검증용).
 
 2. **분석 서버 실행**
-   - 클립을 받아 vLLM 으로 중계할 API 게이트웨이(`poc-vision-bench` )를 띄운다.
+   - 클립을 받아 vLLM 으로 중계할 `poc-vision-bench` 를 띄운다.
 
 3. **단일 추론 호출** (`/chat` )
    1. 텍스트만
 
    1. 영상 + 프롬프트 
 
-   1. 화면만 블랙아웃(ⓑ와 동일 프롬프트)  음성 반영 확인
+   1. 화면만 블랙아웃(영상 + 프롬프트와 동일 프롬프트)  음성 반영 확인
 
 4. **배치 추론 호출** (`/chat/batch` )
    - 여러 클립(영상 + 프롬프트)을 한 요청으로 보내 다건 동시 처리를 확인한다.
@@ -122,8 +121,7 @@ graph LR
 6. **요약·평가**
    - 각 API 가 정상 동작했는지 한눈에 정리한다.
 
-
-### 3.1. 테스트 데이터
+### 3.2. 테스트 데이터
 
 테스트에 사용된 원본 데이터는 아래와 같다. 가능한 실제 방송 영상과 비슷한 50분\~2시간 사이로 영상.
 
