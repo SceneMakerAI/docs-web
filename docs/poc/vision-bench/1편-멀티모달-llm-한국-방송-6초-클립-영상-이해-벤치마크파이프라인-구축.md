@@ -185,6 +185,7 @@ done
 ```bash
 cd "$(git rev-parse --show-toplevel)"
 TARGETS=(
+  "baseball baseball.mp4"
   "docu docu.mp4"
   "drama drama.mp4"
   "entertain entertain.mp4"
@@ -211,8 +212,6 @@ done
 :::note
 ⚡ **한 번에 실행** 
 
-- 위  작업을 자동화한 스크립트
-
 `./script/prepare_data.sh <카테고리> <파일명>`
 
 - 이미 확보한 `data/raw` 원본을 대상으로 클립 분할·블랙아웃만 수행(원본은 손대지 않음).
@@ -230,7 +229,7 @@ done
 | `drama` | 현대 드라마 | 100 | 720×480 | 29.97 | 1.10 MB | 인물 대사 + BGM |
 | `hist_drama` | 사극 | 100 | 1920×1080 | 29.97 | 1.23 MB | 시대 의상·소품 + 문어체 대사 |
 | `esports` | e스포츠 | 100 | 1920×1080 | **60** | 1.35 MB | 게임 UI 오버레이 + 캐스터 + 게임음 |
-| **합계** | — | **700** | — | — | ≈ 1.25 MB | 원본 영상 7편 (장르당 1편, 10분 윈도우 100 등분) |
+| **합계** | - | **700** | - | - | ≈ 1.25 MB | 원본 영상 7편 (장르당 1편, 10분 윈도우 100 등분) |
 
 :::warning
 🔒 **데이터 취급 원칙**
@@ -271,22 +270,26 @@ done
 
 | **키** | **기본** | **역할** |
 | --- | --- | --- |
-| `VLLM_BASE_URL` | — | vLLM `/v1` 엔드포인트 |
+| `VLLM_BASE_URL` | - | vLLM `/v1` 엔드포인트 |
 | `VLLM_CONCURRENCY` | 4 | 동시 호출 상한(Semaphore). 권장 1\~8 |
 | `MAX_BATCH_ITEMS` | 128 | `/chat/batch` 한 요청의 최대 items |
 | `VLLM_TIMEOUT_SECONDS` | 600s | 업스트림 호출 타임아웃 |
-| `VLLM_ACQUIRE_TIMEOUT_SECONDS` | 300s | 세마포어 퍼밋 획득 최대 대기(초). 초과 시 그 요청만 실패 처리 → 퍼밋 누수·half-open(끊긴 클라 FIN 미수신)으로 인한 데드락 백스톱 |
+| `VLLM_ACQUIRE_TIMEOUT_SECONDS` | 300s | 세마포어 퍼밋 획득 최대 대기(초). 초과 시 그 요청만 실패 처리. |
 
 #### 3.2.3. 배치 NDJSON 스트리밍
 
-- `/chat/batch` 는 다건을 받아 fan-out(`asyncio.create_task` ) 후 **완료 순서** (`asyncio.wait(..., return_when=FIRST_COMPLETED)` )로 한 줄씩 흘린다(`application/x-ndjson` , chunked). 입력 순서가 아니므로 `id` 로 매칭하며, 한두 건이 실패해도 나머지는 계속 진행한다(각 라인의 `status` 로 판단).
-- **백프레셔·데드락 하드닝:** 스트리밍 루프는 0.5초마다 `request.is_disconnected()` 로 클라 생존을 확인해, 클라가 끊기면(FIN 수신) in-flight task 를 전부 cancel 하고 세마포어 퍼밋을 즉시 반납한다. half-open(FIN 미수신)처럼 끊김을 못 잡는 경우는 `client.chat()` 의 **퍼밋 획득 타임아웃** (`VLLM_ACQUIRE_TIMEOUT_SECONDS` , 기본 300s)이 되어 그 요청만 실패 처리한다 → 끊긴 런이 퍼밋을 영구 점유해 게이트웨이가 멈추는 데드락 방지.
+- `/chat/batch` 는 다건을 받아 fan-out 후 **완료 순서** 로 한 줄씩 흘린다.
+- 입력 순서가 아니므로 `id` 로 매칭하며, 한두 건이 실패해도 나머지는 계속 진행한다.
+- 백프레셔, 데드락 방지 : 동시 처리 수는 세마포어 퍼밋으로 제한한다. 퍼밋이 다 차면 새 요청은 빌 때까지 대기한다. 끊긴 요청이 퍼밋을 붙든 채 남으면 게이트웨이가 멈출 수 있어, 두 단계로 회수한다:
+  1. 스트리밍 루프가 0.5초마다 request.is_disconnected()로 연결을 확인 → 끊기면 진행 중 작업을 취소하고 퍼밋을 즉시 반납한다.
+
+  1. 끊김 신호가 안 오는 half-open 연결은 퍼밋 획득 타임아웃(`VLLM_ACQUIRE_TIMEOUT_SECONDS` , 기본 300초)으로 해당 요청만 실패시켜 퍼밋을 회수한다.
 
 요청 본문:
 
 ```json
 {"items": [
-  {"id": "0001_0600-0606", "body": {<vLLM chat.completions body — /chat 와 동일>}},
+  {"id": "0001_0600-0606", "body": {<vLLM chat.completions body - /chat 와 동일>}},
   {"id": "0002_0606-0612", "body": {<...>}}
 ]}
 ```
@@ -309,7 +312,7 @@ done
 
 #### 3.2.4. 서버 실행
 
-게이트웨이는 `script/service.sh` 로 관리한다.
+서버는 `script/service.sh` 로 관리한다.
 
 ```bash
 ./script/service.sh start      # 백그라운드 기동 (healthz OK 까지 대기)
@@ -319,7 +322,6 @@ done
 ```
 
 - 직접 실행: `PYTHONPATH=src uv run uvicorn app:app --host 0.0.0.0 --port 8001`
-- vLLM 연결·동시성은 `.env` (→ 3.2.2). 대화형 문서: `/docs` (Swagger)
 
 #### 3.2.5. API 입출력 예시
 
@@ -327,7 +329,7 @@ done
 | --- | --- | --- | --- |
 | GET | `/healthz` | 헬스체크 | lifespan 통과 후 항상 200. 업스트림 도달 여부는 검사 X |
 | POST | `/chat` | 단건 passthrough | vLLM body 그대로 → 응답 그대로. 업스트림 도달 불가 시 502 |
-| POST | `/chat/batch` | 다건 NDJSON 스트리밍 | 완료 순서로 라인별 흘림 (상세 3.2.3) |
+| POST | `/chat/batch` | 다건 NDJSON 스트리밍 | 완료 순서로 라인별 흘림  |
 
 1. `/healthz`
 
@@ -336,7 +338,7 @@ done
 ```
 
 2. `/chat` (단건)
-- 입력: 클라가 조립한 vLLM body (base64 영상 + 프롬프트 + strict schema). 멀티모달 옵션은 **두 키로 분리** — 프레임 샘플링은 `media_io_kwargs.video` (`fps` 또는 `num_frames` , vLLM I/O 로더), 오디오 통합은 `mm_processor_kwargs.use_audio_in_video` (HF 프로세서).
+- 입력: 클라가 조립한 vLLM body (base64 영상 + 프롬프트 + strict schema). 멀티모달 옵션은 **두 키로 분리.** 프레임 샘플링은 `media_io_kwargs.video` (`fps` 또는 `num_frames` , vLLM I/O 로더), 오디오 통합은 `mm_processor_kwargs.use_audio_in_video` .
 
 ```json
 {
@@ -353,7 +355,7 @@ done
 }
 ```
 
-- 출력: vLLM 응답 그대로 — `choices[0].message.content` 에 strict JSON 문자열:
+- 출력: vLLM 응답 그대로 `choices[0].message.content` 에 strict JSON 문자열:
 
 ```json
 {
@@ -364,7 +366,7 @@ done
 
 > 실행: `./script/curl_examples.sh chat`
 
-3. `/chat/batch` (다건) — 입력: `{items:[{id, body}, …]}` (각 body = ②와 동일)
+3. `/chat/batch` (다건) 입력: `{items:[{id, body}, …]}` (각 body = ②와 동일)
 
 ```json
 {"items": [
@@ -373,7 +375,7 @@ done
 ]}
 ```
 
-출력: `application/x-ndjson` — 완료 순서로 한 줄씩 (필드 상세 3.2.3):
+출력: `application/x-ndjson`  완료 순서로 한 줄씩 (필드 상세 3.2.3):
 
 ```javascript
 {"id":"0001_0600-0606","status":200,"elapsed_ms":3104,"body":{<vLLM 응답>}}
@@ -399,8 +401,6 @@ x-request-id: 6da1b40a
 
 {"ok":true}
 ```
-
-→ **PASS** — 서버 기동·라우팅 정상, 모든 응답에 `X-Request-Id` 부여 확인.
 
 #### 3.3.2. 단일 추론 (`POST /chat` )
 
@@ -543,7 +543,7 @@ x-request-id: 6da1b40a
 
    </details>
 
-3. **블랙아웃 영상 + 프롬프트** (통제 실험 — 화면만 검게, 오디오 유지)
+3. **블랙아웃 영상 + 프롬프트** (화면만 검게, 오디오 유지)
    <details>
    <summary>요청 (curl)</summary>
 
@@ -624,7 +624,7 @@ x-request-id: 6da1b40a
 <summary>재현 요약 코드 (<code>batch_throughput.py</code> 핵심부)</summary>
 
 ```python
-# experiments/01_pipeline/batch_throughput.py — 핵심부 (같은 items 로 순차 vs 배치 비교)
+# experiments/01_pipeline/batch_throughput.py 핵심부 (같은 items 로 순차 vs 배치 비교)
 import os, base64, json, time, httpx
 from pathlib import Path
 
@@ -673,7 +673,7 @@ print(f"순차 {seq_ms}ms · 배치 {batch_ms}ms · {seq_ms / batch_ms:.2f}×")
 | 순차 (한 건씩 `/chat` ) | 37536ms | 12/12 |
 | 배치 (`/chat/batch` 일괄) | 22603ms | 12/12 |
 
-배치가 순차보다 빠름(약 **1.7배** , 게이트웨이 동시성 `VLLM_CONCURRENCY=4` 만큼 fan-out 병렬 — 빈출력/폭주 jitter 로 실행마다 배수는 변동). 도착 순서 ≠ 입력 순서(**완료순 스트리밍** ), `X-Batch-Total=12` . 다건 1요청·완료순 스트리밍·각 건 독립 `status` 모두 정상.
+배치가 순차보다 빠름(약 **1.7배** , 게이트웨이 동시성 `VLLM_CONCURRENCY=4` 만큼 fan-out 병렬. 빈출력/폭주 jitter 로 실행마다 배수는 변동). 도착 순서 ≠ 입력 순서(**완료순 스트리밍** ), `X-Batch-Total=12` . 다건 1요청·완료순 스트리밍·각 건 독립 `status` 모두 정상.
 
 #### 3.3.4. 요약
 
@@ -709,27 +709,4 @@ print(f"순차 {seq_ms}ms · 배치 {batch_ms}ms · {seq_ms / batch_ms:.2f}×")
 
 - [Qwen3-Omni vLLM 서빙 가이드](https://docs.vllm.ai/projects/vllm-omni/en/latest/user_guide/examples/online_serving/qwen3_omni/) — `vllm serve` 옵션 (`--max-model-len` 등)
 - [vLLM — OpenAI-Compatible Server](https://docs.vllm.ai/en/latest/serving/openai_compatible_server.html) — `/v1/chat/completions` 규약·`response_format` ·extra body(`mm_processor_kwargs` ·`chat_template_kwargs` ). 게이트웨이가 이 본문을 그대로 패스
-
-## 처리할 대상: "카테고리 원본명" 쌍을 줄마다 하나씩
-
-TARGETS=(  
-"news kbs9"  
-"drama sample1"  
-"baseball game3"  
-)
-
-for target in "${TARGETS[@]}"; do  
-read -r CAT NAME <<< "$target"  
-SRC="data/raw/$CAT/$NAME.mp4"  
-OUT="data/clips/$CAT/$NAME"; mkdir -p "$OUT"
-
-echo "▶ $CAT/NAME 분할 시작"  
-  for i in (seq 0 99); do  
-start=((600 + i*6)); end=((start + 6))             # 절대초 600,606,…,1194  
-name=(printf "%04d_%04d-%04d"((i+1)) "$start" "$end")  # 0001_0600-0606  
-ffmpeg -nostdin -ss "$start" -i "$SRC" -t 6 \  
--c:v libopenh264 -b:v 1500k -c:a aac -movflags +faststart \  
-"$OUT/$name.mp4"  
-done  
-done
 
