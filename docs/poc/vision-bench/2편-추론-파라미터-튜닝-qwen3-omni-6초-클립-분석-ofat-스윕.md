@@ -165,22 +165,34 @@ SceneMaker 프로젝트에서 **대사(STT)분석은 WhisperX의** 별도 모듈
   - `repetition_penalty` : 1.0 / 1.05 / 1.1 / 1.3 (greedy)
 
 - `fps` : 0.5 / 1.0 / 2.0 (별도 측정 · 토큰/지연)
-- `enable_thinking` : True / False (**별도 측정** · 품질/지연)
+- `enable_thinking` : False (품질/지연)
 
 본 절의 판정 기준은 "표현이 풍부한 설정"이 아니라 **"명백한 결함(미완·이종문자·반복·탈주)이 최소인 설정"** 이다. 커버리지·항목 수 증가는 환각(과생성)일 수 있어 가산점으로 치지 않는다.
 
-### 4.0. 테스트 데이터 준비
+### 4.0. 테스트 데이터 준비 및 실행 방법
 
 모든 설정이 **동일한 70클립** 을 본다. 7장르 × 카테고리당 10클립. 
 
 `make_sample.py` 가 원본 mp4 를 복사·재인코딩하지 않고 **symlink 로만** `data/sample70/` 에 모은다. 영상 파생물을 `data/` **한 곳에서만** 관리해, 저작권상 `data/` 하나만 지우면 일괄 정리된다(symlink 는 `*.mp4` 라 gitignore 로 커밋되지 않음).
 
-```bash
-# 카테고리당 10개 등간격 → data/sample70/ 에 symlink (총 70)
-python make_sample.py
-# 그 표본으로 단건/배치 테스트 (experiments/02_param_sweep/ 에서)
-python run.py ../../data/sample70 -o out.json
-```
+1. 표본 준비
+   ```bash
+   # 카테고리당 10개 등간격 → data/sample70/ 에 symlink (총 70)
+   python make_sample.py
+   ```
+
+2. 단건 스모크 (서버·스키마 정상 동작 확인)
+   ```bash
+   # 카테고리당 10개 등간격 → data/sample70/ 에 symlink (총 70)
+   python make_sample.py
+   ```
+
+3. OFAT 스윕 본실행
+   ```bash
+   # run.py 를 설정별로 한 줄씩(temperature·top_pk·freq_repe·fps·thinking) 호출.
+   # 회차마다 sweep.sh 의 OUT 번호만 1 → 2 → 3 으로 바꿔 N=3 을 확보한다.
+   bash sweep.sh        # → sweep_out/<회차>/<파라미터>/<설정>.json (+ _meta.json)
+   ```
 
 ### 4.1. temperature
 
