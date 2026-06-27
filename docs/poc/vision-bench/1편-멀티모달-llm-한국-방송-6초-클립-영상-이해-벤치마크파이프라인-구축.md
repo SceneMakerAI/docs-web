@@ -93,7 +93,7 @@ graph LR
 
 ## 3. 테스트
 
-### 3.1. 테스트 방법
+##### 테스트 방법
 
 클라이언트 → API 서버 → vLLM 의 **기본 동작** 을 아래 6단계로 확인한다.
 
@@ -121,42 +121,59 @@ graph LR
 6. **요약·평가**
    - 각 API 가 정상 동작했는지 한눈에 정리한다.
 
-### 3.2. 테스트 데이터
+### 3.1. 테스트 데이터
 
 테스트에 사용된 원본 데이터는 아래와 같다. 가능한 실제 방송 영상과 비슷한 50분\~2시간 사이로 영상.
 
-| **방송** | **재생시간** | **URL** |
-| --- | --- | --- |
-| KBS 9 뉴스 | 48:30 | [https://www.youtube.com/watch?v=rX1P-jOoNmM](https://www.youtube.com/watch?v=rX1P-jOoNmM) |
-| 슈퍼피쉬 1부 | 58:40 | [https://www.youtube.com/watch?v=iNbWqC1iqKw](https://www.youtube.com/watch?v=iNbWqC1iqKw) |
-| KBS 겨울 연가 | 1 :04:52 | [https://www.youtube.com/watch?v=irVKEhb9g8M](https://www.youtube.com/watch?v=irVKEhb9g8M) |
-| 태조 왕건 | 54:10 | [https://www.youtube.com/watch?v=nmlE2iPWLGM](https://www.youtube.com/watch?v=nmlE2iPWLGM) |
-| 출장십오야 X 스타쉽 전국체전 풀버전 | 1 :00:06 | [https://www.youtube.com/watch?v=6wJGpi1nkCg](https://www.youtube.com/watch?v=6wJGpi1nkCg) |
-| 2009 프로야구 한국시리즈 7차전 | 1 :55:22 | [https://www.youtube.com/watch?v=fP1QEs1Uj5U](https://www.youtube.com/watch?v=fP1QEs1Uj5U) |
-| **2024 LCK SUMMER 결승전 GEN vs HLE** | 2 :11:23 | [https://www.youtube.com/watch?v=_A_I75nJMF8](https://www.youtube.com/watch?v=_A_I75nJMF8) |
+| 카테고리 | **방송** | **재생시간** | **URL** |
+| --- | --- | --- | --- |
+| news | KBS 9 뉴스 | 48:30 | [https://www.youtube.com/watch?v=rX1P-jOoNmM](https://www.youtube.com/watch?v=rX1P-jOoNmM) |
+| docu | 슈퍼피쉬 1부 | 58:40 | [https://www.youtube.com/watch?v=iNbWqC1iqKw](https://www.youtube.com/watch?v=iNbWqC1iqKw) |
+| drama | KBS 겨울 연가 | 1 :04:52 | [https://www.youtube.com/watch?v=irVKEhb9g8M](https://www.youtube.com/watch?v=irVKEhb9g8M) |
+| hist_drama | 태조 왕건 | 54:10 | [https://www.youtube.com/watch?v=nmlE2iPWLGM](https://www.youtube.com/watch?v=nmlE2iPWLGM) |
+| entertain | 출장십오야 X 스타쉽 전국체전 풀버전 | 1 :00:06 | [https://www.youtube.com/watch?v=6wJGpi1nkCg](https://www.youtube.com/watch?v=6wJGpi1nkCg) |
+| baseball | 2009 프로야구 한국시리즈 7차전 | 1 :55:22 | [https://www.youtube.com/watch?v=fP1QEs1Uj5U](https://www.youtube.com/watch?v=fP1QEs1Uj5U) |
+| esports | **2024 LCK SUMMER 결승전 GEN vs HLE** | 2 :11:23 | [https://www.youtube.com/watch?v=_A_I75nJMF8](https://www.youtube.com/watch?v=_A_I75nJMF8) |
 
 데이터 준비 절차
 
 위 표의 영상 데이터를 준비합니다.
 
 1. 원본 데이터 준비
-   - 작업 루트(repository 최상위)의 `data/raw/{category}` 에 각 영상 준비.
+   - 작업 루트의 `data/raw/{category}/{name}` 에 각 영상 준비.
 
    - 카테고리는 다음과 같다. baseball(야구), docu(다큐멘터리), drama (드라마), entertain(예능), esports(e스포츠), hist_drama(사극), news(뉴스)
 
 2. **6초 클립 분할**
-- `00:10:00~00:20:00` (원본 600\~1200s) 구간을 6초 100클립으로 분할. 파일명에 원본 절대초 인코딩
-- `data/clips/{category}/{원본명}/{seq}_{start}-{end}.mp4`
+   - 각 영상의 `00:10:00~00:20:00` 구간을 6초 100개 클립으로 분할.
+
+   - `data/clips/{category}/{원본명}/{seq}_{start}-{end}.mp4`
 
 ```bash
 cd "$(git rev-parse --show-toplevel)"
-CAT=<카테고리>; NAME=<원본명>
-SRC="data/raw/$CAT/$NAME.mp4"
-OUT="data/clips/$CAT/$NAME"; mkdir -p "$OUT"
-for i in $(seq 0 99); do
-  start=$((600 + i*6)); end=$((start + 6))  # 절대초 600,606,…,1194
-  name=$(printf "%04d_%04d-%04d" $((i+1)) "$start" "$end")  # 0001_0600-0606
-  ffmpeg -nostdin -ss "$start" -i "$SRC" -t 6 -c:v libopenh264 -b:v 1500k -c:a aac -movflags +faststart "$OUT/$name.mp4"
+TARGETS=(
+  "baseball baseball.mp4"
+  "docu docu.mp4"
+  "drama drama.mp4"
+  "entertain entertain.mp4"
+  "esports lol.mp4"
+  "hist_drama hist_drama.mp4"
+  "news news.mp4"
+)
+for target in "${TARGETS[@]}"; do
+  read -r CAT NAME <<< "$target"
+  BASE="${NAME%.mp4}"
+  SRC="data/raw/$CAT/$NAME"
+  OUT="data/clips/$CAT/$BASE"; mkdir -p "$OUT"
+  [ -f "$SRC" ] || { echo "! 원본 없음, 건너뜀: $SRC"; continue; }
+  echo "▶ $CAT/$BASE 분할 시작"
+  for i in $(seq 0 99); do
+    start=$((600 + i*6)); end=$((start + 6))
+    name=$(printf "%04d_%04d-%04d" $((i+1)) "$start" "$end")
+    ffmpeg -nostdin -ss "$start" -i "$SRC" -t 6 \
+      -c:v libopenh264 -b:v 1500k -c:a aac -movflags +faststart \
+      "$OUT/$name.mp4"
+  done
 done
 ```
 
@@ -167,13 +184,28 @@ done
 
 ```bash
 cd "$(git rev-parse --show-toplevel)"
-CAT=<카테고리>; NAME=<원본명>
-OUT="data/clips/$CAT/$NAME"
-FIRST=$(ls "$OUT"/*.mp4 | head -1)          # 분할된 클립 한 개만
-BLACK="data/blackout/$CAT/$NAME"; mkdir -p "$BLACK"
-ffmpeg -nostdin -i "$FIRST" \
-  -vf "drawbox=0:0:iw:ih:color=black:t=fill" \
-  -c:v libopenh264 -b:v 300k -c:a copy "$BLACK/$(basename "$FIRST")"
+TARGETS=(
+  "docu docu.mp4"
+  "drama drama.mp4"
+  "entertain entertain.mp4"
+  "esports lol.mp4"
+  "hist_drama hist_drama.mp4"
+  "news news.mp4"
+)
+for target in "${TARGETS[@]}"; do
+  read -r CAT NAME <<< "$target"
+  BASE="${NAME%.mp4}"
+  OUT="data/clips/$CAT/$BASE"
+  BLACK="data/blackout/$CAT/$BASE"; mkdir -p "$BLACK"
+  clips=( "$OUT"/*.mp4 )
+  FIRST="${clips[0]}"
+  [ -f "$FIRST" ] || { echo "! 분할 클립 없음, 건너뜀: $OUT"; continue; }
+  echo "▶ $CAT/$BASE 블랙아웃 → $(basename "$FIRST")"
+  ffmpeg -nostdin -i "$FIRST" \
+    -vf "drawbox=0:0:iw:ih:color=black:t=fill" \
+    -c:v libopenh264 -b:v 300k -c:a copy \
+    "$BLACK/$(basename "$FIRST")"
+done
 ```
 
 :::note
@@ -678,4 +710,26 @@ print(f"순차 {seq_ms}ms · 배치 {batch_ms}ms · {seq_ms / batch_ms:.2f}×")
 - [Qwen3-Omni vLLM 서빙 가이드](https://docs.vllm.ai/projects/vllm-omni/en/latest/user_guide/examples/online_serving/qwen3_omni/) — `vllm serve` 옵션 (`--max-model-len` 등)
 - [vLLM — OpenAI-Compatible Server](https://docs.vllm.ai/en/latest/serving/openai_compatible_server.html) — `/v1/chat/completions` 규약·`response_format` ·extra body(`mm_processor_kwargs` ·`chat_template_kwargs` ). 게이트웨이가 이 본문을 그대로 패스
 
+## 처리할 대상: "카테고리 원본명" 쌍을 줄마다 하나씩
+
+TARGETS=(  
+"news kbs9"  
+"drama sample1"  
+"baseball game3"  
+)
+
+for target in "${TARGETS[@]}"; do  
+read -r CAT NAME <<< "$target"  
+SRC="data/raw/$CAT/$NAME.mp4"  
+OUT="data/clips/$CAT/$NAME"; mkdir -p "$OUT"
+
+echo "▶ $CAT/NAME 분할 시작"  
+  for i in (seq 0 99); do  
+start=((600 + i*6)); end=((start + 6))             # 절대초 600,606,…,1194  
+name=(printf "%04d_%04d-%04d"((i+1)) "$start" "$end")  # 0001_0600-0606  
+ffmpeg -nostdin -ss "$start" -i "$SRC" -t 6 \  
+-c:v libopenh264 -b:v 1500k -c:a aac -movflags +faststart \  
+"$OUT/$name.mp4"  
+done  
+done
 
