@@ -29,8 +29,8 @@
   },
   "373e15b4-0359-8150-88f3-eedc5ebd727b": {
     "file": "docs/poc/vision-bench/2편-추론-파라미터-튜닝-qwen3-omni-6초-클립-분석-ofat-스윕.md",
-    "last_edited": "2026-06-29T16:56:00.000Z",
-    "content_hash": "d9c885c9b5dc3f53baf4263053ff64e1ca3ab56c16f089d06a961628a87475fa",
+    "last_edited": "2026-06-29T17:07:00.000Z",
+    "content_hash": "de95fa85f7517cd86480b5279875065cf31291c30f135a1bc1ab62738169bb1a",
     "order": 3,
     "parent_id": "vision-bench"
   },
@@ -48,10 +48,10 @@
     "order": 2,
     "parent_id": null
   },
-  "373e15b4-0359-813e-b9cb-fcd1ccefc0c4": {
-    "file": "docs/poc/vision-bench/3편-추론-파라미터-상세-조정-및-품질-평가.md",
-    "last_edited": "2026-06-11T06:02:00.000Z",
-    "content_hash": "60d7b96e9e0f9edfa7a2e0c29d3d752fc76154073b190daac9050e175b8aebeb",
+  "38ee15b4-0359-8159-b41e-db27a13cd89e": {
+    "file": "docs/poc/vision-bench/3편-추론-파라미터-조합-qwen3-omni-6초-클립-분석-최적-구성-확정.md",
+    "last_edited": "2026-06-29T17:44:00.000Z",
+    "content_hash": "06aea5a9e46c1c235bd42e03cf0e4382e961788d14aa8ad5bcb73b15611838a7",
     "order": 4,
     "parent_id": "vision-bench"
   }
