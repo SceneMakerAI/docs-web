@@ -50,8 +50,8 @@
   },
   "38ee15b4-0359-8159-b41e-db27a13cd89e": {
     "file": "docs/poc/vision-bench/3편-추론-파라미터-조합-qwen3-omni-6초-클립-분석-최적-구성-확정.md",
-    "last_edited": "2026-06-29T17:44:00.000Z",
-    "content_hash": "06aea5a9e46c1c235bd42e03cf0e4382e961788d14aa8ad5bcb73b15611838a7",
+    "last_edited": "2026-06-29T18:57:00.000Z",
+    "content_hash": "30e7ab0eb251b86d4c2b3d3b86b11c9b8f6896ee3c78ab67b575d0ad5611c401",
     "order": 4,
     "parent_id": "vision-bench"
   }
