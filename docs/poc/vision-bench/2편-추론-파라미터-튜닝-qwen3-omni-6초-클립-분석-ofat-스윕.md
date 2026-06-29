@@ -4,7 +4,7 @@ title: "[2편] 추론 파라미터 튜닝 Qwen3-Omni 6초 클립 분석 (OFAT �
 sidebar_position: 3
 slug: "3"
 last_update:
-  date: 2026-06-27
+  date: 2026-06-29
 ---
 
 ## 1. 들어가며
@@ -160,9 +160,9 @@ SceneMaker 프로젝트에서 **대사(STT)분석은 WhisperX의** 별도 모듈
   - `top_p` : 0.5 / 0.8 / 0.95 / 1.0 (temp=0.7)
 
 - `frequency_penalty / repetition_penalty` 
-  - `frequency_penalty` : 0.0 / 0.5 / 1.0 / 2.0 (greedy)
+  - `frequency_penalty` : 0.0 / 0.5 / 1.0 / 2.0
 
-  - `repetition_penalty` : 1.0 / 1.05 / 1.1 / 1.3 (greedy)
+  - `repetition_penalty` : 1.0 / 1.05 / 1.1 / 1.3
 
 - `fps` : 0.5 / 1.0 / 2.0 (별도 측정 · 토큰/지연)
 - `enable_thinking` : False (품질/지연)
