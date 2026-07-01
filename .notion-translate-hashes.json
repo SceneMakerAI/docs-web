@@ -132,7 +132,7 @@
     "body_hash": "a376a0ff559597d76dbdc1e771fb5c0834fe2d42745c72a953997ea21ac9f035",
     "slug": "1",
     "sidebar_position": "1",
-    "frontmatter_hash": "95beb651a61af6b790d11a702e74a15ca4587e8e19a3c628eac1c209893cca64"
+    "frontmatter_hash": "7d15df42e55fd30e99c39ef9dbee05b3aa440400848c63ebd3c1a0442acc5e5b"
   },
   "docs/poc/audio-bench/poc-기획안-초고속초고품질-다국어-ai-자막-생성-시스템-구축.md": {
     "body_hash": "2f280704931a7250492869c09f1b53bdb73e26fb23c193558933098f4e40d7da",
@@ -153,10 +153,10 @@
     "frontmatter_hash": "007727c458d7f9d57b9c5314565fdd592a8e86a292ddaabd6f52b9ee1ec3b18f"
   },
   "docs/poc/vision-bench/2편-추론-파라미터-튜닝-qwen3-omni-6초-클립-분석-ofat-스윕.md": {
-    "body_hash": "130babd1d227d3dd415989b016818f5ecb2a24bb89b384d7b73bdf3e799cf961",
+    "body_hash": "de95fa85f7517cd86480b5279875065cf31291c30f135a1bc1ab62738169bb1a",
     "slug": "3",
     "sidebar_position": "3",
-    "frontmatter_hash": "f57c584b76050d63f0fd73bef082bec5f1f13933b8607bf226812836416b827a"
+    "frontmatter_hash": "bd91f34677ec986b1dbcf42afb33a3f0f38ba6cb21973e32edc51d31dcc06fa1"
   },
   "docs/guide/scenemakerai-문서.md": {
     "body_hash": "78fecbe8088c45ab98f1e36c1bb7bb6863019a7892a590101a1031398b55d0b0",
@@ -177,16 +177,16 @@
     "frontmatter_hash": "2901b66edcdaa817b613633ac6e2f5135b1bede77dc021295d65b46eb6ad7e9a"
   },
   "docs/install/qwen-3x-설치.md": {
-    "body_hash": "25b9a227898cd3307898e444d568928dcaa3f887d76ce06bb2e1ba013fa206d8",
+    "body_hash": "ae0f4ade3a7372c2eeeee5d86a94fb99c66986ec27e0ee8623e385c2de5bc592",
     "slug": "1",
     "sidebar_position": "1",
-    "frontmatter_hash": "a4a3ace3819ae0f6cd04d8c8e81e790f410d5da23da7c88394840199ff5d40c9"
+    "frontmatter_hash": "5595effad4c9df3ef2f6a34180399cf9a7bd5b260b16a86bfeb1eba53bf469e1"
   },
   "docs/install/ffmpeg-gpunvencnvdec-설치-절차서.md": {
-    "body_hash": "92e979cf6f10dd8a4b5798f3675bda57fff7ac8bb5aa89f90d503af17e5dcac2",
+    "body_hash": "fe34b62f51b5ab0a56c8883ecf5a41ba54e270584661eeddc0f97bd11b5e4567",
     "slug": "2",
     "sidebar_position": "2",
-    "frontmatter_hash": "c07d044af0d99e4c656a4ab55afc5721f234aded452f1db505c3f0d54ca6daea"
+    "frontmatter_hash": "134dffd9a7364434a0a299b2b30f4c3fc7132ed36bb84c65e4c02bbc2b1a5775"
   },
   "docs/install/제목없음.md": {
     "body_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
@@ -219,9 +219,39 @@
     "frontmatter_hash": "e408bdeed7b790240044d4398030d8d1b7c88b0020bb2976c24e032f934685a2"
   },
   "docs/install/milvus-설치-aws-linux-docker-compose.md": {
-    "body_hash": "4d6b14b5c292015bc99f3d6967a95603ea6a2d5069559f2952ea38cfc0e2d1f9",
+    "body_hash": "efa98c1b3f692c063c0ff1af167d208219af19019b1a2d17bb183ab226ae546b",
     "slug": "3",
     "sidebar_position": "3",
-    "frontmatter_hash": "e408bdeed7b790240044d4398030d8d1b7c88b0020bb2976c24e032f934685a2"
+    "frontmatter_hash": "3e34968cc7f068e7db847f0982c942de73b1578136e1e0b1d8b6bb919fc45368"
+  },
+  "docs/contribute/ci빌드-test-cli-argspy에서-잘못된-cli-인자-유효성-검사-테스트를-수정.md": {
+    "body_hash": "fe69133f1ae3a605070d2a13974d084e53fa9147e3a8effb301c666c91bee1c3",
+    "slug": "3",
+    "sidebar_position": "3",
+    "frontmatter_hash": "2ca0bb80c002d6e4ef00902acfcc86195a03b81998616065061f777e1e878e4d"
+  },
+  "docs/contribute/ci빌드-v1completions-엔드포인트에서-bad-words를-지원.md": {
+    "body_hash": "9ccd6e68baa3072671c27596d0667a7054d1b50958e7a2ba3a0cb41ed979f32a",
+    "slug": "4",
+    "sidebar_position": "4",
+    "frontmatter_hash": "d8b03fb75d28a2e3b51b122ab7cb6cb6088a72d5ee1a36213ebc5e258a0857d1"
+  },
+  "docs/contribute/툴-파서-역슬래시-이스케이프-예외처리-수정.md": {
+    "body_hash": "babdf303a40b178812c4dca33531f3ccba5817e6d057c70e1c76c18baa4a8eb6",
+    "slug": "2",
+    "sidebar_position": "2",
+    "frontmatter_hash": "4adac2e2269ded5ff1f5a75d6f01708ce085925b5f08029b94d893a3baad6b36"
+  },
+  "docs/poc/vision-bench/1편-멀티모달-llm-한국-방송-6초-클립-영상-이해-벤치마크파이프라인-구축.md": {
+    "body_hash": "6873f38cc9e3d56537b3fdb1b967f3476f4b972bef160bf3010b6266a5915971",
+    "slug": "1",
+    "sidebar_position": "1",
+    "frontmatter_hash": "ccf784fa07f1d815f7f8fc1a5fab4273f342f828a0aa6d09a4ce0b0cacf190a6"
+  },
+  "docs/poc/vision-bench/3편-추론-파라미터-조합-qwen3-omni-6초-클립-분석-최적-구성-확정.md": {
+    "body_hash": "1a6db84d0445191f35add470fdcd1e8eded88512642cf5c9ed325acb3410fa21",
+    "slug": "4",
+    "sidebar_position": "4",
+    "frontmatter_hash": "b51d662bd6aaf51b52862020a4abc4ea5dd0eaad0199b254ccb275820b18eb6f"
   }
 }

@@ -1,42 +1,39 @@
 ---
-title: "[Part 2] Inference Parameter Tuning — Analysis of a 6-Second Clip from Qwen3-Omni (OFAT Sweep)"
+title: "[Part 2] Inference Parameter Tuning: Analysis of a 6-Second Clip Using Qwen3-Omni (OFAT Sweep)"
 sidebar_position: 3
 slug: "3"
 last_update:
-  date: 2026-06-10
+  date: 2026-06-29
 ---
 
 ## 1. Introduction
 
-SceneMaker’s video clip analysis aims to **reliably extract visual and auditory information** from video clips. Given a single 6-second clip as input, it structures three types of information into a `{summary, objects, ocr, actions, bgm, sfx}` 6-field JSON format.
+SceneMaker’s video clip analysis aims to **reliably extract visual and auditory information** from video clips. It takes a 6-second clip as input and structures the audiovisual information into four fields in `{summary, ocr, actions, sounds}` JSON format.
 
 - **Comprehensive Analysis** 
-  - `summary` : A one-sentence summary combining visual and auditory information
+  - `summary`: A one-sentence summary combining visual and auditory information
 
 - **Visual Analysis** 
-  - `objects` (Key objects and people)
+  - `ocr` (On-screen text: subtitles, logos)
 
-  - `ocr` (On-screen text: subtitles and logos)
-
-  - `actions` (Actions, movements, and scene transitions)
+  - `actions` (Actions, movements, etc.)
 
 - **Auditory Analysis**
-  - `bgm` (Background sounds, music, atmosphere)
+  - `sounds` (Sound effects: applause, typing, etc.)
 
-  - `sfx` (Sound effects: applause, typing, etc.)
+**Stability is key**. If the output is inconsistent, the quality score cannot be trusted. During the first round of validation, four patterns of quality degradation that threaten this were intermittently detected.
 
-The key factor here is **stability**. In a benchmark batch-processing 700 clips, if the output fluctuates or breaks down from run to run—even with the same clip and the same prompt—the quality score itself cannot be trusted. During the validation process in Part 1 (Pipeline Construction), four patterns of quality degradation were intermittently identified.
+1. **Premature EOS**: Outputs an EOS (end-of-sentence) token right from the first token, causing the content to end as an empty string. This occurs when the model “runs out of things to say” and closes immediately
+2, often due to excessive constraints from a strict JSON schema. **Text Degeneration**: The model loses its normal probability distribution, spews out random characters and system tokens, and crashes before completing the JSON.(Gibberish Generation)
+3... **Repetition Loop**: The model gets stuck in a probability trap, repeatedly generating the same words,
+4items, or JSON structures... **Runaway / Incomplete**: Fails to produce a termination token and continues generating up to `max_tokens` (512), resulting in the JSON being truncated before completion (`finish_length`). This is the exact opposite failure of early termination.
 
-1. **Premature EOS**: The model outputs EOS (end-of-sentence) starting with the very first token, resulting in content that ends as an empty string. This occurs when the model “runs out of things to say” and shuts down immediately, often due to excessive constraints imposed by a strict JSON schema.
-2. **Text Degeneration**: The model loses its normal probability distribution, spews out random characters and system tokens, and crashes before completing the JSON (Gibberish Generation).
-3. **Repetition Loop**: The model gets trapped in a probability loop, repeatedly generating the same words, items, or JSON structures.
-4. **Inference Time Variation (Latency Jitter)**: Due to runaway generation—where collapse and repetition prevent the model from reaching a normal EOS, causing the output to extend all the way to `max_tokens`—there is an extreme disparity between the minimum and maximum inference times per clip.
-
-These patterns were merely **observed and identified** in Part 1; **whether they can be controlled via inference parameters was not addressed**. This part (Part 2) assumes that the output is fixed to a strict JSON Schema. This is a record of the **Phase 1 Screening**, in which we investigated whether **notable phenomena such as repetition and degeneration** can be controlled via inference parameters by significantly varying them one at a time (OFAT, one-factor-at-a-time).
+This part investigates whether these patterns can be controlled via inference parameters. This is because Part 1 merely observed and identified the four patterns, without addressing whether they could be controlled via parameters.  
+The premise is that the output is fixed to strict JSON Schema. Focusing on prominent issues such as loops and degeneration that occur even under these conditions, this is the initial adjustment phase where we significantly vary the parameters one at a time (OFAT) to determine which ones can be controlled.
 
 ## 2. Experimental Environment
 
-The experiments were conducted using **the same model, serving environment, and invocation path** as the benchmark. This was done to observe the effects of parameters in that exact environment. Detailed information on the environment configuration can be found in Part 1 “Building a Benchmark Pipeline for Multimodal LLM Understanding of 6-Second Korean Broadcast Video Clips,” so this section covers only a key summary and the **parameters tuned** in this experiment.
+The experiments were conducted using **the same model, serving environment, and invocation path** as the benchmark. This was done to observe the effects of the parameters in that exact environment. Detailed information on the environment configuration can be found in Part 1, “Building a Benchmark Pipeline for Multimodal LLM Understanding of 6-Second Korean Broadcast Video Clips”; therefore, this section covers only a key summary and the **parameters targeted for tuning** in this experiment.
 
 ### 2.1. Environment Summary
 
@@ -46,14 +43,14 @@ The experiments were conducted using **the same model, serving environment, and 
   - Processes four modalities—Image, Video, Audio, and Text—using a single model; this PoC uses only text output.
 
 - **Serving**
-  - vLLM serving on a single GPU(NVIDIA RTX PRO 6000 Blackwell, 96 GB).
+  - vLLM serving on a single AWS g7e.4xlarge GPU (NVIDIA RTX PRO 6000 Blackwell, 96 GB).
 
   - The actual serving size `--max-model-len` is 16,384; be mindful of context overflow when dealing with high resolution or high fps.
 
 - **Call Path**
   - Client (inference request) → Gateway (same as the gateway in Part 1) → vLLM → Qwen 3 Omni
 
-  - Passes through a lightweight gateway (FastAPI) in front of the vLLM. It passes the inference payload without modification, adding only concurrency gates (default 4) and batch NDJSON streaming. This sweep sends a fixed set of 70 clips in a single request and collects results in the order they are completed.
+  - The request passes through a lightweight gateway (FastAPI) in front of the vLLM. It passes the inference payload without modification, adding only concurrency gates (default 4) and batch NDJSON streaming. This sweep sends a fixed set of 70 clips in a single request and collects results in the order they are completed.
 
 :::note
 📎 For details on model specifications, serving settings, and gateway routes, refer to Part 1 of this series: [Building a Benchmark Pipeline for Multimodal LLM Understanding of 6-Second Clips from Korean Broadcasts](/docs/poc/vision-bench/1).
@@ -61,103 +58,106 @@ The experiments were conducted using **the same model, serving environment, and 
 
 ### 2.2. Parameters for Tuning
 
-Inference parameters are not configured on the server but are **specified directly by the client in the request body**. The parameters are divided into two categories based on the operational layer — **vLLM input processing** (preparation before feeding media into the model) and **Qwen3-Omni generation sampling** (decoding, where the model generates output). In this experiment, the OFAT sweep varies only the *generative sampling* group one at a time, while keeping the rest fixed across the entire range.
+Inference parameters are not configured on the server but are **specified directly by the client in the request body**. Parameters are divided into two categories based on the operational layer: **vLLM input processing** (preparation before feeding media into the model) and **Qwen3-Omni generation sampling** (decoding, where the model generates output). In this experiment, the OFAT sweep varies only the *generative sampling* group one parameter at a time, while keeping the rest fixed across the entire range.
 
-**1. Qwen3-Omni Generative Sampling Parameters** (*Autoregressive Decoding · Sampling Strategies*) — OFAT Variation
-
-| **Parameter** | **Role** | **Value Range** | **This Experiment** |
-| --- | --- | --- | --- |
-| `temperature` | Sampling temperature; lower values result in more deterministic behavior | `[0, 2]` (default 1.0) | **Variable** |
-| `top_k` | Limits candidates to the top k by probability | `-1` = Disabled / `≥1` (default -1) Works only when `0 < temperature` is set | **Variation** |
-| `top_p` | Nucleus cutoff; only top candidates by cumulative probability | `(0, 1]` (default 1.0) Works only when `0 < temperature` is set | **Variation** |
-| `frequency_penalty` | Additive iteration suppression (proportional to occurrence count) | `[-2, 2]` · `0` = Disabled (default 0.0) | **Variable** |
-| `repetition_penalty` | Multiplicative repetition suppression (based on occurrence) | `>0` · `1` = Inactive · `>1` = Suppressed | **Variable** |
-| `max_tokens` | Completion token upper limit (output length cap) | `>0` · Within remaining context | Fixed at 512 |
-| `chat_template_kwargs.enable_thinking` | Thinking token generation on/off | `true` / `false` | **Measured separately** (quality·latency) |
-| `seed` | Reproducibility (same input → same output when fixed) | Integer · `<0` = Disabled (random each time) | Fixed -1 |
-
-**2. vLLM Input Processing Parameters** (*Multimodal Ingestion · Context Conditioning*) — Token·Latency Axis (Not OFAT)
+##### **1. Qwen3-Omni Generative Sampling Parameters** (*Autoregressive Decoding · Sampling Strategies*).
 
 | **Parameter** | **Role** | **Value Range** | **This Experiment** |
 | --- | --- | --- | --- |
-| `media_io_kwargs.video.fps` | Video frame extraction rate | `>0` (e.g., 0.5, 1.0, 2.0) | **Measured separately** (quality · latency) |
-| `media_io_kwargs.video.fps` | Simultaneous audio decoding within MP4 | `>0` / `use_audio_in_video` | Fixed on |
+| `temperature` | Sampling temperature; lower values are more deterministic | `[0, 2]` (default 1.0) | **Variable** |
+| `top_k` | Limits candidates to the top k by probability | Works only when `-1` = disabled / `≥1` (default -1) `0 < temperature` | **Variability** |
+| `top_p` | Nucleus cutoff; only top candidates by cumulative probability | Works only when `(0, 1]` (default 1.0) and `0 < temperature` | **Variable** |
+| `frequency_penalty` | Additive iteration suppression (proportional to occurrence count) | Works only when `[-2, 2]` · `0` = Disabled (default 0.0) | **Variable** |
+| `repetition_penalty` | Suppresses multiplicative repetition (based on occurrence) | `>0` · `1` = Disabled · `>1` = Suppressed | **Variable** |
+| `max_tokens` | Upper limit on completion tokens (output length cap) | `>0` · within remaining context | Fixed at 512 |
+| `chat_template_kwargs.enable_thinking` | Thinking token generation on/off | `true` / `false` | Fixed at false  |
+| `seed` | Reproducibility (same input → same output when fixed) | Integer · `<0` = Disabled (random each time) | Fixed at -1  |
+
+##### **2. vLLM Input Processing Parameters** (*Multimodal Ingestion · Context Conditioning*)
+
+| **Parameter** | **Role** | **Value Range** | **This Experiment** |
+| --- | --- | --- | --- |
+| `media_io_kwargs.video.fps` | Video frame extraction rate | `>0`  | Fixed at `0.5` |
+| `use_audio_in_video` | Simultaneous audio decoding from MP4 | `true` / `false`  | Fixed at `true` |
 
 :::note
-📌 `true` **vs** `false` → Both suppress repetition, but their methods differ.
+📌 `frequency_penalty` **vs** `repetition_penalty` → Both suppress repetition, but their methods differ.
 
-- **frequency** (addition·subtraction): The **more** a token has already appeared, the **greater** the penalty (proportional to frequency·cumulative) → Strong at suppressing repetition (`공 공 공…`). **Only output tokens** are counted.
-- **repetition** (multiplication/division): If a token appears even once, it is reduced by a **fixed ratio** (based solely on presence, regardless of frequency). Since vLLMs consider both the **prompt and output**, even prompt vocabulary may be suppressed(potential increase in recall loss).
-- ⚠️ Enabling both results in **double suppression (over-suppression)**
+- **frequency (addition/subtraction)**
+The more a token has already appeared, the greater the penalty (proportional to frequency, cumulative) → Strong at suppressing repetition (`공 공 공…`). **Only output tokens** are counted.
+
+- **repetition (multiplication/division)**
+If a token appears even once, it is reduced by a **fixed ratio** (based solely on presence, regardless of frequency). Since vLLMs examine both the **prompt and output**, even prompt vocabulary can be suppressed.
+
+- Enabling both results in **double over-suppression**.
 :::
 
 ### 2.3. Output Schema / Hallucination Guard
 
-This experiment **fixes** the output contract below **without modification** and only varies the parameters (the prompt remains the same). Responses are **strictly** fixed to `{summary, objects, ocr, actions, bgm, sfx}` **6 fields**
+This experiment **keeps the output contract fixed without modification** while varying only the parameters. The response is fixed to **exactly** `{summary, ocr, actions, sounds}` **fields**.
 
 - vLLM `response_format=json_schema(strict=True)`
 - pydantic `extra="forbid"` 
 
-Since this is a dual constraint, the output can be stored and consumed as-is without any post-processing (parsing, cleaning, or adding/removing fields). 
+Since this is a dual constraint, the output can be saved as-is without any post-processing (parsing, cleaning, or adding/removing fields). 
 
-In the SceneMaker project, **dialogue (STT) analysis is handled by a separate WhisperX module**; for the Qwen3 Omini model, it is designed with a `bgm` **/** `sfx` **split** to include analysis of background noise and sound effects.
+In the SceneMaker project, dialogue (STT) analysis is handled by a separate WhisperX module; for the Qwen3 Omini model, it is designed as `sounds` to include analysis of background noise and sound effects.
 
 | **Field** | **Definition and Guidelines** |
 | --- | --- |
-| `summary` (string) | A one-sentence summary in Korean that integrates visual and auditory information. Do not copy the exact wording from individual fields. |
-| `objects` (array of string) | Key noun keywords for objects and characters in the video (no duplicates; each entry must be within 3 syllables). On-screen text should be entered as `ocr`. |
-| `ocr` (array of string) | Text visible on screen (subtitles, logos, titles) must be reproduced exactly as in the original. |
-| `actions` (array of string) | Verbal phrases describing actions, movements, and scene transitions in the video (no duplicates). |
-| `bgm` (array of string) | Background sounds, music, and overall atmosphere. |
-| `sfx` (array of string) | Discrete sound effects (applause, typing, footsteps, etc.). |
+| `summary` (string) | A single-sentence summary in Korean that integrates visual and auditory information. Do not copy the expressions from individual fields verbatim. |
+| `ocr` (array of string) | Text visible on screen, exactly as it appears in the original. |
+| `actions` (array of string) | Verb phrases describing actions, movements, and scene transitions in the video (without duplication). |
+| `sounds` (array of string) | Sound effects other than dialogue (e.g., applause, typing, footsteps). |
 
 :::note
-🎙️ Dialogue (speech) transcription is handled by a separate WhisperX audio module and is therefore excluded from this schema. The model listens to the audio (`use_audio_in_video` on) but does not transcribe it; it describes only the non-speech soundscape (`bgm` ·`sfx`).
+🎙️ Dialogue (speech) transcription is handled by a separate WhisperX audio module and is therefore excluded from this schema. The model listens to the audio (`use_audio_in_video` on) but does not transcribe it; it only describes non-speech(`sounds` ) only.
 :::
 
 ## 3. Methodology
 
-### 3.1. Sample and Design
+### 3.1. Samples and Design
 
-- **Fixed 70 samples** = 10 clips across 7 genres, each 6 seconds long. All settings use **the same sample and the same prompt**.
-- **OFAT Sweep→** Vary only one parameter across multiple levels while keeping all others fixed to observe the effect of that variable alone.
-- **Sampling Isolation**: The penalty sweep is run in greedy mode (temperature=0), while the top_p·top_k sweeps are run at temp=0.7 anchor.(When temp=0, top_p and top_k have no effect)
+- **Fixed 70 samples**: 10 clips across 7 genres, each 6 seconds long. All settings use **the same sample and the same prompt**.
+- **OFAT Sweep:** Only one parameter is varied across multiple levels while keeping all others fixed, allowing us to observe the effect of that variable alone.
+- **Sampling Isolation**: top_p, top_k, and penalty sweeps are all run at temp=0.7 (since top_p and top_k have no effect at temp=0, and the baseline is also set to 0.7, the penalty is evaluated at 0.7 as well).
 
 :::note
 📖 **Glossary**
 
-- **Sweep**: The process of scanning through a parameter value in multiple steps (e.g., `temperature` 0 → 0.3 → 0.7 → 1.0) and measuring the output at each step. The **OFAT sweep** in this experiment in this experiment sweeps only one axis while keeping other parameters fixed, isolating the effect of that single parameter.
-- **Greedy decoding**: A decoding method that selects only the single token with the highest probability (argmax) at each step. `temperature=0` is an example of greedy decoding; since it lacks randomness, the same input always produces the same output (deterministic). The opposite is **sampling** (`top_k` ·`top_p` ·`temperature`), which selects candidates randomly based on probabilities.
+- **Sweep**: The process of stepping through the values of a single parameter in multiple stages (e.g., `temperature` 0 → 0.3 → 0.7 → 1.0) and measuring the output at each stage. The **OFAT sweep** in this experiment sweeps only one axis while keeping other parameters fixed, thereby isolating the effect of that single parameter.
+- **greedy (greedy decoding)**: Decoding that selects only the single token with the highest probability (argmax) at each step. `temperature=0` This is the greedy approach; since it lacks randomness, the same input yields the same output (deterministic). The opposite is **sampling** (`top_k` ·`top_p` ·`temperature`), which selects candidates randomly based on probabilities.
 :::
 
-### 3.2. What Can Be Measured Without a Ground Truth — Conformity vs. Quality
+### 3.2. What Can Be Measured by Output Alone? Adherence vs. Quality
 
-This experiment deals only with **what can be evaluated without a ground truth**. Output quality is divided into two levels, and the boundary between them marks the dividing line between Stage 1 and the next stage.
+The evaluation of analysis output is divided into two distinct categories. To use an exam analogy, one is whether the answer is disqualified, and the other is the score for the answer.
 
-| **Category** | **Evaluation Target** | **Reference Answer** | **Where** |
-| --- | --- | --- | --- |
-| **Adherence** | Is it in Korean? · Is the JSON format correct? · Are the items short? · Are there no repetitions? (All *rules specified in the prompt*) | Not required | **This document (Stage 1)** |
-| **Quality** | Completeness (no omissions) · Accuracy (no hallucinations) | **Required** | **Next stage (Gemini objective function)** |
+- Adherence = Disqualification axis. No matter how excellent the answer may be, it is disqualified if the paper is blank, written in a foreign language, or violates the specified format. Only the rules are considered, regardless of the quality of the content.
+- Quality = The scoring axis. Once disqualification is avoided, the analysis is actually graded based on how accurate and comprehensive it is.
 
-Adherence is based on rules explicitly stated in the prompt, so it can be assessed simply by looking at the output. In contrast, quality can only be evaluated if there is a “correct answer.” **Compliance is a necessary but not sufficient condition**, so the distinction is clear-cut. Following the rules does not guarantee that the content is correct, but we establish compliance first and then improve quality.
+| **Category** | **Evaluation Target** | Determined by Output Alone |
+| --- | --- | --- |
+| **Adherence** | Is it in Korean? · Is the JSON format correct? · Are the items concise? · Are there any repetitions? | Possible |
+| **Quality** | Completeness (Are there any omissions?) · Accuracy (Are there any hallucinations?) | Not possible |
+
+Adherence is a necessary but not sufficient condition. It merely ensures the submission is not disqualified; it does not guarantee that the content is correct. Establish the rules first, and improve quality later.
 
 ### 3.3. Metrics
 
-To detect and quantify the four quality degradation patterns identified in Part 1 (**premature termination, collapse, repetition, and inference time variance**) **using only the output, without a reference answer** , we aggregate the following metrics from the 70 outputs of each configuration. Each metric targets one or more of the anomalies listed above; all are compliance and structural metrics that can be reliably captured in a single pass (n=70), and `fields` ·`score` (repeat·degen) are expressed as decimal ratios between 0 and 1 (1.0 = 100%).
+The following metrics are aggregated to detect and quantify the four patterns of quality degradation. Each metric targets one or more of the anomalies listed above. `fields` and `score` (repeat·degen) are converted to a ratio between 0 and 1 (1.0 = 100%) and evaluated as such.
 
-| **Metric** | **Definition** | **What it measures** |
+| **Metric** | **Definition** | **What It Measures** |
 | --- | --- | --- |
-| `ok` / `fail` | Number of schema-passing / failing records (/70) | Format compliance · Premature termination |
+| `ok` / `fail` | Number of records passing/failing schema validation | Format compliance · Premature termination |
 | `inference_ms` (avg·p50·p95·min·max) | Inference time per clip (ms) | Inference time variance |
-| `fields` | Percentage of fields with "values" (`summary` ·`objects` ·`ocr` ·`actions` ·`bgm` ·`sfx`, based on "ok" criteria) | Information coverage |
-| `score.repeat` | Percentage of records with exact duplicates within the array — since near-duplicates and partial matches are not measured, this represents the **lower bound** of actual duplicates | Duplicates |
-| `score.degen` | Ratio by breakdown signal — `foreign` (end character) · `finish_length` (reached max_tokens = incomplete/aborted) · `replacement` (broken multibyte) | Breakdown |
+| `fields`  | Percentage of fields with values (`summary` ·`ocr` ·`actions` ·`sounds` ) | Information coverage |
+| `score.repeat` | Percentage of records containing identical items within the array. | Duplication |
+| `score.degen` | Ratio by failure signal. `foreign` (heterogeneous characters) · `finish_length` (max_tokens reached = incomplete/aborted) · `replacement` (broken multibyte) | Failure |
 
-`score.repeat` and `score.degen` are aggregated values of `flags` (signals) per record, so **the metric calculation and debugging (identifying which clips are corrupted) use the same source**. Furthermore, the solutions for the observed anomalies **differ** — exact duplicates within an array (`repeat`) are **losslessly removed** via post-processing (dedup), but **corruptions** such as mixed characters or incomplete data (`degen`) cannot be restored via post-processing → they must be prevented at the generation stage (parameters). This distinction determines, in the subsequent “Parameter Effects” and “Conclusions” sections, “what is resolved via parameters and what is resolved via post-processing.” However, since collapses are rare events that occur infrequently, the frequency observed in a single pass with n=70 is provided for reference only.
+## **4. Effects by Parameter**
 
-## 4. Effects by Parameter
-
-This section lists the target parameters that were varied one at a time (OFAT). The parentheses serve as isolation anchors.
+This section covers the target parameters that were adjusted one at a time (OFAT).
 
 - `temperature` : 0.0 / 0.3 / 0.7 / 1.0
 - `top_k / top_p`
@@ -165,317 +165,348 @@ This section lists the target parameters that were varied one at a time (OFAT). 
 
   - `top_p` : 0.5 / 0.8 / 0.95 / 1.0 (temp=0.7)
 
-- `frequency_penalty / repetition_penalty` 
-  - `frequency_penalty`: 0.0 / 0.5 / 1.0 / 2.0 (greedy)
+- `frequency_penalty / repetition_penalty` (temp=0.7)
+  - `frequency_penalty` : 0.0 / 0.5 / 1.0 / 2.0
 
-  - `repetition_penalty`: 1.0 / 1.05 / 1.1 / 1.3 (greedy)
+  - `repetition_penalty` : 1.0 / 1.05 / 1.1 / 1.3
 
-- `fps`: 0.5 / 1.0 / 2.0 (separate measurement · tokens/latency)
-- `enable_thinking` : True / False (**separate measurement** · quality/latency)
+The evaluation criteria for this section are not "richly expressed configurations" but rather "**configurations with the fewest obvious defects (incompleteness, mixed characters, repetition, or runaway values)** ." Increased coverage or the number of items may be the result of hallucinations (overgeneration) and will not be counted as bonus points.
 
-The evaluation criteria for this section are not "expressive settings" but **"settings with the fewest obvious defects (incompleteness, mixed characters, repetition, or runaway)**. Increased coverage or the number of items may indicate hallucinations (overgeneration) and will not be counted as bonus points—even if the expression is somewhat lacking, the more accurate option is chosen, and the determination of whether it is a hallucination is left to the next stage, where the correct answers are provided.
+### 4.0. Test Data Preparation and Execution Method
 
-### 4.0. Test Data Preparation
+All configurations examine **the same 70 clips**: 7 genres × 10 clips per category. 
 
-All configurations view the **same set of 70 clips**: 7 genres × 10 clips per category. 
+`make_sample.py` collects them in `data/sample70/` **using only symlinks**, without copying or re-encoding the original MP4 files. Video derivatives are managed **in a single location** at `data/`, so for copyright purposes, deleting just one file at `data/` clears them all at once (symlinks are `*.mp4` and are not committed via `gitignore`).
 
-`make_sample.py` collects the original MP4 files in `data/sample70/` **using only symlinks**, without copying or re-encoding them. Video derivatives are managed **in one place only** at `data/` , so for copyright purposes, `data/` deleting just one file cleans up the entire set (symlinks are `*.mp4` and are not committed via `.gitignore`).
+1. Sample Preparation
+   ```bash
+   # 10 items per category, evenly spaced → symlinks to data/sample70/ (70 in total)
+   python make_sample.py
+   ```
 
-```bash
-# 10 items per category, evenly spaced → symlinks to data/sample70/ (70 in total)
-python make_sample.py
-# Single-run/batch testing using that sample (from experiments/02_param_sweep/)
-python run.py ../../data/sample70 -o out.json
-```
+2. Single-run test (to verify normal server and schema operation)
+   ```bash
+   # Send only one clip to check the server and schema responses (single clip, no batch)
+   python run.py ../../data/sample70/news__0001_0600-0606.mp4 --no-batch --verbose
+   ```
 
-### 4.1. temperature
+3. Main OFAT sweep execution
+   ```bash
+   Call #run.py one line at a time for each setting (temperature, top_pk, freq_repe, fps, thinking).
+   # Automatically detects the next episode number in the #sweep_out/ directory. Specify the number of episodes as an argument (default is 1).
+   bash sweep.sh 4   # Cumulative total for the next 4 rounds → N=4
+   ```
 
-**Episode Average** (Episodes 1, 2, 3 · n=70 each)
+### 4.1. Temperature
 
-| **temp** | **ok/fail** | **repeat** | **foreign** | **finish_len** | **summary** | **objects** | **ocr** | **actions** | **bgm** | **sfx** |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| 0.0 | 61/9 | 13% | – | 13% | 100% | 100% | 72% | 100% | 41% | 44% |
-| 0.3 | 63/7 | 11% | – | 10% | 100% | 100% | 72% | 100% | 40% | 44% |
-| 0.7 | **68/2** | 13% | – | 1% | 100% | 100% | 75% | 100% | 45% | 55% |
-| 1.0 | **69/1** | 13% | **26%** | 1% | 100% | 100% | 77% | 100% | 57% | 60% |
+**Average per run** (Runs 1, 2, 3, and 4 · n=70 each)
+
+:::note
+📐 `penalty` = (`repeat` + `finish_length` + `foreign` + `replacement`) ÷ 4 → Average
+
+`field` = (`summary` + `ocr` + `actions` + `sounds`) ÷ 4 → Average coverage.
+:::
+
+| **temp** | **ok/fail** | infer_ms | **penalty** | **field** |
+| --- | --- | --- | --- | --- |
+| 0.0 | 83.21% | 2731 | 8.9% | 95.7% |
+| 0.3 | 83.93% | 2735 | 8.9% | 95.3% |
+| 0.7 | 87.50% | 2818 | **7.5%** | **96.0%** |
+| 1.0 | **92.14%** | 2863 | 14.4% | 93.4% |
 
 <details>
-<summary>📊 History by Episode (Episodes 1, 2, and 3 – Original)</summary>
+<summary>📊 History by Round (Rounds 1, 2, 3, 4)</summary>
 
-| **Episode** | **temp** | **ok/fail** | **repeat** | **foreign** | **finish_len** | **ocr** | **bgm** | **sfx** |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| 1 | 0.0 | 61/9 | 17% | – | 13% | 72% | 39% | 43% |
-| 2 | 0.0 | 60/10 | 9% | – | 14% | 72% | 42% | 43% |
-| 3 | 0.0 | 61/9 | 13% | – | 13% | 72% | 43% | 46% |
-| 1 | 0.3 | 63/7 | 10% | – | 10% | 73% | 40% | 41% |
-| 2 | 0.3 | 61/9 | 13% | – | 13% | 70% | 33% | 41% |
-| 3 | 0.3 | 64/6 | 11% | – | 9% | 73% | 48% | 50% |
-| 1 | 0.7 | 68/2 | 17% | – | 3% | 75% | 46% | 57% |
-| 2 | 0.7 | 69/1 | 6% | – | – | 75% | 48% | 59% |
-| 3 | 0.7 | 68/2 | 16% | – | – | 75% | 43% | 48% |
-| 1 | 1.0 | 68/2 | 6% | 30% | 3% | 76% | 59% | 68% |
-| 2 | 1.0 | 69/1 | 17% | 19% | 1% | 77% | 56% | 54% |
-| 3 | 1.0 | 70/0 | 16% | 29% | – | 79% | 57% | 60% |
+| **Episode** | **temp** | ok | infer_ms | repeat | foreign | finish_len | replacement | penalty | summary | ocr | actions | sounds |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 1 | 0.0 | 81.43% | 2834.1 | 17.10% | 0.00% | 18.60% | 0.00% | 8.93% | 100.00% | 91.20% | 100.00% | 91.20% |
+| 2 | 0.0 | 82.86% | 2751.9 | 17.10% | 0.00% | 17.10% | 0.00% | 8.55% | 100.00% | 91.40% | 100.00% | 93.10% |
+| 3 | 0.0 | 84.29% | 2653.5 | 21.40% | 0.00% | 15.70% | 0.00% | 9.28% | 100.00% | 91.50% | 100.00% | 91.50% |
+| 4 | 0.0 | 84.29% | 2685.3 | 20.00% | 0.00% | 15.70% | 0.00% | 8.93% | 100.00% | 91.50% | 100.00% | 89.80% |
+| 1 | 0.3 | 85.71% | 2656.7 | 18.60% | 0.00% | 14.30% | 0.00% | 8.22% | 100.00% | 90.00% | 100.00% | 90.00% |
+| 2 | 0.3 | 81.43% | 2781.2 | 18.60% | 0.00% | 18.60% | 0.00% | 9.30% | 100.00% | 87.70% | 100.00% | 93.00% |
+| 3 | 0.3 | 87.14% | 2665.1 | 25.70% | 0.00% | 12.90% | 0.00% | 9.65% | 100.00% | 88.50% | 100.00% | 90.20% |
+| 4 | 0.3 | 81.43% | 2,838.7 | 15.70% | 0.00% | 18.60% | 0.00% | 8.57% | 100.00% | 89.50% | 100.00% | 96.50% |
+| 1 | 0.7 | 91.43% | 2718.6 | 27.10% | 1.40% | 8.60% | 0.00% | 9.28% | 100.00% | 90.60% | 100.00% | 95.30% |
+| 2 | 0.7 | 84.29% | 3086.3 | 10.00% | 0.00% | 15.70% | 0.00% | 6.43% | 100.00% | 89.80% | 100.00% | 93.20% |
+| 3 | 0.7 | 85.71% | 2763.9 | 14.30% | 0.00% | 14.30% | 0.00% | 7.15% | 100.00% | 90.00% | 100.00% | 93.30% |
+| 4 | 0.7 | 88.57% | 2702.9 | 17.10% | 0.00% | 11.40% | 0.00% | 7.13% | 100.00% | 90.30% | 100.00% | 93.50% |
+| 1 | 1.0 | 88.57% | 2924.9 | 11.40% | 35.70% | 11.40% | 1.40% | 14.98% | 100.00% | 88.70% | 100.00% | 88.70% |
+| 2 | 1.0 | 94.29% | 3085.7 | 17.10% | 38.60% | 5.70% | 0.00% | 15.35% | 100.00% | 89.40% | 98.50% | 90.90% |
+| 3 | 1.0 | 91.43% | 2758.1 | 12.90% | 35.70% | 8.60% | 0.00% | 14.30% | 100.00% | 90.60% | 98.40% | 81.20% |
+| 4 | 1.0 | 94.29% | 2683.7 | 14.30% | 31.40% | 5.70% | 0.00% | 12.85% | 100.00% | 84.80% | 98.50% | 84.80% |
 
 </details>
 
-The existing hypothesis that "low temperature (temp 0.0) is safe" was refuted by the average data from three cross-validations. Greedy does not operate deterministically, and the **optimal morphological sweet spot** is `Temperature 0.7`.
-
-####
-
-**Key Metrics Comparison Table**
+#### **Key Metrics Comparison Table (Benchmark Matrix)**
 
 | **Evaluation Metric** | **Greedy (0.0)** | **Sweet Spot (0.7)** | **High Temp (1.0)** |
 | --- | --- | --- | --- |
-| **Completion Rate** | 61% (Worst) | **68% (Good)** | 69% (Best) |
-| **P95 / Max Latency** | 8.9k / 9.4k ms | **5.8k / 7.4k ms** | - |
-| **Mismatch Rate** | 0% | **0%** (sporadic cross-series 0–1%) | 26% (explosive) |
+| **Completion Rate (ok)** | 83.21% | 87.50% | **92.14% (Best)** |
+| Penalty | 8.9% | **7.5% (Lowest)** | 14.4% (Worst) |
+| **Foreign Characters** | 0% | 0.35% | **35.4% (Surge)** |
 
-#### 1. Completion Rate and Latency: The “Runaway” Phenomenon in Greedy
+#### 1. Trade-off Between Completion Rate and Penalty
 
-- **Critical flaw in Greedy (0.0):** A “runaway” phenomenon frequently occurred, where the algorithm got trapped in an infinite loop (repeated generation) and failed to reach `max_tokens`. (Termination rate due to length limit: `finish_len` 13%)
-- **Reduction in Tail Latency:** In `temp 0.7`, these runaway incidents decreased sharply, with the P95 latency improving from **8.9k ms ➡️ 5.8k ms** and the maximum latency significantly improving from **9.4k ms ➡️ 7.4k ms**.
-- **Consistency of P50 (Median):** The P50 latency remained consistent at approximately 3.5k ms, unaffected by temperature. In other words, while the typical speed remains the same, **outliers (runaway phenomena) are better controlled at higher temperatures**.
+- Temperature and completion rate are directly proportional
+  - As the value increases, the metrics for runaways and incomplete runs (`finish_length`) decrease from 16.8% to 7.9%, leading to a rise in the completion rate
 
-#### 2. Misconceptions Regarding the Explosion of Non-Standard Characters and Repetition Rates
+- The Pitfall of High Temperature (1.0)
+  - While the completion rate reached its peak, it was accompanied by output corruption, causing the penalty to surge to 14.4%.
 
-- **Risks of Temp 1.0:** In a 1.0 high-temperature environment, the outlier character occurrence rate skyrockets to 26%, making it impossible to deploy in live service.
-- **Stability at 0.7:** This series recorded 0%. However, in tests on a cross-series with identical settings (top_k -1, top_p 1.0, 840 records), sporadic outliers at the 0–1% level were found; nevertheless, this is a safe level that differs from 1.0 by an order of magnitude.
-- **Repeat Rate is Independent of Temperature:** Contrary to the intuition that lowering the temperature would reduce repetition, the rate remained **flat at 11–13%** across the entire range. In other words, repetition cannot be controlled by temperature.
+- Optimization at Temperature 0.7
+  - Achieved a completion rate of 87.5% while recording the lowest penalty (7.5%) across all temperature ranges.
 
-#### 3. The Pitfall of BGM/SFX Coverage
+#### 2. Foreign Characters and Repetition
 
-- Although coverage increased as temperature rose (44% ➡️ 60%), this cannot be considered a positive factor.
-- There is a directional hypothesis that **the risk of overgeneration and hallucinations** increases at higher temperatures, but it is difficult to trust this in the absence of ground truth data.
-- Therefore, the rationale for choosing `0.7` lies not in increased coverage, but in “minimizing defects” (increasing completion rates and suppressing mixed characters).
-- *(Note: The Summary, Objects, and Actions metrics achieved a fixed 100% across all intervals)*
+- **Temperature 1.0 resulted in severe defects**
+  - Foreign character occurrence rate surged to 35.4%
 
-> **Temperature set to 0.7**
-Greedy(0.0) has the highest rate of incomplete runs and a long tail of latency; given the current serving structure, results fluctuate significantly from run to run, meaning even the benefit of low temperature—namely, “deterministic stability”—cannot be guaranteed. In contrast, `0.7` is the most balanced option, simultaneously achieving a top-tier completion rate, minimized latency, and protection against foreign characters.
+- **Temperature 0.7 is within the safe range**
+  - The foreign character occurrence rate in the Temp 0.0–0.7 range is very stable at 0–0.35%
 
-### 4.2. Frequency / Repetition Penalty
+- **Temperature is not a “loop control lever”**
+  - The repetition rate remains stable at 14%–20% without significant fluctuation
 
-**Average per Run** (Runs 1, 2, 3 · greedy temp=0.0 · n=70 each)
+:::note
+💡 **Conclusion = Temperature 0.7**
+Greedy (0.0) yields inconsistent results from run to run, so it lacks even the advantage of “determinism,” and its penalty (8.9%) is higher than that of 0.7. 1.0 has the highest completion rate, but the penalty doubles (14.4%) due to the occurrence of out-of-type characters. In contrast, 0.7 has the lowest penalty (7.5%) and virtually no out-of-class characters, making it the optimal balance with the fewest defects.
+:::
 
-| **Settings** | **ok/fail** | **repeat** | **foreign** | **finish_len** | **summary** | **objects** | **ocr** | **actions** | **bgm** | **sfx** |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| freq 0.0  | 62/8 | 14% | – | 11% | 100% | 100% | 72% | 100% | 44% | 41% |
-| freq 0.5 | **70/0** | 9% | – | – | 100% | 100% | 74% | 100% | 17% | 21% |
-| freq 1.0 | **70/0** | 8% | 1% | – | 100% | 100% | 73% | 100% | 8% | 14% |
-| freq 2.0 | **70/0** | **2%** | 1% | – | 100% | 100% | 73% | 100% | **7%** | **8%** |
-| rep 1.05 | 64/6 | 10% | – | 9% | 100% | 100% | 70% | 100% | 23% | 37% |
-| rep 1.1 | 66/4 | 6% | – | 6% | 100% | 100% | 70% | 100% | 14% | 30% |
-| rep 1.3 | 68/2 | **1%** | 2% | 3% | 100% | 100% | 66% | 100% | **4%** | 30% |
+### 4.2. top_k / top_p
 
-<details>
-<summary>History by Episode (Episodes 1, 2, and 3 – Original)</summary>
+**Average per Round** (Rounds 1, 2, 3, 4 · anchor temperature=0.7 · n=70 for each)
 
-| **Episode** | **Settings** | **ok/fail** | **repeat** | **foreign** | **finish_len** | **ocr** | **bgm** | **sfx** |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| 1 | freq 0.0 | 61/9 | 13% | – | 13% | 72% | 44% | 43% |
-| 2 | freq 0.0 | 62/8 | 16% | – | 11% | 73% | 44% | 44% |
-| 3 | freq 0.0 | 64/6 | 14% | – | 9% | 72% | 45% | 38% |
-| 1 | freq 0.5 | 69/1 | 7% | – | – | 74% | 16% | 20% |
-| 2 | freq 0.5 | 70/0 | 13% | – | – | 73% | 16% | 21% |
-| 3 | freq 0.5 | 70/0 | 6% | – | – | 74% | 19% | 21% |
-| 1 | freq 1.0 | 70/0 | 6% | 1% | – | 73% | 7% | 11% |
-| 2 | freq 1.0 | 70/0 | 9% | 1% | – | 73% | 9% | 14% |
-| 3 | freq 1.0 | 70/0 | 9% | – | – | 73% | 7% | 16% |
-| 1 | freq 2.0 | 70/0 | 1% | 1% | – | 73% | 7% | 9% |
-| 2 | freq 2.0 | 69/1 | 1% | 1% | 1% | 74% | 9% | 6% |
-| 3 | freq 2.0 | 70/0 | 3% | 1% | – | 73% | 6% | 9% |
-| 1 | rep 1.05 | 64/6 | 9% | – | 9% | 70% | 23% | 36% |
-| 2 | rep 1.05 | 64/6 | 13% | – | 9% | 70% | 23% | 39% |
-| 3 | rep 1.05 | 63/7 | 10% | – | 9% | 70% | 22% | 35% |
-| 1 | rep 1.1 | 66/4 | 7% | – | 6% | 70% | 15% | 29% |
-| 2 | rep 1.1 | 67/3 | 7% | – | 4% | 72% | 12% | 27% |
-| 3 | rep 1.1 | 64/6 | 4% | – | 7% | 69% | 14% | 33% |
-| 1 | rep 1.3 | 68/2 | 1% | 3% | 3% | 68% | 4% | 29% |
-| 2 | rep 1.3 | 68/2 | 1% | 1% | 3% | 66% | 4% | 28% |
-| 3 | rep 1.3 | 67/3 | 1% | 3% | 3% | 66% | 4% | 31% |
-
-</details>
-
-detailshe penalty has been confirmed to be the most powerful lever for controlling repetition and runaway behavior in a greedy environment. However, as the penalty strength increases, auditory information (BGM and SFX) is lost proportionally, and in the temperature 0.7 reinforcement experiment, the utility itself disappears. **The conclusion is to turn the penalty OFF**, and when exploring the penalty magnitude, only the *freq* axis is advanced to the next step.
-
-#### **Key Metrics Comparison Table** (based on greedy algorithm)
-
-| **Evaluation Metric** | **Baseline (Penalty OFF)** | **freq 0.5** | **freq 2.0** | **rep 1.3** |
+| **Setting** | **ok/fail** | infer_ms | **penalty** | **field** |
 | --- | --- | --- | --- | --- |
-| **Completion Rate** | 62/70 (worst case) | **70/70** | 70/70 | 68/70 |
-| **Repetition Rate (repeat)** | 14% | 9% | **2%** | **1%** |
-| **BGM / SFX Coverage** | **44% / 41%** | 17% / 21% | 7% / 8% (crash) | 4% / 30% (crash) |
-| **P95 Latency** | 8.8k ms | **4.0k ms** | - | - |
-
-#### 1. Benefits: Prevention of repetition and runaway (based on greedy algorithm)
-
-- **Normalized completion rate:** With a freq of just 0.5, fails dropped from 8 to 0, and runaway behavior was eliminated, improving P95 latency from **8.8k ms to 4.0k ms**. Reproduced in all three runs.
-- **Repetition Suppression:** The repetition rate decreases from 14% to 2% at freq 2.0, and from 1.3% to 1%.
-- **Actual Correction Effect:** There was a case where three fragmented pieces of narration were restored to a single complete sentence, confirming that the effect is not merely “hiding” repetitions but actually “correcting” them.
-
-#### 2. Trade-off: Concurrent Degradation of Auditory Information (BGM/SFX)
-
-- **Loss Proportional to Intensity:** BGM and SFX coverage drops from 44%/41% ➡️ to 7%/8% at freq 2.0 and 4%/30% at rep 1.3. OCR accuracy also drops from 72% to 66% at rep.
-- **The barrier of indecipherability:** Without a reference answer key, it is impossible to distinguish whether this reduction represents “redundancy removal (good)” or “information loss (bad).” ➡️ The penalty magnitude is determined by the quality objective function (next step).
-- *(Note: The Summary, Objects, and Actions metrics consistently achieve 100% across all intervals)*
-
-#### 3. Reinforcement Metrics: Utility disappears in the baseline (temp 0.7)
-
-- **Utility Disappearance:** The utility mentioned above (fail ➡️ 0·runaway elimination) is based on the greedy criterion. When remeasured at temp 0.7 (average across runs, n=70 for each of runs 1, 2, and 3), the baseline has already reached 69/1·finish_len 1% completion, meaning **there are almost no defects left for the penalty to eliminate.**
-- **The only remaining effect is repeat suppression:** repeat decreases from 17% ➡️ 7–8%, but this is handled by deduplication post-processing without any information loss. Only the trade-off (halving of BGM and SFX: 49%/51% ➡️ 21%/25% at freq 0.5) remains.
-- **New defects introduced by rep:** When the rep series is combined with temp 0.7, it **introduces new foreign characters** that were not present in the greedy algorithm (base 0% ➡️ rep 1.05 2% ➡️ rep 1.1 4%; dose-response relationship; reproduced 3 times) ➡️ **rep eliminated**.
-
-> **Penalty OFF (freq 0.0 · rep 1.0)**
-The benefits observed in the greedy algorithm are already negligible at temperature 0.7, and the remaining repetition suppression is replaced by lossless deduplication. There is no reason to accept the loss of auditory information or the introduction of heterogeneous characters by rep. We will only verify in the next step whether a small amount of freq (0–0.5) might be advantageous in terms of quality.
-
-### 4.3. top_k / top_p
-
-**Average per Iteration** (Iterations 1, 2, 3 · anchor temp=0.7 · n=70 each)
-
-| **Settings** | **ok/fail** | **repeat** | **foreign** | **finish_len** | **summary** | **objects** | **ocr** | **actions** | **bgm** | **sfx** |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| top_k 1 | 62/8 | 13% | – | 11% | 100% | 100% | 73% | 100% | 41% | 45% |
-| top_k 10 | 67/3 | 18% | – | 3% | 100% | 100% | 75% | 100% | 44% | 51% |
-| top_k 50 | 67/3 | 16% | – | 4% | 100% | 100% | 74% | 100% | 47% | 52% |
-| top_k -1 | 67/3 | 14% | 1% | 3% | 100% | 100% | 74% | 100% | 46% | 50% |
-| top_p 0.5 | 62/8 | 17% | – | 11% | 100% | 100% | 73% | 100% | 42% | 45% |
-| top_p 0.8 | 65/5 | 18% | – | 7% | 100% | 100% | 72% | 100% | 43% | 47% |
-| top_p 0.95 | 68/2 | 17% | – | 3% | 100% | 100% | 73% | 100% | 50% | 52% |
-| top_p 1.0 | 67/3 | 18% | 1% | 4% | 100% | 100% | 72% | 100% | 49% | 51% |
+| top_k 1 | 82.14% | 2804 | 7.9% | 95.9% |
+| top_k 10 | **92.50%** | 2447 | **6.7%** | 94.5% |
+| top_k 50 | 90.71% | 2566 | 8.4% | 95.3% |
+| top_k -1 | 87.86% | 2677 | 7.6% | 94.6% |
+| top_p 0.5 | **78.57%** | 2958 | 8.9% | 95.4% |
+| top_p 0.8 | 85.00% | 2,773 | 7.5% | 95.6% |
+| top_p 0.95 | 87.50% | 2,627 | 7.2% | 95.4% |
+| top_p 1.0 | 90.36% | 2572 | 7.2% | 94.7% |
 
 <details>
-<summary>Episode History (Episodes 1, 2, and 3 – Original)</summary>
+<summary>📊 History by Round (Rounds 1, 2, 3, 4)</summary>
 
-| **Episode** | **Settings** | **ok/fail** | **repeat** | **foreign** | **finish_len** | **ocr** | **bgm** | **sfx** |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| 1 | top_k 1 | 61/9 | 9% | – | 13% | 72% | 41% | 43% |
-| 2 | top_k 1 | 63/7 | 16% | – | 10% | 73% | 41% | 48% |
-| 3 | top_k 1 | 63/7 | 16% | – | 10% | 73% | 41% | 44% |
-| 1 | top_k 10 | 67/3 | 13% | – | 4% | 73% | 43% | 52% |
-| 2 | top_k 10 | 65/5 | 19% | – | 6% | 72% | 43% | 52% |
-| 3 | top_k 10 | 70/0 | 23% | – | – | 79% | 44% | 49% |
-| 1 | top_k 50 | 66/4 | 14% | – | 6% | 76% | 48% | 58% |
-| 2 | top_k 50 | 68/2 | 17% | – | 3% | 75% | 47% | 48% |
-| 3 | top_k 50 | 67/3 | 16% | – | 3% | 72% | 46% | 49% |
-| 1 | top_k -1 | 66/4 | 13% | 1% | 6% | 74% | 44% | 42% |
-| 2 | top_k -1 | 68/2 | 16% | 1% | 1% | 75% | 40% | 46% |
-| 3 | top_k -1 | 68/2 | 13% | – | 3% | 74% | 53% | 62% |
-| 1 | top_p 0.5 | 61/9 | 17% | – | 13% | 72% | 41% | 44% |
-| 2 | top_p 0.5 | 63/7 | 11% | – | 10% | 73% | 41% | 46% |
-| 3 | top_p 0.5 | 63/7 | 23% | – | 10% | 73% | 43% | 46% |
-| 1 | top_p 0.8 | 66/4 | 23% | – | 6% | 73% | 39% | 42% |
-| 2 | top_p 0.8 | 65/5 | 17% | – | 7% | 72% | 46% | 48% |
-| 3 | top_p 0.8 | 65/5 | 13% | – | 7% | 72% | 43% | 51% |
-| 1 | top_p 0.95 | 69/1 | 21% | – | 3% | 72% | 49% | 54% |
-| 2 | top_p 0.95 | 67/3 | 17% | 1% | 4% | 72% | 49% | 51% |
-| 3 | top_p 0.95 | 68/2 | 11% | – | 3% | 74% | 50% | 53% |
-| 1 | top_p 1.0 | 67/3 | 19% | 1% | 4% | 73% | 54% | 55% |
-| 2 | top_p 1.0 | 64/6 | 19% | 3% | 7% | 72% | 47% | 55% |
-| 3 | top_p 1.0 | 69/1 | 17% | – | 1% | 72% | 48% | 42% |
+| **Iteration** | **Settings** | ok | infer_ms | repeat | foreign | finish_len | replacement | penalty | summary | ocr | actions | sounds |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 1 | top_k 1 | 82.86% | 2859.7 | 11.40% | 0.00% | 17.10% | 0.00% | 7.13% | 100.00% | 91.40% | 100.00% | 94.80% |
+| 2 | top_k 1 | 81.43% | 2825.5 | 12.90% | 0.00% | 18.60% | 0.00% | 7.88% | 100.00% | 91.20% | 100.00% | 93.00% |
+| 3 | top_k 1 | 84.29% | 2690.4 | 17.10% | 0.00% | 15.70% | 0.00% | 8.20% | 100.00% | 91.50% | 100.00% | 89.80% |
+| 4 | top_k 1 | 80.00% | 2842 | 12.90% | 0.00% | 20.00% | 0.00% | 8.23% | 100.00% | 91.10% | 100.00% | 91.10% |
+| 1 | top_k 10 | 92.86% | 2438.9 | 20.00% | 0.00% | 7.10% | 0.00% | 6.78% | 100.00% | 86.20% | 100.00% | 89.20% |
+| 2 | top_k 10 | 91.43% | 2458.6 | 18.60% | 0.00% | 8.60% | 0.00% | 6.80% | 100.00% | 89.10% | 100.00% | 93.80% |
+| 3 | top_k 10 | 94.29% | 2377.5 | 14.30% | 0.00% | 5.70% | 0.00% | 5.00% | 100.00% | 86.40% | 100.00% | 90.90% |
+| 4 | top_k 10 | 91.43% | 2512.1 | 24.30% | 0.00% | 8.60% | 0.00% | 8.22% | 100.00% | 89.10% | 100.00% | 87.50% |
+| 1 | top_k 50 | 91.43% | 2511.2 | 17.10% | 2.90% | 8.60% | 0.00% | 7.15% | 100.00% | 84.40% | 100.00% | 89.10% |
+| 2 | top_k 50 | 90.00% | 2559.5 | 25.70% | 0.00% | 10.00% | 0.00% | 8.93% | 100.00% | 88.90% | 100.00% | 95.20% |
+| 3 | top_k 50 | 91.43% | 2554.7 | 28.60% | 0.00% | 8.60% | 0.00% | 9.30% | 100.00% | 89.10% | 100.00% | 90.60% |
+| 4 | top_k 50 | 90.00% | 2640 | 22.90% | 0.00% | 10.00% | 0.00% | 8.23% | 100.00% | 92.10% | 100.00% | 95.20% |
+| 1 | top_k -1 | 85.71% | 2800.3 | 14.30% | 1.40% | 14.30% | 0.00% | 7.50% | 100.00% | 85.00% | 100.00% | 86.70% |
+| 2 | top_k -1 | 87.14% | 2715 | 21.40% | 0.00% | 12.90% | 0.00% | 8.57% | 100.00% | 86.90% | 100.00% | 90.20% |
+| 3 | top_k -1 | 88.57% | 2682 | 17.10% | 0.00% | 11.40% | 0.00% | 7.13% | 100.00% | 88.70% | 100.00% | 96.80% |
+| 4 | top_k -1 | 90.00% | 2508.9 | 18.60% | 0.00% | 10.00% | 0.00% | 7.15% | 100.00% | 90.50% | 100.00% | 88.90% |
+| 1 | top_p 0.5 | 75.71% | 3144 | 11.40% | 0.00% | 24.30% | 0.00% | 8.93% | 100.00% | 90.60% | 100.00% | 86.80% |
+| 2 | top_p 0.5 | 80.00% | 2901.2 | 17.10% | 0.00% | 20.00% | 0.00% | 9.28% | 100.00% | 91.10% | 100.00% | 96.40% |
+| 3 | top_p 0.5 | 81.43% | 2825.9 | 12.90% | 0.00% | 18.60% | 0.00% | 7.88% | 100.00% | 91.20% | 100.00% | 91.20% |
+| 4 | top_p 0.5 | 77.14% | 2962.4 | 15.70% | 0.00% | 22.90% | 0.00% | 9.65% | 100.00% | 90.70% | 100.00% | 88.90% |
+| 1 | top_p 0.8 | 87.14% | 2817.3 | 18.60% | 1.40% | 12.90% | 0.00% | 8.23% | 100.00% | 91.80% | 100.00% | 95.10% |
+| 2 | top_p 0.8 | 88.57% | 2563.2 | 15.70% | 0.00% | 11.40% | 0.00% | 6.78% | 100.00% | 91.90% | 100.00% | 90.30% |
+| 3 | top_p 0.8 | 84.29% | 2826.6 | 14.30% | 0.00% | 15.70% | 0.00% | 7.50% | 100.00% | 89.80% | 100.00% | 91.50% |
+| 4 | top_p 0.8 | 80.00% | 2883.2 | 10.00% | 0.00% | 20.00% | 0.00% | 7.50% | 100.00% | 85.70% | 100.00% | 92.90% |
+| 1 | top_p 0.95 | 87.14% | 2699.7 | 20.00% | 0.00% | 12.90% | 0.00% | 8.23% | 100.00% | 88.50% | 100.00% | 93.40% |
+| 2 | top_p 0.95 | 90.00% | 2542.2 | 18.60% | 0.00% | 10.00% | 0.00% | 7.15% | 100.00% | 88.90% | 100.00% | 93.70% |
+| 3 | top_p 0.95 | 88.57% | 2559.9 | 12.90% | 0.00% | 11.40% | 0.00% | 6.08% | 100.00% | 87.10% | 100.00% | 93.50% |
+| 4 | top_p 0.95 | 84.29% | 2707.3 | 14.30% | 0.00% | 15.70% | 0.00% | 7.50% | 100.00% | 89.80% | 100.00% | 91.50% |
+| 1 | top_p 1.0 | 88.57% | 2609.7 | 15.70% | 0.00% | 11.40% | 0.00% | 6.78% | 100.00% | 90.30% | 100.00% | 91.90% |
+| 2 | top_p 1.0 | 90.00% | 2612.3 | 22.90% | 0.00% | 10.00% | 0.00% | 8.23% | 100.00% | 87.30% | 100.00% | 92.10% |
+| 3 | top_p 1.0 | 87.14% | 2724 | 15.70% | 1.40% | 12.90% | 0.00% | 7.50% | 100.00% | 86.90% | 100.00% | 91.80% |
+| 4 | top_p 1.0 | 95.71% | 2341.5 | 18.60% | 2.90% | 4.30% | 0.00% | 6.45% | 100.00% | 83.60% | 100.00% | 91.00% |
 
 </details>
 
-detailsop_k and top_p are **secondary parameters** that are largely unaffected by iteration and collapse. In fact, as the number of candidates is narrowed down, they behave like a greedy algorithm, causing only the completion rate to drop. **The conclusion is to keep the default values —** `top_p 1.0 · top_k -1`.
+detailsop_k and top_p are fine-tuning knobs applied on top of temperature. The results fall into three categories: **over-tightening is detrimental, unrestricted (default) is safe, and top_k 10 yields the single best completion rate**. In contrast, iterations and coverage remain unaffected by any of these knobs.
 
-#### **Key Metrics Comparison Table** (anchor temp=0.7)
+#### **Key Metrics Comparison Table**
 
-| **Evaluation Metric** | **Tight (top_k 1 · top_p 0.5)** | **Loose (top_k -1 · top_p 0.95–1.0)** |
-| --- | --- | --- |
-| **Completion Rate** | 62/70 (similar to greedy) | **67–68/70** |
-| **Incompletion (finish_len)** | 11% | **3–4%** |
-| **Repetition Rate (repeat)** | 13–17% | 14–18% (no difference) |
-| **Foreign Characters (foreign)** | 0% | 0–1% (negligible) |
+| **Evaluation Metrics** | **Overfitting (top_k 1 / top_p 0.5)** | **Default (top_k -1 / top_p 1.0)** | **top_k 10 (Candidate)** |
+| --- | --- | --- | --- |
+| **Completion Rate (ok)** | 82.1% **/** 78.6% | 87.9% / 90.4% | **92.5% (Best)** |
+| **Penalty** | 7.9% / 8.9% | 7.6% / 7.2% | **6.7% (Best)** |
+| **Incomplete (finish_len)** | 17.9% / 21.5% | 12.2% / 9.7% | **7.5% (Best)** |
+| **Repeat** | 13.6% / 14.3% | 17.8% / 18.2% | 19% |
+| **Coverage (field)** | 95.9% / 95.4% | 94.6% / 94.7% | 94.5% |
+| **Foreign characters** | 0% / 0% | 0.4% / 1.1% | 0% |
 
-#### 1. Tightening the criteria causes the algorithm to revert to a greedy approach
+#### 1. The completion rate is highest when the settings are “moderately loose”—neither too strict nor too lenient
 
-- **Decrease in completion rate:** Narrowing down candidates—such as top_k = 1 and top_p = 0.5—worsens the results to finish_len 11% and 62/8 completions — This is the same runaway pattern as the greedy algorithm in §4.1. Reproduced in all three runs.
-- **Safe range:** The looser settings (k ≥ 10, p ≥ 0.95) are safe, and within that range, there are no significant differences between the settings.
+- **Backfire of Over-Tightening**
+  - With top_k = 1 and top_p = 0.5, finish_len is 18 / 21%, and the completion rates are 82% / 79%—the worst results. This causes runaway behavior similar to the Greedy algorithm.
 
-#### 2. Not a means of controlling repetition
+- **Internal Optimization**
+  - As top_k varies from 1→10→50→-1, the completion rate peaks at k=10 (92.5%) and then declines again as it approaches the unlimited setting (-1, 87.9%). It appears that a mild top-k cut filters out tail noise, making completion rates more stable.
 
-- **repeat: flat, no trend:** It remains flat across the entire range at 13–18% (no trend in all three runs), so repetition cannot be controlled using top_k or top_p. The lever for controlling repetition is the penalty (§4.2).
-- *(Note: “foreign” is negligible at 0–1% across the entire range; the “Summary,” “Objects,” and “Actions” items consistently achieve 100% across the entire range)*
+#### 2. Not adjustment values for repetition or coverage
 
-> **top_p 1.0 · top_k -1 (maintain default values)**
-If you narrow down candidates at temp 0.7 anchor, you only lose completion rate and gain nothing. Maintain the default full sampling settings, and unify diversity control using temperature alone.
+- **repeat: flat, no trend**
+  - No trend across the entire range (14–24%; even top_k 10 is 19%) → This is not a repeat control (repeat is driven by deduplication and frequency penalty).
 
-## 5. Key Findings
+- **Coverage remains intact**
+  - Field remains flat at 94–96% across all intervals → No setting trims the content (even the truncation in top_k 10 shows no visible loss).
 
-Five key findings emerged from the three sweeps and validation runs. Findings 1 and 2 challenge conventional wisdom; 3 and 4 are recommendations; and 5 is a decision principle.
+#### 3. top_k 10 = Candidate for completion rate
 
-#### 1. Completion rate increases with temperature (challenging conventional wisdom)
+- **Single Best**
+  - OK 92.5% (91%+ in all 4 runs · floor 91.4% · lowest variance ±1.2) · penalty 6.7% — both ranked 1st out of 8 settings, with a +2–5p improvement over the default, so this is not noise.
 
-- **greedy(0.0) is the weakest:** 61/70 completions, 13% runaway — it gets stuck in an infinite loop and runs away up to `max_tokens`. **temp 0.7 yields 68/70 completions and 1% runaway**.
-- **greedy is not even deterministic:** In the current implementation, the same settings fluctuate from run to run, so it lacks even the “stability” that was supposed to be a benefit of low temperatures.
-- **The only cost of high temperature is mixed characters:** It spikes to 26% only at 1.0, while 0.0–0.7 shows sporadic fluctuations of 0–1% ➡️ The structural sweet spot is **temp 0.7** (98% clean after deduplication).
+- **Cost of verification**
+  - It is not possible to determine from the output alone whether the top-10 cut misses rare correct tokens (unusual OCR, rare sound effects) (flat coverage)
 
-#### 2. Repetition is not controlled by sampling parameters
+### 4.3. Frequency / Repetition Penalty
 
-- **Flat across all ranges:** No matter how much you change temperature, top_k, or top_p, the repetition rate remains constant at 13–18% (no trend observed in all three runs).
-- **Main sources:** `ocr` (repeated subtitles and logos) and `objects` (duplicate object names).
-- **The metric is a lower bound:** Since it counts only exact duplicates, the estimated +23% for near-duplicates and partial inclusions is not included in the metric.
+**Average per run** (Runs 1, 2, 3, 4 · anchor temperature=0.7 · n=70 for each)
 
-#### 3. The primary solution for repetition is deduplication, not penalties
+| **Setting** | **ok/fail** | infer_ms | **penalty** | **field** |
+| --- | --- | --- | --- | --- |
+| freq 0.0 | 90.00% | 2589 | 7.0% | 94.0% |
+| freq 0.5 | **99.64%** | 2012 | **2.0%** | 92.0% |
+| freq 1.0 | 100% | 1934 | 1.6% | 88.2% |
+| freq 2.0 | 98.57% | 1988 | 2.0% | 81.6% |
+| rep 1.0 | 90.00% | 2646 | 8.2% | 94.6% |
+| rep 1.05 | 96.07% | 2217 | 4.0% | 93.9% |
+| rep 1.1 | 99.64% | 1950 | 3.7% | 92.7% |
+| rep 1.3 | 99.64% | 1,629 | 2.0% | **82.4%** |
 
-- **Lossless removal:** Exact duplicates are removed via normalization, resulting in zero information loss.
-- **Role of penalties:** Penalties remain only as a secondary option for residual cases (fragmentation and token loops) that dedup cannot resolve.
+<details>
+<summary>📊 History by Round (Rounds 1, 2, 3, 4)</summary>
 
-#### 4. The utility of penalties disappears at the baseline (temp 0.7)
+| **Iteration** | **Settings** | ok | infer_ms | repeat | foreign | finish_len | replacement | penalty | summary | ocr | actions | sounds |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 1 | freq 0.0 | 90.00% | 2585.3 | 14.30% | 0.00% | 10.00% | 0.00% | 6.08% | 100.00% | 88.90% | 100.00% | 84.10% |
+| 2 | freq 0.0 | 88.57% | 2731.5 | 17.10% | 0.00% | 11.40% | 0.00% | 7.13% | 100.00% | 87.10% | 100.00% | 88.70% |
+| 3 | freq 0.0 | 91.43% | 2550.6 | 22.90% | 1.40% | 8.60% | 0.00% | 8.23% | 100.00% | 87.50% | 100.00% | 90.60% |
+| 4 | freq 0.0 | 90.00% | 2487.4 | 14.30% | 1.40% | 10.00% | 0.00% | 6.43% | 100.00% | 87.30% | 100.00% | 88.90% |
+| 1 | freq 0.5 | 100.00% | 1945.9 | 8.60% | 0.00% | 0.00% | 0.00% | 2.15% | 100.00% | 91.40% | 100.00% | 78.60% |
+| 2 | freq 0.5 | 100.00% | 2033.3 | 7.10% | 1.40% | 0.00% | 0.00% | 2.12% | 100.00% | 88.60% | 100.00% | 78.60% |
+| 3 | freq 0.5 | 98.57% | 2044.2 | 10.00% | 0.00% | 1.40% | 0.00% | 2.85% | 100.00% | 85.50% | 100.00% | 79.70% |
+| 4 | freq 0.5 | 100.00% | 2023.8 | 2.90% | 0.00% | 0.00% | 0.00% | 0.73% | 100.00% | 90.00% | 100.00% | 80.00% |
+| 1 | freq 1.0 | 100.00% | 1997.3 | 5.70% | 2.90% | 0.00% | 0.00% | 2.15% | 100.00% | 90.00% | 98.60% | 68.60% |
+| 2 | freq 1.0 | 100.00% | 1909.7 | 1.40% | 1.40% | 0.00% | 0.00% | 0.70% | 100.00% | 88.60% | 95.70% | 67.10% |
+| 3 | freq 1.0 | 100.00% | 1893.7 | 2.90% | 1.40% | 0.00% | 0.00% | 1.08% | 100.00% | 91.40% | 100.00% | 62.90% |
+| 4 | freq 1.0 | 100.00% | 1935.4 | 10.00% | 0.00% | 0.00% | 0.00% | 2.50% | 100.00% | 87.10% | 100.00% | 61.40% |
+| 1 | freq 2.0 | 98.57% | 1984.1 | 8.60% | 5.70% | 1.40% | 0.00% | 3.93% | 100.00% | 85.50% | 95.70% | 44.90% |
+| 2 | freq 2.0 | 98.57% | 2046.9 | 0.00% | 2.90% | 1.40% | 1.40% | 1.43% | 100.00% | 88.40% | 98.60% | 37.70% |
+| 3 | freq 2.0 | 98.57% | 1968.1 | 2.90% | 1.40% | 1.40% | 0.00% | 1.43% | 100.00% | 85.50% | 95.70% | 44.90% |
+| 4 | freq 2.0 | 98.57% | 1951.4 | 2.90% | 0.00% | 1.40% | 0.00% | 1.08% | 100.00% | 84.10% | 98.60% | 44.90% |
+| 1 | rep 1.0 | 94.29% | 2534.6 | 24.30% | 4.30% | 5.70% | 0.00% | 8.57% | 100.00% | 87.90% | 100.00% | 92.40% |
+| 2 | rep 1.0 | 87.14% | 2718.6 | 20.00% | 0.00% | 12.90% | 0.00% | 8.23% | 100.00% | 86.90% | 100.00% | 95.10% |
+| 3 | rep 1.0 | 91.43% | 2557.9 | 17.10% | 1.40% | 8.60% | 0.00% | 6.78% | 100.00% | 87.50% | 100.00% | 90.60% |
+| 4 | rep 1.0 | 87.14% | 2771.5 | 22.90% | 1.40% | 12.90% | 0.00% | 9.30% | 100.00% | 85.20% | 100.00% | 88.50% |
+| 1 | rep 1.05 | 94.29% | 2251.1 | 7.10% | 0.00% | 5.70% | 0.00% | 3.20% | 100.00% | 83.30% | 100.00% | 84.80% |
+| 2 | rep 1.05 | 95.71% | 2243.5 | 8.60% | 0.00% | 4.30% | 0.00% | 3.23% | 100.00% | 89.60% | 100.00% | 88.10% |
+| 3 | rep 1.05 | 98.57% | 2087.9 | 11.40% | 1.40% | 1.40% | 0.00% | 3.55% | 100.00% | 85.50% | 100.00% | 92.80% |
+| 4 | rep 1.05 | 95.71% | 2285.4 | 17.10% | 2.90% | 4.30% | 0.00% | 6.08% | 100.00% | 89.60% | 100.00% | 88.10% |
+| 1 | rep 1.1 | 100.00% | 2035.8 | 14.30% | 4.30% | 0.00% | 0.00% | 4.65% | 100.00% | 91.40% | 98.60% | 85.70% |
+| 2 | rep 1.1 | 100.00% | 1949 | 15.70% | 0.00% | 0.00% | 0.00% | 3.93% | 100.00% | 85.70% | 100.00% | 82.90% |
+| 3 | rep 1.1 | 100.00% | 1827.6 | 12.90% | 2.90% | 0.00% | 0.00% | 3.95% | 100.00% | 91.40% | 100.00% | 78.60% |
+| 4 | rep 1.1 | 98.57% | 1988.5 | 7.10% | 0.00% | 1.40% | 0.00% | 2.12% | 100.00% | 87.00% | 100.00% | 81.20% |
+| 1 | rep 1.3 | 100.00% | 1641.3 | 1.40% | 8.60% | 0.00% | 0.00% | 2.50% | 100.00% | 87.10% | 80.00% | 68.60% |
+| 2 | rep 1.3 | 98.57% | 1711.9 | 0.00% | 8.60% | 1.40% | 0.00% | 2.50% | 100.00% | 91.30% | 75.40% | 59.40% |
+| 3 | rep 1.3 | 100.00% | 1654.8 | 0.00% | 5.70% | 0.00% | 1.40% | 1.78% | 100.00% | 88.60% | 77.10% | 61.40% |
+| 4 | rep 1.3 | 100.00% | 1509.3 | 0.00% | 5.70% | 0.00% | 0.00% | 1.43% | 100.00% | 90.00% | 78.60% | 61.40% |
 
-- **Loss of benefit:** The benefit in the greedy algorithm (fail ➡️ 0, elimination of runaway behavior) is meaningless at 0.7 because there are no defects to remove, and the remaining iteration suppression is handled by dedup. Only the trade-off (halving of BGM and SFX) remains.
-- **Rep elimination:** When the rep series encounters 0.7, it **introduces new heterogeneous characters** that were not present in the greedy algorithm (0% ➡️ 2% ➡️ 4%, dose-response·replicated 3 times).
-- **Remaining suppression:** Only one potential quality improvement at low frequencies (0–0.5) remains to be verified in the next phase.
+</details>
 
-#### 5. Increased coverage is not a bonus (accuracy takes priority)
+detailsenalty was confirmed to be a lever that significantly boosts completion rates at temperature 0.7. Simply changing freq from 0.0 to 0.5 increased the completion rate from 90% to 99.6% and reduced penalty from 7.0% to 2.0%. However, as the intensity increases, sound coverage decreases proportionally (88% → 79% → 65% → 43%), and it is impossible to determine from the numbers alone whether this reduction represents the removal of redundancy or the loss of information.
 
-- **Possibility of hallucination:** While BGM and SFX coverage increases under high-temperature, no-penalty conditions, this could be overgeneration; therefore, it is treated as neutral at this stage where there is no definitive answer.
-- **Evaluation Principle:** The criterion is not “expressiveness” but **“minimizing obvious defects”** — even if the expression is somewhat lacking, we choose the more accurate option.
-- **Final Judgment:** Determining whether hallucination occurred is the responsibility of the next stage (Gemini F1’s precision).
+#### **Key Metrics Comparison Table**
+
+| **Evaluation Metric** | **Baseline (freq 0.0)** | **freq 0.5 (Candidate)** | **freq 2.0** | **rep 1.3** |
+| --- | --- | --- | --- | --- |
+| **Completion Rate (ok)** | 90.0% | **99.6%** | 98.6% | 99.6% |
+| **Penalty** | 7.0% | **2.0%** | 2.0% | 2.0% |
+| **Sound Coverage** | **88%** | 79% | 43% (Collapse) | 63% (collapse) |
+| **Foreign characters** | 0.7% | 0.4% | 2.5% | **7.2% (explosion)** |
+
+#### 1. Benefits: Completion Rate and Repetitive Braking
+
+- **Normalization of completion rate**
+  - With a frequency of 0.5 alone: OK 90% → 99.6%, finish_len 10% → 0.4%, penalty 7.0% → 2.0%. Reproduced in all 4 runs.
+
+- **Repetition Suppression and Delay Reduction**
+  - Repeat rate: 17% → 7% (freq 0.5) → 5% (freq 1.0). As the output duration shortened, infer_ms also decreased from 2589 to 2012 ms.
+
+#### 2. Trade-off: Concomitant reduction in auditory information (sounds)
+
+- **Intensity-Proportional Reduction**
+  - Sound coverage drops from 88% to 79% (0.5) to 65% (1.0) to 43% (2.0)
+
+- **Uninterpretable barrier**
+  - It is impossible to distinguish whether this is “redundancy removal (good)” or “information deletion (bad)”
+
+- *(Note: summary and actions remain at ~100% across all intervals; OCR also remains at 85–89%)*
+
+#### 3. New defect in Repetition Penalty: Induction of foreign characters
+
+- **Dose-response foreign**
+  - In the rep series, the number of foreign characters increases as the intensity is raised.
+
+:::note
+💾 **Frequency Penalty 0.5 Candidate · Exclude Repetition Penalty**
+The temp 0.7 baseline achieves 90% completion and 10% finish_len—not ideal—but freq 0.5 boosts completion to 99.6%. However, the trade-off involving reduced sound coverage cannot be assessed without a correct answer key. The repetition penalty was excluded because it induces out-of-type characters.
+:::
+
+## 5. Summary and Conclusion
+
+Parameter characteristics fall into three types: early-stage optimal/late-stage collapse (penalty—slightly weak or excessive is detrimental), mid-stage optimal (temperature·top_k—the middle is optimal), and late-stage optimal (top_p—one end is optimal). The characteristics of each interval on each axis, based on the average across runs, are as follows.
+
+#### Characteristic Intervals by Parameter
+
+| **Parameter** | **Characteristic** | **Characteristics by Interval** | **Conclusion** |
+| --- | --- | --- | --- |
+| **temperature** | Mid-stage Optimal Type | 0.0–0.3 Stagnation (OK ~83%·foreign 0) **0.3–0.7: Improvement** (penalty 7.5%—lowest) 0.7–1.0: Completion rate ↑·foreign 35% surge·penalty doubled | **0.7 confirmed** · 0.3 accuracy comparison serves as a safety measure |
+| **top_k** | Mid-term Optimal | k=1 Overfitting (ok 82%·finish 18%) **k≈10 Peak** (OK 92.5%·Penalty 6.7%) k=50–Unlimited: Gradual decline (OK 88–91%) | Default -1 · **k=10 Candidate** |
+| **top_p** | Late-stage optimal | 0.5 Worst-case (ok 79%·finish 21%) 0.8–0.95 Gradual improvement (ok 85→87.5%) **1.0 Best** (ok 90%·finish 10%), no internal vertices | **1.0 (off)** |
+| **frequency_penalty** | Initial Optimal·Late Collapse Type | **0–0.5 Rapid Improvement** (ok 90→99.6%·penalty 7→2%) 0.5–1.0 Conformity saturation (gain noise)·sounds 79→65% 1.0–2.0 Collapse (sounds 43%) | **0–0.5 Candidates** · >1.0 Loss |
+| **repetition_penalty** | Early optimization·late collapse type | 1.0–1.1 Completion rate improvement (ok 90→99.6%) **1.1–1.3 foreign 1.8→7.2%·actions 100→78% collapse** | **Excluded** |
+
+#### 1. The completion rate indicates the presence of a convergence interval for Temperature
+
+- **Greedy(0.0) is the weakest**
+  - 83% completion (≈58/70) · 17% incomplete (finish_len); gets stuck in a loop and runs amok up to `max_tokens`.
+
+  - **temp 0.7 is the optimal point at 88% (≈61/70)·12.5%**.
+
+  - In the current server configuration, the same settings fluctuate from run to run, so the “stability”—supposedly an advantage of low temperatures—is not guaranteed
+
+- **The trade-off for **High Temperature** is heterogeneous characters**
+  - It skyrockets to 35% only at 1.0, while ranging from 0% to 0.35% sporadically between 0.0 and 0.7
+
+  - The equilibrium point with the lowest penalty (7.5%) was **temperature 0.7.**
+
+#### 2. The Frequency Penalty parameter is key to iterative improvements
+
+- **Confirmed improvement in completion rate**
+  - At freq 0.5, the completion rate increased from 90% to 99.6%
+
+  - Reduced the penalty from 7.0% to 2.0%
+
+- **The trade-off is sound coverage**
+  - Decreased from 88% to 43% in proportion to intensity; however, without a ground truth, it is difficult to determine whether this represents the removal of redundant data or the loss of information
 
 ## 6. Conclusion
 
-### 6.1. Parameter Leverage Rankings and Directions
+We narrowed the scope using OFAT to the limit of what can be determined **solely by output**. The finalized values and fine-tuning ranges are as follows.
 
-We calculated the leverage of each parameter based on compliance violations (mixed characters, incompleteness, token loops) that remain even after applying dedup. `clean%` = Percentage of records with 0 violations; the range represents the worst ➡️ best on that axis.
+| **Parameter** | **Conclusion** | **Status** |
+| --- | --- | --- |
+| **temperature** | 0.7 — avoids greedy runaway; 1.0 avoids mixed characters (room for future improvement) | Finalized |
+| **top_p / top_k** | Maintain 1.0 / -1 (top_k 10 completion candidates) | Finalized |
+| **frequency penalty** | 0–0.5 — Simultaneous improvement in completion and repetition, but reduction in sounds | Range |
+| **repetition penalty** | Causes mixed characters | Excluded |
 
-| **Priority** | **Parameter** | **Leverage (clean%)** | **Conclusion** |
-| --- | --- | --- | --- |
-| 1 | **temperature** | 74 ➡️ **98%** (high) | **0.7 confirmed** — simultaneously avoids greedy runaway and 1.0 mixed characters |
-| 2 | **freq / rep penalty** | 89 ➡️ 100% (medium) | **OFF confirmed** — No benefit at 0.7; rep is eliminated due to causing mixed characters. Only a small amount of freq will be verified in the next step |
-| 3 | top_k / top_p | 89 ➡️ 96% (low) | **Keep default values (1.0 / -1)** — Tightening settings only lowers completion rate |
-| - | fps · enable_thinking | (measured separately) | Decide after re-measuring with temp fixed at 0.7 (to be done last) |
-
-### 6.2. Finalized Input Parameters (Baseline)
-
-This is the **baseline**, finalized based on the above analysis, prior to the quality objective function (next step).
-
-| **Parameter** | **Value** | **Rationale** | **Finalized** |
-| --- | --- | --- | --- |
-| `temperature` | **0.7** | Highest completion rate (68/70) · finish_len 1% · mixed characters 0–1% · clean 98%. Greedy does not guarantee determinism | ✅ Confirmed |
-| `top_p` / `top_k` | **1.0 / -1** | Tightening parameters causes regression to greedy, resulting in a drop in completion rate — maintain full sampling | ✅ Confirmed |
-| `frequency_penalty` | **0.0** | At temp 0.7, there are no defects to remove (reinforced measurement in §4.2-3). Iterations are handled losslessly by dedup | ✅ Confirmed OFF (only a small quality gain of 0–0.5 will be carried over to the next stage) |
-| `repetition_penalty` | **1.0 (off)** | Causes character corruption when combined with temp 0.7 (0 ➡️ 2 ➡️ 4% capacity-response) | ✅ Confirmed to be eliminated |
-| `max_tokens` | 512 | BLAST-radius cap — Normal (unflagged) output max 460 tokens, approx. 10% margin | ✅ Confirmed |
-| **dedup (post-processing)** | **ON** | Normalized exact deduplication, 0 information loss | ✅ Confirmed |
-| `fps` | 0.5 (provisional) | Token-efficient. Re-evaluate after separate measurement of temp 0.7 anchor | ⚠️ Tentative |
-
-**Reason for setting the penalty to 0:** The benefits observed in the greedy method disappear in the baseline (temp 0.7) (supplementary measurements in §4.2-3), leaving only auditory information loss (BGM·SFX 49%/51% ➡️ 21%/25% at freq 0.5) and the introduction of heterophones in rep. Repetitions are handled losslessly by dedup. While we leave open the hypothesis that a small amount of freq may be advantageous in terms of quality (F1), we do not discard information in advance before measurement.
-
-:::info
-🎯 **Confidence Label (Post Integrity)**
-
-- ✅ **This Stage Finalized** (No answer key required): temperature 0.7 · default top_p/top_k values · penalty OFF (including rep elimination) · dedup ON · max_tokens 512
-- ⚠️ **Next Step** (Answer Key Required): Determine whether there is a quality gain with low freq (0–0.5) · Cross-validation of hallucination (precision) at temp 0.3 vs. 0.7 · fps · thinking · Overall quality (completeness · accuracy)
-:::
-
-### 6.3. Handoff to the Next Step
-
-After defining the quality objective function (Gemini ground truth), we only perform the search narrowed down by this step.
-
-1. **Start with fixed baseline:** `temp 0.7 · top_p 1.0 · top_k -1 · 페널티 OFF · dedup ON · max_tokens 512` — This is the confirmed value for this. 
-2. **1D sweep on only the freq axis:** Determine the optimal size by testing freq 0–0.5 against Gemini F1. Since rep was eliminated due to heteroglyph-induced issues, it is not re-enabled (including the prohibition on double suppression).
-3. **Cross-validation of temp 0.3 vs. 0.7:** We use F1 precision to test the directional hypothesis that “higher temperatures lead to increased hallucinations.” This serves as a safeguard to verify whether the
-4. **Separate measurement for FPS and enable_thinking** Re-measure with a temp of 0.7 and an anchor, then add it to §4. The trade-off between tokens/latency vs. detail will be evaluated using the ground truth
-
-This stage has drawn conclusions up to the limit of what can be determined without an answer key—**the baseline has been established**, and the trade-offs between quality (hallucinations and completeness) and minor penalties and fps will be addressed in the next stage. The principle of drawing conclusions only on measurable factors remains unchanged.
+**In the next document**, we will use the confirmed values as a starting point and determine the final values by synthesizing the numerical characteristics revealed by the parameters (frequency penalty, top_k, temperature) and OFAT.
 

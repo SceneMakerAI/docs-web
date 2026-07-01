@@ -3,7 +3,7 @@ title: "Installing Milvus (AWS Linux + Docker Compose)"
 sidebar_position: 3
 slug: "3"
 last_update:
-  date: 2026-06-22
+  date: 2026-06-23
 ---
 
 
@@ -51,12 +51,15 @@ Install docker-compose separately.
 # 4. Verifying that Docker Compose is Working Properly
 > docker compose version
 Docker Compose version v5.1.4
-> 
+> systemctl start docker
+> systemctl enable docker
 ```
 
 ---
 
-##  3. Install Milvus
+##
+
+ 3. Install Milvus
 
 ### 3.1 Install Mulvus
 
@@ -146,8 +149,8 @@ services:
 ### 4.1 Attu Configuration
 
 - Open the AWS firewall
-- Access: [http://<host_ip>:8000/](http://54.116.216.7:8000/#/connect)
-- Since they are isolated from each other via Docker, 127.0.0.1 will not work.
+- Access: http://<host_ip>:8000/
+- Since the services are isolated from each other via Docker, 127.0.0.1 will not work.
 
 ![image](/img/install/milvus-설치-aws-linux-docker-compose/img-00.png)
 

@@ -6,7 +6,7 @@ description: "vLLM Multimodal Processor Cache Bug — StopIteration (400) due to
 tags: [ai]
 keywords: [vllm, qwen3-omni, use_audio_in_video, mm_processor_cache, StopIteration]
 last_update:
-  date: 2026-06-04
+  date: 2026-06-25
 ---
 
 Collection of vLLM (`vllm-project/vllm`) open-source contributions. Each issue/PR is organized on a subpage.
