@@ -902,6 +902,21 @@ def remove_orphans(synced_files, previously_tracked):
         index_path = os.path.join(dpath, "index.md")
         if index_path not in previously_tracked:
             continue  # sync가 만들지 않은 디렉토리는 건드리지 않음
+        # 디렉토리 내부의 개별 orphan 파일 정리 (자식 페이지 하나만 Notion에서 삭제된 경우)
+        for fname in os.listdir(dpath):
+            if fname in SKIP_FILES or fname.startswith("."):
+                continue
+            if not (fname.endswith(".md") or fname.endswith(".mdx")):
+                continue
+            fpath = os.path.join(dpath, fname)
+            if fpath in previously_tracked and fpath not in synced_files:
+                os.remove(fpath)
+                log(f"미추적 파일 삭제: {fpath}")
+                slug = os.path.splitext(fname)[0]
+                img_dir = f"static/img/{section}/{slug}"
+                if os.path.isdir(img_dir):
+                    shutil.rmtree(img_dir)
+                    log(f"연관 이미지 삭제: {img_dir}")
         # 해당 디렉토리의 모든 파일이 synced_files에서 제거됐는지 확인
         remaining = [f for f in synced_files if f.startswith(dpath + os.sep)]
         if not remaining:
