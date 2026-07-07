@@ -91,6 +91,37 @@ class TestRemoveOrphans:
         assert not os.path.exists(deleted_path), "삭제 대상 파일이 남아 있음"
         assert os.path.exists(kept_path), "보존 대상 파일이 삭제됨"
 
+    def test_orphan_inside_subdir_deleted(self):
+        """서브디렉토리 내부에서 Notion 페이지 하나만 삭제된 경우 해당 orphan .md만 제거.
+
+        vision-bench/ 처럼 다른 파일이 살아있는 부모 디렉토리에서 자식 페이지 하나가
+        Notion에서 삭제되면, 그 orphan .md 파일이 삭제되어야 한다 (사이드바 중복 방지).
+        """
+        parent_index = self._create_file("vision-bench/index.md")
+        orphan_child = self._create_file("vision-bench/old-page.md")
+        active_child = self._create_file("vision-bench/new-page.md")
+        previously_tracked = {parent_index, orphan_child, active_child}
+        synced_files = {parent_index, active_child}  # old-page.md만 Notion에서 삭제됨
+
+        with patch.object(n, "SAVE_DIR", self.tmpdir):
+            n.remove_orphans(synced_files, previously_tracked)
+
+        assert not os.path.exists(orphan_child), "서브디렉토리 내부 orphan 파일이 남아 있음"
+        assert os.path.exists(active_child), "동기화된 자식 파일이 삭제됨"
+        assert os.path.exists(parent_index), "부모 index.md가 삭제됨"
+
+    def test_manual_file_inside_subdir_preserved(self):
+        """서브디렉토리 내부의 수동 작성 파일(sync map에 없음)은 삭제되지 않음."""
+        parent_index = self._create_file("vision-bench/index.md")
+        manual_child = self._create_file("vision-bench/manual.md")
+        previously_tracked = {parent_index}  # manual.md는 sync가 만든 게 아님
+        synced_files = {parent_index}
+
+        with patch.object(n, "SAVE_DIR", self.tmpdir):
+            n.remove_orphans(synced_files, previously_tracked)
+
+        assert os.path.exists(manual_child), "서브디렉토리 내부 수동 파일이 삭제됨"
+
 
 # ── TC-5: last_edited 기반 스킵 ───────────────────────────────────────────────
 
