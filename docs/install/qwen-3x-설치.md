@@ -4,7 +4,7 @@ title: "Qwen 3.x 설치"
 sidebar_position: 1
 slug: "1"
 last_update:
-  date: 2026-06-24
+  date: 2026-07-07
 ---
 
 ## AWS 서버 세팅
@@ -214,7 +214,10 @@ nvme0n1       259:0    0    2T  0 disk
 ├─nvme0n1p127 259:3    0    1M  0 part 
 └─nvme0n1p128 259:4    0   10M  0 part /boot/efi
 nvme1n1       259:1    0  1.7T  0 disk 
-> 
+> lsblk -d -o NAME,MODEL,SIZE
+NAME    MODEL                             SIZE
+nvme0n1 Amazon Elastic Block Store        300G
+nvme1n1 Amazon EC2 NVMe Instance Storage  3.5T
 ```
 
 
@@ -370,6 +373,7 @@ Python 3.12.13
 #### Torch 설치
 
 - sm_120 미포함이면 절대 진행 금지 (Balckwell GPU 에서 필요)
+  - sm_100 / sm_120 : 블랙웰 (Blackwell), RTX 5090, 5080 등 RTX 50 시리즈 등을 지원하는 아키텍처
 
 ```bash
 (vllm-svc) > uv pip install \
