@@ -814,6 +814,13 @@ class TestInsertTruncateMarker:
         assert "![image](/img/x.png)" in excerpt
         assert "본문 텍스트." not in excerpt
 
+    def test_leading_divider_skipped(self):
+        # 제목 바로 뒤 구분선(---)은 콘텐츠로 취급하지 않고, 그 뒤 첫 문단이 excerpt에 포함
+        body = "### **개요**\n\n---\n\n개발 과정에서 달마다 글을 작성하기로 했다.\n\n다음 문단.\n"
+        excerpt, rest = self._split(body)
+        assert "개발 과정에서 달마다 글을 작성하기로 했다." in excerpt
+        assert "다음 문단." not in excerpt
+
     def test_divider_not_treated_as_boundary(self):
         # section-break 구분선이 첫 문단보다 뒤에 있으면 excerpt는 첫 문단까지만
         body = "### 개요\n\n첫 문단.\n\n---\n\n### 다음 섹션\n내용\n"
