@@ -3,10 +3,10 @@ id: ci빌드-v1completions-엔드포인트에서-bad-words를-지원
 title: "[CI/빌드]  /v1/completions 엔드포인트에서 bad_words를 지원"
 sidebar_position: 4
 slug: "4"
-tags: [PR]
-keywords: [PR]
+tags: [PR, Merged]
+keywords: [PR, Merged]
 last_update:
-  date: 2026-06-26
+  date: 2026-07-09
 ---
 
 
