@@ -379,14 +379,19 @@ def download_image(url: str, slug: str, index: int) -> str:
         ext = ".jpg"
     filename = f"img-{index:02d}{ext}"
     filepath = f"{save_dir}/{filename}"
-    if not os.path.exists(filepath):
-        r = requests.get(url, timeout=30)
-        r.raise_for_status()
-        with open(filepath, "wb") as f:
-            f.write(r.content)
-        log(f"이미지 저장: {filepath}")
-    else:
-        log(f"이미지 캐시: {filepath}")
+    # Notion 이미지 URL은 매번 바뀌므로(서명 URL) 파일명 존재만으로 캐시하면
+    # 교체된 이미지가 반영되지 않는다. 항상 내려받아 내용이 다를 때만 덮어쓴다.
+    r = requests.get(url, timeout=30)
+    r.raise_for_status()
+    new_content = r.content
+    if os.path.exists(filepath):
+        with open(filepath, "rb") as f:
+            if f.read() == new_content:
+                log(f"이미지 변경 없음: {filepath}")
+                return f"/img/{_last_seg}/{slug}/{filename}"
+    with open(filepath, "wb") as f:
+        f.write(new_content)
+    log(f"이미지 저장: {filepath}")
     return f"/img/{_last_seg}/{slug}/{filename}"
 
 

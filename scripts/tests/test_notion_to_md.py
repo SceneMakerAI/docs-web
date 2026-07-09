@@ -5,6 +5,7 @@ TC-5: last_edited 기반 스킵 (불필요한 파일 덮어쓰기 방지)
 import hashlib
 import json
 import os
+import shutil
 import sys
 import tempfile
 from pathlib import Path
@@ -632,6 +633,55 @@ class TestShiftEnterLineBreak:
         """여러 Shift+Enter가 모두 hard break으로 변환."""
         out = self._render("A\nB\nC")
         assert "A  \nB  \nC" in out
+
+
+# ── 이미지 재다운로드: Notion 이미지 교체 시 같은 index 파일 덮어쓰기 ──────────
+
+class TestDownloadImageRedownload:
+    """Notion에서 이미지를 교체하면 URL은 바뀌지만 img-NN 파일명은 동일하다.
+    파일이 존재해도 새 내용이면 덮어써야 stale 이미지가 남지 않는다."""
+
+    def setup_method(self):
+        self.tmpdir = tempfile.mkdtemp()
+        self._orig = n.STATIC_IMG_DIR
+        n.STATIC_IMG_DIR = self.tmpdir
+
+    def teardown_method(self):
+        n.STATIC_IMG_DIR = self._orig
+        shutil.rmtree(self.tmpdir, ignore_errors=True)
+
+    def _mock_response(self, content):
+        m = MagicMock()
+        m.content = content
+        m.raise_for_status = lambda: None
+        return m
+
+    def _prewrite(self, content):
+        save_dir = os.path.join(self.tmpdir, "blog", "x")
+        os.makedirs(save_dir, exist_ok=True)
+        path = os.path.join(save_dir, "img-00.png")
+        with open(path, "wb") as f:
+            f.write(content)
+        return path
+
+    @patch.object(n, "requests")
+    def test_overwrites_when_content_changed(self, mock_requests):
+        path = self._prewrite(b"OLD-IMAGE")
+        mock_requests.get.return_value = self._mock_response(b"NEW-IMAGE")
+        n.download_image("https://notion/new.png", "blog/x", 0)
+        with open(path, "rb") as f:
+            assert f.read() == b"NEW-IMAGE"
+
+    @patch.object(n, "requests")
+    def test_no_rewrite_when_identical(self, mock_requests):
+        # 내용 동일 시 재기록하지 않아 git churn 방지 (mtime 유지)
+        path = self._prewrite(b"SAME-IMAGE")
+        os.utime(path, (1_000_000, 1_000_000))
+        mock_requests.get.return_value = self._mock_response(b"SAME-IMAGE")
+        n.download_image("https://notion/x.png", "blog/x", 0)
+        assert os.path.getmtime(path) == 1_000_000
+        with open(path, "rb") as f:
+            assert f.read() == b"SAME-IMAGE"
 
 
 # ── 리스트 항목의 이미지 자식은 최상위(전체 폭)로 hoist ──────────────────────
