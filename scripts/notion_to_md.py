@@ -685,8 +685,14 @@ def _insert_truncate_marker(body):
     if "<!--truncate-->" in body:
         return body
     lines = body.split("\n")
+
+    def _skippable(line):
+        stripped = line.strip()
+        # 빈 줄·제목·구분선은 excerpt의 첫 콘텐츠로 취급하지 않는다
+        return stripped == "" or bool(re.match(r"#{1,6}\s", line)) or re.fullmatch(r"-{3,}", stripped)
+
     i = 0
-    while i < len(lines) and (lines[i].strip() == "" or re.match(r"#{1,6}\s", lines[i])):
+    while i < len(lines) and _skippable(lines[i]):
         i += 1
     if i >= len(lines):
         return body
