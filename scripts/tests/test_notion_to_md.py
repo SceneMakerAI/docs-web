@@ -759,3 +759,75 @@ class TestChildPageBlock:
         }
         result = self._render(block)
         assert result == ""
+
+
+# ── 블로그 truncate 마커 배치 (_insert_truncate_marker) ──────────────────────
+
+class TestInsertTruncateMarker:
+    """BLOG_MODE excerpt 경계용 <!--truncate--> 삽입 규칙.
+
+    규칙: 선행 제목(#...)은 excerpt에 남기고, 첫 실제 콘텐츠 블록 뒤에 삽입.
+    """
+
+    def _split(self, body):
+        result = n._insert_truncate_marker(body)
+        assert result.count("<!--truncate-->") == 1
+        excerpt, rest = result.split("<!--truncate-->", 1)
+        return excerpt, rest
+
+    def test_leading_heading_then_paragraph(self):
+        # 05번 글 케이스: 빈 제목 뒤 첫 문단이 excerpt에 포함되어야 함
+        body = "### **개요**\n\n개발 과정에서 달마다 글을 작성하기로 했다.\n\n다음 문단.\n"
+        excerpt, rest = self._split(body)
+        assert "### **개요**" in excerpt
+        assert "개발 과정에서 달마다 글을 작성하기로 했다." in excerpt
+        assert "다음 문단." not in excerpt
+        assert "다음 문단." in rest
+
+    def test_leading_list_block(self):
+        # 06번 글 케이스: 선행 제목 없이 불릿 리스트가 첫 콘텐츠 → 리스트 전체가 excerpt
+        body = "- 프로젝트 소개\n- Qwen3.6 VLM 적용기\n\n### 프로젝트 소개\n본문\n"
+        excerpt, rest = self._split(body)
+        assert "- 프로젝트 소개" in excerpt
+        assert "- Qwen3.6 VLM 적용기" in excerpt
+        assert "### 프로젝트 소개" not in excerpt
+        assert "### 프로젝트 소개" in rest
+
+    def test_multiple_leading_headings(self):
+        body = "# 제목\n\n## 소제목\n\n첫 문단.\n\n둘째 문단.\n"
+        excerpt, rest = self._split(body)
+        assert "# 제목" in excerpt
+        assert "## 소제목" in excerpt
+        assert "첫 문단." in excerpt
+        assert "둘째 문단." not in excerpt
+
+    def test_paragraph_first_no_heading(self):
+        body = "첫 문단.\n\n둘째 문단.\n"
+        excerpt, rest = self._split(body)
+        assert "첫 문단." in excerpt
+        assert "둘째 문단." not in excerpt
+
+    def test_image_as_first_content_block(self):
+        body = "### 개요\n\n![image](/img/x.png)\n\n본문 텍스트.\n"
+        excerpt, rest = self._split(body)
+        assert "### 개요" in excerpt
+        assert "![image](/img/x.png)" in excerpt
+        assert "본문 텍스트." not in excerpt
+
+    def test_divider_not_treated_as_boundary(self):
+        # section-break 구분선이 첫 문단보다 뒤에 있으면 excerpt는 첫 문단까지만
+        body = "### 개요\n\n첫 문단.\n\n---\n\n### 다음 섹션\n내용\n"
+        excerpt, rest = self._split(body)
+        assert "첫 문단." in excerpt
+        assert "다음 섹션" not in excerpt
+
+    def test_already_has_truncate_unchanged(self):
+        body = "### 개요\n\n<!--truncate-->\n\n본문\n"
+        assert n._insert_truncate_marker(body) == body
+
+    def test_only_headings_no_content(self):
+        # 콘텐츠 블록이 없으면 마커 삽입하지 않음
+        body = "### 개요\n\n### 다른 제목\n"
+        result = n._insert_truncate_marker(body)
+        assert "<!--truncate-->" not in result
+        assert result == body

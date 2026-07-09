@@ -675,6 +675,28 @@ def save_sync_map(mapping):
         json.dump(mapping, f, ensure_ascii=False, indent=2)
 
 
+def _insert_truncate_marker(body):
+    """블로그 excerpt 경계용 <!--truncate--> 삽입.
+
+    선행 제목(#...)은 excerpt에 남기고, 첫 실제 콘텐츠 블록이 끝나는 지점 뒤에
+    마커를 넣는다. 콘텐츠 블록이 없으면(제목/빈 줄만) 원본을 그대로 반환한다.
+    section-break 구분선을 excerpt 경계로 오인하지 않는다.
+    """
+    if "<!--truncate-->" in body:
+        return body
+    lines = body.split("\n")
+    i = 0
+    while i < len(lines) and (lines[i].strip() == "" or re.match(r"#{1,6}\s", lines[i])):
+        i += 1
+    if i >= len(lines):
+        return body
+    j = i
+    while j < len(lines) and lines[j].strip() != "":
+        j += 1
+    head = "\n".join(lines[:j])
+    tail = "\n".join(lines[j:]).lstrip("\n")
+    return head + "\n\n<!--truncate-->\n\n" + tail
+
 
 def save_doc_page(page, position, existing_map, parent_slug=None, is_parent=False):
     """Notion 페이지를 Markdown 파일로 저장한다.
@@ -763,16 +785,8 @@ def save_doc_page(page, position, existing_map, parent_slug=None, is_parent=Fals
     safe_title = title.replace('"', '\\"')
 
     if BLOG_MODE:
-        # truncate 마커 삽입: Notion 구분선 우선, 없으면 첫 단락 뒤에 자동 삽입
-        if "\n---\n" in body:
-            body = body.replace("\n---\n", "\n\n<!--truncate-->\n\n", 1)
-        else:
-            stripped = body.lstrip("\n")
-            match = re.search(r"\n\n", stripped)
-            if match:
-                offset = len(body) - len(stripped)
-                pos = offset + match.end()
-                body = body[:pos] + "<!--truncate-->\n\n" + body[pos:]
+        # truncate 마커 삽입: 선행 제목은 excerpt에 남기고 첫 콘텐츠 블록 뒤에 삽입
+        body = _insert_truncate_marker(body)
 
         authors_list = read_multi_select(props, NOTION_PROPERTY_AUTHORS)
         if not authors_list:
