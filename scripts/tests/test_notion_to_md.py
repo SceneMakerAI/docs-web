@@ -634,6 +634,52 @@ class TestShiftEnterLineBreak:
         assert "A  \nB  \nC" in out
 
 
+# ── 리스트 항목의 이미지 자식은 최상위(전체 폭)로 hoist ──────────────────────
+
+class TestListItemImageHoisting:
+    """Notion에서 이미지가 불릿/번호 항목의 자식으로 들어가면 들여쓰기 없이
+    최상위 블록(전체 폭)으로 렌더되어야 한다. 텍스트 자식은 기존대로 들여쓰기 유지."""
+
+    def _rt(self, text):
+        return [{"plain_text": text, "annotations": {"code": False, "bold": False, "italic": False, "strikethrough": False}, "href": None}]
+
+    def _image_child(self, url="https://notion/x.png"):
+        return {"type": "image", "id": "img-1", "image": {"file": {"url": url}}, "has_children": False}
+
+    def _list_block(self, b_type, text, children):
+        return {"type": b_type, b_type: {"rich_text": self._rt(text)}, "_children": children, "has_children": bool(children)}
+
+    @patch.object(n, "download_image", return_value="/img/blog/x/img-00.png")
+    def test_bulleted_image_child_hoisted(self, _dl):
+        block = self._list_block("bulleted_list_item", "서버에 나타난다", [self._image_child()])
+        out = n.block_to_markdown(block, "blog/x", [0])
+        img_line = next(l for l in out.splitlines() if "![image]" in l)
+        assert img_line == "![image](/img/blog/x/img-00.png)", f"이미지가 들여쓰기됨: {img_line!r}"
+        assert "- 서버에 나타난다\n\n![image](/img/blog/x/img-00.png)" in out
+
+    @patch.object(n, "download_image", return_value="/img/blog/x/img-00.png")
+    def test_numbered_image_child_hoisted(self, _dl):
+        block = self._list_block("numbered_list_item", "결과", [self._image_child()])
+        out = n.block_to_markdown(block, "blog/x", [0], 3)
+        img_line = next(l for l in out.splitlines() if "![image]" in l)
+        assert img_line == "![image](/img/blog/x/img-00.png)", f"이미지가 들여쓰기됨: {img_line!r}"
+        assert "3. 결과\n\n![image](/img/blog/x/img-00.png)" in out
+
+    def test_non_image_child_still_indented(self):
+        # 회귀: 텍스트 자식(중첩 불릿)은 여전히 2칸 들여쓰기 유지
+        child = self._list_block("bulleted_list_item", "중첩 항목", [])
+        block = self._list_block("bulleted_list_item", "부모", [child])
+        out = n.block_to_markdown(block, "blog/x", [0])
+        assert "  - 중첩 항목" in out
+
+    @patch.object(n, "download_image", return_value="/img/blog/x/img-00.png")
+    def test_image_counter_increments(self, _dl):
+        block = self._list_block("bulleted_list_item", "설명", [self._image_child()])
+        counter = [5]
+        n.block_to_markdown(block, "blog/x", counter)
+        assert counter[0] == 6
+
+
 # ── TC-14: toggle summary 인라인 마크다운 → HTML 변환 ──────────────────────────
 
 class TestToggleSummaryInlineMarkdown:

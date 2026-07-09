@@ -402,6 +402,15 @@ def block_to_markdown(block, slug, image_counter, item_num=1):
     def render_children():
         return "".join(block_to_markdown(c, slug, image_counter) for c in children)
 
+    def render_children_hoist_images():
+        # 리스트 항목의 직속 이미지 자식은 들여쓰기하면 좁게 렌더되므로
+        # 최상위(전체 폭) 블록으로 분리한다. 문서 순서대로 렌더해 카운터 일관성 유지.
+        nested, hoisted = [], []
+        for c in children:
+            rendered = block_to_markdown(c, slug, image_counter)
+            (hoisted if c["type"] == "image" else nested).append(rendered)
+        return "".join(nested), "".join(hoisted)
+
     if b_type == "table":
         if not children:
             return ""
@@ -464,7 +473,9 @@ def block_to_markdown(block, slug, image_counter, item_num=1):
     ):  # callout은 아래 elif에서 별도 처리 — 이 tuple 포함은 rich_text 추출용
         rich_text = block[b_type].get("rich_text", [])
         content = extract_text_from_rich_text(rich_text)
-        child_md = render_children()
+        # 리스트 항목은 render_children_hoist_images()로 별도 렌더 — 여기서 렌더하면
+        # 이미지가 이중 렌더되고 image_counter가 두 번 증가한다.
+        child_md = "" if b_type in ("bulleted_list_item", "numbered_list_item") else render_children()
         if b_type == "paragraph":
             # 단일 멀티라인 인라인 코드 (`...\n...`) → fenced code block
             # CommonMark 파서가 인라인 코드 내 \n을 공백으로 치환하므로 선변환 필요
@@ -486,13 +497,13 @@ def block_to_markdown(block, slug, image_counter, item_num=1):
         elif b_type == "bulleted_list_item":
             # "2. 내용" 같이 숫자+점으로 시작하면 GFM이 nested ordered list로 파싱 — 이스케이프
             safe = re.sub(r'^(\d+)\. ', r'\1\\. ', content)
-            if child_md:
-                return f"- {safe}\n{indent_md(child_md)}\n"
-            return f"- {safe}\n\n"
+            nested, hoisted = render_children_hoist_images()
+            item = f"- {safe}\n{indent_md(nested)}\n" if nested else f"- {safe}\n\n"
+            return item + hoisted
         elif b_type == "numbered_list_item":
-            if child_md:
-                return f"{item_num}. {content}\n{indent_md(child_md, '   ')}\n"
-            return f"{item_num}. {content}\n\n"
+            nested, hoisted = render_children_hoist_images()
+            item = f"{item_num}. {content}\n{indent_md(nested, '   ')}\n" if nested else f"{item_num}. {content}\n\n"
+            return item + hoisted
         elif b_type == "to_do":
             checked = "[x]" if block["to_do"]["checked"] else "[ ]"
             return f"- {checked} {content}\n\n" + child_md
