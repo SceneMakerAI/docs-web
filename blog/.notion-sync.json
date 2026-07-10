@@ -12,5 +12,19 @@
     "content_hash": "f32ceebabdb5e7dbb7bfd88b61e09322625ccb172afa0dea06950677768036e3",
     "order": 2,
     "parent_id": null
+  },
+  "399e15b4-0359-8061-8695-ec051ca2bc89": {
+    "file": "blog/2026-07-10-07-faster-whisper-한국어-음성인식-최적화-경험-공유.md",
+    "last_edited": "2026-07-10T06:32:00.000Z",
+    "content_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "order": 3,
+    "parent_id": null
+  },
+  "399e15b4-0359-80bc-a362-f310d7425d86": {
+    "file": "blog/2026-07-10-07-음성분석-처리-결과-1건-공유.md",
+    "last_edited": "2026-07-10T06:22:00.000Z",
+    "content_hash": "28a4a9f8f1e995d81f13b2b216abed74f32eb5c3c19b558785bae391a9c64c1e",
+    "order": 4,
+    "parent_id": null
   }
 }
