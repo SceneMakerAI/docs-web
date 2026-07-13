@@ -15,15 +15,15 @@
   },
   "399e15b4-0359-8061-8695-ec051ca2bc89": {
     "file": "blog/2026-07-10-07-faster-whisper-한국어-음성인식-최적화-경험-공유.md",
-    "last_edited": "2026-07-13T07:05:00.000Z",
-    "content_hash": "b8c4b85ef2ccf32a2cf3eb24d1c38a6e24a3c2d339027246d81cd05a7bb372e6",
+    "last_edited": "2026-07-13T08:26:00.000Z",
+    "content_hash": "d01b2a673ab736025d03a1da8d24d7806395edb732af2fc83d491d16eb3844fd",
     "order": 3,
     "parent_id": null
   },
   "399e15b4-0359-80bc-a362-f310d7425d86": {
     "file": "blog/2026-07-10-07-음성분석-처리-과정-및-결과.md",
-    "last_edited": "2026-07-13T05:10:00.000Z",
-    "content_hash": "461521fea49839d624c996b3d1810ce0cec9537f417bcff4bef5b2e1a032e90f",
+    "last_edited": "2026-07-13T08:12:00.000Z",
+    "content_hash": "c574481f67998746c09ecb478b07989676da8014ccf5c3cdc901973df0b05aeb",
     "order": 4,
     "parent_id": null
   },
