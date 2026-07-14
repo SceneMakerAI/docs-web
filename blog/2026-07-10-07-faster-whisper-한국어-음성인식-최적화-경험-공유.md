@@ -12,30 +12,155 @@ last_update:
 
 ---
 
-
-음성인식 최적화 경험은 해당 PoC 참고하여 재기재
+faster-whisper-large-v3 로 음성 인식 작업을 진행하였다. 
 
 <!--truncate-->
 
-[https://doc.scenemaker.solbox.com/docs/poc/audio-bench/1](https://doc.scenemaker.solbox.com/docs/poc/audio-bench/1)
+최적화를 진행하였으며, 구체적 과정은 
 
-**4. 시스템 설계 + 환각 처리  > 4.1 Whisper 측** 
+1. transcribe 실행. segment 결과 추출
+2. for 루프 검사, 결과물 필터하여 모델 최적화
 
-내용을 기재하면 됨. 
+라고 할 수 있다. 
 
-- poc/poc-stt-bench 내부 코드 확인
-- 레퍼런스 글 확인 및  간단 정리
 
-| 최적화 | 무엇 | 효과 |
-| --- | --- | --- |
-| **Strategy 2** | VAD/LID=raw, STT=denoise | 감지 정확도 + 전사 품질 둘 다 |
-| **언어 티어링** | Whisper 못하는 언어 버림 (nl/zh/vi 오판 차단) | 환각 제거 |
-| **LID 신뢰도 게이트** | 저신뢰 비-한국어 → 한국어 강제 | 한국어 특화 |
-| **logprob 필터** | 확신 낮은 세그먼트 drop | 환각 제거 |
-| **VAD 튜닝** | 단음절 버림, 발화 단위 분할 | 경계 오류 방지 |
-| **LLM 후처리 교정** | Qwen 1차 교정 (물고지→물고기) | 오탈자·동음이의 |
+---
 
-### 마무리
+### 1. transcribe 
+
+```python
+# poc-stt-bench/ib/audio/whisper/whisper_stt.py
+# Line 97
+
+def _do_transcribe(audio_np: np.ndarray, language: str) -> tuple[list, float]:
+    """Call faster-whisper transcribe. Returns segments (list) + mean avg_logprob.
+
+    When segments are empty, logprob = -inf (automatic loss in dual comparison).
+    """
+    segments_gen, _info = _model.transcribe(
+        audio_np,
+        language=language,
+        beam_size=5,
+        no_speech_threshold=0.6,
+        log_prob_threshold=-1.0,
+        compression_ratio_threshold=2.4,
+        condition_on_previous_text=False,
+        repetition_penalty=1.2,
+        no_repeat_ngram_size=3,
+    )
+    segs = list(segments_gen)
+    if not segs:
+        return segs, float("-inf")
+    return segs, sum(s.avg_logprob for s in segs) / len(segs)
+```
+
+- 해당 파라미터 값 (beam_size, log_prob_threshold 등) 은, 패키지 함수 시그니처에 있는 것과 동일함을 확인
+
+
+### 2. 결과물 필터
+
+2-1)
+
+2-2)
+
+2-3)
+
+2-4)
+
+2-5) 
+
+```python
+MIN_LOGPROB = -1.0       # drop if avg_logprob < this. catch-all for hallucinations
+MIN_SEG_S = 0.2          # drop segments shorter than this. preserves short interjections like "네"/"그렇죠"
+
+# When a short speech is detected as a non-main language, run both ko and lid and compare logprob.
+# Avoids 1-2s segments in Korean content being misclassified as ja/zh.
+MAIN_LANG = "ko"
+SHORT_SEG_S = 3.0        # below this duration and LID != MAIN_LANG -> dual transcribe
+MIN_DUAL_LOGPROB = -0.6  # if both dual sides fall below this -> drop (hallucination/noise)
+LID_TRUST_PROB = 0.5     # LID prob below this + non-main lang -> force MAIN_LANG (LID itself untrustworthy)
+KO_MIN_HANGUL_RATIO = 0.3  # if Hangul ratio of ko transcription is below this -> drop. Cuts Whisper outputting kana/hanja hallucinations in ko mode
+
+# poc-stt-bench/ib/audio/whisper/whisper_stt.py
+
+
+# 게이트1
+# Line 148
+    # ── 1) VAD (raw)
+    speech_ranges = vad.detect(raw_np, sr=TARGET_SR)
+    log.info(f"audio {total_sec:.1f}s → VAD {len(speech_ranges)} speech segments")
+
+    # ── 2) Per-speech LID(raw) + ASR(denoised)
+    all_segments: list[dict] = []
+    for start_s, end_s in speech_ranges:
+        s_idx = int(start_s * TARGET_SR)
+        e_idx = int(end_s * TARGET_SR)
+
+# Line 170
+        # A low prob like 0.23 means ko/de/ja/zh are all comparable = the model doesn't know -> ko is the natural assumption
+
+# 게이트 3- LID_TRUST_PROB
+        if lang_code != MAIN_LANG and prob < LID_TRUST_PROB:
+            log.info(f"    LID {lang_code}={prob:.2f} < {LID_TRUST_PROB} → {MAIN_LANG} 강제")
+            lang_code = MAIN_LANG
+            
+# 게이트 4 — dual transcribe + MIN_DUAL_LOGPROB (-0.6)
+
+        # 2c) transcribe — dual compare (ko vs lid) when short speech + non-main lang
+        chunk_dur = end_s - start_s
+        if chunk_dur < SHORT_SEG_S and lang_code != MAIN_LANG:
+            segs_main, lp_main = _do_transcribe(chunk_den, MAIN_LANG)
+            segs_lid, lp_lid = _do_transcribe(chunk_den, lang_code)
+            if max(lp_main, lp_lid) < MIN_DUAL_LOGPROB:
+                log.info(f"    dual [{_hms(start_s)}~{_hms(end_s)}|{chunk_dur:.1f}s] "
+                         f"lp({MAIN_LANG})={lp_main:.2f}, lp({lang_code})={lp_lid:.2f} → 양쪽 약함, drop")
+                continue
+            if lp_main >= lp_lid:
+                segments_out, chosen_lang = segs_main, MAIN_LANG
+                log.info(f"    dual [{_hms(start_s)}~{_hms(end_s)}|{chunk_dur:.1f}s] "
+                         f"lp({MAIN_LANG})={lp_main:.2f} ≥ lp({lang_code})={lp_lid:.2f} → {MAIN_LANG}")
+            else:
+                segments_out, chosen_lang = segs_lid, lang_code
+                log.info(f"    dual [{_hms(start_s)}~{_hms(end_s)}|{chunk_dur:.1f}s] "
+                         f"lp({lang_code})={lp_lid:.2f} > lp({MAIN_LANG})={lp_main:.2f} → {lang_code}")
+        else:
+            segments_out, _ = _do_transcribe(chunk_den, lang_code)
+            chosen_lang = lang_code
+            
+# Line 197
+        for seg in segments_out:
+            text = (seg.text or "").strip()
+            if not text:
+                continue
+            abs_start = float(seg.start) + start_s
+            abs_end = float(seg.end) + start_s
+            dur = abs_end - abs_start
+# 게이트 2 — MIN_LOGPROB (-1.0)
+            if seg.avg_logprob < MIN_LOGPROB:
+                log.info(f"    drop [{_hms(abs_start)}~{_hms(abs_end)}|{chosen_lang}] lp={seg.avg_logprob:.2f} | {text[:30]}")
+                continue
+            if dur < MIN_SEG_S:
+                log.info(f"    drop [{_hms(abs_start)}~{_hms(abs_end)}|{chosen_lang}] dur={dur:.2f}s | {text[:30]}")
+                continue
+# 게이트 5 — 한글 char 비율 게이트 (30%)
+            if chosen_lang == MAIN_LANG:
+                ratio = _hangul_ratio(text)
+                if ratio < KO_MIN_HANGUL_RATIO:
+                    log.info(f"    drop [{_hms(abs_start)}~{_hms(abs_end)}|{chosen_lang}] hangul={ratio:.0%} | {text[:30]}")
+                    continue
+# 통과한 것만 채택
+            all_segments.append({
+                "start": abs_start,
+                "end": abs_end,
+                "text": text,
+                "speaker": None,
+                "language": chosen_lang,
+            })
+            
+  
+```
+
+
 
 ---
 
