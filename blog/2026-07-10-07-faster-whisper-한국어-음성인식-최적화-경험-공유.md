@@ -8,18 +8,16 @@ last_update:
   date: 2026-07-14
 ---
 
-### 
-
-들어가며
-
-<!--truncate-->
+### 들어가며
 
 ---
 
 
 음성인식 최적화 경험은 해당 PoC 참고하여 재기재
 
-[https://doc.scenemaker.solbox.com/docs/poc/audio-bench/1/#4-%EC%8B%9C%EC%8A%A4%ED%85%9C-%EC%84%A4%EA%B3%84--%ED%99%98%EA%B0%81-%EC%B2%98%EB%A6%AC](https://doc.scenemaker.solbox.com/docs/poc/audio-bench/1/#4-%EC%8B%9C%EC%8A%A4%ED%85%9C-%EC%84%A4%EA%B3%84--%ED%99%98%EA%B0%81-%EC%B2%98%EB%A6%AC)
+<!--truncate-->
+
+[https://doc.scenemaker.solbox.com/docs/poc/audio-bench/1](https://doc.scenemaker.solbox.com/docs/poc/audio-bench/1)
 
 **4. 시스템 설계 + 환각 처리  > 4.1 Whisper 측** 
 
