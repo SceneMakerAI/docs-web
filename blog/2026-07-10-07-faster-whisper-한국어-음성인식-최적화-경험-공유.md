@@ -1,20 +1,23 @@
 ---
 title: "07_faster-whisper 한국어 음성인식 최적화 경험 공유"
 date: 2026-07-10
-slug: 3
+slug: 4
 authors: [sbin]
+description: "이 글은 음성을 글자 변환  (Speech to Text) 하는 과정을 구체적으로 명시한 글이다"
 last_update:
   date: 2026-07-14
 ---
 
-### 들어가며
+### 
+
+들어가며
+
+<!--truncate-->
 
 ---
 
 
 음성인식 최적화 경험은 해당 PoC 참고하여 재기재
-
-<!--truncate-->
 
 [https://doc.scenemaker.solbox.com/docs/poc/audio-bench/1/#4-%EC%8B%9C%EC%8A%A4%ED%85%9C-%EC%84%A4%EA%B3%84--%ED%99%98%EA%B0%81-%EC%B2%98%EB%A6%AC](https://doc.scenemaker.solbox.com/docs/poc/audio-bench/1/#4-%EC%8B%9C%EC%8A%A4%ED%85%9C-%EC%84%A4%EA%B3%84--%ED%99%98%EA%B0%81-%EC%B2%98%EB%A6%AC)
 
