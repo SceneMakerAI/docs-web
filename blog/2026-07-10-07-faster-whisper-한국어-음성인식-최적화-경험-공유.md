@@ -4,10 +4,11 @@ date: 2026-07-10
 slug: 3
 authors: [sbin]
 last_update:
-  date: 2026-07-13
+  date: 2026-07-14
 ---
 
-음성인식 최적화 경험은 
+
+음성인식 최적화 경험은 해당 PoC 참고하여 재기재
 
 <!--truncate-->
 
