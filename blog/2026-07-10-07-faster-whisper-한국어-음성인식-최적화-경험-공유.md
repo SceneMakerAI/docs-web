@@ -16,13 +16,15 @@ faster-whisper-large-v3 로 음성 인식 작업을 진행하였다.
 
 <!--truncate-->
 
-최적화를 진행하였으며, 구체적 과정은 
+간단히 요약하면 
 
 1. transcribe 실행. segment 결과 추출
 2. for 루프 검사, 결과물 필터하여 모델 최적화
 
 라고 할 수 있다. 
 
+
+최적화 경험을 아래에 기재해보겠다.
 
 ---
 
@@ -59,32 +61,29 @@ def _do_transcribe(audio_np: np.ndarray, language: str) -> tuple[list, float]:
 
 ### 2. 결과물 필터
 
-2-1)
+---
 
-2-2)
+있을때와 없을때 비교
 
-2-3)
 
-2-4)
+---
 
-2-5) 
+2-1) # 게이트 1 — VAD pre-filter
+
+2-2) # 게이트 3- LID_TRUST_PROB
+
+2-3) # 게이트 4 — dual transcribe + MIN_DUAL_LOGPROB (-0.6)
+
+2-4) # 게이트 2 — MIN_LOGPROB (-1.0)
+
+2-5)  # 게이트 5 — 한글 char 비율 게이트 (30%)
 
 ```python
-MIN_LOGPROB = -1.0       # drop if avg_logprob < this. catch-all for hallucinations
-MIN_SEG_S = 0.2          # drop segments shorter than this. preserves short interjections like "네"/"그렇죠"
-
-# When a short speech is detected as a non-main language, run both ko and lid and compare logprob.
-# Avoids 1-2s segments in Korean content being misclassified as ja/zh.
-MAIN_LANG = "ko"
-SHORT_SEG_S = 3.0        # below this duration and LID != MAIN_LANG -> dual transcribe
-MIN_DUAL_LOGPROB = -0.6  # if both dual sides fall below this -> drop (hallucination/noise)
-LID_TRUST_PROB = 0.5     # LID prob below this + non-main lang -> force MAIN_LANG (LID itself untrustworthy)
-KO_MIN_HANGUL_RATIO = 0.3  # if Hangul ratio of ko transcription is below this -> drop. Cuts Whisper outputting kana/hanja hallucinations in ko mode
-
 # poc-stt-bench/ib/audio/whisper/whisper_stt.py
 
 
-# 게이트1
+# 게이트 1 — VAD pre-filter
+# poc-stt-bench/ib/audio/whisper/whisper_stt.py
 # Line 148
     # ── 1) VAD (raw)
     speech_ranges = vad.detect(raw_np, sr=TARGET_SR)
@@ -100,11 +99,15 @@ KO_MIN_HANGUL_RATIO = 0.3  # if Hangul ratio of ko transcription is below this -
         # A low prob like 0.23 means ko/de/ja/zh are all comparable = the model doesn't know -> ko is the natural assumption
 
 # 게이트 3- LID_TRUST_PROB
+LID_TRUST_PROB = 0.5     # LID prob below this + non-main lang -> force MAIN_LANG (LID itself untrustworthy)
+
         if lang_code != MAIN_LANG and prob < LID_TRUST_PROB:
             log.info(f"    LID {lang_code}={prob:.2f} < {LID_TRUST_PROB} → {MAIN_LANG} 강제")
             lang_code = MAIN_LANG
             
 # 게이트 4 — dual transcribe + MIN_DUAL_LOGPROB (-0.6)
+MIN_DUAL_LOGPROB = -0.6  # if both dual sides fall below this -> drop (hallucination/noise)
+SHORT_SEG_S = 3.0        # below this duration and LID != MAIN_LANG -> dual transcribe
 
         # 2c) transcribe — dual compare (ko vs lid) when short speech + non-main lang
         chunk_dur = end_s - start_s
@@ -136,6 +139,9 @@ KO_MIN_HANGUL_RATIO = 0.3  # if Hangul ratio of ko transcription is below this -
             abs_end = float(seg.end) + start_s
             dur = abs_end - abs_start
 # 게이트 2 — MIN_LOGPROB (-1.0)
+MIN_LOGPROB = -1.0       # drop if avg_logprob < this. catch-all for hallucinations
+MIN_SEG_S = 0.2          # drop segments shorter than this. preserves short interjections like "네"/"그렇죠"
+
             if seg.avg_logprob < MIN_LOGPROB:
                 log.info(f"    drop [{_hms(abs_start)}~{_hms(abs_end)}|{chosen_lang}] lp={seg.avg_logprob:.2f} | {text[:30]}")
                 continue
@@ -143,6 +149,10 @@ KO_MIN_HANGUL_RATIO = 0.3  # if Hangul ratio of ko transcription is below this -
                 log.info(f"    drop [{_hms(abs_start)}~{_hms(abs_end)}|{chosen_lang}] dur={dur:.2f}s | {text[:30]}")
                 continue
 # 게이트 5 — 한글 char 비율 게이트 (30%)
+# Avoids 1-2s segments in Korean content being misclassified as ja/zh.
+MAIN_LANG = "ko"
+KO_MIN_HANGUL_RATIO = 0.3  # if Hangul ratio of ko transcription is below this -> drop. Cuts Whisper outputting kana/hanja hallucinations in ko mode
+
             if chosen_lang == MAIN_LANG:
                 ratio = _hangul_ratio(text)
                 if ratio < KO_MIN_HANGUL_RATIO:
