@@ -5,20 +5,20 @@ slug: 4
 authors: [sbin]
 description: "이 글은 음성을 글자 변환  (Speech to Text) 하는 과정을 구체적으로 명시한 글이다"
 last_update:
-  date: 2026-07-14
+  date: 2026-07-15
 ---
 
 ### 들어가며
 
 ---
 
-faster-whisper-large-v3 로 음성 인식 작업을 진행하였다. 
+faster-whisper-large-v3 로 음성 인식 작업을 진행하면서, 최적화 작업까지 진행하였다.
 
 <!--truncate-->
 
 간단히 요약하면 
 
-1. transcribe 실행. segment 결과 추출
+1. transcribe 실행 하여 Specch-to-Text 진행. segment 결과 추출
 2. for 루프 검사, 결과물 필터하여 모델 최적화
 
 라고 할 수 있다. 
@@ -56,7 +56,10 @@ def _do_transcribe(audio_np: np.ndarray, language: str) -> tuple[list, float]:
     return segs, sum(s.avg_logprob for s in segs) / len(segs)
 ```
 
-- 해당 파라미터 값 (beam_size, log_prob_threshold 등) 은, 패키지 함수 시그니처에 있는 것과 동일함을 확인
+- 해당 파라미터 값 (beam_size, log_prob_threshold 등) 조회 결과, 패키지 함수 시그니처에 있는 것과 동일함을 확인
+  - 시그니처란, 해당 오픈 소스에서 설정한 값을 의미
+
+  - PoC 에서도 동일하게 진행
 
 
 ### 2. 결과물 필터
