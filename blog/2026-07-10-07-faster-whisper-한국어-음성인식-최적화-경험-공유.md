@@ -12,11 +12,29 @@ last_update:
 
 ---
 
-PoC 통해 모델 별 비교 및 성능 테스트 해보았다. 
+PoC 통해 모델 별 비교 및 정확도 테스트 해보았다. 
 
 <!--truncate-->
 
-그 과정에서 어떠한 최적화를 하였으며, 코드 수정을 어떤걸 하였나 기재하였다. 
+그 과정에서 최적화의 중요성을 알게 되었다 
+
+아래가 그 예시이다. 
+
+```python
+[01:12:28.9~01:12:30.9|S???|ko] 길다가 길다가 왔다 갔다
+[01:12:30.9~01:12:32.7|S???|ko] 길다가 저랬다고
+[01:12:34.2~01:12:37.7|S???|ja] ご視聴ありがとうございました     <- 이 부분 말해두기
+[01:12:38.7~01:12:40.3|S???|ko] 서클
+```
+
+---
+
+
+최적화도 다양하게 분류 된다는 것을 알았고, 
+
+블로그 글을 쓰며 내용 정리를 해보기로 했다.
+
+---
 
 
 - **최적화 1**   | 정확도 — raw/denoised 분리 (95.2% vs 93.4%)
@@ -28,8 +46,7 @@ PoC 통해 모델 별 비교 및 성능 테스트 해보았다.
 
 ---
 
-1. 문제 제기
-2. 
+1. 각 부분 코드 또는 로그로 나타내기
 
 ---
 
@@ -131,6 +148,7 @@ prob 0.23 같은 값은 "ko/ja/zh 가 다 비슷하다 = 모델이 모른다" �
 
 ```python
 # 게이트 3- LID_TRUST_PROB
+# poc-stt-bench/ib/audio/whisper/whisper_stt.py
 # Line 170
 LID_TRUST_PROB = 0.5     # LID prob below this + non-main lang -> force MAIN_LANG (LID itself untrustworthy)
 
@@ -150,6 +168,7 @@ LID_TRUST_PROB = 0.5     # LID prob below this + non-main lang -> force MAIN_LAN
 
 ```python
 # 게이트 4 — dual transcribe + MIN_DUAL_LOGPROB (-0.6)
+# poc-stt-bench/ib/audio/whisper/whisper_stt.py
 # Line 176
 MIN_DUAL_LOGPROB = -0.6  # if both dual sides fall below this -> drop (hallucination/noise)
 SHORT_SEG_S = 3.0        # below this duration and LID != MAIN_LANG -> dual transcribe
@@ -188,6 +207,7 @@ Whisper 가 한국어 모드에서 가나·한자 토큰을 환각으로 출력�
 
 ```python
 # 게이트 5 — 한글 char 비율 게이트 (30%)
+# poc-stt-bench/ib/audio/whisper/whisper_stt.py
 # Line 211
 # Avoids 1-2s segments in Korean content being misclassified as ja/zh.
 MAIN_LANG = "ko"

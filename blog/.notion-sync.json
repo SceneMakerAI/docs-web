@@ -8,8 +8,8 @@
   },
   "398e15b4-0359-80c1-be0f-e8fe3bf4b188": {
     "file": "blog/2026-07-09-06-프로젝트-소개-및-qwen36-방송-도메인-적용기.md",
-    "last_edited": "2026-07-14T07:28:00.000Z",
-    "content_hash": "622ce39bd3097aaf5b8dba7b828327ff1bf9c78ddd2f1fefb342077746fa255c",
+    "last_edited": "2026-07-15T06:15:00.000Z",
+    "content_hash": "65b723277ac03e024208ebb646e8bec714759db9730500a711910e23c9255287",
     "order": 2,
     "parent_id": null
   },
@@ -22,8 +22,8 @@
   },
   "399e15b4-0359-80bc-a362-f310d7425d86": {
     "file": "blog/2026-07-10-07-faster-whisper-한국어-음성인식-최적화-경험-공유.md",
-    "last_edited": "2026-07-15T05:28:00.000Z",
-    "content_hash": "58556a57090f8e4bd73fbb86d24a733c2f01a77f505a32bc45a34fa7e252c4b5",
+    "last_edited": "2026-07-15T06:30:00.000Z",
+    "content_hash": "5e269feb98b833d3a7c9fa245c117d250ce3ab7fb9cb2cd3d30c19765db3f706",
     "order": 4,
     "parent_id": null
   },
@@ -78,8 +78,8 @@
   },
   "39de15b4-0359-8096-8fe0-d8cf81d3e397": {
     "file": "blog/2026-07-14-09-db-스키마-공개.md",
-    "last_edited": "2026-07-14T06:50:00.000Z",
-    "content_hash": "6183855c7bc1cc2518694697f308e03a731c2faa105ace09943455cec3e4af1e",
+    "last_edited": "2026-07-15T06:08:00.000Z",
+    "content_hash": "b0561e70190bee4976df1570dd487469ff0a55115b65a26bcbb14fe7f529596a",
     "order": 12,
     "parent_id": null
   },
@@ -113,7 +113,7 @@
   },
   "39de15b4-0359-8088-be18-d31d76a03c9a": {
     "file": "blog/2026-07-14-08-숏폼-자동-생성-파이프라인-기술-해설-1.md",
-    "last_edited": "2026-07-14T06:49:00.000Z",
+    "last_edited": "2026-07-15T06:07:00.000Z",
     "content_hash": "6183855c7bc1cc2518694697f308e03a731c2faa105ace09943455cec3e4af1e",
     "order": 17,
     "parent_id": null
