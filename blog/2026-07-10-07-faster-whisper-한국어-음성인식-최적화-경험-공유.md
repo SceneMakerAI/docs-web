@@ -12,34 +12,30 @@ last_update:
 
 ---
 
-PoC 를 통해 환각이 적고 사용 가능한 것으로 faster-whisper-large-v3 선정을 하기로 하였다. (사용 가능률/환각 비율 측정)
+PoC 통해 모델 별 비교 및 성능 테스트 해보았다. 
 
 <!--truncate-->
 
-간단히 요약하면 
+그 과정에서 어떠한 최적화를 하였으며, 코드 수정을 어떤걸 하였나 기재하였다. 
 
-1. transcribe 실행 하여 Specch-to-Text 진행. segment 결과 추출
-2. for 루프 검사, 결과물 필터하여 모델 최적화
 
-라고 할 수 있다. 
+- **최적화 1**   | 정확도 — raw/denoised 분리 (95.2% vs 93.4%)
+- **최적화 2**  | 환각 억제 — 공식 파라미터 3개 튜닝 (반복 환각, 검증한 기본값 표 포함) / VAD pre-filter · MIN_LOGPROB
+- **최적화 3**  | 언어 오분류 — LID 저신뢰→ko 강제 · dual transcribe · 한글 비율 게이트
+
+---
 
 
 ---
 
-밑에글 stt_service.py 내용으로 변경필요
-
-목차
-
----
-
-3. 문제 제기
-4. 
+1. 문제 제기
+2. 
 
 ---
 
-### 1. transcribe 
+### 1. **최적화 2**  
 
-인자 튜닝을 할 지 부터 생각해보았다.
+파라미터 부터 보자
 
 ```python
 # poc-stt-bench/ib/audio/whisper/whisper_stt.py
@@ -67,13 +63,14 @@ def _do_transcribe(audio_np: np.ndarray, language: str) -> tuple[list, float]:
     return segs, sum(s.avg_logprob for s in segs) / len(segs)
 ```
 
-- 해당 파라미터 값 (beam_size, log_prob_threshold 등) 조회 결과, 패키지 함수 시그니처에 있는 것과 동일함을 확인 (→ 일부 다름 확인)
-  - 시그니처란, 해당 오픈 소스에서 설정한 값을 의미
+| 파라미터 | 기본값 | 우리 값 | 역할 |
+| --- | --- | --- | --- |
+| `condition_on_previous_text` | `True` | `False` | 윈도우 간 반복 전파 차단 |
+| `repetition_penalty` | `1.0` | `1.2` | 반복 토큰 소프트 페널티 |
+| `no_repeat_ngram_size` | `0` | `3` | 3-gram 반복 하드 금지 |
 
-  - PoC 에서도 동일하게 진행
 
-
-### 2. 결과물 필터
+### 2. **최적화 3**
 
 ---
 
@@ -98,7 +95,9 @@ def _do_transcribe(audio_np: np.ndarray, language: str) -> tuple[list, float]:
 
 ---
 
-#### 2-2) # 게이트 2 — dual transcribe + MIN_DUAL_LOGPROB (-0.6)
+#### 2-2) # 게이트 2 — dual transcribe + MIN_DUAL_LOGPROB (-1.0)
+
+세그먼트 평균 로그확률이 -1.0 (확률로 약 37%) 미만이면 버린다. 확신 없이 뱉은 환각의 catch-all.
 
 ```python
 # poc-stt-bench/ib/audio/whisper/whisper_stt.py
@@ -126,6 +125,10 @@ MIN_SEG_S = 0.2          # drop segments shorter than this. preserves short inte
 
 #### 2-3) # 게이트 3- LID_TRUST_PROB
 
+언어 감지 확률이 0.5 미만이면서 비-한국어로 나오면 한국어로 강제한다.  
+prob 0.23 같은 값은 "ko/ja/zh 가 다 비슷하다 = 모델이 모른다" 는 뜻이고,  
+한국어 메인 콘텐츠에서는 **한국어로 두는 것이 가장 안전한 가정** 이다.
+
 ```python
 # 게이트 3- LID_TRUST_PROB
 # Line 170
@@ -140,6 +143,10 @@ LID_TRUST_PROB = 0.5     # LID prob below this + non-main lang -> force MAIN_LAN
 
 
 #### 2-4) # 게이트4 — MIN_LOGPROB (-1.0)
+
+3초 미만 발화가 비-한국어로 감지되면, **한국어로도 · 감지 언어로도** 둘 다 전사한 뒤  
+`avg_logprob` 이 높은 쪽을 채택한다. 양쪽 다 -0.6 미만이면 잡음으로 보고 버린다.  
+1\\~2초짜리 한국어가 음향적으로 일본어/중국어로 오분류되는 것을 막는 장치다.
 
 ```python
 # 게이트 4 — dual transcribe + MIN_DUAL_LOGPROB (-0.6)
@@ -176,6 +183,9 @@ MAIN_LANG = "ko"
 
 #### 2-5)  # 게이트 5 — 한글 char 비율 게이트 (30%)
 
+한국어로 인식됐는데 결과 텍스트의 한글 비율이 30% 미만이면 버린다.  
+Whisper 가 한국어 모드에서 가나·한자 토큰을 환각으로 출력하는 케이스를 정확히 잘라낸다.
+
 ```python
 # 게이트 5 — 한글 char 비율 게이트 (30%)
 # Line 211
@@ -190,6 +200,8 @@ KO_MIN_HANGUL_RATIO = 0.3  # if Hangul ratio of ko transcription is below this -
                     continue
 ```
 
+> 이 다섯은 공식 문서에 없는, 한국어 콘텐츠를 보며 하나씩 만든 규칙이다.
+"어떤 환각을 봤고 → 어떤 게이트로 막았나" 가 이 프로젝트 최적화의 실체다.
 
 
 ---
