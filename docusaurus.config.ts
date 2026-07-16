@@ -46,6 +46,8 @@ const config: Config = {
 
   themes: ['@docusaurus/theme-mermaid'],
 
+  plugins: ['docusaurus-plugin-image-zoom'],
+
   // Set the production url of your site here
   url: 'https://doc.scenemaker.solbox.com',
   // 커스텀 도메인 적용 후에는 호스트가 이 리포 전용이므로 서브패스 불필요
@@ -165,6 +167,17 @@ const config: Config = {
   ],
 
   themeConfig: {
+    // 본문 이미지 클릭 시 확대 (lightbox) — 블로그·docs 공통. em(캡션용 이미지)은 제외
+    zoom: {
+      selector: '.markdown :not(em) > img',
+      background: {
+        light: 'rgba(20, 20, 20, 0.85)',
+        dark: 'rgba(10, 10, 10, 0.9)',
+      },
+      config: {
+        margin: 24,
+      },
+    },
     metadata: [
       {
         name: 'keywords',
