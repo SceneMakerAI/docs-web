@@ -451,3 +451,18 @@ h1 {
 [data-theme='dark'] .markdown table td {
   border-color: rgba(255, 255, 255, 0.12);
 }
+
+/* ─────────── 블로그 목록: 우측 데드스페이스 제거 ─────────── */
+/* 기본 구조: aside.col--3(25%) + main.col--7(58%) = col--10 → 우측 col--2(약 17%)가
+   빈 공간으로 남아 본문이 왼쪽에 치우쳐 "좁아 보임". main을 넓혀 균형을 맞춘다. */
+.blog-list-page .container .row > main.col--7 {
+  flex: 0 0 75%;
+  max-width: 75%;
+}
+@media (max-width: 996px) {
+  /* 모바일: 사이드바가 접히므로 본문 전체폭 */
+  .blog-list-page .container .row > main.col--7 {
+    flex: 0 0 100%;
+    max-width: 100%;
+  }
+}
