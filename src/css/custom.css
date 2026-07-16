@@ -466,3 +466,29 @@ h1 {
     max-width: 100%;
   }
 }
+
+/* ─────────── 블로그 목록: 카드형 + 간격 리듬 ─────────── */
+/* 제목+얇은 divider의 단조로운 텍스트 스택을 카드로 분리해 스캔 가능하게. */
+.blog-list-page article {
+  padding: 1.75rem 2rem;
+  margin-bottom: 1.75rem;
+  border: 1px solid var(--ifm-toc-border-color);
+  border-radius: 12px;
+  background: var(--ifm-background-surface-color);
+  transition: box-shadow 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+}
+.blog-list-page article:hover {
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.07);
+  border-color: var(--ifm-color-primary);
+  transform: translateY(-2px);
+}
+[data-theme='dark'] .blog-list-page article:hover {
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.4);
+}
+/* 카드 안 상·하단 여백 정리 (본문 첫/끝 요소 마진 흡수) */
+.blog-list-page article > header > h2 {
+  margin-top: 0;
+}
+.blog-list-page article .markdown > :last-child {
+  margin-bottom: 0;
+}
