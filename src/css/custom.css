@@ -492,3 +492,23 @@ h1 {
 .blog-list-page article .markdown > :last-child {
   margin-bottom: 0;
 }
+
+/* ─────────── 블로그 제목·메타 위계 ─────────── */
+/* 48px 파란 제목이 과해 정보 위계가 약함 → 크기 축소·뉴트럴 색, hover에서만 강조. */
+.blog-list-page article > header > h2 {
+  font-size: 1.9rem;
+  line-height: 1.3;
+}
+.blog-list-page article > header > h2 a {
+  color: var(--ifm-heading-color);
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+.blog-list-page article > header > h2 a:hover {
+  color: var(--ifm-color-primary);
+}
+/* 날짜·읽기시간 메타: 작고 muted하게 */
+.blog-list-page article > header time {
+  color: var(--ifm-color-emphasis-600);
+  font-size: 0.85rem;
+}
