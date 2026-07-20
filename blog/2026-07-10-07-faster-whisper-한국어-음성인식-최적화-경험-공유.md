@@ -4,8 +4,9 @@ date: 2026-07-10
 slug: 4
 authors: [sbin]
 description: "이 글은 음성을 글자 변환  (Speech to Text) 하는 과정을 구체적으로 명시한 글이다"
+tags: [Fast-Whisper]
 last_update:
-  date: 2026-07-16
+  date: 2026-07-20
 ---
 
 ### 들어가며
