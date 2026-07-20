@@ -134,6 +134,7 @@ const config: Config = {
           blogDescription: 'SceneMakerAI 기술 블로그 — 오픈소스 AI로 방송 콘텐츠를 재가공하는 플랫폼 개발 이야기',
           blogSidebarTitle: '전체 글',
           blogSidebarCount: 'ALL',
+          sortPosts: 'ascending', // 제목 접두번호 오름차순(05→12). date 인코딩(blog_sort_date)과 함께 동작
           showReadingTime: true,
           readingTime: ({content}) => {
             const koreanChars = (content.match(/[가-힯]/g) ?? []).length;

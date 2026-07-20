@@ -934,3 +934,35 @@ class TestInsertTruncateMarker:
         result = n._insert_truncate_marker(body)
         assert "<!--truncate-->" not in result
         assert result == body
+
+
+# ── TC-12: 블로그 정렬용 date 인코딩 (제목 접두번호 → 하루 안 시각) ──────────────
+
+class TestBlogSortDate:
+    """blog_sort_date: 실제 날짜(일)는 보존하고 제목 접두번호를 하루 안의
+    시각으로 인코딩해, 같은 날짜 글도 접두번호 순으로 정렬되게 한다.
+    (sortPosts: 'ascending' 과 함께 05→12 오름차순 정렬을 만든다)"""
+
+    def test_higher_prefix_maps_to_later_time_same_day(self):
+        """같은 날짜: 접두번호 클수록 늦은 시각 → 오름차순 정렬 시 아래로."""
+        d08 = n.blog_sort_date("2026-07-14", "08_모아보기 서비스 구현기 1건")
+        d12 = n.blog_sort_date("2026-07-14", "12_향후 로드맵 및 지속 기여 계획 공유 1건")
+        assert d12 > d08
+
+    def test_calendar_day_preserved(self):
+        """표시용 날짜(일)는 실제 값 그대로 유지 (TZ 이동 없이 정오 기준)."""
+        d = n.blog_sort_date("2026-06-22", "05_기술 블로그 개설")
+        assert d[:10] == "2026-06-22"
+
+    def test_exact_encoding_format(self):
+        """정오(12:00) 기준 + 접두번호 분 → 08_ → 12:08:00."""
+        assert n.blog_sort_date("2026-07-14", "08_숏폼 자동 생성") == "2026-07-14T12:08:00"
+        assert n.blog_sort_date("2026-07-14", "12_과제 성과 종합 정리") == "2026-07-14T12:12:00"
+
+    def test_leading_zero_prefix_parsed(self):
+        """접두번호 05 → 정수 5로 파싱 (12:05)."""
+        assert n.blog_sort_date("2026-06-22", "05_기술 블로그 개설") == "2026-06-22T12:05:00"
+
+    def test_missing_prefix_defaults_to_noon(self):
+        """접두번호 없는 제목 → 12:00:00 기본값."""
+        assert n.blog_sort_date("2026-07-14", "제목없음") == "2026-07-14T12:00:00"

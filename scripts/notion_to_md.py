@@ -300,6 +300,20 @@ def read_last_edited_time_prop(props, name):
     return None
 
 
+def blog_sort_date(date_str, title):
+    """블로그 정렬용 date 문자열 생성.
+
+    실제 날짜(일)는 그대로 두고 제목 접두번호(예: "12_...")를 하루 안의 시각으로
+    인코딩한다(정오 기준, 번호 클수록 늦은 시각). 같은 날짜에 여러 글이 몰려도
+    접두번호 순으로 정렬되며, sortPosts:'ascending' 과 함께 05→12 오름차순이 된다.
+    정오 기준이라 타임존에 따른 표시 날짜(일) 이동이 없다.
+    """
+    m = re.match(r"\s*0*(\d+)", title or "")
+    prefix = int(m.group(1)) if m else 0
+    hh, mm = divmod(720 + prefix, 60)  # 720분 = 12:00
+    return f"{date_str}T{hh:02d}:{mm:02d}:00"
+
+
 def generate_category_json(dir_path, label, position):
     slug = os.path.basename(dir_path)
     parent = os.path.basename(os.path.dirname(dir_path))
@@ -830,7 +844,7 @@ def save_doc_page(page, position, existing_map, parent_slug=None, is_parent=Fals
         if not safe_slug:
             safe_slug = str(order)
 
-        lines = ["---", f'title: "{safe_title}"', f"date: {date_str}"]
+        lines = ["---", f'title: "{safe_title}"', f"date: {blog_sort_date(date_str, title)}"]
         if safe_slug:
             lines.append(f"slug: {safe_slug}")
         if authors_list:
