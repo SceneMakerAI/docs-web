@@ -104,6 +104,12 @@ def translate_with_deepl(text):
     return resp.json()["translations"][0]["text"]
 
 
+def clean_frontmatter_value(text):
+    """DeepL 번역 결과를 frontmatter `key: "..."` 값으로 안전하게 정리.
+    HTML 엔티티(&quot; 등)를 되돌리고, YAML 큰따옴표 문자열을 깨는 내부 " 를 \\" 로 이스케이프."""
+    return html.unescape(text).replace('"', '\\"')
+
+
 def translate_with_deepl_plain(text):
     """tag_handling 없이 번역 — mermaid·코드 주석용."""
     if not text.strip():
@@ -317,7 +323,7 @@ def translate_file(kr_path, hashes):
                         f'description: "{en_desc_m.group(1)}"', 1
                     )
                 else:
-                    en_desc = translate_with_deepl(kr_desc_m.group(1))
+                    en_desc = clean_frontmatter_value(translate_with_deepl(kr_desc_m.group(1)))
                     en_frontmatter = en_frontmatter.replace(
                         f'description: "{kr_desc_m.group(1)}"',
                         f'description: "{en_desc}"', 1
@@ -332,13 +338,13 @@ def translate_file(kr_path, hashes):
     title_match = re.search(r'^title: "(.+)"', en_frontmatter, re.MULTILINE)
     if title_match:
         kr_title = title_match.group(1)
-        en_title = translate_with_deepl(kr_title)
+        en_title = clean_frontmatter_value(translate_with_deepl(kr_title))
         en_frontmatter = en_frontmatter.replace(f'title: "{kr_title}"', f'title: "{en_title}"', 1)
 
     desc_match = re.search(r'^description: "(.+)"', en_frontmatter, re.MULTILINE)
     if desc_match:
         kr_desc = desc_match.group(1)
-        en_desc = translate_with_deepl(kr_desc)
+        en_desc = clean_frontmatter_value(translate_with_deepl(kr_desc))
         en_frontmatter = en_frontmatter.replace(f'description: "{kr_desc}"', f'description: "{en_desc}"', 1)
 
     # 사전 번역: mermaid 블록 + 모든 코드 블록 한국어 줄 (인라인 코드는 보호됨)
