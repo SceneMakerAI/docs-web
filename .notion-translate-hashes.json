@@ -253,5 +253,125 @@
     "slug": "4",
     "sidebar_position": "4",
     "frontmatter_hash": "b51d662bd6aaf51b52862020a4abc4ea5dd0eaad0199b254ccb275820b18eb6f"
+  },
+  "blog/2026-06-22-05-기술-블로그-개설.md": {
+    "body_hash": "f9b799b93b6c94bd8a22f8eafade74a8d44c7c3dfcd6ae7f62bcb367b363f5fb",
+    "slug": "",
+    "sidebar_position": "",
+    "frontmatter_hash": "690b82a83b057680774fb3bc7c45450c7e9e1ca701e9b1c50f97a5a7a7e1c345"
+  },
+  "blog/2026-07-09-06-프로젝트-소개-및-qwen36-방송-도메인-적용기.md": {
+    "body_hash": "e9940f3d0c913dd68497717da8fe457398c89bd06303b5cc091bc94b98def04b",
+    "slug": "",
+    "sidebar_position": "",
+    "frontmatter_hash": "99e420cb099a4d66b1fad127ba1d17eeb786fa1b5e54adc335237ece0e16dbfe"
+  },
+  "blog/2026-07-10-07-faster-whisper-한국어-음성인식-최적화-경험-공유.md": {
+    "body_hash": "bfee59b46ce777f0c6e93ea819b8af330138d4249311b033f4c66109f28585c4",
+    "slug": "",
+    "sidebar_position": "",
+    "frontmatter_hash": "d4647ca2e42b230880ab822e977c3455699b51d778f68ec9d73cb7412b515954"
+  },
+  "blog/2026-07-10-07-음성분석-처리-과정-및-결과.md": {
+    "body_hash": "0994adffb8271510036c71ef01f7e302e89414f010aaa8ae833e11375cf2b65b",
+    "slug": "",
+    "sidebar_position": "",
+    "frontmatter_hash": "145460f3826d67bf4e34f62c15bbafe2378796dfec6aa9921b248de6b14a1a3c"
+  },
+  "blog/2026-07-13-07-langgraph-기반-방송-워크플로우-설계.md": {
+    "body_hash": "85f2c9f9cf64706fa14248ac42a1cb9a6db8ff8da822e26cfd1f931fcd3d6eac",
+    "slug": "",
+    "sidebar_position": "",
+    "frontmatter_hash": "b09cc073e189caeb74f6a73d568be6bf23c242a7ba0b8e223b792d2cc5a62194"
+  },
+  "blog/2026-07-13-07-rag-파이프라인-구축.md": {
+    "body_hash": "8c9497c4065b083ff3855d939d33359c88f85d93e96946f39675a8746d5772f1",
+    "slug": "",
+    "sidebar_position": "",
+    "frontmatter_hash": "2c2bc5950d3a2467391521d87752e69bb77d97a33b8a1ded2b03ecf2d752e3c3"
+  },
+  "blog/2026-07-14-08-모아보기-서비스-구현기-1건.md": {
+    "body_hash": "a38d070f404dc5bc168c58a1b6b5efb7977295e87a031557c3706a400b9e4d3e",
+    "slug": "",
+    "sidebar_position": "",
+    "frontmatter_hash": "bd833c0015f08119ce0c0ac7819fd88c43f2e83174894595e0439cbe152497f9"
+  },
+  "blog/2026-07-14-08-숏폼-자동-생성-파이프라인-해설-1.md": {
+    "body_hash": "ecfb423861d8bf2914fbb285d526e1f49bc892723deedfd70ca72cd24628f985",
+    "slug": "",
+    "sidebar_position": "",
+    "frontmatter_hash": "9b3ed43b3dde77e3c0690961b96a9a5cdf9fce3fbebdd8f8595541eb42c8a496"
+  },
+  "blog/2026-07-14-08-숏폼-자동-생성-파이프라인-해설-2.md": {
+    "body_hash": "d8ff31d00ea2e50e0698ba99236971f5c4adc763e20e9eaf9227acd91b8832a9",
+    "slug": "",
+    "sidebar_position": "",
+    "frontmatter_hash": "161d07b4f2527e9f657a15b2021d00522860bbbfad55417f79547fbdf670cd3a"
+  },
+  "blog/2026-07-14-09-db-스키마-공개.md": {
+    "body_hash": "e76870761472c4f3a54df572baa17df0e7fb2586e2da89e65632a515a3238b10",
+    "slug": "",
+    "sidebar_position": "",
+    "frontmatter_hash": "e92b49fea21ee40521a37eef4891988c21ce2d0a8a2637b4bf45a4fa04b917a8"
+  },
+  "blog/2026-07-14-09-vllm-기본-추론-최적화-노하우-1건.md": {
+    "body_hash": "2c4533c2fc616c1887f60e3ec2b30d339c104a7da2d8765f7b1497f259b3bc44",
+    "slug": "",
+    "sidebar_position": "",
+    "frontmatter_hash": "630f1120901feab9b5951c0be4b9bdb8fc3d622e62e81b95a376c2fc5ea0104d"
+  },
+  "blog/2026-07-14-09-맥락-기반-광고-최적화-기술-해설-1건.md": {
+    "body_hash": "0eb896e1bf33c1f46ad420bdcebfa1e81bc2d6a9dff4e1080634034ba7863aef",
+    "slug": "",
+    "sidebar_position": "",
+    "frontmatter_hash": "7393a07674dcfeac6aab5b8c7fbb5fb4dc2787a208f7d30a570b86ecba4c1ea0"
+  },
+  "blog/2026-07-14-10-sbsi-실증-테스트-사례-공유-1건.md": {
+    "body_hash": "63dc43a783dab89aa0ff5b5481a0fe60a7310217c46212b62976c3430b0007ab",
+    "slug": "",
+    "sidebar_position": "",
+    "frontmatter_hash": "3ba0154e5a61e5289e42c7820b05d86e510390353b05b6a6b66a6ae5ba0ce9c4"
+  },
+  "blog/2026-07-14-10-방송-ai-서비스-성능-벤치마크-결과-분석-1건.md": {
+    "body_hash": "6183855c7bc1cc2518694697f308e03a731c2faa105ace09943455cec3e4af1e",
+    "slug": "",
+    "sidebar_position": "",
+    "frontmatter_hash": "278d0a7e8b9aee15b25ea7a043154a694825729643fe6073b45f0033ffae06d9"
+  },
+  "blog/2026-07-14-11-방송-ai-오픈웨이트-모델-활용-사례-1건.md": {
+    "body_hash": "47480b959fb999d91b2b82f8fe988caec707c56384b7ac036082e418a9b149f9",
+    "slug": "",
+    "sidebar_position": "",
+    "frontmatter_hash": "a1ad1c2ece9432d7a02e572d2315f32a21bdcf0d4a0237609abd95f9e6154f79"
+  },
+  "blog/2026-07-14-11-오픈-소스-기여-종합-가이드-1건.md": {
+    "body_hash": "8ff979c0351020a6653f646dccb28b0990fa951463f49db905b0d7a1d7b2405e",
+    "slug": "",
+    "sidebar_position": "",
+    "frontmatter_hash": "aa47feb483273e6f976a597a4c5d667b6f5bd9e0929ecab14d237f8141a0c17e"
+  },
+  "blog/2026-07-14-11-테스트-케이스-작성-1건.md": {
+    "body_hash": "1f391c5b95b0257a4572c519c1e8eeb6cc9e32c0b4fa812e49ec0389a3f9cb3e",
+    "slug": "",
+    "sidebar_position": "",
+    "frontmatter_hash": "a0ab812d28b0c1e35089fc5632c872663295b87e2a09d9d685c6869602498e95"
+  },
+  "blog/2026-07-14-12-과제-성과-종합-정리-1건.md": {
+    "body_hash": "90275035bfa21567fee44941bd2e3995419c31806588da801ca8b679f8fda1d0",
+    "slug": "",
+    "sidebar_position": "",
+    "frontmatter_hash": "708b7b05bdcefe7e40b2439a96a73413fc8d9295a93435c79f64bdca38790079"
+  },
+  "blog/2026-07-14-12-오픈소스-생태계-기여-실적-보고-1건.md": {
+    "body_hash": "0faa977f9480f88d85c0185c52d1a7a515cfcbd6e61028bfa26b3ff7db0a2a9c",
+    "slug": "",
+    "sidebar_position": "",
+    "frontmatter_hash": "9a5f4eddad80cc01c03c231d8024e2499822a2e91c3995419b992c1105a23890"
+  },
+  "blog/2026-07-14-12-향후-로드맵-및-지속-기여-계획-공유-1건.md": {
+    "body_hash": "22d066efc06de8a775c15e316497b47bbfec29e89c881a1a9594fa63c738f7f3",
+    "slug": "",
+    "sidebar_position": "",
+    "frontmatter_hash": "3284ff10411ab168be8094eeddf8d9fc838e3b1efe7b02f783e0d94865ee3944"
   }
 }
