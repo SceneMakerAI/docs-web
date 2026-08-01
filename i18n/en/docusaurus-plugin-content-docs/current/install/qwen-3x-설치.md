@@ -3,7 +3,7 @@ title: "Installing Qwen 3.x"
 sidebar_position: 1
 slug: "1"
 last_update:
-  date: 2026-06-24
+  date: 2026-07-07
 ---
 
 ## AWS Server Setup
@@ -29,12 +29,12 @@ For this reason, region selection should not be based solely on “proximity,”
 
 1
 
-. **Capacity Availability** — Can the instance actually be
+. **Capacity Availability** — Can the instance actually be launched when needed
 1
 
-launched when needed? **Response Time in Korea** — Network latency as perceived by the user 
+? **Response Time in Korea** — Network latency as perceived by the user 
 
-**Comparison of G7e-Supported Regions** (Measured on May 19, 2026)
+**Comparison of Regions Offering G7e** (Measured on May 19, 2026)
 
 | Region | Capacity Score | Korea TCP RTT | Overall |
 | --- | --- | --- | --- |
@@ -64,7 +64,7 @@ aws ec2 get-spot-placement-scores \
 ```
 
 - Required permissions: `ec2:GetSpotPlacementScores`
-- Cost: Free, evaluation period: 1 hour
+- Cost: Free; Evaluation period: Next 1 hour
 
 **(1) Capacity**
 
@@ -81,7 +81,7 @@ aws ec2 get-spot-placement-scores \
 🎯 **Conclusion**
 
 - Prioritizing **availability stability**, **select us-west-2 (Oregon)**
-- When scaling for interactive serving to Korean users, consider a multi-region setup with ap-northeast-1 (Tokyo) or **Capacity Block for ML / Capacity Reservation**
+- When scaling for interactive serving to Korean users, consider a multi-region setup using ap-northeast-1 (Tokyo) or **Capacity Block for ML / Capacity Reservation**
 :::
 
 ---
@@ -139,8 +139,8 @@ G4dn, G5, G6, Gr6, G6e, P4d, P4de, P5, P5e, P5en, P6-B200, P6-B300
 
 details*Reasons for Choosing 4xlarge**
 
-- MoE models with 30–35B parameters, such as Qwen3-Coder-30B-A3B and Qwen3.6-35B-A3B, require ~70 GB of VRAM in bf16 mode → a single 96 GB card provides ample capacity, including KV cache
-- Larger models (80–120B) are also possible with FP8/FP4 quantization
+- MoE models with 30–35B parameters, such as Qwen3-Coder-30B-A3B and Qwen3.6-35B-A3B, require ~70 GB of VRAM in bf16 mode → a single 96 GB card provides ample capacity, even with a KV cache
+- With FP8/FP4 quantization, even larger models (80–120B) are possible
 - First, validate with 1 GPU; if scaling is needed, switch to 12xlarge or larger
 
 **VRAM Requirements by Model**
@@ -164,7 +164,7 @@ Based on 32k contexts and a single sequence. Since vLLM dynamically allocates pa
 | Type | gp3 |
 | IOPS | 16,000 |
 | Throughput | 1,000 MB/s |
-| Encryption | Not applied (encryption recommended upon production deployment) |
+| Encryption | None (encryption recommended upon production deployment) |
 | Device | `nvme0n1` |
 | Mount | `/` (root) |
 
@@ -184,7 +184,7 @@ Based on 32k contexts and a single sequence. Since vLLM dynamically allocates pa
 
 | Action | Data |
 | --- | --- |
-| Reboot | Persistent |
+| Reboot | Persisted |
 | **Stop / Start** | **Deleted** |
 | Terminate | Deleted |
 | Hardware Failure | Deleted |
@@ -193,20 +193,20 @@ Based on 32k contexts and a single sequence. Since vLLM dynamically allocates pa
 **Separation of Uses Recommended**
 
 - **EBS (** `/` **)**: Model weights, persistent data → Data that must never be lost
-- **Instance Store (** `/mnt/nvme` **)**: KV cache, temporary builds, swap, inference logs → Data that
+- **Instance Store (** `/mnt/nvme` **)**: KV cache, temporary builds, swap, inference logs → Data that can be lost
+
+ 
 
 ---
 
-### can be lost
+### NVMe Configuration
 
- NVMe Configuration
-
-- In a cloud environment, NVMe has the following characteristics that differ from those of a typical physical server:
+- In a cloud environment, NVMe has the following characteristics that differ from those on a typical physical server:
   - Data is retained upon reboot
 
   - Data is lost when the instance is stopped and restarted, or when it is terminated
 
-#### 1. Check NVMe Device
+#### 1. Verify NVMe Device
 
 ```shell
 > lsblk
@@ -216,8 +216,13 @@ nvme0n1       259:0    0    2T  0 disk
 ├─nvme0n1p127 259:3    0    1M  0 part 
 └─nvme0n1p128 259:4    0   10M  0 part /boot/efi
 nvme1n1       259:1    0  1.7T  0 disk 
-> 
+> lsblk -d -o NAME,MODEL,SIZE
+NAME    MODEL                             SIZE
+nvme0n1 Amazon Elastic Block Store        300G
+nvme1n1 Amazon EC2 NVMe Instance Storage  3.5T
 ```
+
+ 
 
 #### 2. Disk Formatting and Mounting
 
@@ -249,7 +254,7 @@ Filesystem      Size  Used Avail Use% Mounted on
 
 ## Model Installation
 
-Given that renting A100 or H100 hardware is not practical, we will compare the following two models on a server capable of running on a single GPU. (Comparison document to be released later)
+Given that it is not easy to rent A100 or H100 hardware in practice, we will compare the following two models on a server capable of running on a single GPU. (Comparison document to be released later)
 
 | Model Name | Model Weight Size | Actual GPU | KV Cache Availability (based on 90% utilization) |
 | --- | --- | --- | --- |
@@ -307,6 +312,8 @@ drwxr-xr-x. 4 root root    92 May 19 18:45 hub
 drwxr-xr-x. 4 root root    59 May 19 17:28 xet
 ```
 
+ 
+
 ### Installing VLLM
 
 Since VLLM requires many package dependencies, it is recommended to install the packages in an isolated UV environment.
@@ -360,6 +367,7 @@ Python 3.12.13
 #### Installing Torch
 
 - Do not proceed under any circumstances if sm_120 is not included (required for Blackwell GPUs)
+  - sm_100 / sm_120: Architectures supporting Blackwell, RTX 5090, 5080, and other RTX 50 series GPUs
 
 ```bash
 (vllm-svc) > uv pip install \
@@ -417,7 +425,7 @@ EOF
 (vllm-svc) > mkdir -p /usr/service/cache/hf-cache
 ```
 
-##### Testing
+##### Test
 
 ```shell
 (vllm-svc) > vllm serve /stg/models/Qwen3.5-122B-A10B-GPTQ-Int4 \
@@ -446,7 +454,7 @@ EOF
 {"id":"chatcmpl-89cf9de14d6fdfd2","object":"chat.completion","created":1779181606,"prompt_routed_experts":null,"model":"qwen","choices":[{"index":0,"message":{"role":"assistant","content":"Hello! Nice to meet you. 😊\nHow can I help you today? If you have any questions or topics you’d like to discuss, please feel free to let me know.","refusal":null,"annotations":null,"audio":null,"function_call":null,"tool_calls":[],"reasoning":null},"logprobs":null,"finish_reason":"stop","stop_reason":null,"token_ids":null,"routed_experts":null}],"service_tier":null,"system_fingerprint":"vllm-0.21.0-2426ae93","usage":{"prompt_tokens":14,"total_tokens":49,"completion_tokens":35,"prompt_tokens_details":null},"prompt_logprobs":null,"prompt_token_ids":null,"prompt_text":null,"kv_transfer_params":null}[root@ip-172-31-22-41 models]#
 ```
 
-#### Register Service
+#### Register service
 
 - Qwen3.6-27B-FP8
 
@@ -465,7 +473,7 @@ Environment="PATH=/usr/service/vllm-svc/.venv/bin:/usr/local/sbin:/usr/local/bin
 Environment="HF_HOME=/mnt/nvme/hf-cache"
 Environment="VLLM_CACHE_ROOT=/mnt/nvme/vllm-cache"
 
-# Checking NVMe Mount
+# Check NVMe Mount
 ExecStartPre=/bin/bash -c 'mountpoint -q /mnt/nvme || (echo "NVMe not mounted" && exit 1)'
 
 # Preparing the Model/Cache Directory
@@ -557,6 +565,8 @@ vllm serve /mnt/nvme/models/Qwen3-Omni-30B-A3B-Instruct \
     --tensor-parallel-size 1 \
     --trust-remote-code
 ```
+
+ 
 
 ### Service Registration
 

@@ -2,10 +2,10 @@
 title: "[CI/Build] Support for `bad_words` at the `/v1/completions` endpoint"
 sidebar_position: 4
 slug: "4"
-tags: [PR]
-keywords: [PR]
+tags: [PR, Merged]
+keywords: [PR, Merged]
 last_update:
-  date: 2026-06-26
+  date: 2026-07-09
 ---
 
 
