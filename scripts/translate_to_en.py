@@ -65,6 +65,27 @@ def _restore_code_blocks(body, store):
     return body
 
 
+def _protect_images(body):
+    """이미지 마크다운 전체(![alt](/url))를 placeholder 태그로 보호.
+    URL만 보호하면 DeepL(tag_handling=html)이 self-closing 태그 뒤 ) 를
+    다음 줄로 밀어내 이미지 구문을 깨뜨린다 — 구문 전체를 감춰 괄호를 못 보게 한다."""
+    store = {}
+
+    def _sub(m):
+        key = f'<x id="IMG{len(store)}"/>'
+        store[key] = m.group(0)
+        return key
+
+    protected = re.sub(r'!\[[^\]]*\]\((/[^)]+)\)', _sub, body)
+    return protected, store
+
+
+def _restore_images(body, store):
+    for key, val in store.items():
+        body = body.replace(key, val)
+    return body
+
+
 def _protect_inline_code(body):
     store = {}
     result = []
@@ -384,15 +405,9 @@ def translate_file(kr_path, hashes):
         return f'{m.group(1)}{key}. '        # group 1 = leading spaces
 
     body_protected = re.sub(r'(?m)^( *)(\d+)\. ', _protect_ol, body_protected)
-    # Protect image URLs — DeepL translates Korean path segments (e.g. /img/milvus-설치-.../)
-    _img_store: dict[str, str] = {}
-
-    def _protect_img(m: re.Match) -> str:
-        key = f'<x id="IMG{len(_img_store)}"/>'
-        _img_store[key] = m.group(2)
-        return f'![{m.group(1)}]({key})'
-
-    body_protected = re.sub(r'!\[([^\]]*)\]\((/[^)]+)\)', _protect_img, body_protected)
+    # Protect images — hide the whole ![alt](/url) so DeepL can't translate Korean
+    # path segments nor relocate the closing ) onto a new line (breaks the image)
+    body_protected, _img_store = _protect_images(body_protected)
     translated = translate_with_deepl(body_protected) if body_no_inline.strip() else body_protected
     for key, num in _ol_store.items():
         translated = translated.replace(key, num)
@@ -431,8 +446,7 @@ def translate_file(kr_path, hashes):
     en_body = _restore_code_blocks(en_body, code_store)
     for key, val in _bq_store.items():
         en_body = en_body.replace(key, val)
-    for key, url in _img_store.items():
-        en_body = en_body.replace(key, url)
+    en_body = _restore_images(en_body, _img_store)
     # Safety net: DeepL relocates blockquote '> ' marker mid-sentence
     # e.g. "If an>  `code` ..." → "> If an `code` ..."
     en_body = re.sub(r'^([A-Za-z][^>\n]*\S)(> +)(\S)', r'> \1 \3', en_body, flags=re.MULTILINE)
