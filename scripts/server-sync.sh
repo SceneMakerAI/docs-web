@@ -1,6 +1,6 @@
 #!/bin/bash
 # Notion → docs/ 동기화 → git push
-# 서버 crontab에서 3시간마다 실행 (0 */3 * * *)
+# 서버 crontab에서 6시간마다 실행 (0 */6 * * *)
 
 set -e
 
@@ -22,6 +22,19 @@ trap 'if [ -n "$ORIG_BRANCH" ] && [ "$ORIG_BRANCH" != "main" ]; then git checkou
 
 # 진행 중인 rebase 중단 (이전 실행 충돌로 잠긴 경우 해제)
 git rebase --abort 2>/dev/null || true
+
+# 커밋 안 한 로컬 변경을 stash로 치운다 — checkout·pull 보다 먼저.
+# 이게 없으면 파일 하나가 pull --rebase 를 영구히 막아 동기화가 통째로 멈춘다
+# (2026-07-21 ~ 08-11, 42회 연속 실패한 실제 사례).
+# 추적 파일만 대상이며 stash에 보존되므로 작업은 유실되지 않는다: git stash list / git stash pop
+if ! git diff --quiet HEAD; then
+  echo "[$(date)] WARN: 커밋되지 않은 로컬 변경 감지 — stash 처리 (git stash list 로 복구 가능)"
+  git diff --name-only HEAD
+  if ! git stash push -m "server-sync auto-stash $(date +'%Y-%m-%d %H:%M')" --quiet; then
+    echo "[$(date)] ERROR: stash 실패, 스킵"
+    exit 1
+  fi
+fi
 
 # 항상 main에서 실행 보장 (실패 시 즉시 종료)
 if ! git checkout main --quiet 2>/dev/null; then

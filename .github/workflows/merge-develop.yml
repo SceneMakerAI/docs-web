@@ -10,6 +10,7 @@ on:
 
 permissions:
   contents: write
+  actions: write   # deploy.yml 수동 트리거용
 
 jobs:
   merge:
@@ -61,6 +62,7 @@ jobs:
         run: npm run build
 
       - name: develop → main 머지
+        id: merge
         if: steps.diff.outputs.has_changes == 'true'
         run: |
           git stash
@@ -89,3 +91,11 @@ jobs:
           git add -A
           git commit -m "chore: develop → main 머지 (sync-json 충돌 자동 해소) [skip-notion]"
           git push origin main
+
+      # GITHUB_TOKEN push 는 deploy.yml(on: push)을 트리거하지 못한다 (워크플로 재귀 방지).
+      # workflow_dispatch 는 예외라 명시 호출로 배포를 잇는다.
+      - name: Trigger deploy
+        if: steps.merge.outcome == 'success' && steps.diff.outputs.has_changes == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh workflow run deploy.yml --ref main

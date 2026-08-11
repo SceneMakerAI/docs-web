@@ -10,6 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+      actions: write   # deploy.yml 수동 트리거용
 
     steps:
       - uses: actions/checkout@v4
@@ -30,11 +31,25 @@ jobs:
         run: python3 scripts/translate_to_en.py
 
       - name: Commit translated files
+        id: commit
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add i18n/en/ .notion-translate-hashes.json
-          git diff --cached --quiet && echo "번역 변경 없음" && exit 0
+          if git diff --cached --quiet; then
+            echo "번역 변경 없음"
+            echo "pushed=false" >> $GITHUB_OUTPUT
+            exit 0
+          fi
           git commit -m "chore: EN 번역 자동 업데이트 [skip-notion]"
           git pull --rebase origin main
           git push origin main
+          echo "pushed=true" >> $GITHUB_OUTPUT
+
+      # GITHUB_TOKEN 으로 push 한 커밋은 deploy.yml(on: push)을 트리거하지 못한다
+      # (GitHub의 워크플로 재귀 방지). workflow_dispatch 는 예외라 명시 호출로 배포를 잇는다.
+      - name: Trigger deploy
+        if: steps.commit.outputs.pushed == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh workflow run deploy.yml --ref main
