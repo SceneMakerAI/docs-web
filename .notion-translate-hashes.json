@@ -279,7 +279,7 @@
     "frontmatter_hash": "145460f3826d67bf4e34f62c15bbafe2378796dfec6aa9921b248de6b14a1a3c"
   },
   "blog/2026-07-13-07-langgraph-기반-방송-워크플로우-설계.md": {
-    "body_hash": "479d8252ad9ff68f6b9147bfbdd8f9bf5da0a550ee538e9f588731974333158e",
+    "body_hash": "4434dac8813a8f0ccdef43b9106431b3854e0d1d8dfab0720856a2a32ad6d733",
     "slug": "",
     "sidebar_position": "",
     "frontmatter_hash": "a7cf9fcb6143fbba05ddc9d74b8fdcc8cadfcde336437fa0f28cfb16c9bc2542"
@@ -288,49 +288,49 @@
     "body_hash": "8c9497c4065b083ff3855d939d33359c88f85d93e96946f39675a8746d5772f1",
     "slug": "",
     "sidebar_position": "",
-    "frontmatter_hash": "2c2bc5950d3a2467391521d87752e69bb77d97a33b8a1ded2b03ecf2d752e3c3"
+    "frontmatter_hash": "13cb5b7b3ad32dea417eae45145caee541c8f6c778b5ffe75aefc2b2703e413d"
   },
   "blog/2026-07-14-08-모아보기-서비스-구현기-1건.md": {
-    "body_hash": "0123db2ad30d5d38426815db40b769e82679bf38183bf5c62f34e4a8c18778ed",
+    "body_hash": "297ea658832c7cdbef9edecf96d5fe69e95f6bbb3a1d08dea6aa2580112a5f6c",
     "slug": "",
     "sidebar_position": "",
     "frontmatter_hash": "264c1dae224a6260b22daed069d7720704d1d4b4512ca2c9d901937816b5083f"
   },
   "blog/2026-07-14-08-숏폼-자동-생성-파이프라인-해설-1.md": {
-    "body_hash": "c7927ce1e227fc21d5b97a19574f3e636a4f868f8cd83ff3c83f8272dd9ff8fc",
+    "body_hash": "d2da8f151d54b8b0c8f89e7aa17dd15b9c6d75bc8cbf5c16ee1a23550dc4849a",
     "slug": "",
     "sidebar_position": "",
-    "frontmatter_hash": "61eb2615762acb01d241240cc5c47c3825ca1c7c7079cafd8f3d3894d963868e"
+    "frontmatter_hash": "b67e0965b5f7fc49e5eed68af353b59c7827ddea2b878d0a01ad8ea2f0387208"
   },
   "blog/2026-07-14-08-숏폼-자동-생성-파이프라인-해설-2.md": {
-    "body_hash": "d8ff31d00ea2e50e0698ba99236971f5c4adc763e20e9eaf9227acd91b8832a9",
+    "body_hash": "1f9a4b981e50bda956cc906e5cb2caded6e034d7e1e795339a6dec0ee7f194ab",
     "slug": "",
     "sidebar_position": "",
-    "frontmatter_hash": "161d07b4f2527e9f657a15b2021d00522860bbbfad55417f79547fbdf670cd3a"
+    "frontmatter_hash": "e65d43a466079d1a9a51373c0967b93fff076a34bac20718f98f928ae7a66af6"
   },
   "blog/2026-07-14-09-db-스키마-공개.md": {
     "body_hash": "74dbd24dafe7344c663d113138557e0540234bb7799c4a2c259c950e54a02862",
     "slug": "",
     "sidebar_position": "",
-    "frontmatter_hash": "0b5417105490b0ad8370cc02178f98f2b58bb1b09e87f2111f64ba2cf5aef5fb"
+    "frontmatter_hash": "93c867bef4a96c48d4a963d9f43c877f04507c39c5256a7a46d5753d1bb09b5f"
   },
   "blog/2026-07-14-09-vllm-기본-추론-최적화-노하우-1건.md": {
-    "body_hash": "2c4533c2fc616c1887f60e3ec2b30d339c104a7da2d8765f7b1497f259b3bc44",
+    "body_hash": "6e2de88b501261a8ecd152d5021c9bbc1c4b5696ecbcb6c7d959b7cfd8cc5b92",
     "slug": "",
     "sidebar_position": "",
-    "frontmatter_hash": "630f1120901feab9b5951c0be4b9bdb8fc3d622e62e81b95a376c2fc5ea0104d"
+    "frontmatter_hash": "db340286eae88d0f0b59a3f9a75c76e22ecc6e824b26f635feb3a0bdaa7bcfb7"
   },
   "blog/2026-07-14-09-맥락-기반-광고-최적화-기술-해설-1건.md": {
     "body_hash": "0eb896e1bf33c1f46ad420bdcebfa1e81bc2d6a9dff4e1080634034ba7863aef",
     "slug": "",
     "sidebar_position": "",
-    "frontmatter_hash": "7393a07674dcfeac6aab5b8c7fbb5fb4dc2787a208f7d30a570b86ecba4c1ea0"
+    "frontmatter_hash": "d780adcc5fab75f63075638ef8ff4d2dc0913898688eaef0fb1ab2c3f3618113"
   },
   "blog/2026-07-14-10-sbsi-실증-테스트-사례-공유-1건.md": {
-    "body_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "body_hash": "a2849e64fda4488ec007481aea06c99a59274d75f499baea22af8526dee18e35",
     "slug": "",
     "sidebar_position": "",
-    "frontmatter_hash": "70110b66e4afc2f09e79a092a091df3a95e5f8a2dc8143629a87e037e0571d69"
+    "frontmatter_hash": "d31fe90b4016bd87a7db6bdfd8496a1c3e2ec893a8d4940be799542c2c43af09"
   },
   "blog/2026-07-14-10-방송-ai-서비스-성능-벤치마크-결과-분석-1건.md": {
     "body_hash": "6183855c7bc1cc2518694697f308e03a731c2faa105ace09943455cec3e4af1e",
@@ -339,13 +339,13 @@
     "frontmatter_hash": "278d0a7e8b9aee15b25ea7a043154a694825729643fe6073b45f0033ffae06d9"
   },
   "blog/2026-07-14-11-방송-ai-오픈웨이트-모델-활용-사례-1건.md": {
-    "body_hash": "1d015024698159ae1f909862761f33e76bfa5f210bbecbe5bb8cbad6524b2c7d",
+    "body_hash": "188b96622b530e71cd00d752a17d13a7fd5a971d26305d823a5eff576fc5e467",
     "slug": "",
     "sidebar_position": "",
-    "frontmatter_hash": "5382e66580685fa50907db37b05f7b99a91dc6c64e3c498da5f0ac4ae5845d17"
+    "frontmatter_hash": "99b4e0de8e697f2ec1b2c0cf572ad215766bafa9e33bf4b9d660982d679a0a60"
   },
   "blog/2026-07-14-11-오픈-소스-기여-종합-가이드-1건.md": {
-    "body_hash": "06dcd0ab0630f61b5d8a2a947fca6366c0ce6aecf8ee2f38baea92ff5e1b211c",
+    "body_hash": "823d1cdbf793902b88cffa0c2f25ccd7eaf7df497928952b9f8653ff7b9d49de",
     "slug": "",
     "sidebar_position": "",
     "frontmatter_hash": "7d6430fbc1eccfd778cb06525db5932f48e35cb13be33ed3523291ce05b60672"
@@ -379,5 +379,11 @@
     "slug": "5",
     "sidebar_position": "5",
     "frontmatter_hash": "4170a52c7b354787489c0eb25f8cbae446fb7c0acc7184a9e09a822041242faf"
+  },
+  "docs/about/개요.md": {
+    "body_hash": "7a6d985704e8f50a94e503b2e7b46b86c538478a0cc0fc58ac1ab541f8e27fbe",
+    "slug": "1",
+    "sidebar_position": "1",
+    "frontmatter_hash": "4cd87bcfc3e45e4e01c8689ae219d537af44ce8fe149ecf58d9c0b0a493884d9"
   }
 }
