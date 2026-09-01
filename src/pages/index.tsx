@@ -1,3 +1,9 @@
+// ---------------------------------------------------------------
+// 공개 문서사이트 홈 — Hero · Features · KPI 세 블록.
+// KPI 수치(오픈소스 기여 30+ · 기술블로그 20+ · 1시간→20분 · 장면분류 F1 0.70)는
+// 과제 성과지표와 직접 연결되므로, 보고 수치와 어긋나지 않게 함께 갱신한다.
+// ---------------------------------------------------------------
+
 import type {ReactNode} from 'react';
 import Link from '@docusaurus/Link';
 import Translate, {translate} from '@docusaurus/Translate';
