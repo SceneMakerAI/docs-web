@@ -170,3 +170,23 @@ def test_rejoin_does_not_swallow_html_comment():
     assert T._rejoin_marker_tags(body, "HDR") == body
     bq = '<x id="BQ0"/>\n\n<!--truncate-->\n'
     assert T._rejoin_marker_tags(bq, "BQ", sep="") == bq
+
+
+def test_unglue_html_comment_moves_it_before_marker():
+    """DeepL이 제목 마커 뒤에 붙여버린 <!--truncate--> 를 마커 앞으로 되돌린다.
+
+    실제 응답: '<x id="HDR1"/><!--truncate-->\\n\\n  Collect'
+    → 그대로 두면 '### <!--truncate-->' 가 되고 제목 텍스트는 문단으로 떨어진다.
+    KO 원문은 항상 주석이 제목보다 앞에 온다.
+    """
+    body = '<x id="HDR1"/><!--truncate-->\n\n  Collect\n'
+    out = T._unglue_html_comments(body)
+    assert out == '<!--truncate-->\n\n<x id="HDR1"/>\n\n  Collect\n'
+    joined = T._rejoin_marker_tags(out, "HDR")
+    assert '<!--truncate-->\n\n<x id="HDR1"/> Collect' in joined
+
+
+def test_unglue_html_comments_leaves_normal_text():
+    """주석이 붙어 있지 않으면 그대로 둔다."""
+    body = '<x id="HDR0"/> Introduction\n'
+    assert T._unglue_html_comments(body) == body

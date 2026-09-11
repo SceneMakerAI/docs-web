@@ -113,6 +113,19 @@ def _restore_blockquotes(body, store):
     return body
 
 
+def _unglue_html_comments(body):
+    """DeepL 이 마커 placeholder 뒤에 붙여 내보낸 HTML 주석을 마커 앞으로 되돌린다.
+
+    실제 응답: '<x id="HDR1"/><!--truncate-->\\n\\n  Collect' — 그대로 복원하면
+    '### <!--truncate-->' 라는 제목이 생기고 진짜 제목 텍스트는 문단으로 떨어진다
+    (실제 사례: /en/blog/7·8·16·19·20).
+
+    KO 원문은 <!--truncate--> 가 항상 제목보다 앞에 오므로, 앞으로 옮기는 것이
+    원문 순서를 되살리는 것이기도 하다.
+    """
+    return re.sub(r'(<x id="(?:HDR|BQ)\d+"/>)(<!--.*?-->)', r'\2\n\n\1', body)
+
+
 def _rejoin_marker_tags(body, prefix, sep=" "):
     """DeepL 이 마커 placeholder 와 본문 사이에 넣은 줄바꿈을 제거해 다시 한 줄로 만든다.
 
@@ -458,6 +471,7 @@ def translate_file(kr_path, hashes):
     translated = translate_with_deepl(body_protected) if body_no_inline.strip() else body_protected
     for key, num in _ol_store.items():
         translated = translated.replace(key, num)
+    translated = _unglue_html_comments(translated)
     translated = _rejoin_marker_tags(translated, "HDR")
     for key, markers in _hdr_store.items():
         translated = translated.replace(key, markers)
