@@ -474,3 +474,24 @@ def test_translate_file_rejoins_sentence_across_hr_end_to_end(tmp_path, monkeypa
     en = out.read_text(encoding="utf-8")
     assert "If you apply `faster-whisper` directly, subtitles look wrong." in en
     assert not re.search(r"^If you apply\s*$", en, re.MULTILINE)
+
+
+def test_rejoin_sentence_across_hr_inline_token_form():
+    """복구 시점엔 구분선이 아직 placeholder라 문장 조각과 같은 줄에 있다.
+
+    실제 응답: '### Introduction\\n\\nIf you apply <x id="HR"/>\\n\\n`faster-whisper` directly to …'
+    줄 단위로만 보면 못 잡는다 — 같은 줄 형태를 반드시 다뤄야 한다.
+    """
+    hr = '<x id="HR"/>'
+    body = (f'### Introduction\n\nIf you apply {hr}\n\n'
+            '__INLINE0__ directly to Korean broadcast content.\n')
+    out = T._rejoin_sentence_across_hr(body, hr)
+    assert out == (f'### Introduction\n\n{hr}\n\n'
+                   'If you apply __INLINE0__ directly to Korean broadcast content.\n')
+
+
+def test_rejoin_sentence_across_hr_inline_keeps_complete_sentence():
+    """같은 줄이어도 완결 문장이면 옮기지 않는다."""
+    hr = '<x id="HR"/>'
+    body = f'A complete sentence. {hr}\n\nNext paragraph.\n'
+    assert T._rejoin_sentence_across_hr(body, hr) == f'A complete sentence.\n\n{hr}\n\nNext paragraph.\n'

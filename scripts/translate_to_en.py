@@ -148,6 +148,12 @@ def _rejoin_sentence_across_hr(body, hr_token):
     보수적으로만 움직인다 — 구분선 바로 위 문단이 문장 종결 부호로 끝나지 않고,
     제목·목록·표·주석·placeholder 도 아닐 때만. 완결된 문단은 건드리지 않는다.
     """
+    # DeepL 응답에서는 구분선이 아직 placeholder라 문장 조각과 같은 줄에 붙어 나온다
+    # ('If you apply <x id="HR"/>'). 먼저 줄을 갈라 아래 로직이 볼 수 있게 한다.
+    esc = re.escape(hr_token)
+    body = re.sub(rf'(?m)^((?:(?!{esc}).)*\S)[ \t]*{esc}[ \t]*$',
+                  lambda m: f'{m.group(1)}\n\n{hr_token}', body)
+
     lines = body.split('\n')
     out = []
     for i, line in enumerate(lines):
