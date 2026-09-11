@@ -322,3 +322,42 @@ def test_translate_file_translates_korean_tags_end_to_end(tmp_path, monkeypatch)
     en = out.read_text(encoding="utf-8")
     assert "tags: [rag, Update required]" in en
     assert "업데이트 필요" not in en
+
+
+def test_rejoin_ordered_list_markers_reattaches_and_normalizes():
+    """DeepL이 숫자 목록 마커를 본문에서 떼어내고 구분자까지 바꾼 것을 되돌린다.
+
+    실제 응답: '<x id="OL0"/>\\n\\n: Noise removal' / '<x id="OL1"/>\\n\\n. Detection'
+    → 복원하면 '1' 과 ': Noise removal' 이 따로 놀아 목록이 깨진다
+    (실제 사례: /en/blog/3 음성분석 5단계).
+    """
+    body = ('<x id="OL0"/>\n\n: Noise removal (Denoise)\n'
+            '<x id="OL1"/>\n\n. Detection of human speech segments (VAD)\n')
+    out = T._rejoin_ol_markers(body)
+    assert out == ('<x id="OL0"/>. Noise removal (Denoise)\n'
+                   '<x id="OL1"/>. Detection of human speech segments (VAD)\n')
+
+
+def test_rejoin_ordered_list_markers_leaves_intact_items():
+    """이미 붙어 있는 목록 항목은 그대로 둔다."""
+    body = '<x id="OL0"/>. Noise removal\n<x id="OL1"/>. VAD\n'
+    assert T._rejoin_ol_markers(body) == body
+
+
+def test_translate_file_repairs_ordered_list_end_to_end(tmp_path, monkeypatch):
+    """배선 검증 — translate_file 이 숫자 목록 복구를 거친다."""
+    kr = tmp_path / "post.md"
+    kr.write_text('---\ntitle: "글"\n---\n\n1. 노이즈 제거\n1. 화자 분리\n', encoding="utf-8")
+    out = tmp_path / "en.md"
+    def fake(t):
+        t = re.sub(r'(<x id="OL0"/>)\. ', r'\1\n\n: ', t)
+        t = re.sub(r'(<x id="OL1"/>)\. ', r'\1\n\n. ', t)
+        return t.replace("노이즈 제거", "Denoise").replace("화자 분리", "Diarization").replace("글", "Post")
+    monkeypatch.setattr(T, "translate_with_deepl", fake)
+    monkeypatch.setattr(T, "translate_with_deepl_plain", fake)
+    monkeypatch.setattr(T, "kr_to_en_path", lambda p: str(out))
+    T.translate_file(str(kr), {})
+    en = out.read_text(encoding="utf-8")
+    assert "1. Denoise" in en
+    assert "1. Diarization" in en
+    assert not re.search(r"^\d+\s*$", en, re.MULTILINE)   # 숫자만 있는 줄 없음

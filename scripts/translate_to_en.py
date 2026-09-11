@@ -115,6 +115,19 @@ def _restore_blockquotes(body, store):
     return body
 
 
+def _rejoin_ol_markers(body):
+    """DeepL 이 떼어낸 숫자 목록 마커를 본문에 다시 붙이고 구분자를 '.' 로 되돌린다.
+
+    보호 시 '<x id="OL0"/>. ' 형태로 내보내는데, DeepL 은 태그만 앞 줄에 남기고
+    나머지를 다음 문단으로 밀며 구분자를 ':' 로 바꾸기도 한다. 그대로 복원하면
+    '1' 과 ': 노이즈 제거' 가 따로 놀아 목록이 통째로 깨진다
+    (실제 사례: /en/blog/3 음성분석 5단계).
+
+    구분자를 항상 '.' 로 통일한다 — ':' 로는 마크다운 목록이 되지 않는다.
+    """
+    return re.sub(r'(<x id="OL\d+"/>)\n+[ \t]*[.:][ \t]*', r'\1. ', body)
+
+
 def _unglue_html_comments(body):
     """DeepL 이 마커 placeholder 뒤에 붙여 내보낸 HTML 주석을 마커 앞으로 되돌린다.
 
@@ -551,6 +564,7 @@ def translate_file(kr_path, hashes):
     # path segments nor relocate the closing ) onto a new line (breaks the image)
     body_protected, _img_store = _protect_images(body_protected)
     translated = translate_with_deepl(body_protected) if body_no_inline.strip() else body_protected
+    translated = _rejoin_ol_markers(translated)
     for key, num in _ol_store.items():
         translated = translated.replace(key, num)
     translated = _unglue_html_comments(translated)
