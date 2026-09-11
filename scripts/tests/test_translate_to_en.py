@@ -40,3 +40,50 @@ def test_protect_images_multiple_and_korean_path():
     assert len(store) == 2
     restored = T._restore_images(protected, store)
     assert restored == body
+
+
+def test_protect_blockquotes_distinguishes_empty_quote_lines():
+    """내용 있는 '> 텍스트'와 빈 '>' 줄은 서로 다른 placeholder 종류를 받는다.
+    빈 줄에 뒤 문단을 끌어붙이면 안 되기 때문."""
+    body = "> 테이블 구현\n>\n> 다음 줄"
+    protected, store = T._protect_blockquotes(body)
+    assert 'id="BQ0"' in protected        # 내용 있음
+    assert 'id="BQE1"' in protected       # 빈 줄
+    assert 'id="BQ2"' in protected        # 내용 있음
+    assert T._restore_blockquotes(protected, store) == body
+
+
+def test_rejoin_detached_blockquote_marker():
+    """DeepL이 마커와 본문 사이에 빈 줄을 넣어도(실제 버그 재현) 다시 붙는다.
+
+    실제 응답: '<x id="BQ1"/>\\n\\nTable Implementation'
+    → 복원 시 '> ' 만 남은 빈 blockquote + 별도 문단이 됐다 (/en/blog/6).
+    """
+    body = "- 앞 문장\n\n> 테이블 구현\n\n| 공정 | 담당 |\n"
+    protected, store = T._protect_blockquotes(body)
+    key = next(k for k in store if 'id="BQ0"' in k)
+    deepl_out = protected.replace(f"{key}테이블 구현", f"{key}\n\nTable Implementation")
+    repaired = T._rejoin_blockquote_markers(deepl_out)
+    restored = T._restore_blockquotes(repaired, store)
+    assert "> Table Implementation" in restored
+    assert not re.search(r"^>\s*$", restored, re.MULTILINE)
+
+
+def test_rejoin_keeps_consecutive_markers_on_own_lines():
+    """마커가 연달아 있으면 본문은 마지막 마커에만 붙는다 — 중첩 인용(> >) 금지."""
+    body = "> \n>\n> 첫 문장\n"
+    protected, store = T._protect_blockquotes(body)
+    last = next(k for k in store if 'id="BQ2"' in k)
+    deepl_out = protected.replace(f"{last}첫 문장", f"{last}\n\nFirst sentence")
+    restored = T._restore_blockquotes(T._rejoin_blockquote_markers(deepl_out), store)
+    assert "> First sentence" in restored
+    assert "> > " not in restored
+    assert restored.count("\n") == body.count("\n")
+
+
+def test_rejoin_does_not_swallow_paragraph_after_empty_quote_line():
+    """빈 '>' 줄 다음의 일반 문단은 인용 안으로 끌려들어가지 않는다."""
+    body = "> 인용\n>\n\n일반 문단\n"
+    protected, store = T._protect_blockquotes(body)
+    restored = T._restore_blockquotes(T._rejoin_blockquote_markers(protected), store)
+    assert restored == body

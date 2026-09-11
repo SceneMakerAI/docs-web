@@ -86,6 +86,45 @@ def _restore_images(body, store):
     return body
 
 
+def _protect_blockquotes(body):
+    """blockquote '> ' 마커를 placeholder 태그로 보호.
+
+    tag_handling="html" 이 <x .../> 를 그대로 보존하므로 DeepL 이 '> ' 를 태그 이름으로
+    바꿔먹는 것을 막는다. 내용이 있는 줄은 BQ, 빈 '>' 줄은 BQE 로 구분한다 —
+    분리된 마커를 다시 붙일 때(_rejoin_blockquote_markers) 빈 줄이 뒤 문단을
+    끌어당기면 안 되기 때문.
+    """
+    store = {}
+
+    def _sub(m):
+        line_end = body.find("\n", m.end())
+        rest = body[m.end():] if line_end == -1 else body[m.end():line_end]
+        kind = "BQ" if rest.strip() else "BQE"
+        key = f'<x id="{kind}{len(store)}"/>'
+        store[key] = m.group(0)
+        return key
+
+    return re.sub(r'^> ?', _sub, body, flags=re.MULTILINE), store
+
+
+def _restore_blockquotes(body, store):
+    for key, val in store.items():
+        body = body.replace(key, val)
+    return body
+
+
+def _rejoin_blockquote_markers(body):
+    """DeepL 이 마커와 본문 사이에 넣은 줄바꿈을 제거해 다시 한 줄로 만든다.
+
+    실제 응답: '<x id="BQ1"/>\\n\\nTable Implementation' — 복원하면 '> ' 만 남은
+    빈 blockquote 와 인용 밖으로 떨어진 문단이 된다 (/en/blog/6 실제 사례).
+
+    내용이 있던 BQ 만 대상이고, 뒤가 또 다른 마커면 붙이지 않는다 — 붙이면
+    '> > ' 중첩 인용이 된다. 본문은 연속 마커 중 마지막 것에만 붙는다.
+    """
+    return re.sub(r'(<x id="BQ\d+"/>)\n+[ \t]*(?!<x id="BQ)(?=\S)', r'\1', body)
+
+
 def _protect_inline_code(body):
     store = {}
     result = []
@@ -374,14 +413,7 @@ def translate_file(kr_path, hashes):
     body_no_code, code_store = _protect_code_blocks(body)
     body_no_inline, inline_store = _protect_inline_code(body_no_code)
     # Protect blockquote > markers — DeepL with tag_handling="html" can replace "> " with tag names
-    _bq_store: dict[str, str] = {}
-
-    def _protect_bq(m: re.Match) -> str:
-        key = f'<x id="BQ{len(_bq_store)}"/>'
-        _bq_store[key] = m.group(0)
-        return key
-
-    body_no_inline = re.sub(r'^> ?', _protect_bq, body_no_inline, flags=re.MULTILINE)
+    body_no_inline, _bq_store = _protect_blockquotes(body_no_inline)
     # DeepL converts <hr/> to "---" which merges with next headings
     # Use an HTML tag placeholder: tag_handling="html" preserves <x ...> tags exactly
     _HR = '<x id="HR"/>'
@@ -444,8 +476,8 @@ def translate_file(kr_path, hashes):
     en_body = re.sub(r'\n{3,}', '\n\n', en_body)
     en_body = _restore_inline_code(en_body, inline_store)
     en_body = _restore_code_blocks(en_body, code_store)
-    for key, val in _bq_store.items():
-        en_body = en_body.replace(key, val)
+    en_body = _rejoin_blockquote_markers(en_body)
+    en_body = _restore_blockquotes(en_body, _bq_store)
     en_body = _restore_images(en_body, _img_store)
     # Safety net: DeepL relocates blockquote '> ' marker mid-sentence
     # e.g. "If an>  `code` ..." → "> If an `code` ..."
