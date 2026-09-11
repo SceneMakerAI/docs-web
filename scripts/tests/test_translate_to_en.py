@@ -40,3 +40,45 @@ def test_protect_images_multiple_and_korean_path():
     assert len(store) == 2
     restored = T._restore_images(protected, store)
     assert restored == body
+
+
+def test_translate_frontmatter_tags_only_korean_items(monkeypatch):
+    """한글 태그만 번역하고 영문 태그는 그대로 둔다.
+
+    EN 페이지에 'Tags: 업데이트 필요' 가 한글로 노출되고
+    /en/blog/tags/업데이트-필요/ 라는 한글 URL 이 생겼다.
+    """
+    monkeypatch.setattr(T, "translate_with_deepl_plain", lambda t: "Update required")
+    fm = '---\ntitle: "x"\ntags: [rag, 업데이트 필요, milvus]\n---\n\n'
+    out = T._translate_frontmatter_tags(fm)
+    assert "tags: [rag, Update required, milvus]" in out
+
+
+def test_translate_frontmatter_tags_no_korean_skips_deepl(monkeypatch):
+    """한글이 없으면 DeepL을 부르지 않고 원본 그대로 돌려준다."""
+    called = []
+    monkeypatch.setattr(T, "translate_with_deepl_plain", lambda t: called.append(t) or "x")
+    fm = '---\ntags: [rag, milvus]\n---\n\n'
+    assert T._translate_frontmatter_tags(fm) == fm
+    assert called == []
+
+
+def test_translate_frontmatter_tags_without_tags_line(monkeypatch):
+    """tags 줄이 없으면 그대로 통과."""
+    fm = '---\ntitle: "x"\n---\n\n'
+    assert T._translate_frontmatter_tags(fm) == fm
+
+
+def test_translate_file_translates_korean_tags_end_to_end(tmp_path, monkeypatch):
+    """배선 검증 — translate_file 이 실제로 태그 번역을 거친다."""
+    kr = tmp_path / "post.md"
+    kr.write_text('---\ntitle: "스키마 공개"\ntags: [rag, 업데이트 필요]\n---\n\n본문\n',
+                  encoding="utf-8")
+    out = tmp_path / "en.md"
+    monkeypatch.setattr(T, "translate_with_deepl", lambda t: t.replace("스키마 공개", "Schema Release").replace("본문", "Body"))
+    monkeypatch.setattr(T, "translate_with_deepl_plain", lambda t: "Update required")
+    monkeypatch.setattr(T, "kr_to_en_path", lambda p: str(out))
+    T.translate_file(str(kr), {})
+    en = out.read_text(encoding="utf-8")
+    assert "tags: [rag, Update required]" in en
+    assert "업데이트 필요" not in en

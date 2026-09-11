@@ -283,6 +283,27 @@ def cleanup_stale_en_files(source_files):
                     log(f"스테일 EN 파일 삭제: {en_path}")
 
 
+def _translate_frontmatter_tags(en_frontmatter):
+    """frontmatter `tags: [...]` 중 한글 항목만 영어화한다.
+
+    태그는 EN 페이지 하단 'Tags:' 와 /en/blog/tags/<태그>/ URL 을 만든다.
+    한글 태그를 그대로 두면 EN 로케일에 한글 라벨·한글 URL 이 생긴다
+    (실제 사례: /en/blog/tags/업데이트-필요/).
+
+    영문 태그(rag, milvus 등)는 건드리지 않는다 — 번역하면 KR/EN 태그가
+    불필요하게 갈린다.
+    """
+    m = re.search(r'^tags: \[(.+)\]$', en_frontmatter, re.MULTILINE)
+    if not m:
+        return en_frontmatter
+    items = [t.strip() for t in m.group(1).split(',')]
+    if not any(_KO_RE.search(t) for t in items):
+        return en_frontmatter
+    en_items = [html.unescape(translate_with_deepl_plain(t)).strip() if _KO_RE.search(t) else t
+                for t in items]
+    return en_frontmatter.replace(m.group(0), f'tags: [{", ".join(en_items)}]', 1)
+
+
 def translate_file(kr_path, hashes):
     with open(kr_path, encoding="utf-8") as f:
         content = f.read()
@@ -319,6 +340,7 @@ def translate_file(kr_path, hashes):
 
     # id 필드 제거 (로케일 매칭은 파일 경로로 처리)
     en_frontmatter = re.sub(r'^id: .+\n', '', frontmatter, count=1, flags=re.MULTILINE)
+    en_frontmatter = _translate_frontmatter_tags(en_frontmatter)
 
     def _new_cache():
         return {"body_hash": body_hash, "slug": slug, "sidebar_position": pos, "frontmatter_hash": fm_hash}
