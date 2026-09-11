@@ -385,5 +385,17 @@
     "slug": "1",
     "sidebar_position": "1",
     "frontmatter_hash": "4cd87bcfc3e45e4e01c8689ae219d537af44ce8fe149ecf58d9c0b0a493884d9"
+  },
+  "docs/guide/외부-연동-규격.md": {
+    "body_hash": "5af5b6e2b251895d0247693f256a7627e6815497065bf5ce0d7f0e3dd4df81fd",
+    "slug": "1",
+    "sidebar_position": "1",
+    "frontmatter_hash": "562d9149328a8ce72272fd0a37030797ec83c1f739ad8bf0ce55f1b446ea3b51"
+  },
+  "docs/test/야구-질의.md": {
+    "body_hash": "074b0a6e65a74d4a7e9b03f5a6e2d4d53dc4663050ffa8c8dab0f8219675103b",
+    "slug": "1",
+    "sidebar_position": "1",
+    "frontmatter_hash": "7bd3e21f666605b3b10395f8ad702fe3d33bef770a636f2a05b6af544387c4ba"
   }
 }
