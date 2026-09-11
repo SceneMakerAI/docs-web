@@ -9,10 +9,10 @@ last_update:
 ## 1. Concepts
 
 - FFmpeg itself is an open-source project. The "GPU version" is not a separate product, but simply a **build compiled with NVENC/NVDEC enabled**.
-- GPU encoding/decoding is provided by the NVIDIA **driver**. The CUDA toolkit is not required; `nvidia-smi` is sufficient.
-- The default FFmpeg included in distributions (via apt, etc.) usually has nvenc disabled. You must obtain a build with nvenc enabled or compile it yourself.
+- GPU encoding/decoding is provided by the NVIDIA **driver**. The CUDA toolkit is not required; `nvidia-smi` support is sufficient.
+- The default ffmpeg included in distributions (via apt, etc.) usually has nvenc disabled. You must obtain a build with nvenc enabled or compile it yourself.
 
-## 2. Prerequisites
+ ##2. Prerequisites
 
 ```javascript
 # Checking GPU/Driver Operation
@@ -95,10 +95,10 @@ NVENC OK
 ```
 
 - Note — **Driver vs. NVENC SDK Version**: Builds that are too recent require the new NVENC SDK and will be rejected by older drivers.
-- If `Driver does not support the required nvenc API version. Required: X.Y` appears, update your driver or use an **older build** (BtbN’s `autobuild-YYYY-MM-DD` releases sorted by date). 
-- Make sure the test input is large enough, such as 1280x720 (very small sizes may trigger false positives due to falling below the NVENC minimum resolution).
+- If `Driver does not support the required nvenc API version. Required: X.Y` appears, either update your driver or download an **older build** (BtbN’s `autobuild-YYYY-MM-DD` releases by date). 
+- Use a sufficiently large test input, such as 1280x720 (very small inputs may trigger false positives due to falling below the NVENC minimum resolution).
 
-## 5. Basic Usage Pattern
+ ##5. Basic Usage Patterns
 
 Perform decoding, scaling, and encoding entirely on the GPU:
 
@@ -111,7 +111,7 @@ Perform decoding, scaling, and encoding entirely on the GPU:
 > ffmpeg -hwaccel cuda -hwaccel_output_format cuda -i in.mp4 \
        -vf scale_cuda=1280:720 -c:v h264_nvenc out.mp4
 
-# Specifying a Specific Decoder (When the input codec is known, e.g., VP9)
+# Specifying a specific decoder (when the input codec is known, e.g., VP9)
 > ffmpeg -hwaccel cuda -hwaccel_output_format cuda -c:v vp9_cuvid -i in.webm \
        -vf scale_cuda=1280:720 -c:v h264_nvenc out.mp4
 ```
@@ -121,21 +121,21 @@ Frequently Used Options
 - `hwaccel cuda`  : Use hardware decoding
 - `hwaccel_output_format cuda`  : Keep decoded frames in GPU memory(required when chained with GPU filters such as `scale_cuda`)
 - `c:v h264_nvenc`  / `hevc_nvenc`  / `av1_nvenc`  : Hardware encoder
-- `preset p1` (Fast) ~ `p7` (High Quality), `tune ll` / `ull`: nvenc quality/speed
-- `gpu 0` or `hwaccel_device 1`: Specify the ##GPU to use
+- `preset p1` (Fast) ~ `p7` (High Quality), `tune ll` / `ull`  : nvenc quality/speed
+- `gpu 0`  or `hwaccel_device 1`  : Specify the GPU to use
 
- **6. For Verification — GPU Engine Utilization**
+ ##**6. For Verification — GPU Engine Utilization**
 
-The GPU-Util(%) value in nvidia-smi refers to compute cores (SMs), so it appears low during hardware transcoding. The actual encoder/decoder utilization is:
+The “GPU-Util(%)” value in `nvidia-smi` refers to compute cores (SMs), so it appears low during hardware transcoding. The actual encoder/decoder utilization is:
 
 ```javascript
 > nvidia-smi dmon -s u    # View the "enc" and "dec" columns
 ```
 
-### **Cautions/Pitfalls (General)**
+ ###**Cautions/Pitfalls (General)**
 
-- The default ffmpeg included in most distributions often has nvenc disabled → Check step 4 first.
-- If the ffmpeg build is newer than the driver, nvenc will fail → Upgrade the driver or use an older ffmpeg build.
-- A cuvid decoder compatible with the input codec is required for GPU decoding (otherwise, it will fall back to CPU decoding or result in an error).
-- FFmpeg is a standalone static binary, so it can be installed or replaced independently of the system or Python environment.
+- The default ffmpeg included in most distributions often has nvenc disabled → Check this first in step 4.
+- If the ffmpeg build is newer than the driver, nvenc will be rejected → Upgrade the driver or use an older ffmpeg build.
+- A cuvid decoder compatible with the input codec is required for GPU decoding (otherwise, it falls back to CPU decoding or returns an error).
+- FFmpeg is an independent static binary, so it can be installed or replaced independently of the system or Python environment.
 

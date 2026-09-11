@@ -10,7 +10,7 @@ last_update:
 ## 1. Overview
 
 - Install AWS Linux
-- Install Mulvus Compose
+- Install the appropriate version of Docker Compose
 - Install Attu
 
 ---
@@ -32,7 +32,7 @@ Docker version 25.0.14, build 0bab007
 >
 ```
 
-### 2.2 Installing Docker Compose (Plugin Method)
+ ### 2.2 Installing Docker Compose (Plugin Method)
 
 The default repository for Amazon Linux 2023 does not include the `docker-compose` plugin.
 
@@ -55,11 +55,11 @@ Docker Compose version v5.1.4
 > systemctl enable docker
 ```
 
+ 
+
 ---
 
-##
-
- 3. Install Milvus
+## 3. Install Milvus
 
 ### 3.1 Install Mulvus
 
@@ -104,16 +104,16 @@ affc1daa2946   quay.io/coreos/etcd:v3.5.25                "etcd -advertise-cli�
 > systemctl enable docker
 ```
 
-#### Restart Milvus
+ #### Restart Milvus
 
-Services bundled with Docker Compose often fail to start automatically when the server is restarted.
+Services bundled with Docker Compose often fail to start automatically when the server is shut down and then restarted.
 
-Verify that the `restart: always` option is included for each service in the official `docker-compose.yml` file and apply it.
+Verify that the `restart: always` option is definitely included for each service within the official `docker-compose.yml` file, and apply it.
 
 ```javascript
 > cd /usr/service/milvus-standalone  # The path to the folder where Compose was located earlier
 > vi docker-compose.yml
-# Example of editing docker-compose.yml
+# Example of Editing docker-compose.yml
 services:
   etcd:
     container_name: milvus-etcd
@@ -135,7 +135,7 @@ services:
     
 ```
 
-#### Restarting Attu
+ #### Restarting Attu
 
 ```javascript
 # Check the "restart always" command below
@@ -149,8 +149,10 @@ services:
 ### 4.1 Attu Configuration
 
 - Open the AWS firewall
-- Access: http://<host_ip>:8000/
-- Since the services are isolated from each other via Docker, 127.0.0.1 will not work.
+- Access: http://<host_ip>
+
+:8000/
+- Since they are isolated from each other via Docker, 127.0.0.1 will not work.
 
 ![image](/img/install/milvus-설치-aws-linux-docker-compose/img-00.png)
 
