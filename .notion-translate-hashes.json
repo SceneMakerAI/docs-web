@@ -397,5 +397,10 @@
     "slug": "1",
     "sidebar_position": "1",
     "frontmatter_hash": "7bd3e21f666605b3b10395f8ad702fe3d33bef770a636f2a05b6af544387c4ba"
+  },
+  "blog/authors.yml": {
+    "body_hash": "27f512732a5cc4910b2e369efa5bb583bd46be2951827be9640cd14395b6341e",
+    "slug": null,
+    "sidebar_position": null
   }
 }
