@@ -10,7 +10,7 @@
 
 - 운영 URL: `https://doc.scenemaker.solbox.com`
 - 스택: **Docusaurus 3.x** (React 19, TypeScript), **한국어(기본)·영어 이중 로케일**
-- 파이프라인: Notion DB → 서버 crontab(1시간, `server-sync.sh`) → GH Pages (`deploy.yml`)
+- 파이프라인: Notion DB → 서버 crontab(6시간, `server-sync.sh`) → GH Pages (`deploy.yml`)
 - 번역 파이프라인: `docs/`·`blog/` KR → DeepL → `i18n/en/` EN (매월 1일, `monthly-translate.yml`)
 - 참고: [https://docusaurus.io/ko/docs](https://docusaurus.io/ko/docs)
 
@@ -18,85 +18,84 @@
 
 ## 서비스 개요 — 무엇을 만드나
 
-> ⚠️ 아래는 **SceneMaker 제품(파이프라인)** 설명이다. 이 저장소(`docs-web`)는 그 제품을 소개하는 **문서 사이트**일 뿐이고, 파이프라인 코드는 형제 디렉토리(`agent/`, `worker/`, `ui/`)에 있다.
+> ⚠️ 아래는 **SceneMaker 제품(파이프라인)** 설명이다. 이 저장소(`docs-web`)는 그 제품을 소개하는 **문서 사이트**일 뿐이다.
+> 파이프라인 코드는 **개발 박스 `192.168.0.208` 의 `/usr/service/source/scenemaker`** 에 있다 (`agent/`·`api/`·`worker/`·`ui/`·`poc/`·`train/`). 이 작업 머신에는 없다.
+> GitHub org: [SceneMakerAI](https://github.com/SceneMakerAI) — 16개 리포, 다수 private.
 
-**한 줄:** 방송 영상 1편을 넣으면 오픈소스 멀티모달 AI가 분석·색인해서, **자연어 질의로 원하는 장면(클립)을 찾아주는** 서비스. 최종 산출물은 숏폼·하이라이트·예고편·광고매칭용 **클립 구간 목록**(다음 단계 ffmpeg 조립의 입력).
+**한 줄:** 방송 영상 1편을 넣으면 오픈소스 멀티모달 AI가 분석·색인해서, **자연어 질의로 하이라이트 영상을 합성해주는** 서비스. 최종 산출물은 S3에 올라간 **완성된 MP4**(+ 구간 목록 JSON).
 
-- **검색 원자 = 6초 세그먼트.** 모든 요약 계층에 타임코드를 보존한다 — 최종 목적이 클립 컷팅이라 요약↔원본 매핑이 끊기면 안 됨.
-- **뼈대 = RAG.** 색인(agent-scenario)이 영상을 접어 Milvus에 넣고, 검색(agent-search)이 질의로 클립을 꺼낸다. 영상 RAG라 "답이 문단이 아니라 타임코드 구간"인 게 문서 RAG와 다른 점.
-- **데이터 4계층:** 세그먼트(6초, `t_segment`) → 씬(`t_chapter` L2) → 서브/막(`t_chapter` L1) → 전체 줄거리(`t_video.summary`).
+- **뼈대 = RAG.** 색인(`agent-vision` ingest 단계)이 증거를 Milvus에 넣고, 편성(`agent-compose`)이 질의로 클립 구간을 꺼낸 뒤 렌더(`worker-render`)가 영상으로 만든다. "답이 문단이 아니라 타임코드 구간"인 게 문서 RAG와 다른 점.
+- **도메인 특화 구조.** 범용 파이프라인이 아니라 `cate_id` 로 도메인 플로우를 고른다. 현재 등록된 건 **야구(`cate_id=5100`)뿐**이고, `agent-vision`·`agent-compose` 모두 `domains/<종목>/` 아래에 단계·노드를 둔다. 도메인 추가 = 모듈 작성 + `pipeline/dispatch.py` 표에 한 줄.
+- **스트림 청크 단위 처리.** `stream_mode=Y` 면 영상을 조각(`stream_id`·`stream_seq`)으로 나눠 순차 처리한다. 재처리(`force`)는 "이 청크부터 끝까지" 산출을 지운다 — 뒤 청크가 앞 청크 값(타순 시드·통산 구간 번호)을 이어받기 때문.
 
-**5공정 (영상 → 클립):**
-
-```
-업로드(ui) → 자막(agent-stt+worker) → 화면분석(agent-vision)
-          → 색인(agent-scenario) → 검색(agent-search) → ffmpeg 조립(다음 단계)
-```
-
-
-| 공정     | 담당                                   | 하는 일                                                               | 산출물                  |
-| ------ | ------------------------------------ | ------------------------------------------------------------------ | -------------------- |
-| 업로드    | `ui-workspace` (Next.js)             | S3 업로드 + 분석결과 조회 콘솔                                                | `t_video`            |
-| ① 자막   | `agent-stt` (+`worker-prep_stt` STT) | 음성 → 대사·화자, vLLM 자막교정                                              | `t_dialogue`         |
-| ② 화면분석 | `agent-vision`                       | 6초 세그먼트 화면·OCR·소리·동작 분석                                            | `t_segment`          |
-| ③ 색인   | `agent-scenario`                     | 씬→막→전체 map-reduce 요약 + 인물 신원 해소 + 임베딩                              | `t_chapter` · Milvus |
-| ④ 검색   | `agent-search`                       | LangGraph 6단계(scope→plan→retrieve→expand→select→assemble)로 질의 → 클립 | 클립 구간 목록             |
-
-
-- 색인·검색 상세는 형제 문서: `agent/agent-scenario/CLAUDE.md`, `agent/agent-search/README.md`.
-- 공정 진행 상태는 `t_video.status_code` 로 전이(1001 업로드 → 1006 자막 → 1010 화면 → 1016 화자보정 → 1021 색인).
-
-
-
-### 4대 서비스 (agent-search `service` 값)
-
-
-| service       | UI 이름  | route              | 세부 유형(preset)                       |
-| ------------- | ------ | ------------------ | ----------------------------------- |
-| `compilation` | 모아보기   | structural (여러 클립) | 회차_요약 / 정주행_가이드 / 인물_하이라이트 / 감성_몽타주 |
-| `shortform`   | 숏폼·리믹스 | pinpoint (한 장면)    | 명장면_클립 / 명대사_카드 / (예고편·티저)          |
-| `trailer`     | 예고편    | structural + 정렬 특수 | 예고편                                 |
-| `ad_slot`     | 광고 최적화 | (LLM 해석)           | (광고 매칭)                             |
-
-
-- **Batch 자동화** = 위 서비스를 대량·반복·자동으로 굴리는 **오케스트레이션**(제안서 4번째 서비스). 개별 콘텐츠가 아니라 파이프라인 전체를 자동 구동.
-- 코드상 하드분기는 `trailer` 정렬(`assemble.py`) 하나뿐. 나머지는 `service` 문자열이 scope/plan LLM 프롬프트에 들어가 `route`(pinpoint/structural)를 가른다 — 전용 파일 없음.
-
-
-
-### 구현 현황 (2026-07-20 기준 — 코드 검증)
+**공정 (영상 → 완성 MP4):**
 
 ```
-[업로드]✅ → [자막]🔄 → [화면분석]⚠️ → [색인]✅ → [검색]✅ → [영상생성]❌ → [배포]📋
+api-external(19000)
+  → ① agent-stt(19010) ─ worker-prep_stt(19600) STT · worker-img_models(19700) 프레임추론
+  → ② agent-vision(8001) 분석+색인
+  → ③ agent-compose(8084) 편성
+  → ④ worker-render(19700, 별 호스트) 합성 → S3 MP4
 ```
 
-- **색인(agent-scenario)·검색(agent-search) = 완성·실측됨.** RAG 코어 견고. compilation·shortform 실행 검증(야구·겨울연가 덤프). trailer·ad_slot은 미착수(뼈대/이름만).
-- **자막(**`worker-prep_stt`**) = faster-whisper → Qwen3-ASR 이관 중** (2026-07 전면 재작성, HTTP 서비스화). `worker-prep-stt2`는 그 실험판(은퇴 예정).
-- `agent-vision` **= 서비스 코드 리포 밖.** `t_segment`(검색 원자) 공급 주체인데, 리포엔 오프라인 실험판 `agent/agent-test`(Qwen3-VL, CLI, DB 안 씀)만 있음.
-- **영상 생성(⑤ ffmpeg 컷팅·concat·9:16) = 미구현.** agent-search는 클립 **좌표**(`v_id, start~end`)까지만 냄. 제안서 STEP 04 "Serving"이 통째로 빔.
-- **자동 연쇄·Batch = 미구현.** 지금은 공정을 수동 HTTP로 연결(코드상 자동 트리거는 `agent-stt→agent-vision` 1곳뿐). `status_code`는 정의돼 있으나 구동 오케스트레이터 없음.
-- **agent-search 소비 UI 없음** — `ui-workspace`는 업로드·분석조회 콘솔이고 검색 API(`/api/v1/search`)를 호출하지 않음.
+| 공정 | 담당 | 하는 일 | 산출물 |
+| --- | --- | --- | --- |
+| 게이트웨이 | `api/api-external` | 외부 요청을 뒷단에 그대로 전달(가공 없음). `POST /api/v1/stt_svc`→agent-stt `pre_svc`, `POST /api/v1/compose`→agent-compose | 로그 · 접수 응답 |
+| ① 자막 | `agent/agent-stt` (+`worker-prep_stt`) | 등록 → S3 download → ffmpeg 오디오·1fps 프레임 추출 → 화자분리+전사 → 자막교정·용어교정·환각제거 → 줄거리 요약 | `t_dialogue` |
+| ② 화면분석·색인 | `agent/agent-vision` (`agent-vision4`) | `prep`(장면분할) → `board`(전광판) → `vision`(프레임 판정) → `play`(플레이 판정) → `scene`(구간 묶기) → `ingest`(임베딩·Milvus 색인) | `t_vision` · `t_scoreboard_baseball` · `t_play_baseball` · `t_scene_baseball` · Milvus |
+| ③ 편성 | `agent/agent-compose` | LangGraph 7노드로 질의 → 클립 구간 목록. 접수만 하고 결과는 `callback_url` 통보(1~3분 소요) | `t_compose` · `t_compose_clip` |
+| ④ 합성 | `worker/worker-render` | 구간별 ffmpeg 컷(재인코딩) + 그룹 범퍼 삽입 → concat → S3 업로드 | `{v_id}/result/{v_id}_{c_id}.mp4` |
+| 소비 UI | `ui/ui-sbs-viwer` (Next.js) | 분석 완료 영상 탐색 · 클립 편성 요청 · 결과 재생 | — |
 
+- **`agent-compose` 편성 그래프 (LangGraph):** `load_inventory → parse_query → retrieve_evidence → select_clips → select_end_point → merge_overlap → trim_budget`
+- **상태 코드는 컴포넌트별 대역으로 분리됐다.** `agent-stt` 2000번대(2001 접수 → 2010 추출 → 2030 대사추출 → 2050 교정 → 2080 요약 → 2000 완료, 오류 29xx) · `agent-vision` 3000번대(3010 prep → 3020 board → 3060 vision → 3030 play → 3040 scene → 3050 publish → 3000 완료, 3900 오류·3901 미지원 cate_id).
+- **자동 연쇄는 환경변수 트리거로 한다** — `agent-stt` 의 `STT_TRIGGER`·`VISION_TRIGGER`, 그리고 각 단계의 `callback_url`.
 
+### 구현 현황 (2026-09-11 기준 — 208 소스 직접 확인)
 
-### 설계(제안서) vs 실제 코드 — 바뀐 것 (블로그 쓸 때 주의)
+```
+[게이트웨이]✅ → [자막]✅ → [화면분석·색인]✅ → [편성]✅ → [영상합성]✅ → [공개 UI]✅
+```
 
+| 컴포넌트 | 최근 커밋 | 상태 |
+| --- | --- | --- |
+| `api/api-external` | 2026-09-11 | ✅ 게이트웨이 동작 (systemd) |
+| `agent/agent-vision` | 2026-09-11 | ✅ 콜백 통보 + 실행 락 전역 1건 |
+| `agent/agent-compose` | 2026-09-11 | ✅ 편성 + 렌더 트리거 |
+| `agent/agent-stt` | 2026-09-10 | ✅ 스트림 청크 지원 |
+| `worker/worker-prep_stt` | 2026-09-10 | ✅ HTTP + S3 download |
+| `worker/worker-img_models` | 2026-09-10 | ✅ 야구 전용(축구는 뼈대만) |
+| `worker/worker-render` | 2026-08-20 | ✅ S3 in/out |
+| `ui/ui-sbs-viwer` | 2026-08-24 | ✅ 공개 뷰어 |
+| `ui/ui-workspace` | 2026-06-25 | ⚠️ 사실상 정지 — 신규 공정은 `ui-sbs-viwer` 로 이동 |
+| `agent/agent-test` | (git 아님) | 오프라인 실험판 |
 
-| 항목       | 제안서 발표자료                   | 실제 코드                                |
-| -------- | -------------------------- | ------------------------------------ |
-| 벡터 DB    | Qdrant                     | **Milvus** (1개 컬렉션 + `ref_type` 4계층) |
-| STT      | Fast-Whisper               | **Qwen3-ASR** (이관 중)                 |
-| 장면 전환 탐지 | FFmpeg + **PySceneDetect** | scenedetect 미사용, **LLM 씬 분리**        |
+- **야구 외 도메인은 미등록.** `DOMAIN_FLOWS = {5100: baseball.run}` 한 줄뿐이고, 미등록 `cate_id` 는 조용히 넘기지 않고 `3901 UNSUPPORTED` 로 명시 마킹된다.
+- **F1 측정 인프라(정답 GT·채점기)는 여전히 없음** — 국책과제 KPI 입증 수단 부재.
 
+### 이전 문서(2026-07-20) 대비 바뀐 것 — 블로그·문서 쓸 때 주의
 
-
+| 항목 | 옛 서술 | 2026-09-11 실제 |
+| --- | --- | --- |
+| 색인 담당 | `agent-scenario` | **리포 없음.** 색인은 `agent-vision` 의 `ingest` 단계가 흡수 |
+| 검색 담당 | `agent-search` (`/api/v1/search`) | **`agent-compose`** (`/api/v1/compose`) 로 개명·재작성 |
+| 편성 그래프 | 6단계 scope→plan→retrieve→expand→select→assemble | **7노드** load_inventory→parse_query→retrieve_evidence→select_clips→select_end_point→merge_overlap→trim_budget |
+| 4대 서비스 | `service` 문자열(compilation/shortform/trailer/ad_slot)로 분기 | **폐기.** 자연어 `query` + `budget_sec` 만 받는다 |
+| 데이터 계층 | `t_segment`(6초) → `t_chapter` L2/L1 → `t_video.summary` | **도메인 테이블로 교체** — `t_vision` · `t_scoreboard_baseball` · `t_play_baseball` · `t_scene_baseball` · `t_compose`/`t_compose_clip` |
+| 영상 생성 | ❌ 미구현 (클립 좌표까지만) | **✅ `worker-render`** — cut(재인코딩) + 범퍼 + concat + S3 업로드 |
+| `agent-vision` | 리포 밖, 오프라인 실험판만 | **✅ 리포 존재**(`agent-vision4`), 분석+색인 주체 |
+| 소비 UI | 없음 | **✅ `ui-sbs-viwer`** (탐색·편성·재생) |
+| STT | faster-whisper → Qwen3-ASR **이관 중** | **이관 완료.** 1차 전사 = pyannote diarize + **Qwen3-ASR**, 2차 리컨사일 = faster-whisper(`stt2_svc`) |
+| 외부 진입 | 각 에이전트 직접 호출 | **`api-external` 게이트웨이 단일화** |
+| 출력 규격 | 강제 없음(102초 클립 통과) | **`trim_budget` 노드**가 `budget_sec` 기준으로 덜어낸다 |
 
 ### 핵심 주의 (파이프라인 작업 시)
 
-- **RAG ≠ 학습.** 영상 데이터는 검색용 **색인(임베딩)** 이지 모델 fine-tune 아님. "학습에 쓴다"는 오해.
-- **장면/감정 태깅은** `agent-scenario/lib/pipeline/scene/scene.py` 가 함(`emotion`·`highlight`·`events`·`is_ad`). 이게 **국책과제 F1 KPI(VLM+RAG 장면/감정 분류)** 대상. 단 **F1 측정 인프라(정답 GT·채점기)는 없음** — KPI 입증 수단 부재.
-- **출력 규격 미강제** — `max_clip_sec`/`min_clip_sec`이 select 프롬프트에만 있고 코드 강제 없어, 규격 초과 클립(예: 102초)이 통과할 수 있음.
-
+- **읽기 전용.** `192.168.0.208:/usr/service/source/scenemaker` 는 조회만 한다 — 수정·생성·삭제·git 조작 금지.
+- **RAG ≠ 학습.** 영상 데이터는 검색용 **색인(임베딩)** 이지 모델 fine-tune 아님.
+- **`worker-render` 는 `-c copy` 를 쓰지 않는다.** 원본 키프레임이 5초 간격인데 하이라이트 평균이 16초라 copy 로 자르면 컷이 최대 5초씩 어긋나고, mp4 edit list 를 concat demuxer 가 무시해 앞부분이 되살아난다(실측). 전 조각을 **원본 규격으로 재인코딩**한다.
+- **렌더 워커는 1개다.** ffmpeg 하나가 NVDEC 컨텍스트로 400MB 넘는 VRAM 을 잡아, 24GB 카드에서 입력 86개를 동시에 열면 61번째에 OOM(실측).
+- **`force` 재처리 범위는 "이 청크부터 끝까지"** — 앞 청크를 다시 계산하면 뒤 청크가 이어받은 값이 무효가 된다.
 
 
 ### 국책과제 (참고 — 발표자료는 gitignore된 confidential PDF)
@@ -109,27 +108,25 @@
 
 ## 서비스 인프라 (참고 — 문서 사이트와 무관)
 
-이 `docs-web` 은 문서 사이트일 뿐이고, 실제 SceneMaker 파이프라인(agent-stt / agent-vision / agent-scenario / agent-search, worker)은 **별도 AWS 서버들에 분산 배포**된다. 추후 참고용 요약(2026-07-20 확인).
+이 `docs-web` 은 문서 사이트일 뿐이고, 실제 SceneMaker 파이프라인은 **별도 AWS 서버들에 분산 배포**된다. 참고용 요약(2026-09-11 확인).
 
 - **리전:** `ap-northeast-2` (서울). aws CLI 설치돼 있으나 활성 자격증명이 **임시 STS 토큰이라 만료**되기 쉬움 → 라이브 인스턴스 조회는 갱신 후 `aws ec2 describe-instances` 로.
-- **개발 박스:** `RTX4090x2` (Intel i9-14900K, 125GB RAM, RTX 4090 ×2, 로컬 192.168.0.208). 코드 개발 + docs-web dev 서버 전용. 운영 서비스는 안 돈다. (이 CPU/보드는 만성 하드웨어 불안정 이력 있음.)
-- **운영 토폴로지 — 원격 5개 호스트.** 컴포넌트끼리는 HTTP + 공유 RDB/Milvus + `status_code` 로 느슨히 연결. **구체 IP·자격증명은 각 컴포넌트** `.env` **에만** 두고 이 공개 파일엔 적지 않는다(역할·포트만).
+- **개발 박스:** `RTX4090x2` (Intel i9-14900K, 125GB RAM, RTX 4090 ×2, 로컬 192.168.0.208). **소스 원본 위치 = `/usr/service/source/scenemaker`** (읽기 전용으로만 다룰 것). 운영 서비스는 안 돈다. (이 CPU/보드는 만성 하드웨어 불안정 이력 있음.)
+- **배포 단위 = systemd.** 각 리포의 `deploy/<name>.service` + `deploy/update.sh`. 서비스는 `uv` 가상환경(`.venv/bin/python`)으로 뜬다.
+- **구체 IP·자격증명은 각 컴포넌트** `.env` **에만** 둔다 — 이 공개 파일엔 역할·포트만.
 
-
-| 원격 호스트(역할)                    | 포트    | 쓰는 컴포넌트                             |
-| ----------------------------- | ----- | ----------------------------------- |
-| DB (MariaDB `sm_db`)          | 13306 | 전 컴포넌트 공유 상태·데이터                    |
-| DB (Milvus `sm_db`/`sm_1024`) | 19530 | agent-scenario 색인 / agent-search 검색 |
-| 텍스트추론 (vLLM `qwen`)           | 8000  | agent-scenario·agent-search 판단·요약   |
-| 텍스트추론 (임베딩 `qwen-embed`)      | 8001  | agent-scenario·agent-search 벡터      |
-| STT/VL GPU (STT worker)       | 8000  | agent-stt                           |
-| STT/VL GPU (Qwen3-VL)         | 8002  | agent-test / vision                 |
-| 자막교정 (vLLM `qwen`)            | 8000  | agent-stt 자막교정 · agent-test refine  |
-| vision (agent-vision)         | 8001  | agent-stt 가 트리거, `t_segment` 기록 주체  |
-
-
-- **로컬 서비스 포트:** agent-stt `19010` · agent-scenario `19011` · agent-search `19012` · worker-prep_stt `19600`.
-- **미완:** 공정 자동 연쇄(ui→stt→vision→scenario→search)는 미구현(수동 HTTP). agent-search 를 쓰는 UI 없음. agent-vision 서비스 코드는 리포 밖(리포 안엔 오프라인 실험판 agent-test).
+| 컴포넌트 | 포트 | 역할 |
+| --- | --- | --- |
+| `api-external` | 19000 | 외부 공개 게이트웨이 (유일한 외부 진입점) |
+| `agent-stt` | 19010 | 자막 공정 오케스트레이터 |
+| `agent-vision` | 8001 | 화면분석 + 벡터 색인 |
+| `agent-compose` | 8084 | 질의 기반 편성 |
+| `worker-prep_stt` | 19600 | STT GPU (Qwen3-ASR / faster-whisper 2차) |
+| `worker-img_models` | 19700 | 야구 프레임 추론 GPU |
+| `worker-render` | 19700 | ffmpeg 합성 GPU (별 호스트) |
+| MariaDB `sm_db` | 13306 | 전 컴포넌트 공유 상태·데이터 |
+| Milvus | 19530 | `agent-vision` 색인 / `agent-compose` 검색 |
+| vLLM (자막교정) | 8601 | `agent-stt` 자막·용어 교정 |
 
 > ⚠️ 이 파일은 **공개 repo(GH Pages 배포)** 에 있다. 운영 IP·자격증명을 하드코딩하지 말 것 — 위 표처럼 역할·포트만 적고 구체 엔드포인트는 `.env` 로.
 
@@ -358,7 +355,7 @@ git push origin develop
 
 ### crontab 충돌 처리
 
-crontab이 1시간마다 main에 push하므로 `non-fast-forward` 에러 시:
+crontab이 6시간마다 main에 push하므로 `non-fast-forward` 에러 시:
 
 ```bash
 git pull --rebase origin main
