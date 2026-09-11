@@ -421,3 +421,56 @@ def test_translate_file_repairs_list_split_by_comment_end_to_end(tmp_path, monke
     assert "1. Chunking" in en
     assert "<!--truncate-->" in en
     assert not re.search(r"^\d+\s*$", en, re.MULTILINE)
+
+
+def test_rejoin_sentence_split_across_hr():
+    """DeepL이 영어 어순 때문에 문장 앞부분을 구분선 위로 올린 것을 되돌린다.
+
+    실제 사례 (/en/blog/4):
+      '### Introduction' / 'If you apply' / '---' / '`faster-whisper …` directly to …'
+    KO 원문은 '### 들어가며' / '---' / '`faster-whisper …` 를 … 나오지 않는다.' 였다.
+    """
+    hr = '<x id="HR"/>'
+    body = (f'### Introduction\n\nIf you apply\n\n{hr}\n\n'
+            '`faster-whisper large-v3` directly to Korean broadcast content.\n')
+    out = T._rejoin_sentence_across_hr(body, hr)
+    assert out == (f'### Introduction\n\n{hr}\n\n'
+                   'If you apply `faster-whisper large-v3` directly to '
+                   'Korean broadcast content.\n')
+
+
+def test_rejoin_sentence_across_hr_keeps_complete_sentences():
+    """마침표로 끝난 완결 문장은 구분선 아래로 내리지 않는다."""
+    hr = '<x id="HR"/>'
+    body = f'A complete sentence.\n\n{hr}\n\nNext paragraph.\n'
+    assert T._rejoin_sentence_across_hr(body, hr) == body
+
+
+def test_rejoin_sentence_across_hr_skips_non_text_blocks():
+    """제목·목록·표·주석·placeholder 는 문장 조각으로 보지 않는다."""
+    hr = '<x id="HR"/>'
+    for prev in ('### Heading', '- list item', '| a | b |', '<!--truncate-->',
+                 '<x id="IMG0"/>', '> quote'):
+        body = f'{prev}\n\n{hr}\n\nNext text.\n'
+        assert T._rejoin_sentence_across_hr(body, hr) == body, prev
+
+
+def test_translate_file_rejoins_sentence_across_hr_end_to_end(tmp_path, monkeypatch):
+    """배선 검증 — translate_file 이 구분선 위로 올라간 문장 조각을 되돌린다."""
+    kr = tmp_path / "post.md"
+    kr.write_text('---\ntitle: "글"\n---\n\n### 들어가며\n\n---\n\n'
+                  '`faster-whisper` 를 그대로 돌리면 자막이 이상하다.\n', encoding="utf-8")
+    out = tmp_path / "en.md"
+    def fake(t):
+        t = t.replace('<x id="HDR0"/> 들어가며', '<x id="HDR0"/> Introduction')
+        # 문장 앞머리를 HR 위로 올리는 DeepL 흉내
+        t = t.replace('<x id="HR"/>\n\n__INLINE0__ 를 그대로 돌리면 자막이 이상하다.',
+                      'If you apply\n\n<x id="HR"/>\n\n__INLINE0__ directly, subtitles look wrong.')
+        return t.replace("글", "Post")
+    monkeypatch.setattr(T, "translate_with_deepl", fake)
+    monkeypatch.setattr(T, "translate_with_deepl_plain", fake)
+    monkeypatch.setattr(T, "kr_to_en_path", lambda p: str(out))
+    T.translate_file(str(kr), {})
+    en = out.read_text(encoding="utf-8")
+    assert "If you apply `faster-whisper` directly, subtitles look wrong." in en
+    assert not re.search(r"^If you apply\s*$", en, re.MULTILINE)
