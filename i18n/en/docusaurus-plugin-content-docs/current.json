@@ -38,5 +38,9 @@
   "sidebar.releaseNotesSidebar.category.릴리즈 노트": {
     "message": "Release Notes",
     "description": "The label for category '릴리즈 노트' in sidebar 'releaseNotesSidebar'"
+  },
+  "sidebar.testSidebar.category.테스트": {
+    "message": "Tests",
+    "description": "The label for category '테스트' in sidebar 'testSidebar'"
   }
 }
