@@ -350,6 +350,30 @@ def cleanup_stale_en_files(source_files):
                     log(f"스테일 EN 파일 삭제: {en_path}")
 
 
+def _fill_empty_headings(en_body, kr_body):
+    """DeepL 이 통째로 빼먹은 제목 텍스트를 KO 원문 단독 번역으로 채운다.
+
+    마커 재결합(_rejoin_marker_tags)은 '떨어진' 텍스트를 도로 붙이는 것이라
+    아예 사라진 경우는 못 고친다 — '### 마무리' 가 '### ' 로 나온 실제 사례
+    (/en/blog/11). 제목 개수는 마커 보호 덕에 KO 와 항상 같으므로 순서로 짝짓는다.
+
+    코드블록이 placeholder 로 치환된 상태에서 불러야 한다 — 그렇지 않으면
+    bash 주석('# ...')이 제목으로 세어져 짝이 어긋난다.
+    """
+    kr_titles = re.findall(r'(?m)^#{1,6} +(.+?)\s*$', kr_body)
+    lines = en_body.split('\n')
+    idx = -1
+    for i, line in enumerate(lines):
+        m = re.match(r'^(#{1,6})\s*(.*)$', line)
+        if not m:
+            continue
+        idx += 1
+        if m.group(2).strip() or idx >= len(kr_titles):
+            continue
+        lines[i] = f"{m.group(1)} {html.unescape(translate_with_deepl_plain(kr_titles[idx])).strip()}"
+    return '\n'.join(lines)
+
+
 def translate_file(kr_path, hashes):
     with open(kr_path, encoding="utf-8") as f:
         content = f.read()
@@ -475,6 +499,7 @@ def translate_file(kr_path, hashes):
     translated = _rejoin_marker_tags(translated, "HDR")
     for key, markers in _hdr_store.items():
         translated = translated.replace(key, markers)
+    translated = _fill_empty_headings(translated, body_no_code)
     en_body = html.unescape(translated.replace(_HR, '\n\n---\n\n'))
     # Safety net: fix any ---# produced by DeepL converting <hr/> in older translations
     en_body = re.sub(r'^---(?=#{1,6} )', '---\n\n', en_body, flags=re.MULTILINE)
