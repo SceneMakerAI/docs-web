@@ -202,6 +202,37 @@ def _unglue_html_comments(body):
     return re.sub(r'(<x id="(?:HDR|BQ|OL)\d+"/>)\n+[ \t]*(<!--.*?-->)\n+', r'\2\n\n\1\n\n', body)
 
 
+_SINGLE_STAR = re.compile(r'(?<!\*)\*(?!\*)')
+
+
+def _repair_marker_inside_emphasis(body):
+    """이탤릭 캡션 한가운데로 끼어든 제목 마커를 캡션 뒤로 빼낸다.
+
+    DeepL 은 placeholder 를 문장 안쪽으로 옮기기도 한다. 실제 응답 (/en/blog/1):
+      '*The\\n\\n<x id="HDR7"/>\\n\\nfinal result: … deployed* Conclusion'
+    이대로 재결합하면 '### final result: … deployed* Conclusion' 이라는
+    캡션 반쪽짜리 제목이 생긴다.
+
+    앞 문단의 '*' 가 닫히지 않았을 때만 움직인다 — 닫는 '*' 까지가 캡션이고
+    그 뒤가 진짜 제목 텍스트다. 뒤가 비면 제목을 비워 두고 _fill_empty_headings
+    가 KO 원문으로 채우게 둔다.
+    """
+    pat = re.compile(r'(?m)^(?P<prev>[^\n]*\S)\n\n(?P<marker><x id="HDR\d+"/>)\n\n(?P<after>[^\n]*\S)$')
+
+    def _fix(m):
+        prev, marker, after = m.group('prev'), m.group('marker'), m.group('after')
+        if len(_SINGLE_STAR.findall(prev)) % 2 == 0:
+            return m.group(0)                      # 강조가 닫혀 있다 — 정상
+        close = _SINGLE_STAR.search(after)
+        if not close:
+            return m.group(0)                      # 닫는 '*' 가 없으면 판단 불가
+        caption = f'{prev} {after[:close.end()]}'
+        heading = after[close.end():].strip()
+        return f'{caption}\n\n{marker} {heading}'.rstrip()
+
+    return pat.sub(_fix, body)
+
+
 def _rejoin_marker_tags(body, prefix, sep=" "):
     """DeepL 이 마커 placeholder 와 본문 사이에 넣은 줄바꿈을 제거해 다시 한 줄로 만든다.
 
@@ -630,6 +661,7 @@ def translate_file(kr_path, hashes):
     translated = _rejoin_ol_markers(translated)
     for key, num in _ol_store.items():
         translated = translated.replace(key, num)
+    translated = _repair_marker_inside_emphasis(translated)
     translated = _rejoin_marker_tags(translated, "HDR")
     for key, markers in _hdr_store.items():
         translated = translated.replace(key, markers)
