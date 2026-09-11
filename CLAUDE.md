@@ -148,7 +148,8 @@ docs-web/
 │   ├── guide/          # 문서 (NOTION_DOCS)
 │   ├── install/        # 설치 (NOTION_INSTALL)
 │   ├── poc/            # PoC (NOTION_POC) — 서브디렉토리 구조
-│   └── release-notes/  # 릴리즈 노트 (NOTION_RELEASE)
+│   ├── release-notes/  # 릴리즈 노트 (NOTION_RELEASE)
+│   └── test/           # 테스트 (NOTION_TEST)
 ├── blog/               # 블로그 (NOTION_BLOG) — Notion sync 대상
 ├── i18n/en/            # EN 번역 파일 — translate_to_en.py가 자동 생성 (수동 편집 금지)
 │   ├── docusaurus-theme-classic/
@@ -171,7 +172,7 @@ docs-web/
 │   ├── sync-local.sh         # 로컬에서 전체 섹션 수동 동기화
 │   ├── sync-develop.sh       # main 콘텐츠를 develop으로 즉시 흡수 (로컬 수동 헬퍼)
 │   ├── sync.sh               # blog·contribute 즉시 동기화 후 push
-│   └── tests/                # notion_to_md.py·md_to_notion.py 단위 테스트
+│   └── tests/                # notion_to_md.py·md_to_notion.py·translate_to_en.py 단위 테스트
 └── .github/workflows/
     ├── deploy.yml
     ├── monthly-translate.yml  # 매월 1일 EN 번역 자동 실행
@@ -201,6 +202,7 @@ docs-web/
 | `NOTION_CONTRIBUTE`   | "오픈소스 기여" DB ID → `docs/contribute/`                                     |
 | `NOTION_RELEASE`      | "릴리즈 노트" DB ID → `docs/release-notes/`                                   |
 | `NOTION_INSTALL`      | "설치" DB ID → `docs/install/`                                             |
+| `NOTION_TEST`         | "테스트" DB ID → `docs/test/`                                              |
 | `DEEPL_API_KEY`       | DeepL Free API 키 — `translate_to_en.py` 및 `monthly-translate.yml` Secret |
 
 
@@ -236,14 +238,14 @@ docs/poc/vision-bench/child.md  (slug: "1")  →  /docs/poc/vision-bench/1
 ### 서버 crontab (콘텐츠 동기화 주체)
 
 ```
-0 */1 * * * /root/docs-web/scripts/server-sync.sh >> /var/log/notion-sync.log 2>&1
+0 */6 * * * /root/docs-web/scripts/server-sync.sh >> /var/log/notion-sync.log 2>&1
 ```
 
 `server-sync.sh` 실행 흐름:
 
 1. ORIG_BRANCH 저장 + `trap EXIT` 등록 (종료 시 원래 브랜치 복귀 — dev 서버 파일 보호)
 2. `git checkout main` → `git pull --rebase`
-3. Notion 8개 DB 병렬 동기화
+3. Notion 9개 DB 병렬 동기화 (하나라도 실패하면 `exit 1` — 커밋·push 전체 중단)
 4. `git commit` → `git push origin main` → `deploy.yml` 트리거
 5. 스크립트 종료 → trap이 자동으로 원래 브랜치(develop 등)로 복귀
 
@@ -384,8 +386,8 @@ git push origin design
 
 | 명령어                     | 용도                                    |
 | ----------------------- | ------------------------------------- |
-| `npm start`             | main 브랜치 dev 서버 (port 3000, KO+EN)    |
-| `npm run start:develop` | develop 브랜치 dev 서버 (port 3001, KO+EN) |
+| `npm start`             | main 브랜치 dev 서버 (port 3000, **KO만**)    |
+| `npm run start:develop` | develop 브랜치 dev 서버 (port 3001, **KO만**) |
 | `npm run build`         | 프로덕션 빌드 — **PR 전 통과 필수**              |
 | `npm run clear`         | Docusaurus 캐시 정리                      |
 | `npm run typecheck`     | TypeScript 검사 (빌드와 무관, IDE 보조)        |
@@ -393,7 +395,11 @@ git push origin design
 
 **dev 서버 404 / 브랜치 전환 후 캐시 꼬임:** `npm run clear` 후 재시작.
 
-**EN 로케일 접근:** `--locale` 플래그 없이 실행하면 KO (`/`) + EN (`/en/`) 모두 서빙된다. `http://localhost:3001/en/docs/...` 로 바로 접근 가능.
+**EN 로케일 접근:** `docusaurus start` 는 **기본 로케일(KO)만 서빙**한다. dev 서버에서 `/en/` 은 404다. EN 확인은 별도 포트로 띄운다.
+
+```bash
+npx docusaurus start --host 0.0.0.0 --port 3002 --locale en   # http://localhost:3002/en/
+```
 
 ---
 
@@ -433,6 +439,26 @@ python3 scripts/translate_to_en.py
 - `DEEPL_API_KEY`는 `.env` (로컬) + GitHub Secrets `DEEPL_API_KEY` (CI) 모두 필요.
 - DeepL Free API 한도: 500,000자/월. 전체 재번역 시 소진 주의.
 - `monthly-translate.yml`은 `continue-on-error: true`로 번역 실패 시에도 워크플로우 green.
+- **해시 캐시는 스크립트 버그 수정을 소급 적용하지 않는다.** 번역 로직을 고쳐도 KR 원문이 그대로면 기존 EN 산출물은 재번역되지 않아 깨진 상태로 남는다 (실제 사례: 2026-08-11 이미지 보호 패치 이전에 번역된 블로그 6건이 `![image](...` 형태로 깨진 채 2026-09-11까지 방치).
+
+**특정 파일 강제 재번역:**
+
+```bash
+python3 -c "
+import json
+p='.notion-translate-hashes.json'
+h=json.load(open(p))
+h['blog/파일명.md']['body_hash']=''   # 대상만 무효화
+json.dump(h, open(p,'w'), indent=2, ensure_ascii=False)
+"
+export $(grep -v '^#' .env | xargs) && python3 scripts/translate_to_en.py
+```
+
+검증 (EN 이미지 개수가 KR과 같아야 함):
+
+```bash
+grep -rlE '^!\[[^]]*\]\([^)]*$' i18n/en/   # 출력 없으면 정상
+```
 
 ---
 
@@ -444,7 +470,7 @@ python3 scripts/translate_to_en.py
 
 - **깨진 내부 링크** — PR 전 `npm run build` 로컬 통과 필수
 - **MDX 컴파일 오류** — frontmatter·JSX 문법 오류
-- **사이드바 비어있음** — Notion DB에 콘텐츠가 없는 섹션은 `placeholder.md` 필수 (현재: `about/`, `architecture/`, `release-notes/`)
+- **사이드바 비어있음** — Notion DB에 콘텐츠가 없는 섹션은 `placeholder.md` 필수. `notion_to_md.py`가 sync 결과 0건이면 자동 생성하고, 실제 문서가 생기면 자동 제거한다 (현재 보유: `architecture/`, `release-notes/`)
 
 ---
 
@@ -465,13 +491,14 @@ python3 scripts/translate_to_en.py
 
 | 사이드바 ID               | `docs/` 경로       | 환경변수                  | Notion 콘텐츠 유무                   |
 | --------------------- | ---------------- | --------------------- | ------------------------------- |
-| `aboutSidebar`        | `about/`         | `NOTION_ABOUT`        | ❌ placeholder.md 필요 (navbar 숨김) |
-| `architectureSidebar` | `architecture/`  | `NOTION_ARCHITECTURE` | ❌ placeholder.md 필요 (navbar 숨김) |
+| `aboutSidebar`        | `about/`         | `NOTION_ABOUT`        | ✅                               |
+| `architectureSidebar` | `architecture/`  | `NOTION_ARCHITECTURE` | ❌ placeholder.md 자동 생성 (navbar 숨김) |
 | `installSidebar`      | `install/`       | `NOTION_INSTALL`      | ✅                               |
 | `pocSidebar`          | `poc/`           | `NOTION_POC`          | ✅                               |
 | `docsSidebar`         | `guide/`         | `NOTION_DOCS`         | ✅                               |
 | `contributeSidebar`   | `contribute/`    | `NOTION_CONTRIBUTE`   | ✅                               |
-| `releaseNotesSidebar` | `release-notes/` | `NOTION_RELEASE`      | ❌ placeholder.md 필요 (navbar 숨김) |
+| `releaseNotesSidebar` | `release-notes/` | `NOTION_RELEASE`      | ❌ placeholder.md 자동 생성 (navbar 숨김) |
+| `testSidebar`         | `test/`          | `NOTION_TEST`         | ✅                               |
 
 
 블로그는 `sidebars.ts` 미포함 — navbar에 `{to: '/blog'}` 방식.
@@ -527,6 +554,10 @@ Notion 인라인 서브페이지(`child_page`)와 페이지 링크(`link_to_page
 3. `docs/new-section/_category_.json` 생성
 4. `sidebars.ts` + `docusaurus.config.ts` navbar 추가 (hasNotionContent 조건부 포함)
 5. Notion DB에 콘텐츠가 없으면 `placeholder.md` 즉시 생성 (빌드 실패 방지)
+6. **EN 라벨 수동 추가** — `translate_to_en.py`는 본문만 번역하고 라벨 JSON은 건드리지 않는다
+   - `i18n/en/docusaurus-theme-classic/navbar.json` → `"item.label.<KR라벨>"`
+   - `i18n/en/docusaurus-plugin-content-docs/current.json` → `"sidebar.<sidebarId>.category.<KR라벨>"`
+   - 빠뜨리면 EN 로케일 메뉴에 한글이 그대로 노출된다
 
 **수동 Notion 동기화 (단일 섹션):**
 
