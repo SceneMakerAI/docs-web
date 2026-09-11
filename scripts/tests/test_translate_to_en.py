@@ -142,3 +142,19 @@ def test_translate_file_repairs_detached_markers_end_to_end(tmp_path, monkeypatc
     assert "> Table Implementation" in en
     assert not re.search(r"^#{1,6}\s*$", en, re.MULTILINE)   # 빈 제목 없음
     assert not re.search(r"^>\s*$", en, re.MULTILINE)        # 빈 인용문 없음
+
+
+def test_rejoin_does_not_swallow_hr_placeholder():
+    """제목 텍스트가 유실됐을 때 재결합이 다음 구분선(---)을 제목으로 끌어올리면 안 된다.
+
+    '<x id="HDR1"/>\\n\\n<x id="HR"/>' → '### ---' 가 되어, 뒤이은 유실 복구까지 막혔다
+    (실제 사례: /en/blog/11 '### 마무리').
+    """
+    body = '<x id="HDR1"/>\n\n<x id="HR"/>\n\nnext\n'
+    assert T._rejoin_marker_tags(body, "HDR") == body
+
+
+def test_rejoin_still_joins_normal_text():
+    """정상 본문은 여전히 붙인다 — HR 차단이 과하게 걸리면 안 된다."""
+    body = '<x id="HDR0"/>\n\nIntroduction\n'
+    assert T._rejoin_marker_tags(body, "HDR") == '<x id="HDR0"/> Introduction\n'
