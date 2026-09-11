@@ -158,3 +158,15 @@ def test_rejoin_still_joins_normal_text():
     """정상 본문은 여전히 붙인다 — HR 차단이 과하게 걸리면 안 된다."""
     body = '<x id="HDR0"/>\n\nIntroduction\n'
     assert T._rejoin_marker_tags(body, "HDR") == '<x id="HDR0"/> Introduction\n'
+
+
+def test_rejoin_does_not_swallow_html_comment():
+    """재결합이 HTML 주석(<!--truncate-->)을 제목·인용문 안으로 끌어올리면 안 된다.
+
+    '### <!--truncate-->' 가 되어 블로그 미리보기 마커가 제목으로 렌더됐다
+    (실제 사례: /en/blog/7·8·16·19·20).
+    """
+    body = '<x id="HDR1"/>\n\n<!--truncate-->\n\nnext\n'
+    assert T._rejoin_marker_tags(body, "HDR") == body
+    bq = '<x id="BQ0"/>\n\n<!--truncate-->\n'
+    assert T._rejoin_marker_tags(bq, "BQ", sep="") == bq

@@ -123,14 +123,15 @@ def _rejoin_marker_tags(body, prefix, sep=" "):
 
     뒤가 또 다른 같은 종류 마커면 붙이지 않는다 — 붙이면 '> > ' 중첩 인용이나
     제목 마커 중복이 된다. 본문은 연속 마커 중 마지막 것에만 붙는다.
-    구분선(HR) 도 붙이지 않는다 — 본문이 통째로 유실됐을 때 다음 '---' 를 제목
-    안으로 끌어올려 '### ---' 를 만들고, 빈 제목 복구까지 막는다.
+    구분선(HR) 과 HTML 주석(<!--truncate--> 등) 도 붙이지 않는다 — 본문이 통째로
+    유실됐을 때 다음 블록을 제목 안으로 끌어올려 '### ---' · '### <!--truncate-->'
+    를 만들고, 빈 제목 복구(_fill_empty_headings)까지 막는다.
 
     Args:
         prefix: 마커 종류 ("BQ" 는 BQE(빈 인용 줄)까지 함께 걸러진다).
         sep: 마커와 본문 사이에 되돌릴 구분자 — 인용문은 "", 제목은 " ".
     """
-    pat = rf'(<x id="{prefix}\d+"/>)\n+[ \t]*(?!<x id="(?:HR|{prefix}))(?=\S)'
+    pat = rf'(<x id="{prefix}\d+"/>)\n+[ \t]*(?!<x id="(?:HR|{prefix})|<!--)(?=\S)'
     return re.sub(pat, lambda m: m.group(1) + sep, body)
 
 
