@@ -39,6 +39,10 @@
     "message": "Release Notes",
     "description": "Navbar item with label 릴리즈 노트"
   },
+  "item.label.테스트": {
+    "message": "Tests",
+    "description": "Navbar item with label 테스트"
+  },
   "item.label.GitHub": {
     "message": "GitHub",
     "description": "Navbar item with label GitHub"
