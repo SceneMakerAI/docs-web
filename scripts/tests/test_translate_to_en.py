@@ -361,3 +361,63 @@ def test_translate_file_repairs_ordered_list_end_to_end(tmp_path, monkeypatch):
     assert "1. Denoise" in en
     assert "1. Diarization" in en
     assert not re.search(r"^\d+\s*$", en, re.MULTILINE)   # 숫자만 있는 줄 없음
+
+
+def test_rejoin_ol_markers_normalizes_various_separators():
+    """DeepL이 목록 구분자 '.' 를 ';' '?' ',' 등으로 바꿔도 '.' 로 되돌린다.
+
+    실제 응답: '<x id="OL1"/>\\n\\n; semantic unit segmentation',
+               '<x id="OL1"/>\\n\\n? **Response Time in Korea**'
+    """
+    for sep in ('.', ':', ';', '?', ',', '!'):
+        body = f'<x id="OL3"/>\n\n{sep} Item text\n'
+        assert T._rejoin_ol_markers(body) == '<x id="OL3"/>. Item text\n', sep
+
+
+def test_rejoin_ol_markers_without_separator():
+    """구분자를 통째로 떨어뜨린 경우에도 붙인다."""
+    body = '<x id="OL0"/>\n\nItem text\n'
+    assert T._rejoin_ol_markers(body) == '<x id="OL0"/>. Item text\n'
+
+
+def test_rejoin_ol_markers_does_not_swallow_comment_or_marker():
+    """다음 블록이 주석·다른 마커면 붙이지 않는다."""
+    for nxt in ('<!--truncate-->', '<x id="OL1"/>', '<x id="HR"/>'):
+        body = f'<x id="OL0"/>\n\n{nxt}\n'
+        assert T._rejoin_ol_markers(body) == body, nxt
+
+
+def test_unglue_separated_html_comment_between_marker_and_text():
+    """마커와 본문 사이에 끼어든 <!--truncate--> 를 마커 앞으로 옮긴다.
+
+    실제 응답: '<x id="OL0"/>\\n\\n<!--truncate-->\\n\\n: document structuring'
+    KO 원문은 주석이 목록보다 앞에 온다.
+    """
+    body = '<x id="OL0"/>\n\n<!--truncate-->\n\n: document structuring\n'
+    out = T._unglue_html_comments(body)
+    assert out == '<!--truncate-->\n\n<x id="OL0"/>\n\n: document structuring\n'
+    assert T._rejoin_ol_markers(out) == '<!--truncate-->\n\n<x id="OL0"/>. document structuring\n'
+
+
+def test_translate_file_repairs_list_split_by_comment_end_to_end(tmp_path, monkeypatch):
+    """배선·순서 검증 — 주석이 목록 마커와 본문 사이에 끼어든 경우까지 복구된다.
+
+    unglue 가 OL 재결합보다 뒤에 있으면 이 테스트가 실패한다.
+    """
+    kr = tmp_path / "post.md"
+    kr.write_text('---\ntitle: "글"\n---\n\n<!--truncate-->\n\n1. 파싱\n1. 청킹\n', encoding="utf-8")
+    out = tmp_path / "en.md"
+    def fake(t):
+        # 주석을 첫 목록 마커 뒤로 옮기고 구분자를 ':' 로 바꾸는 DeepL 흉내
+        t = t.replace('<!--truncate-->\n\n<x id="OL0"/>. ', '<x id="OL0"/>\n\n<!--truncate-->\n\n: ')
+        t = re.sub(r'(<x id="OL1"/>)\. ', r'\1\n\n; ', t)
+        return t.replace("파싱", "Parsing").replace("청킹", "Chunking").replace("글", "Post")
+    monkeypatch.setattr(T, "translate_with_deepl", fake)
+    monkeypatch.setattr(T, "translate_with_deepl_plain", fake)
+    monkeypatch.setattr(T, "kr_to_en_path", lambda p: str(out))
+    T.translate_file(str(kr), {})
+    en = out.read_text(encoding="utf-8")
+    assert "1. Parsing" in en
+    assert "1. Chunking" in en
+    assert "<!--truncate-->" in en
+    assert not re.search(r"^\d+\s*$", en, re.MULTILINE)

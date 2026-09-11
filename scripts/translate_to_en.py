@@ -123,9 +123,12 @@ def _rejoin_ol_markers(body):
     '1' 과 ': 노이즈 제거' 가 따로 놀아 목록이 통째로 깨진다
     (실제 사례: /en/blog/3 음성분석 5단계).
 
-    구분자를 항상 '.' 로 통일한다 — ':' 로는 마크다운 목록이 되지 않는다.
+    구분자를 항상 '.' 로 통일한다 — ':' ';' '?' 로는 마크다운 목록이 되지 않는다.
+    구분자를 통째로 떨어뜨린 경우에도 '.' 를 넣어 붙인다.
+    다음 블록이 주석·다른 placeholder 면 붙이지 않는다 (제목·인용문과 같은 이유).
     """
-    return re.sub(r'(<x id="OL\d+"/>)\n+[ \t]*[.:][ \t]*', r'\1. ', body)
+    return re.sub(r'(<x id="OL\d+"/>)\n+[ \t]*[.:;?,!]?[ \t]*(?!<x id=|<!--)(?=\S)',
+                  r'\1. ', body)
 
 
 def _unglue_html_comments(body):
@@ -138,7 +141,9 @@ def _unglue_html_comments(body):
     KO 원문은 <!--truncate--> 가 항상 제목보다 앞에 오므로, 앞으로 옮기는 것이
     원문 순서를 되살리는 것이기도 하다.
     """
-    return re.sub(r'(<x id="(?:HDR|BQ)\d+"/>)(<!--.*?-->)', r'\2\n\n\1', body)
+    body = re.sub(r'(<x id="(?:HDR|BQ|OL)\d+"/>)(<!--.*?-->)', r'\2\n\n\1', body)
+    # 마커와 본문 사이에 한 줄 띄고 끼어든 경우 (목록에서 관측)
+    return re.sub(r'(<x id="(?:HDR|BQ|OL)\d+"/>)\n+[ \t]*(<!--.*?-->)\n+', r'\2\n\n\1\n\n', body)
 
 
 def _rejoin_marker_tags(body, prefix, sep=" "):
@@ -564,10 +569,11 @@ def translate_file(kr_path, hashes):
     # path segments nor relocate the closing ) onto a new line (breaks the image)
     body_protected, _img_store = _protect_images(body_protected)
     translated = translate_with_deepl(body_protected) if body_no_inline.strip() else body_protected
+    # 주석 위치 복원이 먼저다 — 마커와 본문 사이에 낀 주석을 치워야 재결합이 붙는다.
+    translated = _unglue_html_comments(translated)
     translated = _rejoin_ol_markers(translated)
     for key, num in _ol_store.items():
         translated = translated.replace(key, num)
-    translated = _unglue_html_comments(translated)
     translated = _rejoin_marker_tags(translated, "HDR")
     for key, markers in _hdr_store.items():
         translated = translated.replace(key, markers)
