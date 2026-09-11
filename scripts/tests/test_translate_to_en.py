@@ -495,3 +495,50 @@ def test_rejoin_sentence_across_hr_inline_keeps_complete_sentence():
     hr = '<x id="HR"/>'
     body = f'A complete sentence. {hr}\n\nNext paragraph.\n'
     assert T._rejoin_sentence_across_hr(body, hr) == f'A complete sentence.\n\n{hr}\n\nNext paragraph.\n'
+
+
+def test_repair_marker_inside_emphasis_restores_caption_and_heading():
+    """DeepL이 제목 마커를 이탤릭 캡션 한가운데 끼워 넣은 것을 되돌린다.
+
+    실제 응답 (/en/blog/1):
+      '*The\\n\\n<x id="HDR7"/>\\n\\nfinal result: … deployed* Conclusion'
+    캡션은 '*'로 닫는 데까지가 한 덩어리, 그 뒤가 진짜 제목 텍스트다.
+    """
+    body = ('<x id="IMG5"/>\n\n*The\n\n<x id="HDR7"/>\n\n'
+            'final result: the layout converted and deployed* Conclusion\n')
+    out = T._repair_marker_inside_emphasis(body)
+    assert out == ('<x id="IMG5"/>\n\n'
+                   '*The final result: the layout converted and deployed*\n\n'
+                   '<x id="HDR7"/> Conclusion\n')
+
+
+def test_repair_marker_inside_emphasis_leaves_balanced_text():
+    """앞 문단의 강조가 정상적으로 닫혀 있으면 건드리지 않는다."""
+    body = '*A complete caption*\n\n<x id="HDR1"/>\n\nConclusion\n'
+    assert T._repair_marker_inside_emphasis(body) == body
+
+
+def test_repair_marker_inside_emphasis_without_trailing_heading_text():
+    """닫는 '*' 뒤에 아무것도 없으면 제목은 비워 두고 나중 복구(_fill_empty_headings)에 맡긴다."""
+    body = '*The\n\n<x id="HDR1"/>\n\nrest of caption*\n'
+    out = T._repair_marker_inside_emphasis(body)
+    assert out == '*The rest of caption*\n\n<x id="HDR1"/>\n'
+
+
+def test_translate_file_repairs_marker_inside_emphasis_end_to_end(tmp_path, monkeypatch):
+    """배선 검증 — 캡션 안으로 끼어든 제목 마커가 복구된다."""
+    kr = tmp_path / "post.md"
+    kr.write_text('---\ntitle: "글"\n---\n\n*캡션 전체*\n\n### 마무리\n\n본문\n', encoding="utf-8")
+    out = tmp_path / "en.md"
+    def fake(t):
+        return (t.replace('*캡션 전체*\n\n<x id="HDR0"/> 마무리',
+                          '*The\n\n<x id="HDR0"/>\n\nwhole caption* Conclusion')
+                 .replace("본문", "Body").replace("글", "Post"))
+    monkeypatch.setattr(T, "translate_with_deepl", fake)
+    monkeypatch.setattr(T, "translate_with_deepl_plain", fake)
+    monkeypatch.setattr(T, "kr_to_en_path", lambda p: str(out))
+    T.translate_file(str(kr), {})
+    en = out.read_text(encoding="utf-8")
+    assert "*The whole caption*" in en
+    assert "### Conclusion" in en
+    assert "deployed* Conclusion" not in en
