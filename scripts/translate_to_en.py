@@ -113,16 +113,28 @@ def _restore_blockquotes(body, store):
     return body
 
 
-def _rejoin_blockquote_markers(body):
-    """DeepL 이 마커와 본문 사이에 넣은 줄바꿈을 제거해 다시 한 줄로 만든다.
+def _rejoin_marker_tags(body, prefix, sep=" "):
+    """DeepL 이 마커 placeholder 와 본문 사이에 넣은 줄바꿈을 제거해 다시 한 줄로 만든다.
 
-    실제 응답: '<x id="BQ1"/>\\n\\nTable Implementation' — 복원하면 '> ' 만 남은
-    빈 blockquote 와 인용 밖으로 떨어진 문단이 된다 (/en/blog/6 실제 사례).
+    DeepL 은 문맥이 길어지면 <x id="…"/> 를 뒤따르던 본문에서 떼어내 별도 줄로 내보낸다.
+    그대로 복원하면 마커만 남은 빈 블록 + 밖으로 떨어진 문단이 된다
+    (실제 사례: '<x id="BQ1"/>\\n\\nTable Implementation' → 빈 인용문 /en/blog/6,
+     '<x id="HDR1"/>\\n\\n\\n\\nConclusion' → 빈 제목 /en/blog/14).
 
-    내용이 있던 BQ 만 대상이고, 뒤가 또 다른 마커면 붙이지 않는다 — 붙이면
-    '> > ' 중첩 인용이 된다. 본문은 연속 마커 중 마지막 것에만 붙는다.
+    뒤가 또 다른 같은 종류 마커면 붙이지 않는다 — 붙이면 '> > ' 중첩 인용이나
+    제목 마커 중복이 된다. 본문은 연속 마커 중 마지막 것에만 붙는다.
+
+    Args:
+        prefix: 마커 종류 ("BQ" 는 BQE(빈 인용 줄)까지 함께 걸러진다).
+        sep: 마커와 본문 사이에 되돌릴 구분자 — 인용문은 "", 제목은 " ".
     """
-    return re.sub(r'(<x id="BQ\d+"/>)\n+[ \t]*(?!<x id="BQ)(?=\S)', r'\1', body)
+    pat = rf'(<x id="{prefix}\d+"/>)\n+[ \t]*(?!<x id="{prefix})(?=\S)'
+    return re.sub(pat, lambda m: m.group(1) + sep, body)
+
+
+def _rejoin_blockquote_markers(body):
+    """인용문 마커 재결합 — 마커와 본문 사이에 구분자가 없다."""
+    return _rejoin_marker_tags(body, "BQ", sep="")
 
 
 def _protect_inline_code(body):
@@ -443,6 +455,7 @@ def translate_file(kr_path, hashes):
     translated = translate_with_deepl(body_protected) if body_no_inline.strip() else body_protected
     for key, num in _ol_store.items():
         translated = translated.replace(key, num)
+    translated = _rejoin_marker_tags(translated, "HDR")
     for key, markers in _hdr_store.items():
         translated = translated.replace(key, markers)
     en_body = html.unescape(translated.replace(_HR, '\n\n---\n\n'))
