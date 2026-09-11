@@ -8,7 +8,7 @@ last_update:
 
 ## AWS Server Setup
 
-### EC2 Instance Configuration
+### Configuring an EC2 Instance
 
 ---
 
@@ -25,20 +25,16 @@ last_update:
 
 Supply of the new GPU instance types (G7e, P5, P6, etc.) **cannot keep up with demand**. Depending on the region and time zone, instance provisioning often fails with an `InsufficientInstanceCapacity` error.
 
-For this reason, region selection should not be based solely on "proximity," but must consider the following **two factors together**.
+For this reason, region selection should not be based solely on “proximity,” but must consider the following **two factors together**.
 
-1
-
-. **Capacity Availability** — Can the instance actually be launched when needed
-1
-
-? **Response Time in Korea** — Network latency as perceived by users 
+1. **Capacity Availability** — Can the instance actually be launched when needed
+1. **South Korea Response Time** — Network latency as perceived by the user 
 
 **Comparison of Regions Offering G7e** (Measured on May 19, 2026)
 
 | Region | Capacity Score | Korea TCP RTT | Overall |
 | --- | --- | --- | --- |
-| **us-west-2** (Oregon) ⭐ | **3** | 180 ms | 🟢 Balanced (3 capacity points, 2 availability zones) |
+| **us-west-2** (Oregon) ⭐ | **3** | 180 ms | 🟢 Balanced (2 availability zones with a capacity score of 3) |
 | us-east-1 (Virginia) | 3 | 208 ms | 🟢 Stable (2 availability zones with a capacity score of 3) |
 | us-east-2 (Ohio) | 3 | 213 ms | 🟢 Stable |
 | ap-northeast-1 (Tokyo) | 1 | 46 ms | 🟠 Close, but difficult to secure |
@@ -47,7 +43,7 @@ For this reason, region selection should not be based solely on "proximity," but
 
 **Score Interpretation**
 
-- Capacity score (g7e.12xl, 1–10) = AWS **Spot Placement Score** (1 = very scarce / 10 = very abundant). Strong correlation with On-Demand availability
+- Capacity score (g7e.12xl, 1–10) = AWS **Spot Placement Score** (1 = very scarce / 10 = very ample). Strong correlation with On-Demand availability
 - Scores are generally low across all 6 regions offering G7e (a common phenomenon with newer GPUs) → Among these, **a score of 3 is currently the best available**
 - Scores vary by time of day and day of the week → We recommend remeasuring yourself before deployment
 
@@ -64,17 +60,17 @@ aws ec2 get-spot-placement-scores \
 ```
 
 - Required permissions: `ec2:GetSpotPlacementScores`
-- Cost: Free; evaluation period: the next hour
+- Cost: Free; Evaluation period: Next 1 hour
 
 **(1) Capacity**
 
 - The South Korea and Japan regions (Seoul and Tokyo) have a score of **1** → Frequent provisioning failures are expected during weekday business hours
-- The three U.S. regions (us-east-1 / us-east-2 / us-west-2) have a score of **3**
-- Among these, **us-west-2 and us-east-1 each have two availability zones with a score of 3** (usw2-az1·az3 / use1-az2·az6) → Even if capacity is exhausted in one availability zone, a fallback to another is possible
+- The three U.S. regions (us-east-1, us-east-2, and us-west-2) have a score of **3**
+- Among these, **us-west-2 and us-east-1 have two availability zones with a score of 3** (usw2-az1·az3 / use1-az2·az6) → Even if capacity is exhausted in one availability zone, a fallback to another is possible
 
 **(2) Response Time**
 
-- LLM serving takes 200–500 ms for the model to generate its first token → An additional 150–200 ms for the network is negligible to end users
+- LLM serving takes 200–500 ms for the model to generate the first token → An additional 150–200 ms for the network is negligible in terms of user experience
 - If proximity to South Korea is a priority, Tokyo is the sweet spot, but capacity constraints are significant
 
 :::tip
@@ -104,14 +100,14 @@ G4dn, G5, G6, Gr6, G6e, P4d, P4de, P5, P5e, P5en, P6-B200, P6-B300
 ```
 
 :::warning
-ℹ️ **G7e is not listed** in the official list. However, actual testing confirmed that the Blackwell driver and CUDA function normally. When recreating the AMI in the future, we recommend using the **Deep Learning Base OSS NVIDIA Driver GPU AMI** (AL2023), which explicitly supports G7e.
+ℹ️ **G7e is not listed** in the official list. However, actual testing confirmed that the Blackwell driver and CUDA function normally. When recreating the AMI in the future, we recommend using the **Deep Learning Base OSS NVIDIA Driver GPU AMI** (AL2023), which explicitly supports the G7e.
 :::
 
 ---
 
 #### 2. Instance Type
 
-**Selected Instance** : `g7e.4xlarge`
+**Selected Instance**: `g7e.4xlarge`
 
 | Item | Value |
 | --- | --- |
@@ -139,9 +135,9 @@ G4dn, G5, G6, Gr6, G6e, P4d, P4de, P5, P5e, P5en, P6-B200, P6-B300
 
 details*Reasons for Choosing 4xlarge**
 
-- MoE 30–35B models such as Qwen3-Coder-30B-A3B and Qwen3.6-35B-A3B require ~70 GB of VRAM in bf16 mode → a single 96 GB card provides ample capacity, including KV cache
-- With FP8/FP4 quantization, even larger models (80–120B) are possible
-- First validate with 1 GPU; if scaling is needed, switch to 12xlarge or larger
+- MoE 30–35B models such as Qwen3-Coder-30B-A3B and Qwen3.6-35B-A3B require ~70 GB of VRAM in bf16 → a single 96 GB card provides ample capacity, even with a KV cache
+- Larger models (80–120B) are also feasible with FP8/FP4 quantization
+- First validate with 1 GPU; if scaling is needed, upgrade to 12xlarge or larger
 
 **VRAM Requirements by Model**
 
@@ -164,13 +160,13 @@ Based on 32k contexts and a single sequence. Since vLLM dynamically allocates pa
 | Type | gp3 |
 | IOPS | 16,000 |
 | Throughput | 1,000 MB/s |
-| Encryption | Not applied (encryption recommended upon production deployment) |
+| Encryption | None (encryption recommended upon production deployment) |
 | Device | `nvme0n1` |
 | Mount | `/` (root) |
 
 **Purpose**: Model weights (permanent storage), Docker images, OS, etc.
 
-**2) Instance Store (Temporary Storage — Included by default with g7e.4xlarge)**
+**2) Instance Store (Temporary Storage — Included by default on g7e.4xlarge)**
 
 | Item | Value |
 | --- | --- |
@@ -184,13 +180,13 @@ Based on 32k contexts and a single sequence. Since vLLM dynamically allocates pa
 
 | Action | Data |
 | --- | --- |
-| Reboot | Persistent |
+| Reboot | Persisted |
 | **Stop / Start** | **Deleted** |
 | Terminate | Deleted |
 | Hardware Failure | Deleted |
 :::
 
-**Recommended Use Case Separation**
+**Separation of Uses Recommended**
 
 - **EBS (** `/` **)**: Model weights, persistent data → Data that must never be lost
 - **Instance Store (** `/mnt/nvme` **)**: KV cache, temporary builds, swap, inference logs → Data that can be lost
@@ -201,7 +197,7 @@ Based on 32k contexts and a single sequence. Since vLLM dynamically allocates pa
 
 ### NVMe Configuration
 
-- In a cloud environment, NVMe has the following characteristics, which differ from those of standard physical servers:
+- In a cloud environment, NVMe has the following characteristics that differ from those of standard physical servers:
   - Data is retained upon reboot
 
   - Data is lost when the instance is stopped and restarted, or when it is terminated
@@ -252,7 +248,7 @@ Filesystem      Size  Used Avail Use% Mounted on
 
 ## Model Installation
 
-Given that renting A100 or H100 hardware is not practical in most cases, we compare the following two models on a server capable of running on a single GPU. (Comparison document to be released later)
+Given that it is not easy to rent A100 or H100 hardware in practice, we will compare the following two models on a server capable of running on a single GPU. (Comparison document to be released later)
 
 | Model Name | Model Weight Size | Actual GPU | KV Cache Availability (based on 90% utilization) |
 | --- | --- | --- | --- |
@@ -278,15 +274,15 @@ Given that renting A100 or H100 hardware is not practical in most cases, we comp
 # Download Acceleration (Multithreaded)
 export HF_XET_HIGH_PERFORMANCE=1
 
-# Save Location - Choose one of the two options
-export HF_HOME=/mnt/nvme/hf-cache # Fast, but the data is lost when the process stops
+# Save Location - Choose One of the Two
+export HF_HOME=/mnt/nvme/hf-cache # Fast, but data is lost when the process stops
 # export HF_HOME=/root/hf-cache # or EBS (persistent)
 ```
 
 ### Download the Model
 
 - Download the model to a local directory
-- After downloading, you can also upload the model to S3.
+- After downloading, the model can also be uploaded to S3.
 
 ```shell
 ## Download the First Model
@@ -375,7 +371,7 @@ import torch
 al = torch.cuda.get_arch_list()
 print("torch", torch.__version__, "| cuda", torch.version.cuda)
 print("arch_list", al)
-assert torch.__version__.endswith("+cu130"), "❌ Not the cu130 wheel"
+assert torch.__version__.endswith("+cu130"), "❌ Not a cu130 wheel"
 assert "sm_120" in al, "❌ sm_120 not included → No Blackwell kernel"
 print("✅ torch OK")
 PY
@@ -447,7 +443,7 @@ EOF
   }'
   
   
-{"id":"chatcmpl-89cf9de14d6fdfd2","object":"chat.completion","created":1779181606,"prompt_routed_experts":null,"model":"qwen","choices":[{"index":0,"message":{"role":"assistant","content":"Hello! Nice to meet you. 😊\nHow can I help you today? If you have any questions or topics you’d like to discuss, please feel free to let me know.","refusal":null,"annotations":null,"audio":null,"function_call":null,"tool_calls":[],"reasoning":null},"logprobs":null,"finish_reason":"stop","stop_reason":null,"token_ids":null,"routed_experts":null}],"service_tier":null,"system_fingerprint":"vllm-0.21.0-2426ae93","usage":{"prompt_tokens":14,"total_tokens":49,"completion_tokens":35,"prompt_tokens_details":null},"prompt_logprobs":null,"prompt_token_ids":null,"prompt_text":null,"kv_transfer_params":null}[root@ip-172-31-22-41 models]#
+{"id":"chatcmpl-89cf9de14d6fdfd2","object":"chat.completion","created":1779181606,"prompt_routed_experts":null,"model":"qwen","choices":[{"index":0,"message":{"role":"assistant","content":"Hello! Nice to meet you. 😊\nHow can I help you today? If you have any questions or topics you’d like to discuss, please let me know anytime.","refusal":null,"annotations":null,"audio":null,"function_call":null,"tool_calls":[],"reasoning":null},"logprobs":null,"finish_reason":"stop","stop_reason":null,"token_ids":null,"routed_experts":null}],"service_tier":null,"system_fingerprint":"vllm-0.21.0-2426ae93","usage":{"prompt_tokens":14,"total_tokens":49,"completion_tokens":35,"prompt_tokens_details":null},"prompt_logprobs":null,"prompt_token_ids":null,"prompt_text":null,"kv_transfer_params":null}[root@ip-172-31-22-41 models]#
 ```
 
 #### Register service
@@ -510,9 +506,9 @@ WantedBy=multi-user.target
 
 ---
 
-## Qwen3-Omni-30B-A3B-Instruct (multimodal)
+## Qwen3-Omni-30B-A3B-Instruct (Multimodal)
 
-Unlike the previous text models (Qwen3.5 / 3.6), this is an omni model that **accepts video, images, and audio as joint inputs**. It is used for the 6-second video clip understanding benchmark (vision-bench). The installation process is the same as above, but **audio decoder dependencies** and **multimodal serving flags** are added. (For vLLM installation, **reuse the same venv** as in the **vLLM Installation** section above; here, only the audio dependencies are added.)
+Unlike the previous text models (Qwen3.5 / 3.6), this is an omni model that **accepts video, images, and audio as joint inputs**. It is used in the 6-second video clip understanding benchmark (vision-bench). The installation process is the same as above, but **audio decoder dependencies** and **multimodal serving flags** are added. (For vLLM installation, **reuse the same venv** as in the **vLLM Installation** section above; here, only the audio dependencies are added.)
 
 ### Model Download
 
@@ -534,9 +530,9 @@ Unlike the previous text models (Qwen3.5 / 3.6), this is an omni model that **ac
 (vllm-svc) > uv pip install soundfile librosa av
 ```
 
-- `soundfile` (libsndfile bindings) · `librosa` (resampling) · `av` (PyAV, container demux) — all three are required
+- `soundfile` (libsndfile bindings) · `librosa` (resampling) · `av` (PyAV, container demux) — All three are required
 - **You must restart the service** after installation for the changes to take effect (`sudo systemctl restart vllm_omni_i` )
-- You must include `mm_processor_kwargs: {"use_audio_in_video": true}` in the client request body for the audio within the MP4 file to be processed
+- You must include `mm_processor_kwargs: {"use_audio_in_video": true}` in the client request body for the audio in the MP4 file to be processed
 
 #### Manual Testing
 
@@ -564,7 +560,7 @@ vllm serve /mnt/nvme/models/Qwen3-Omni-30B-A3B-Instruct \
 
  ### Service Registration
 
-**Note:** To use audio input, `--limit-mm-per-prompt` must include `audio`, and the audio dependencies must be installed in the venv.
+**Note:** To use audio input, `--limit-mm-per-prompt` must include `audio`, and the audio dependencies listed above must be installed in the venv.
 
 ```shell
 [Unit]
