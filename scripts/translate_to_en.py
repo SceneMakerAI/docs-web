@@ -131,6 +131,62 @@ def _rejoin_ol_markers(body):
                   r'\1. ', body)
 
 
+# 문장이 끝났다고 볼 수 있는 꼬리 — 이걸로 끝나면 구분선 위 문단은 완결된 것으로 본다.
+_SENTENCE_TAIL = ('.', '!', '?', ':', ';', '"', "'", ')', ']', '*', '`', '”', '」', '|')
+# 문장 조각으로 보지 않는 줄머리 — 제목·목록·인용·표·코드·주석·placeholder
+_NOT_A_FRAGMENT = re.compile(r'^\s*(#{1,6} |[-*+] |\d+[.)] |> |\| |```|<!--|<x id=)')
+
+
+def _rejoin_sentence_across_hr(body, hr_token):
+    """구분선 위로 올라간 문장 앞부분을 아래 문단 앞으로 되돌린다.
+
+    DeepL 은 영어 어순에 맞추느라 문장 앞머리를 구분선(<x id="HR"/>) 위로 옮긴다:
+      'If you apply' / '---' / '`faster-whisper large-v3` directly to …'
+    KO 원문은 구분선이 문단보다 앞이므로, 조각을 아래 문단 앞에 붙이면 원문 구조가
+    복원된다 (실제 사례: /en/blog/4·6, 9개 파일 11곳).
+
+    보수적으로만 움직인다 — 구분선 바로 위 문단이 문장 종결 부호로 끝나지 않고,
+    제목·목록·표·주석·placeholder 도 아닐 때만. 완결된 문단은 건드리지 않는다.
+    """
+    # DeepL 응답에서는 구분선이 아직 placeholder라 문장 조각과 같은 줄에 붙어 나온다
+    # ('If you apply <x id="HR"/>'). 먼저 줄을 갈라 아래 로직이 볼 수 있게 한다.
+    esc = re.escape(hr_token)
+    body = re.sub(rf'(?m)^((?:(?!{esc}).)*\S)[ \t]*{esc}[ \t]*$',
+                  lambda m: f'{m.group(1)}\n\n{hr_token}', body)
+
+    lines = body.split('\n')
+    out = []
+    for i, line in enumerate(lines):
+        if line.strip() != hr_token:
+            out.append(line)
+            continue
+        # 위쪽에서 마지막 비어있지 않은 줄 찾기
+        j = len(out) - 1
+        while j >= 0 and not out[j].strip():
+            j -= 1
+        if j < 0:
+            out.append(line)
+            continue
+        frag = out[j].strip()
+        if (len(frag) > 120 or frag.endswith(_SENTENCE_TAIL)
+                or _NOT_A_FRAGMENT.match(frag)):
+            out.append(line)
+            continue
+        # 아래쪽에서 첫 비어있지 않은 줄 찾기
+        k = i + 1
+        while k < len(lines) and not lines[k].strip():
+            k += 1
+        if k >= len(lines) or _NOT_A_FRAGMENT.match(lines[k].strip()):
+            out.append(line)
+            continue
+        del out[j]
+        while out and not out[-1].strip():
+            out.pop()
+        out.extend(['', line])
+        lines[k] = f"{frag} {lines[k].lstrip()}"
+    return '\n'.join(out)
+
+
 def _unglue_html_comments(body):
     """DeepL 이 마커 placeholder 뒤에 붙여 내보낸 HTML 주석을 마커 앞으로 되돌린다.
 
@@ -578,6 +634,7 @@ def translate_file(kr_path, hashes):
     for key, markers in _hdr_store.items():
         translated = translated.replace(key, markers)
     translated = _fill_empty_headings(translated, body_no_code)
+    translated = _rejoin_sentence_across_hr(translated, _HR)
     en_body = html.unescape(translated.replace(_HR, '\n\n---\n\n'))
     # Safety net: fix any ---# produced by DeepL converting <hr/> in older translations
     en_body = re.sub(r'^---(?=#{1,6} )', '---\n\n', en_body, flags=re.MULTILINE)
