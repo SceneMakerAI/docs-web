@@ -1,0 +1,43 @@
+minsung:
+  name: 임민성
+  title: The SceneMakerAI Team
+  description: SceneMakerAI Multimodal AI Pipeline Developer
+  url: https://github.com/MinsungIM
+  image_url: https://github.com/MinsungIM.png
+  email: minsung7336@solbox.com
+  page: true
+  socials:
+    github: MinsungIM
+
+sbin:
+  name: sbin
+  title: The SceneMakerAI Team
+  description: SceneMakerAI Multimodal AI Pipeline Developer
+  url: https://github.com/sb
+  image_url: https://avatars.githubusercontent.com/u/219066026?v=4&size=64
+  email: sbin@solbox.com
+  page: true
+  socials:
+    github: sbin
+
+jplee:
+  name: jplee
+  title: The SceneMakerAI Team
+  description: Team Lead, SceneMakerAI Multimodal AI Pipeline
+  url: https://github.com/jp
+  image_url: https://avatars.githubusercontent.com/u/219066026?v=4&size=64
+  email: jplee@solbox.com
+  page: true
+  socials:
+    github: jplee
+
+김주홍:
+  name: 김주홍
+  title: The SceneMakerAI Team
+  description: SceneMakerAI Multimodal AI Pipeline Developer
+  url: https://github.com/jay
+  image_url: https://avatars.githubusercontent.com/u/219066026?v=4&size=64
+  email: jay@solbox.com
+  page: true
+  socials:
+    github: jay

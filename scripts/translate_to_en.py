@@ -22,6 +22,8 @@ HASH_FILE = ".notion-translate-hashes.json"
 
 EN_DOCS_DIR = "i18n/en/docusaurus-plugin-content-docs/current/"
 EN_BLOG_DIR = "i18n/en/docusaurus-plugin-content-blog/"
+KR_AUTHORS_YML = "blog/authors.yml"
+EN_AUTHORS_YML = EN_BLOG_DIR + "authors.yml"
 
 _PROG_LANG_PROTECT = {
     'bash', 'sh', 'shell', 'python', 'py', 'javascript', 'js',
@@ -283,6 +285,44 @@ def cleanup_stale_en_files(source_files):
                     log(f"스테일 EN 파일 삭제: {en_path}")
 
 
+
+def translate_authors_yml(hashes):
+    """blog/authors.yml 의 역할 라벨(title·description)만 영어화해 EN 로케일용으로 쓴다.
+
+    Docusaurus 는 i18n/<locale>/docusaurus-plugin-content-blog/authors.yml 이 있으면
+    그걸 쓴다. 이게 없어 EN 블로그 전 페이지와 /en/blog/authors/* 에 'SceneMakerAI 팀'
+    이 한글로 노출됐다.
+
+    `name` 은 사람 이름이라 번역하지 않는다 — 로마자 표기는 본인이 정할 일이다.
+    YAML 파서를 거치지 않고 줄 단위로 바꾼다: 순서·주석·들여쓰기가 그대로 남아
+    KR 원본과 diff 가 읽히기 때문.
+    """
+    if not os.path.exists(KR_AUTHORS_YML):
+        return
+    raw = open(KR_AUTHORS_YML, encoding="utf-8").read()
+    digest = hashlib.sha256(raw.encode()).hexdigest()
+    cached = _normalize_cached(hashes.get(KR_AUTHORS_YML))
+    if cached.get("body_hash") == digest and os.path.exists(EN_AUTHORS_YML):
+        return
+
+    memo = {}
+
+    def _line(m):
+        indent, key, val = m.group(1), m.group(2), m.group(3).strip()
+        if not _KO_RE.search(val):
+            return m.group(0)
+        if val not in memo:
+            memo[val] = html.unescape(translate_with_deepl_plain(val)).strip()
+        return f"{indent}{key}: {memo[val]}"
+
+    out = re.sub(r'(?m)^( +)(title|description): (.+)$', _line, raw)
+    os.makedirs(os.path.dirname(EN_AUTHORS_YML), exist_ok=True)
+    with open(EN_AUTHORS_YML, "w", encoding="utf-8") as f:
+        f.write(out)
+    hashes[KR_AUTHORS_YML] = {"body_hash": digest, "slug": None, "sidebar_position": None}
+    log(f"{KR_AUTHORS_YML} → {EN_AUTHORS_YML} (역할 라벨 {len(memo)}건 번역)")
+
+
 def translate_file(kr_path, hashes):
     with open(kr_path, encoding="utf-8") as f:
         content = f.read()
@@ -467,6 +507,11 @@ def main():
     source_files = collect_source_files()
 
     cleanup_stale_en_files(source_files)
+
+    try:
+        translate_authors_yml(hashes)
+    except Exception as e:
+        log(f"오류 (authors.yml): {e}")
 
     translated = 0
     errors = 0

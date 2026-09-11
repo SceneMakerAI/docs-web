@@ -40,3 +40,51 @@ def test_protect_images_multiple_and_korean_path():
     assert len(store) == 2
     restored = T._restore_images(protected, store)
     assert restored == body
+
+
+def test_translate_authors_yml_localizes_role_labels(tmp_path, monkeypatch):
+    """authors.yml 의 title·description 만 영어화하고 나머지는 그대로 둔다.
+
+    EN 블로그 전 페이지 하단·작성자 페이지에 'SceneMakerAI 팀' 이 한글로 노출됐다.
+    """
+    src = tmp_path / "authors.yml"
+    src.write_text(
+        "minsung:\n"
+        "  name: 임민성\n"
+        "  title: SceneMakerAI 팀\n"
+        "  description: SceneMakerAI 멀티모달 AI 파이프라인 개발자\n"
+        "  url: https://github.com/MinsungIM\n"
+        "  socials:\n"
+        "    github: MinsungIM\n", encoding="utf-8")
+    dst = tmp_path / "en" / "authors.yml"
+    monkeypatch.setattr(T, "KR_AUTHORS_YML", str(src))
+    monkeypatch.setattr(T, "EN_AUTHORS_YML", str(dst))
+    monkeypatch.setattr(T, "translate_with_deepl_plain",
+                        lambda t: {"SceneMakerAI 팀": "SceneMakerAI Team",
+                                   "SceneMakerAI 멀티모달 AI 파이프라인 개발자":
+                                       "SceneMakerAI Multimodal AI Pipeline Developer"}[t])
+    T.translate_authors_yml({})
+
+    out = dst.read_text(encoding="utf-8")
+    assert "title: SceneMakerAI Team" in out
+    assert "description: SceneMakerAI Multimodal AI Pipeline Developer" in out
+    assert "url: https://github.com/MinsungIM" in out      # 비번역 키 보존
+    assert "github: MinsungIM" in out                      # 중첩 구조 보존
+    assert "minsung:" in out
+
+
+def test_translate_authors_yml_skips_when_unchanged(tmp_path, monkeypatch):
+    """해시가 같고 산출물이 있으면 DeepL을 부르지 않는다."""
+    src = tmp_path / "authors.yml"
+    src.write_text("a:\n  title: SceneMakerAI 팀\n", encoding="utf-8")
+    dst = tmp_path / "en" / "authors.yml"
+    monkeypatch.setattr(T, "KR_AUTHORS_YML", str(src))
+    monkeypatch.setattr(T, "EN_AUTHORS_YML", str(dst))
+    calls = []
+    monkeypatch.setattr(T, "translate_with_deepl_plain",
+                        lambda t: calls.append(t) or "SceneMakerAI Team")
+    hashes = {}
+    T.translate_authors_yml(hashes)
+    assert len(calls) == 1
+    T.translate_authors_yml(hashes)          # 두 번째 호출은 스킵
+    assert len(calls) == 1
