@@ -1,0 +1,8 @@
+{
+  "label": "테스트",
+  "position": 5,
+  "link": {
+    "type": "generated-index",
+    "description": "SceneMakerAI 테스트 사례와 검증 결과를 정리합니다."
+  }
+}

@@ -221,6 +221,9 @@ const config: Config = {
         ...(hasNotionContent('release-notes')
           ? [{type: 'docSidebar' as const, sidebarId: 'releaseNotesSidebar', label: '릴리즈 노트',   position: 'left' as const}]
           : [{to: '/docs/release-notes', label: '릴리즈 노트',   position: 'left' as const}]),
+        ...(hasNotionContent('test')
+          ? [{type: 'docSidebar' as const, sidebarId: 'testSidebar',         label: '테스트',        position: 'left' as const}]
+          : []),
         {href: 'https://github.com/SceneMakerAI', label: 'GitHub', position: 'right'},
         {type: 'localeDropdown', position: 'right'},
       ],
