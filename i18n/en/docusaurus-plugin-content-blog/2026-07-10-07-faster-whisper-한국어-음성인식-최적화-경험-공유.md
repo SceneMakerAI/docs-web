@@ -6,7 +6,7 @@ authors: [sbin]
 description: "This article provides a detailed explanation of the speech-to-text conversion process."
 tags: [Fast-Whisper, Hugging face]
 last_update:
-  date: 2026-07-20
+  date: 2026-09-29
 ---
 
 ### Introduction

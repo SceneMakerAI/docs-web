@@ -258,55 +258,55 @@
     "body_hash": "f9b799b93b6c94bd8a22f8eafade74a8d44c7c3dfcd6ae7f62bcb367b363f5fb",
     "slug": "",
     "sidebar_position": "",
-    "frontmatter_hash": "690b82a83b057680774fb3bc7c45450c7e9e1ca701e9b1c50f97a5a7a7e1c345"
+    "frontmatter_hash": "40769eb3ec83a9097c7030a7ff4522c4de2e6227389667444f802deb8948ffe5"
   },
   "blog/2026-07-09-06-프로젝트-소개-및-qwen36-방송-도메인-적용기.md": {
     "body_hash": "e9940f3d0c913dd68497717da8fe457398c89bd06303b5cc091bc94b98def04b",
     "slug": "",
     "sidebar_position": "",
-    "frontmatter_hash": "99e420cb099a4d66b1fad127ba1d17eeb786fa1b5e54adc335237ece0e16dbfe"
+    "frontmatter_hash": "cfb28e0a85703f1ceac57fa00283c1a52d64c5e5b5092d6ebdf962370427754a"
   },
   "blog/2026-07-10-07-faster-whisper-한국어-음성인식-최적화-경험-공유.md": {
     "body_hash": "bfee59b46ce777f0c6e93ea819b8af330138d4249311b033f4c66109f28585c4",
     "slug": "",
     "sidebar_position": "",
-    "frontmatter_hash": "d4647ca2e42b230880ab822e977c3455699b51d778f68ec9d73cb7412b515954"
+    "frontmatter_hash": "41a7c08d065b8e5f3b47b69a435e4fce266dd1ac84c5f7af1c62bf4cb0eee275"
   },
   "blog/2026-07-10-07-음성분석-처리-과정-및-결과.md": {
     "body_hash": "0994adffb8271510036c71ef01f7e302e89414f010aaa8ae833e11375cf2b65b",
     "slug": "",
     "sidebar_position": "",
-    "frontmatter_hash": "145460f3826d67bf4e34f62c15bbafe2378796dfec6aa9921b248de6b14a1a3c"
+    "frontmatter_hash": "cb5b59a3c449bb74f74fe68b2662cbb6f070035d361d9bebf73a0c3bfd58066e"
   },
   "blog/2026-07-13-07-langgraph-기반-방송-워크플로우-설계.md": {
     "body_hash": "4434dac8813a8f0ccdef43b9106431b3854e0d1d8dfab0720856a2a32ad6d733",
     "slug": "",
     "sidebar_position": "",
-    "frontmatter_hash": "a7cf9fcb6143fbba05ddc9d74b8fdcc8cadfcde336437fa0f28cfb16c9bc2542"
+    "frontmatter_hash": "46cf3844371eca36defa21f69a53b3b07cbcd5bd9f8caf58edbb71c09857be9c"
   },
   "blog/2026-07-13-07-rag-파이프라인-구축.md": {
     "body_hash": "8c9497c4065b083ff3855d939d33359c88f85d93e96946f39675a8746d5772f1",
     "slug": "",
     "sidebar_position": "",
-    "frontmatter_hash": "13cb5b7b3ad32dea417eae45145caee541c8f6c778b5ffe75aefc2b2703e413d"
+    "frontmatter_hash": "6a9c8a54e1c8316e519b6dbf4c4e7134216290e8ec34fedf1703d9a7dcb12ad2"
   },
   "blog/2026-07-14-08-모아보기-서비스-구현기-1건.md": {
     "body_hash": "297ea658832c7cdbef9edecf96d5fe69e95f6bbb3a1d08dea6aa2580112a5f6c",
     "slug": "",
     "sidebar_position": "",
-    "frontmatter_hash": "264c1dae224a6260b22daed069d7720704d1d4b4512ca2c9d901937816b5083f"
+    "frontmatter_hash": "2e6f649b69715ef3365fcd9e95a8bc420be43be505f87b4a9f49dd31af07edbc"
   },
   "blog/2026-07-14-08-숏폼-자동-생성-파이프라인-해설-1.md": {
-    "body_hash": "d2da8f151d54b8b0c8f89e7aa17dd15b9c6d75bc8cbf5c16ee1a23550dc4849a",
+    "body_hash": "dfb6512b7a11ee84cac817fe9fdbf3853b2f3818904b8d12d3b11f22b5563550",
     "slug": "",
     "sidebar_position": "",
-    "frontmatter_hash": "b67e0965b5f7fc49e5eed68af353b59c7827ddea2b878d0a01ad8ea2f0387208"
+    "frontmatter_hash": "6ecad4a31646d197d254bdfb8ec16e6b041568df678f86e19827b5356c857318"
   },
   "blog/2026-07-14-08-숏폼-자동-생성-파이프라인-해설-2.md": {
-    "body_hash": "1f9a4b981e50bda956cc906e5cb2caded6e034d7e1e795339a6dec0ee7f194ab",
+    "body_hash": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
     "slug": "",
     "sidebar_position": "",
-    "frontmatter_hash": "e65d43a466079d1a9a51373c0967b93fff076a34bac20718f98f928ae7a66af6"
+    "frontmatter_hash": "354ac7dce810c30bcde7433e71adf23cd131deca547bd8922ea5da879ff7fc92"
   },
   "blog/2026-07-14-09-db-스키마-공개.md": {
     "body_hash": "74dbd24dafe7344c663d113138557e0540234bb7799c4a2c259c950e54a02862",
@@ -315,10 +315,10 @@
     "frontmatter_hash": "93c867bef4a96c48d4a963d9f43c877f04507c39c5256a7a46d5753d1bb09b5f"
   },
   "blog/2026-07-14-09-vllm-기본-추론-최적화-노하우-1건.md": {
-    "body_hash": "6e2de88b501261a8ecd152d5021c9bbc1c4b5696ecbcb6c7d959b7cfd8cc5b92",
+    "body_hash": "407c218837877ec7a83daf3b0613bf1c75c942a20a15c2416eeda87ba2010246",
     "slug": "",
     "sidebar_position": "",
-    "frontmatter_hash": "db340286eae88d0f0b59a3f9a75c76e22ecc6e824b26f635feb3a0bdaa7bcfb7"
+    "frontmatter_hash": "91afec0e6dd5bfc87f7d07ebe6470201cfa294483ba23c95b321e75ade828c78"
   },
   "blog/2026-07-14-09-맥락-기반-광고-최적화-기술-해설-1건.md": {
     "body_hash": "0eb896e1bf33c1f46ad420bdcebfa1e81bc2d6a9dff4e1080634034ba7863aef",
@@ -327,10 +327,10 @@
     "frontmatter_hash": "d780adcc5fab75f63075638ef8ff4d2dc0913898688eaef0fb1ab2c3f3618113"
   },
   "blog/2026-07-14-10-sbsi-실증-테스트-사례-공유-1건.md": {
-    "body_hash": "a2849e64fda4488ec007481aea06c99a59274d75f499baea22af8526dee18e35",
+    "body_hash": "0262939f1cd237630e66fc39babae98cbbab442242b00423c38bb23bb7ca0d6b",
     "slug": "",
     "sidebar_position": "",
-    "frontmatter_hash": "d31fe90b4016bd87a7db6bdfd8496a1c3e2ec893a8d4940be799542c2c43af09"
+    "frontmatter_hash": "bf3b0fbf156d312d5404729c0e7ba6fcb45512fdbf0fc542e21d19b4c9dc2f42"
   },
   "blog/2026-07-14-10-방송-ai-서비스-성능-벤치마크-결과-분석-1건.md": {
     "body_hash": "6183855c7bc1cc2518694697f308e03a731c2faa105ace09943455cec3e4af1e",
@@ -348,7 +348,7 @@
     "body_hash": "823d1cdbf793902b88cffa0c2f25ccd7eaf7df497928952b9f8653ff7b9d49de",
     "slug": "",
     "sidebar_position": "",
-    "frontmatter_hash": "7d6430fbc1eccfd778cb06525db5932f48e35cb13be33ed3523291ce05b60672"
+    "frontmatter_hash": "8482cfe609c982d921d79c2ec6137ee28d93751e4578084ed4f05ec43a20f166"
   },
   "blog/2026-07-14-11-테스트-케이스-작성-1건.md": {
     "body_hash": "8547ff07b44fc41219719469036adae86c2954eb7c8cc8758cb449b3cf139a50",
@@ -387,10 +387,10 @@
     "frontmatter_hash": "4cd87bcfc3e45e4e01c8689ae219d537af44ce8fe149ecf58d9c0b0a493884d9"
   },
   "docs/guide/외부-연동-규격.md": {
-    "body_hash": "5af5b6e2b251895d0247693f256a7627e6815497065bf5ce0d7f0e3dd4df81fd",
+    "body_hash": "5ea76fbbdf381619809b92410b1ab815b7133017170c989d0dab9f67a41a2cbc",
     "slug": "1",
     "sidebar_position": "1",
-    "frontmatter_hash": "562d9149328a8ce72272fd0a37030797ec83c1f739ad8bf0ce55f1b446ea3b51"
+    "frontmatter_hash": "e75c9cf1206b3d6b87e80ecc757258fcd1447392cad397ecc42e974d7fce0084"
   },
   "docs/test/야구-질의.md": {
     "body_hash": "074b0a6e65a74d4a7e9b03f5a6e2d4d53dc4663050ffa8c8dab0f8219675103b",
@@ -402,5 +402,17 @@
     "body_hash": "27f512732a5cc4910b2e369efa5bb583bd46be2951827be9640cd14395b6341e",
     "slug": null,
     "sidebar_position": null
+  },
+  "docs/install/aws-g7e24xlarge-초기-세팅.md": {
+    "body_hash": "9081c0ff6a75267c9507d797dcb5703d99b326c8f7f4f5978cf84631859ec549",
+    "slug": "4",
+    "sidebar_position": "4",
+    "frontmatter_hash": "f63481060644625c84038565ffc3c0de9081c4410fbb48716327bf9b74bd0d09"
+  },
+  "blog/2026-07-14-09-db-스키마-공개-김부장꺼로-변경할-수도.md": {
+    "body_hash": "491a71891777c82db942a7d1ef9d89a6aece320bf7208c083b6443c4f5751a47",
+    "slug": "",
+    "sidebar_position": "",
+    "frontmatter_hash": "c8bcd67a5055f2e58abeb06d4c7fbaae408645dc6d5d0981bdf0b6f1461086e9"
   }
 }
