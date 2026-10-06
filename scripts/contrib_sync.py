@@ -2,7 +2,7 @@
 contrib_sync.py — GitHub 기여(PR·Issue·Discussion) ↔ Notion '오픈소스 생태계 기여' 페이지의 표
 
 표는 NOTION_DISCUSSION DB 의 페이지 본문에 있고 열은 고정이다:
-  날짜 | 유형 | 리포 | 제목(GitHub 링크) | 작성자 | 참여자 | 상태
+  번호 | 유형 | 리포 | 제목(GitHub 링크) | 작성자 | 참여자 | 상태
 
 Env vars (필수):
   NOTION_TOKEN          Notion API 토큰
@@ -79,9 +79,9 @@ def _cell(text, url=None):
     return [{"type": "text", "text": {"content": text, "link": {"url": url} if url else None}}]
 
 
-def row_cells(date, kind, repo, title, url, author, participants, status) -> list:
-    """표 한 행의 칸 7개. date 는 GitHub 의 ISO 시각."""
-    return [_cell(f"{date[5:7]}.{date[8:10]}"), _cell(kind), _cell(repo), _cell(title, url),
+def row_cells(number, kind, repo, title, url, author, participants, status) -> list:
+    """표 한 행의 칸 7개. number 는 표 안의 일련번호."""
+    return [_cell(str(number)), _cell(kind), _cell(repo), _cell(title, url),
             _cell(author), _cell(participants), _cell(status)]
 
 
@@ -127,6 +127,13 @@ def plan_status_updates(rows, fetch) -> list:
             new_cells[COL_STATUS] = _cell(new)
             updates.append((row["id"], new_cells, old, new))
     return updates
+
+
+def next_number(rows) -> int:
+    """새 행에 줄 일련번호 — 표에 있는 가장 큰 번호 다음."""
+    numbers = [int(text) for row in rows
+               if (text := _cell_text(row["table_row"]["cells"][0])).isdigit()]
+    return max(numbers, default=0) + 1
 
 
 def find_row(rows, url):
@@ -244,10 +251,13 @@ def cmd_add(args):
     table_id, rows = load_table(os.environ["NOTION_DISCUSSION"])
     existing = find_row(rows, gh["html_url"])
     title = args.title or gh["title"]
-    if existing and not args.title:
+    number = next_number(rows)
+    if existing:
         row = next(r for r in rows if r["id"] == existing)
-        title = _cell_text(row["table_row"]["cells"][COL_TITLE])
-    cells = row_cells(date=gh["created_at"], kind=kind, repo=repo, title=title, url=gh["html_url"],
+        number = _cell_text(row["table_row"]["cells"][0]) or number
+        if not args.title:
+            title = _cell_text(row["table_row"]["cells"][COL_TITLE])
+    cells = row_cells(number=number, kind=kind, repo=repo, title=title, url=gh["html_url"],
                       author=gh["user"]["login"],
                       participants=fetch_participants(owner, repo, kind, number, gh),
                       status=status_label(kind, gh))
