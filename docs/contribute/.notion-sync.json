@@ -36,22 +36,22 @@
   },
   "3f1e15b4-0359-8128-83b8-c55a8710dd15": {
     "file": "docs/contribute/use-casemilvus-자체-chunking-방법과-벡터db-사용법-시간-구간-증거-색인.md",
-    "last_edited": "2026-10-06T05:29:00.000Z",
-    "content_hash": "9bf675f5f5869294744057bcd98022306be8efa865c8402071b9728ee82d2304",
+    "last_edited": "2026-10-06T08:07:00.000Z",
+    "content_hash": "7be8a308b9056a463a64f896cf8b6e9d13bd553b7f57e59c7c6e63b442b16d74",
     "order": 6,
     "parent_id": null
   },
   "3f1e15b4-0359-8161-979e-db1a5601287d": {
     "file": "docs/contribute/use-case음성분석-단위테스트-결과-언어-식별lid-whisper-vs-voxlingua107-rawdenoise.md",
-    "last_edited": "2026-10-06T05:30:00.000Z",
-    "content_hash": "964576cb79724460a92c99fd2eef6c9f929b18c1ec7ec182f0a9d2ef3045ec17",
+    "last_edited": "2026-10-06T08:07:00.000Z",
+    "content_hash": "441c97f7938abddc378cb6cdeff2feaf242f85f9c2cc35c7d56fcaf4b55187db",
     "order": 7,
     "parent_id": null
   },
   "3f1e15b4-0359-8128-9f0a-eb2bdda185fa": {
     "file": "docs/contribute/use-casewhisper-단위테스트-결과-한국어-방송-6종에서-faster-whisper-large-v3-vs-qwen3-asr.md",
-    "last_edited": "2026-10-06T05:31:00.000Z",
-    "content_hash": "31456db4bf3af4ed2f69b1c600fd078c154c5b45954ea9f79f7b340fa4fea180",
+    "last_edited": "2026-10-06T08:07:00.000Z",
+    "content_hash": "5d47cc78dbe14989ad4b1e46f17e3666f45a11690cae7e4977b8b2f8bc83afbc",
     "order": 8,
     "parent_id": null
   },
@@ -64,8 +64,8 @@
   },
   "3f1e15b4-0359-810f-a93c-deb8b00eec1c": {
     "file": "docs/contribute/use-caseqwen-설치-절차-aws-g7eblackwell-vllm-으로-qwen-3x-qwen3-omni-서빙.md",
-    "last_edited": "2026-10-06T05:33:00.000Z",
-    "content_hash": "d18996ee369532c2a761f6f55e0bac22d241f7901095dcd26ba7e1d55f971cda",
+    "last_edited": "2026-10-06T08:07:00.000Z",
+    "content_hash": "67e3c424056f81e32cfcac1e20c40c5e90473a5ecf6031b6d2e67cc04e00ff0f",
     "order": 10,
     "parent_id": null
   },
@@ -88,6 +88,174 @@
     "last_edited": "2026-10-06T06:10:00.000Z",
     "content_hash": "a32366a0f9a6213f094a7d721f0fe992b88b7bea5e082057d51199e81beff479",
     "order": 13,
+    "parent_id": null
+  },
+  "3f1e15b4-0359-8187-a3dc-ca258b162a72": {
+    "file": "docs/contribute/파일-객체를-dict-로-넘길-때-keyerror-uri-수정.md",
+    "last_edited": "2026-10-06T07:12:00.000Z",
+    "content_hash": "4a57f25c480b56694140d2da188453266a239012403b0d9ee44dfd0f40d4fa92",
+    "order": 14,
+    "parent_id": null
+  },
+  "3f1e15b4-0359-817c-beb0-c909f67f679b": {
+    "file": "docs/contribute/대소문자-무시-모드에서-중첩-dataclass-의-대문자-필드-누락-수정.md",
+    "last_edited": "2026-10-06T07:35:00.000Z",
+    "content_hash": "7bd70c25c2d6b9e87d0f5b9c7bf05b2710595d8608db7ebd48984663f4401155",
+    "order": 15,
+    "parent_id": null
+  },
+  "3f1e15b4-0359-812a-a899-e4f5aedf7302": {
+    "file": "docs/contribute/정렬-실패-세그먼트가-srtvtt-출력에서-누락되는-문제.md",
+    "last_edited": "2026-10-06T07:35:00.000Z",
+    "content_hash": "ae7d1a4e4f886243efe80f653e5049fe2c1c15a0a86f3828c3b4684cf072e0f5",
+    "order": 16,
+    "parent_id": null
+  },
+  "3f1e15b4-0359-812c-8c54-d55cf84edd0d": {
+    "file": "docs/contribute/ssdictcursor-가-dict-대신-tuple-을-반환하는-문제-수정.md",
+    "last_edited": "2026-10-06T07:41:00.000Z",
+    "content_hash": "f01f5ee96c733cc0ab555b72dfead3bf7407d820f514c4cf9515075edf7a258f",
+    "order": 17,
+    "parent_id": null
+  },
+  "3f1e15b4-0359-8164-bd28-de7058e3203d": {
+    "file": "docs/contribute/collect-env-가-uv-환경에서-다른-환경의-패키지를-읽거나-죽는-문제-수정.md",
+    "last_edited": "2026-10-06T07:42:00.000Z",
+    "content_hash": "1f4104948af0d695e0acf358eb507334c32f1a421b8a177cd299b829ac155d70",
+    "order": 18,
+    "parent_id": null
+  },
+  "3f1e15b4-0359-811e-9911-e0fc6e84f29f": {
+    "file": "docs/contribute/copy-skip-cache-에서-save-filename-이-무시되어-label-encoder-가-로드되지-않는-문제.md",
+    "last_edited": "2026-10-06T07:45:00.000Z",
+    "content_hash": "0a8ea0096527051689fe3fc7fa11e0d06b0734996f63ca0aaf1287ec945c6cf5",
+    "order": 19,
+    "parent_id": null
+  },
+  "3f1e15b4-0359-817b-b5ad-d443f974699e": {
+    "file": "docs/contribute/audiocrop-pad-모드가-범위-밖-구간에서-틀린-길이실제-오디오-반환.md",
+    "last_edited": "2026-10-06T07:43:00.000Z",
+    "content_hash": "9cbf7b4c3dbaac7b4db9c207ced1db36b282a5378c0875279cec4b4a020f66ed",
+    "order": 20,
+    "parent_id": null
+  },
+  "3f1e15b4-0359-812f-9f5a-e78fdafe6b10": {
+    "file": "docs/contribute/추론-진행률-hook-이-전체보다-큰-완료-수를-보고하는-문제-수정.md",
+    "last_edited": "2026-10-06T07:45:00.000Z",
+    "content_hash": "42af2a9dde97ebfa547d59237bdcf3c11f997340811ed07bcadcff6abbe9901f",
+    "order": 21,
+    "parent_id": null
+  },
+  "3f1e15b4-0359-819b-9ef9-f5f228fdbdff": {
+    "file": "docs/contribute/ids-로-조회삭제할-때-varchar-primary-key-이스케이프-누락-수정.md",
+    "last_edited": "2026-10-06T07:46:00.000Z",
+    "content_hash": "278692762d144b1e2a3f79a991c86ad7f734f196d9729e6aa43b181c5a1656c6",
+    "order": 22,
+    "parent_id": null
+  },
+  "3f1e15b4-0359-818c-a0bc-f6f5e31e6c7b": {
+    "file": "docs/contribute/transcribechunk-length-가-이후-호출의-윈도-크기를-영구히-바꾸는-문제.md",
+    "last_edited": "2026-10-06T07:48:00.000Z",
+    "content_hash": "3c54645b2d8de160158e409d7b566567f26d2c52ac2f513a03ebde20fbf0ad74",
+    "order": 23,
+    "parent_id": null
+  },
+  "3f1e15b4-0359-8105-9844-c644738eaa0a": {
+    "file": "docs/contribute/detect-language-가-dict-형태의-vad-parameters-에서-크래시하는-문제-수정.md",
+    "last_edited": "2026-10-06T07:50:00.000Z",
+    "content_hash": "a7291b519081b64aed7ec2df7e6c98002f165812cb1717a99c64fdfb1ebf2016",
+    "order": 24,
+    "parent_id": null
+  },
+  "3f1e15b4-0359-8107-a83e-da436b1740b6": {
+    "file": "docs/contribute/ssl-verify-identity-만-켜면-sslcontext-생성에서-valueerror-발생.md",
+    "last_edited": "2026-10-06T07:52:00.000Z",
+    "content_hash": "a68f607fed86882aa03fde89d120e27f573f9e41decfd7ce44b5999142025a71",
+    "order": 25,
+    "parent_id": null
+  },
+  "3f1e15b4-0359-81ae-9505-c763ee76be2f": {
+    "file": "docs/contribute/staticfiles-405-응답에-allow-헤더-추가.md",
+    "last_edited": "2026-10-06T07:54:00.000Z",
+    "content_hash": "b5ddb8491fabdcacfa5171469e658219006fcd496d67b03ee814b90a64f0f2a7",
+    "order": 26,
+    "parent_id": null
+  },
+  "3f1e15b4-0359-81b1-99fe-e5e59ca6153f": {
+    "file": "docs/contribute/dotenv-run-이-fifo-형태의-env-를-거부하는-문제-수정.md",
+    "last_edited": "2026-10-06T07:56:00.000Z",
+    "content_hash": "e7ee7f98032b034f9916f18cae8dca964f7e73bee1e31dbae78c49d1acc8a025",
+    "order": 27,
+    "parent_id": null
+  },
+  "3f1e15b4-0359-81ae-b243-e380b00c1a7e": {
+    "file": "docs/contribute/upload-dir-를-str-로-주고-upload-keep-filename-을-켜면-나는-typeerror-수정.md",
+    "last_edited": "2026-10-06T07:57:00.000Z",
+    "content_hash": "df77aa939bccb9b299ca74065a36a2856d1eea8d76dbbf520ee7d3c26a00b588",
+    "order": 28,
+    "parent_id": null
+  },
+  "3f1e15b4-0359-81a5-9672-c31ea9614488": {
+    "file": "docs/contribute/header-값의-콜론-뒤-공백-때문에-h11wsproto-응답이-전부-실패하는-문제.md",
+    "last_edited": "2026-10-06T07:59:00.000Z",
+    "content_hash": "707013a30d3ec93ebbd03a30a991540032871848731fda18abbed22f25d90353",
+    "order": 29,
+    "parent_id": null
+  },
+  "3f1e15b4-0359-8149-88a1-d8da0011a667": {
+    "file": "docs/contribute/긴-오디오-청크-병합-시-공백-누락으로-한국어영어-단어가-붙는-문제.md",
+    "last_edited": "2026-10-06T08:00:00.000Z",
+    "content_hash": "24a7b530a2c918adcee311ec21439c894737ee4ef9954744123e712d95369e41",
+    "order": 30,
+    "parent_id": null
+  },
+  "3f1e15b4-0359-81b1-9334-ea92d89577f3": {
+    "file": "docs/contribute/querysearch-결과를-제자리-정렬하면-벡터동적-필드가-다른-행에-붙는-문제.md",
+    "last_edited": "2026-10-06T08:02:00.000Z",
+    "content_hash": "f5db82593cc85195a38bb39cd587d2372c23084479d86fe5e961d99d6b04d6c4",
+    "order": 31,
+    "parent_id": null
+  },
+  "3f1e15b4-0359-8171-91b0-ec5b4039c08f": {
+    "file": "docs/contribute/10분-이상-파일에서-sfinfo-duration-이-지수-표기로-깨지는-문제-수정.md",
+    "last_edited": "2026-10-06T08:04:00.000Z",
+    "content_hash": "d983da59c37e87c9c94d72f300d9f23204a4cf56d1aae11868803bd761a6bfee",
+    "order": 32,
+    "parent_id": null
+  },
+  "3f1e15b4-0359-812f-8e29-dc297d07b17f": {
+    "file": "docs/contribute/max-speech-duration-s-강제-분할-시-이어지는-음성이-누락되는-문제-수정.md",
+    "last_edited": "2026-10-06T08:08:00.000Z",
+    "content_hash": "bd53e01776f932422118d58bb0e397b35e248d6dfe59c3bafea3cbc3255678b0",
+    "order": 33,
+    "parent_id": null
+  },
+  "3f1e15b4-0359-81f8-9d0c-e603be7fa6ef": {
+    "file": "docs/contribute/copy-skip-cache-에서-fetch-가-없는-경로를-반환하는-문제-수정.md",
+    "last_edited": "2026-10-06T08:41:00.000Z",
+    "content_hash": "6ac046cf3a97393432547641f64287a875595e57816a0c55de23c4a265db3d4d",
+    "order": 34,
+    "parent_id": null
+  },
+  "3f1e15b4-0359-8161-8aef-ee7869ca77ce": {
+    "file": "docs/contribute/경로에-16k-가-들어가면-기본-onnx-모델이-16-khz-전용으로-오인되는-문제-수정.md",
+    "last_edited": "2026-10-06T08:51:00.000Z",
+    "content_hash": "77badd3765aa213b39ef5e5a8800c2aede93313633351b7f0964c246914721a2",
+    "order": 35,
+    "parent_id": null
+  },
+  "3f1e15b4-0359-81b3-8905-f4485ac60cdb": {
+    "file": "docs/contribute/웹-검색-본문-추출-중-rust-panic-으로-stt-svc-프로세스가-죽는-문제.md",
+    "last_edited": "2026-10-06T08:52:00.000Z",
+    "content_hash": "2dc0395d058e0848b6845a7ef7a02af70540d3016272160711e6050442521718",
+    "order": 36,
+    "parent_id": null
+  },
+  "3f1e15b4-0359-8160-b4f0-fb107ac76bf5": {
+    "file": "docs/contribute/httpsredirectmiddleware-가-ipv6-호스트의-대괄호를-떼어-잘못된-location-을-만드는-문제-수정.md",
+    "last_edited": "2026-10-06T08:54:00.000Z",
+    "content_hash": "27d438f7d85b219cb5bcb8f24868a61732f709c1b3373dd58059c7717e6f847a",
+    "order": 37,
     "parent_id": null
   }
 }

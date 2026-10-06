@@ -10,7 +10,7 @@ last_update:
   date: 2026-10-06
 ---
 
-GitHub Discussion: [https://github.com/SceneMakerAI/docs-web/discussions/36](https://github.com/SceneMakerAI/docs-web/discussions/36)
+GitHub Discussion: [https://github.com/milvus-io/milvus/discussions/53969](https://github.com/milvus-io/milvus/discussions/53969)
 
 계획서에는 Qdrant 라고 적었는데 실제로는 Milvus 를 쓰고 있다. 영상을 어떻게 잘라 넣었는지 적는다. 스키마는 [`sm_db`](https://github.com/SceneMakerAI/sm_db) , 검색 코드는 [`agent-compose`](https://github.com/SceneMakerAI/agent-compose) 에 있다.
 

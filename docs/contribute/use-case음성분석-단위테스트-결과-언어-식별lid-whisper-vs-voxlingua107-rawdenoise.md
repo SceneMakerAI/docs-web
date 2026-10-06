@@ -10,7 +10,7 @@ last_update:
   date: 2026-10-06
 ---
 
-GitHub Discussion: [https://github.com/SceneMakerAI/docs-web/discussions/35](https://github.com/SceneMakerAI/docs-web/discussions/35)
+GitHub Discussion: [https://github.com/speechbrain/speechbrain/discussions/3092](https://github.com/speechbrain/speechbrain/discussions/3092)
 
 STT 앞에서 발화 구간마다 언어를 먼저 판별하려고 하는데, 모델을 뭘로 할지와 입력을 원본으로 줄지 denoise 해서 줄지가 정해지지 않아 재 봤다. 도구는 [`poc-lid-bench`](https://github.com/SceneMakerAI/poc-lid-bench) .
 

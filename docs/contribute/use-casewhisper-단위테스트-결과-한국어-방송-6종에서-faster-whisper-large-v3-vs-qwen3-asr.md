@@ -10,7 +10,7 @@ last_update:
   date: 2026-10-06
 ---
 
-GitHub Discussion: [https://github.com/SceneMakerAI/docs-web/discussions/34](https://github.com/SceneMakerAI/docs-web/discussions/34)
+GitHub Discussion: [https://github.com/SYSTRAN/faster-whisper/discussions/1663](https://github.com/SYSTRAN/faster-whisper/discussions/1663)
 
 한국어 방송에 faster-whisper large-v3 와 Qwen3-ASR 을 같은 조건으로 돌려 본 결과다. 코드와 결과 파일은 [`poc-stt-bench`](https://github.com/SceneMakerAI/poc-stt-bench) 에 있다.
 

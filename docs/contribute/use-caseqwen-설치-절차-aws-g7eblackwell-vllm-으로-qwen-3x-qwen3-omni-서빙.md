@@ -10,7 +10,7 @@ last_update:
   date: 2026-10-06
 ---
 
-GitHub Discussion: [https://github.com/SceneMakerAI/docs-web/discussions/31](https://github.com/SceneMakerAI/docs-web/discussions/31)
+GitHub Discussion: [https://github.com/QwenLM/Qwen3-Omni/discussions/182](https://github.com/QwenLM/Qwen3-Omni/discussions/182)
 
 Qwen 3.x 를 AWS g7e 인스턴스에 올리면서 걸렸던 부분을 적어 둔다. 전체 절차는 [설치 문서](https://doc.scenemaker.solbox.com/docs/install/1) 에 있어서, 여기에는 문서를 따라가다 멈췄던 지점만 모았다.
 
