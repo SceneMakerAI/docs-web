@@ -217,7 +217,7 @@ const config: Config = {
           ? [{type: 'docSidebar' as const, sidebarId: 'docsSidebar',         label: '문서',          position: 'left' as const}]
           : [{to: '/docs/guide',           label: '문서',          position: 'left' as const}]),
         {to: '/blog', label: '블로그', position: 'left'},
-        {type: 'docSidebar', sidebarId: 'contributeSidebar',   label: '오픈소스 생태계 기여 30건', position: 'left'},
+        {type: 'docSidebar', sidebarId: 'contributeSidebar',   label: '오픈소스 기여', position: 'left'},
         ...(hasNotionContent('release-notes')
           ? [{type: 'docSidebar' as const, sidebarId: 'releaseNotesSidebar', label: '릴리즈 노트',   position: 'left' as const}]
           : [{to: '/docs/release-notes', label: '릴리즈 노트',   position: 'left' as const}]),
@@ -225,7 +225,7 @@ const config: Config = {
           ? [{type: 'docSidebar' as const, sidebarId: 'testSidebar',         label: '테스트',        position: 'left' as const}]
           : []),
         ...(hasNotionContent('discussion')
-          ? [{type: 'docSidebar' as const, sidebarId: 'discussionSidebar',   label: 'Github Discussion', position: 'left' as const}]
+          ? [{type: 'docSidebar' as const, sidebarId: 'discussionSidebar',   label: '오픈소스 생태계 기여', position: 'left' as const}]
           : []),
         {href: 'https://github.com/SceneMakerAI', label: 'GitHub', position: 'right'},
         {type: 'localeDropdown', position: 'right'},
