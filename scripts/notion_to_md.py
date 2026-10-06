@@ -137,15 +137,6 @@ NOTION_PROPERTY_DATE = os.environ.get("NOTION_PROPERTY_DATE", "날짜")
 NOTION_PROPERTY_SUBITEM = os.environ.get("NOTION_PROPERTY_SUBITEM", "하위 항목")
 NOTION_PROPERTY_PARENT = os.environ.get("NOTION_PROPERTY_PARENT", "상위 항목")
 FETCH_MODE = os.environ.get("FETCH_MODE", "ALL")
-# 표 모드: DB 행마다 문서를 만들지 않고, 전체 행을 표 한 장짜리 단일 페이지로 렌더
-TABLE_MODE = os.environ.get("TABLE_MODE", "") == "1"
-TABLE_TITLE = os.environ.get("TABLE_TITLE", "")
-TABLE_INTRO = os.environ.get("TABLE_INTRO", "")
-NOTION_PROPERTY_TARGET = os.environ.get("NOTION_PROPERTY_TARGET", "대상")
-NOTION_PROPERTY_KIND = os.environ.get("NOTION_PROPERTY_KIND", "유형")
-NOTION_PROPERTY_NUMBER = os.environ.get("NOTION_PROPERTY_NUMBER", "번호")
-NOTION_PROPERTY_LINK = os.environ.get("NOTION_PROPERTY_LINK", "링크")
-NOTION_PROPERTY_STATUS = os.environ.get("NOTION_PROPERTY_STATUS", "상태")
 TIMEZONE_HOURS = 9
 
 # Blog mode: SAVE_DIR 가 'blog' 또는 'blog/'로 시작하면 blog 플러그인 frontmatter 생성
@@ -274,21 +265,6 @@ def read_rich_text_plain(props, prop_name):
     if p.get("type") != "rich_text":
         return None
     return "".join(t["plain_text"] for t in p.get("rich_text", [])) or None
-
-
-def read_select(props, prop_name):
-    p = props.get(prop_name, {})
-    if p.get("type") not in ("select", "status"):
-        return None
-    inner = p.get(p["type"])
-    return inner.get("name") if inner else None
-
-
-def read_url(props, prop_name):
-    p = props.get(prop_name, {})
-    if p.get("type") != "url":
-        return None
-    return p.get("url") or None
 
 
 def read_files_url(props, prop_name):
@@ -940,55 +916,6 @@ def save_doc_page(page, position, existing_map, parent_slug=None, is_parent=Fals
     return title, new_filename, last_edited, content_hash, order
 
 
-def _table_cell(text):
-    """표 셀용 이스케이프 — 열 구분자(|)와 MDX 가 JSX 로 읽는 문자(< { })."""
-    text = (text or "").replace("\n", " ").strip()
-    for ch in ("|", "<", "{", "}"):
-        text = text.replace(ch, "\\" + ch)
-    return text
-
-
-def render_table_page(pages, title, intro=""):
-    """DB 행 전체를 날짜순 표 한 장으로 렌더한 Markdown 문서를 돌려준다.
-
-    정렬은 날짜 속성 오름차순, 같은 날짜는 created_time 순. 날짜 없는 행은 맨 뒤.
-    """
-    def sort_key(page):
-        date = read_date_start(page.get("properties", {}), NOTION_PROPERTY_DATE)
-        return (date is None, date or "", page.get("created_time", ""))
-
-    lines = [
-        "---",
-        f"id: {slugify(title)}",
-        f'title: "{title}"',
-        "sidebar_position: 1",
-        'slug: "1"',
-        "---",
-        "",
-    ]
-    if intro:
-        lines += [intro, ""]
-    lines += ["| 날짜 | 대상 | 유형 | 번호 | 제목 | 상태 |", "| --- | --- | --- | --- | --- | --- |"]
-    for page in sorted(pages, key=sort_key):
-        props = page.get("properties", {})
-        url = read_url(props, NOTION_PROPERTY_LINK)
-
-        def linked(text):
-            cell = _table_cell(text)
-            return f"[{cell}]({url})" if cell and url else cell
-
-        cells = [
-            read_date_start(props, NOTION_PROPERTY_DATE) or "",
-            _table_cell(read_select(props, NOTION_PROPERTY_TARGET)),
-            _table_cell(read_select(props, NOTION_PROPERTY_KIND)),
-            linked(read_rich_text_plain(props, NOTION_PROPERTY_NUMBER)),
-            linked(read_title_plain(props, NOTION_PROPERTY_TITLE)),
-            _table_cell(read_select(props, NOTION_PROPERTY_STATUS)),
-        ]
-        lines.append("| " + " | ".join(cells) + " |")
-    return "\n".join(lines) + "\n"
-
-
 def remove_orphans(synced_files, previously_tracked):
     """이전 sync에서 Notion이 만든 파일 중 이번에 사라진 것만 삭제.
     수동 작성 파일(sync map에 없던 파일)은 건드리지 않는다.
@@ -1098,10 +1025,6 @@ def main():
         all_pages.sort(key=lambda p: p.get("created_time", ""))
         log(f"총 {len(all_pages)}개 페이지, created_time 오름차순 정렬")
 
-    if TABLE_MODE:
-        sync_table_page(all_pages, existing_map)
-        return
-
     # 부모-자식 관계 구성
     page_by_id = {p["id"]: p for p in all_pages}
     children_map = {}  # {parent_id: [child_page_id, ...]}
@@ -1174,31 +1097,6 @@ def main():
     save_sync_map(existing_map)
     log(f"완료: {saved}개 저장")
 
-    sync_placeholder(synced_files)
-
-
-def sync_table_page(all_pages, existing_map):
-    """표 모드 저장 — 행이 있으면 단일 문서 1개, 없으면 placeholder."""
-    title = TABLE_TITLE or SAVE_DIR.rstrip("/").split("/")[-1]
-    previously_tracked = {
-        (v["file"] if isinstance(v, dict) else v) for v in existing_map.values()
-    }
-    synced_files = set()
-    new_map = {}
-    if all_pages:
-        os.makedirs(SAVE_DIR, exist_ok=True)
-        filepath = os.path.join(SAVE_DIR, f"{slugify(title)}.md")
-        with open(filepath, "w", encoding="utf-8") as f:
-            f.write(render_table_page(all_pages, title, TABLE_INTRO))
-        synced_files.add(filepath)
-        new_map["__table__"] = {"file": filepath, "last_edited": "", "content_hash": "", "order": 1, "parent_id": None}
-        log(f"[표 모드] 저장: {filepath} ({len(all_pages)}행)")
-    remove_orphans(synced_files, previously_tracked)
-    save_sync_map(new_map)
-    sync_placeholder(synced_files)
-
-
-def sync_placeholder(synced_files):
     # docs/* 섹션에서 sync 결과가 0개면 빌드 실패 방지용 placeholder 생성.
     # 실제 문서가 생기면 자동 제거.
     if SAVE_DIR.startswith("docs/") and FETCH_MODE != "DAILY":

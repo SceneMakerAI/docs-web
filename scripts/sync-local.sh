@@ -74,7 +74,6 @@ fi
 
 if [ -n "$NOTION_DISCUSSION" ]; then
   NOTION_DATABASE_ID="$NOTION_DISCUSSION" SAVE_DIR=docs/discussion FETCH_MODE=ALL \
-    TABLE_MODE=1 TABLE_TITLE="Github Discussion" \
     python scripts/notion_to_md.py &
   pids+=($!)
 fi
