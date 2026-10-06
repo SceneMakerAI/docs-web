@@ -251,13 +251,13 @@ def cmd_add(args):
     table_id, rows = load_table(os.environ["NOTION_DISCUSSION"])
     existing = find_row(rows, gh["html_url"])
     title = args.title or gh["title"]
-    number = next_number(rows)
+    serial = next_number(rows)
     if existing:
         row = next(r for r in rows if r["id"] == existing)
-        number = _cell_text(row["table_row"]["cells"][0]) or number
+        serial = _cell_text(row["table_row"]["cells"][0]) or serial
         if not args.title:
             title = _cell_text(row["table_row"]["cells"][COL_TITLE])
-    cells = row_cells(number=number, kind=kind, repo=repo, title=title, url=gh["html_url"],
+    cells = row_cells(number=serial, kind=kind, repo=repo, title=title, url=gh["html_url"],
                       author=gh["user"]["login"],
                       participants=fetch_participants(owner, repo, kind, number, gh),
                       status=status_label(kind, gh))

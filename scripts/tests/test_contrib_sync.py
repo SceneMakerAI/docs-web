@@ -182,3 +182,25 @@ class TestNextNumber:
         rows = [HEADER, _table_row("r1", "06.04", "PR", "vllm", "a", None, "x", "", "Open"),
                 _table_row("r2", "5", "PR", "vllm", "b", None, "x", "", "Open")]
         assert c.next_number(rows) == 6
+
+
+class TestAddRegistersTheGithubThread:
+
+    def test_participants_come_from_the_github_number_not_the_table_number(self, monkeypatch):
+        """표 일련번호(여기서는 3)가 아니라 GitHub 번호(48084)의 댓글에서 참여자를 읽는다."""
+        url = "https://github.com/vllm-project/vllm/pull/48084"
+        rows = [_table_row("r1", "1", "PR", "r", "가", "https://github.com/o/r/pull/1", "a", "", "Open"),
+                _table_row("r2", "2", "PR", "r", "나", "https://github.com/o/r/pull/2", "a", "", "Open")]
+        asked = []
+        monkeypatch.setenv("NOTION_DISCUSSION", "db")
+        monkeypatch.setattr(c, "fetch_github", lambda *a: {
+            "title": "t", "html_url": url, "user": {"login": "me"}, "state": "open", "merged_at": None})
+        monkeypatch.setattr(c, "load_table", lambda db: ("table", rows))
+        monkeypatch.setattr(c, "fetch_participants", lambda o, r, k, n, gh: asked.append(n) or "")
+        appended = []
+        monkeypatch.setattr(c, "append_row", lambda table_id, cells: appended.append(cells))
+
+        c.cmd_add(type("Args", (), {"url": url, "title": None, "body_file": None})())
+
+        assert asked == [48084]
+        assert _plain(appended[0])[0] == "3"
