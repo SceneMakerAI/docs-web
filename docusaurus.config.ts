@@ -225,7 +225,7 @@ const config: Config = {
           ? [{type: 'docSidebar' as const, sidebarId: 'testSidebar',         label: '테스트',        position: 'left' as const}]
           : []),
         ...(hasNotionContent('discussion')
-          ? [{type: 'docSidebar' as const, sidebarId: 'discussionSidebar',   label: 'Github Discussion', position: 'left' as const}]
+          ? [{type: 'docSidebar' as const, sidebarId: 'discussionSidebar',   label: '오픈소스 생태계 기여', position: 'left' as const}]
           : []),
         {href: 'https://github.com/SceneMakerAI', label: 'GitHub', position: 'right'},
         {type: 'localeDropdown', position: 'right'},
