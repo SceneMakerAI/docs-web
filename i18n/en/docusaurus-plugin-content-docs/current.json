@@ -31,9 +31,9 @@
     "message": "Vision-bench",
     "description": "The label for category 'Vision-bench' in sidebar 'pocSidebar'"
   },
-  "sidebar.contributeSidebar.category.오픈소스 생태계 기여 30건": {
-    "message": "Open Source Contributions",
-    "description": "The label for category '오픈소스 생태계 기여 30건' in sidebar 'contributeSidebar'"
+  "sidebar.contributeSidebar.category.오픈소스 기여": {
+    "message": "Contribute",
+    "description": "The label for category '오픈소스 기여' in sidebar 'contributeSidebar'"
   },
   "sidebar.releaseNotesSidebar.category.릴리즈 노트": {
     "message": "Release Notes",
