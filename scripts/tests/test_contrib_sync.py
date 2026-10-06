@@ -21,14 +21,14 @@ def _text(content, href=None):
     }
 
 
-def _table_row(block_id, date, kind, repo, title, url, author, participants, status):
-    cells = [[_text(date)], [_text(kind)], [_text(repo)], [_text(title, url)],
+def _table_row(block_id, number, kind, repo, title, url, author, participants, status):
+    cells = [[_text(number)], [_text(kind)], [_text(repo)], [_text(title, url)],
              [_text(author)], [_text(participants)] if participants else [], [_text(status)]]
     return {"id": block_id, "type": "table_row", "table_row": {"cells": cells}}
 
 
 HEADER = {"id": "h", "type": "table_row", "table_row": {"cells": [
-    [_text(x)] for x in ("날짜", "유형", "리포", "제목", "작성자", "참여자", "상태")]}}
+    [_text(x)] for x in ("번호", "유형", "리포", "제목", "작성자", "참여자", "상태")]}}
 
 
 def _plain(cells):
@@ -100,15 +100,15 @@ class TestParticipants:
 class TestRowCells:
 
     def test_cells_follow_the_page_table_columns(self):
-        cells = c.row_cells(date="2026-07-09T05:00:13Z", kind="PR", repo="vllm",
+        cells = c.row_cells(number=8, kind="PR", repo="vllm",
                             title="Responses API 에 min_p 지원",
                             url="https://github.com/vllm-project/vllm/pull/48084",
                             author="sungbin1015", participants="", status="Open")
-        assert _plain(cells) == ["07.09", "PR", "vllm", "Responses API 에 min_p 지원",
+        assert _plain(cells) == ["8", "PR", "vllm", "Responses API 에 min_p 지원",
                                  "sungbin1015", "", "Open"]
 
     def test_only_the_title_links_to_github(self):
-        cells = c.row_cells(date="2026-07-09T05:00:13Z", kind="PR", repo="vllm", title="제목",
+        cells = c.row_cells(number=8, kind="PR", repo="vllm", title="제목",
                             url="https://github.com/vllm-project/vllm/pull/48084",
                             author="a", participants="b", status="Open")
         links = [[t["text"].get("link") for t in cell] for cell in cells]
@@ -166,3 +166,19 @@ class TestFindRow:
 
     def test_unknown_link_means_new_row(self):
         assert c.find_row([HEADER], "https://github.com/o/r/pull/1") is None
+
+
+class TestNextNumber:
+
+    def test_follows_the_largest_number_in_the_table(self):
+        rows = [HEADER, _table_row("r1", "1", "PR", "vllm", "a", None, "x", "", "Open"),
+                _table_row("r2", "2", "Issue", "sm_db", "b", None, "x", "", "Open")]
+        assert c.next_number(rows) == 3
+
+    def test_empty_table_starts_at_one(self):
+        assert c.next_number([HEADER]) == 1
+
+    def test_non_numeric_first_cells_are_ignored(self):
+        rows = [HEADER, _table_row("r1", "06.04", "PR", "vllm", "a", None, "x", "", "Open"),
+                _table_row("r2", "5", "PR", "vllm", "b", None, "x", "", "Open")]
+        assert c.next_number(rows) == 6
