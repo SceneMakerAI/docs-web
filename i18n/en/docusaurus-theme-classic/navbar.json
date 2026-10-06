@@ -43,6 +43,10 @@
     "message": "Tests",
     "description": "Navbar item with label 테스트"
   },
+  "item.label.Github Discussion": {
+    "message": "GitHub Discussion",
+    "description": "Navbar item with label Github Discussion"
+  },
   "item.label.GitHub": {
     "message": "GitHub",
     "description": "Navbar item with label GitHub"
