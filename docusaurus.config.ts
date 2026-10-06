@@ -226,7 +226,7 @@ const config: Config = {
           : []),
         ...(hasNotionContent('discussion')
           ? [{type: 'docSidebar' as const, sidebarId: 'discussionSidebar',   label: 'Github Discussion', position: 'left' as const}]
-          : [{to: '/docs/discussion',    label: 'Github Discussion', position: 'left' as const}]),
+          : []),
         {href: 'https://github.com/SceneMakerAI', label: 'GitHub', position: 'right'},
         {type: 'localeDropdown', position: 'right'},
       ],
