@@ -165,6 +165,7 @@ docs-web/
 │   ├── notion_to_md.py       # Notion → docs/·blog/ 변환 핵심 스크립트
 │   ├── translate_to_en.py    # docs/·blog/ KR → DeepL → i18n/en/ EN 번역 스크립트
 │   ├── md_to_notion.py       # docs/ → Notion 역업로드 (md-to-notion.yml 용)
+│   ├── contrib_sync.py       # GitHub 기여(PR·Issue·Discussion) ↔ Notion 기여 표: 상태 동기화·행 등록
 │   ├── server-sync.sh        # 서버 crontab 진입점 (pull→sync→commit→push)
 │   ├── sync-local.sh         # 로컬에서 전체 섹션 수동 동기화
 │   ├── sync-develop.sh       # main 콘텐츠를 develop으로 즉시 흡수 (로컬 수동 헬퍼)
@@ -541,6 +542,24 @@ Notion 인라인 서브페이지(`child_page`)와 페이지 링크(`link_to_page
 ---
 
 
+
+## 오픈소스 기여 표 — `contrib_sync.py`
+
+기여 목록은 `NOTION_DISCUSSION` DB 의 페이지 **본문에 있는 표 한 장**이다. 열은 `번호 | 유형 | 리포 | 제목(GitHub 링크) | 작성자 | 참여자 | 상태` 로 고정이고(번호는 1부터 붙는 일련번호), 상태 표기는 `Open`·`Merged`·`Closed`(PR·Issue), `Posted`(Discussion)다. 일반 Notion sync 가 이 페이지를 `docs/discussion/github-discussion.md` 로 내려받는다.
+
+- **상태 동기화 (자동):** `server-sync.sh` 가 Notion 내려받기 직전에 `python3 scripts/contrib_sync.py status` 를 돌려, 제목에 GitHub 링크가 있는 행의 **상태 칸만** 현재 값으로 고친다. 다른 칸은 건드리지 않는다. 실패해도 콘텐츠 동기화는 계속한다.
+- **새 기여 등록 (수동, 필수):** PR·Issue·Discussion 을 올린 직후 실행한다. 표 끝에 행을 추가하고, 같은 링크의 행이 있으면 그 행을 갱신한다(작성자·참여자·상태 재계산, `--title` 을 안 주면 기존 제목 유지).
+
+```bash
+python3 scripts/contrib_sync.py add <GitHub URL> [--title "표에 적을 제목"] [--body-file 글.md]
+python3 scripts/contrib_sync.py status --dry-run   # 바뀔 상태만 확인
+```
+
+`--body-file` 을 주면 같은 글을 `NOTION_CONTRIBUTE` DB 에 상세 페이지로도 올린다. GitHub 토큰은 `GITHUB_TOKEN`, 없으면 `gh auth token` 을 쓴다.
+
+업스트림 PR 용 fork 는 `/mnt/cache/oss-contrib/<repo>` 에 받는다 (루트 디스크 여유가 적다).
+
+---
 
 ## 콘텐츠 추가 체크리스트
 
