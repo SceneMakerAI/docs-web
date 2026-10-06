@@ -951,11 +951,13 @@ def _table_cell(text):
 def render_table_page(pages, title, intro=""):
     """DB 행 전체를 날짜순 표 한 장으로 렌더한 Markdown 문서를 돌려준다.
 
-    정렬은 날짜 속성 오름차순, 같은 날짜는 created_time 순. 날짜 없는 행은 맨 뒤.
+    정렬은 순서 속성(있는 행이 먼저) → 날짜 오름차순 → created_time 순. 날짜 없는 행은 뒤.
     """
     def sort_key(page):
-        date = read_date_start(page.get("properties", {}), NOTION_PROPERTY_DATE)
-        return (date is None, date or "", page.get("created_time", ""))
+        props = page.get("properties", {})
+        order = read_number(props, NOTION_PROPERTY_ORDER)
+        date = read_date_start(props, NOTION_PROPERTY_DATE)
+        return (order is None, order or 0, date is None, date or "", page.get("created_time", ""))
 
     lines = [
         "---",
@@ -968,7 +970,7 @@ def render_table_page(pages, title, intro=""):
     ]
     if intro:
         lines += [intro, ""]
-    lines += ["| 날짜 | 대상 | 유형 | 번호 | 제목 | 상태 |", "| --- | --- | --- | --- | --- | --- |"]
+    lines += ["| No. | 날짜 | 대상 | 유형 | 번호 | 제목 | 상태 |", "| --- | --- | --- | --- | --- | --- | --- |"]
     for page in sorted(pages, key=sort_key):
         props = page.get("properties", {})
         url = read_url(props, NOTION_PROPERTY_LINK)
@@ -977,7 +979,9 @@ def render_table_page(pages, title, intro=""):
             cell = _table_cell(text)
             return f"[{cell}]({url})" if cell and url else cell
 
+        order = read_number(props, NOTION_PROPERTY_ORDER)
         cells = [
+            "" if order is None else str(int(order)),
             read_date_start(props, NOTION_PROPERTY_DATE) or "",
             _table_cell(read_select(props, NOTION_PROPERTY_TARGET)),
             _table_cell(read_select(props, NOTION_PROPERTY_KIND)),
