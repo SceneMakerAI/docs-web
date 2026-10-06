@@ -42,5 +42,9 @@
   "sidebar.testSidebar.category.테스트": {
     "message": "Tests",
     "description": "The label for category '테스트' in sidebar 'testSidebar'"
+  },
+  "sidebar.discussionSidebar.category.Github Discussion": {
+    "message": "GitHub Discussion",
+    "description": "The label for category 'Github Discussion' in sidebar 'discussionSidebar'"
   }
 }
