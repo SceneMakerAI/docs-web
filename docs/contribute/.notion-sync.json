@@ -1,8 +1,8 @@
 {
   "375e15b4-0359-81cb-a108-f0349254a59b": {
     "file": "docs/contribute/vllm.md",
-    "last_edited": "2026-06-25T08:56:00.000Z",
-    "content_hash": "a376a0ff559597d76dbdc1e771fb5c0834fe2d42745c72a953997ea21ac9f035",
+    "last_edited": "2026-10-06T06:15:00.000Z",
+    "content_hash": "1e4613228e83f7c4f51903b43a6b5a4da5c1cb9115ad6b70e54fe93435274076",
     "order": 1,
     "parent_id": null
   },
@@ -15,14 +15,14 @@
   },
   "38be15b4-0359-809e-b2f8-f28527769213": {
     "file": "docs/contribute/ci빌드-test-cli-argspy에서-잘못된-cli-인자-유효성-검사-테스트를-수정.md",
-    "last_edited": "2026-06-26T06:14:00.000Z",
+    "last_edited": "2026-10-06T06:14:00.000Z",
     "content_hash": "fe69133f1ae3a605070d2a13974d084e53fa9147e3a8effb301c666c91bee1c3",
     "order": 3,
     "parent_id": null
   },
   "38be15b4-0359-80e3-8888-cbb1deee98a2": {
-    "file": "docs/contribute/ci빌드-v1completions-엔드포인트에서-bad-words를-지원.md",
-    "last_edited": "2026-07-09T00:58:00.000Z",
+    "file": "docs/contribute/frontend-v1completions-엔드포인트에서-bad-words를-지원.md",
+    "last_edited": "2026-10-06T06:10:00.000Z",
     "content_hash": "9ccd6e68baa3072671c27596d0667a7054d1b50958e7a2ba3a0cb41ed979f32a",
     "order": 4,
     "parent_id": null
@@ -74,6 +74,20 @@
     "last_edited": "2026-10-06T05:28:00.000Z",
     "content_hash": "bb217b2662f743364e1f31495807168785ead7016384f9cd67c257f8a4aa934f",
     "order": 11,
+    "parent_id": null
+  },
+  "3f1e15b4-0359-816a-8828-e4a4d3b07839": {
+    "file": "docs/contribute/bug-use-audio-in-video-에서-멀티모달-프로세서-캐시가-오디오를-누락-qwen3-omni.md",
+    "last_edited": "2026-10-06T06:15:00.000Z",
+    "content_hash": "d0770c4d9747e496ba64bdc8258d872cdb62f7f8e7b75c7fb69fe98cd5df6f65",
+    "order": 12,
+    "parent_id": null
+  },
+  "3f1e15b4-0359-81c2-ad4e-c6c0bbb464eb": {
+    "file": "docs/contribute/frontend-responses-api-에서-min-p-를-지원.md",
+    "last_edited": "2026-10-06T06:10:00.000Z",
+    "content_hash": "a32366a0f9a6213f094a7d721f0fe992b88b7bea5e082057d51199e81beff479",
+    "order": 13,
     "parent_id": null
   }
 }

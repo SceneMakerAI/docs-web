@@ -1,12 +1,12 @@
 ---
 id: ci빌드-test-cli-argspy에서-잘못된-cli-인자-유효성-검사-테스트를-수정
-title: "[CI/빌드]] test_cli_args.py에서 잘못된 CLI 인자 유효성 검사 테스트를 수정"
+title: "[CI/빌드] test_cli_args.py에서 잘못된 CLI 인자 유효성 검사 테스트를 수정"
 sidebar_position: 3
 slug: "3"
-tags: [PR]
-keywords: [PR]
+tags: [PR, Merged]
+keywords: [PR, Merged]
 last_update:
-  date: 2026-06-26
+  date: 2026-10-06
 ---
 
 [https://github.com/vllm-project/vllm/pull/46779](https://github.com/vllm-project/vllm/pull/46779)
