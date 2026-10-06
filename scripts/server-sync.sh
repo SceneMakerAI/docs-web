@@ -90,7 +90,6 @@ pids=()
 
 [ -n "$NOTION_DISCUSSION" ] && \
   NOTION_DATABASE_ID="$NOTION_DISCUSSION" SAVE_DIR=docs/discussion FETCH_MODE=ALL \
-  TABLE_MODE=1 TABLE_TITLE="Github Discussion" \
   python3 scripts/notion_to_md.py & pids+=($!)
 
 # 모든 동기화 완료 대기
