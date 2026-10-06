@@ -971,8 +971,10 @@ class TestBlogSortDate:
 # ── 표 모드: DB 행들을 표 한 장짜리 단일 페이지로 렌더 ─────────────────────────
 
 def _row(title, date=None, target=None, kind=None, number=None, url=None, status=None,
-         created="2026-01-01T00:00:00.000Z"):
+         created="2026-01-01T00:00:00.000Z", order=None):
     props = {"제목": {"type": "title", "title": [{"plain_text": title}]}}
+    if order is not None:
+        props["순서"] = {"type": "number", "number": order}
     if date:
         props["날짜"] = {"type": "date", "date": {"start": date}}
     if target:
@@ -1025,8 +1027,8 @@ class TestRenderTablePage:
         assert md.startswith("---\n")
         assert 'title: "Github Discussion"' in md
         assert 'slug: "1"' in md
-        assert "| 날짜 | 대상 | 유형 | 번호 | 제목 | 상태 |" in md
-        assert "| 2026-06-04 | vLLM | Issue |  | 글 | 닫힘 |" in md
+        assert "| No. | 날짜 | 대상 | 유형 | 번호 | 제목 | 상태 |" in md
+        assert "|  | 2026-06-04 | vLLM | Issue |  | 글 | 닫힘 |" in md
 
     def test_cell_text_is_escaped_for_table_and_mdx(self):
         pages = [_row("a | b <tag> {x}", date="2026-06-04")]
@@ -1037,3 +1039,14 @@ class TestRenderTablePage:
         pages = [_row("날짜 없음"), _row("날짜 있음", date="2026-06-04")]
         md = n.render_table_page(pages, "T")
         assert md.index("날짜 있음") < md.index("날짜 없음")
+
+    def test_order_property_wins_over_date(self):
+        pages = [
+            _row("계획 2번 (미게시)", order=2),
+            _row("순서 없는 이슈", date="2026-01-01"),
+            _row("계획 1번", date="2026-10-06", order=1),
+        ]
+        md = n.render_table_page(pages, "T")
+        assert md.index("계획 1번") < md.index("계획 2번 (미게시)") < md.index("순서 없는 이슈")
+        assert "| 1 | 2026-10-06 |" in md
+        assert "| 2 |  |" in md
