@@ -8,7 +8,8 @@ last_update:
   date: 2026-10-06
 ---
 
-SceneMakerAI 를 개발하면서 오픈소스 커뮤니티에 올린 Issue·Pull Request·Discussion 목록입니다. 번호나 제목을 누르면 GitHub 원문으로 이동합니다.
+SceneMakerAI 를 개발하면서 오픈소스 커뮤니티에 올린 Issue·Pull Request·Discussion 목록입니다.   
+번호나 제목을 누르면 GitHub 원문으로 이동합니다. **총 30건 예정**
 
 | 날짜 | 대상 | 유형 | 번호 | 제목 | 상태 |
 | --- | --- | --- | --- | --- | --- |

@@ -12,65 +12,55 @@ last_update:
 
 GitHub Discussion: [https://github.com/SceneMakerAI/docs-web/discussions/36](https://github.com/SceneMakerAI/docs-web/discussions/36)
 
-월별 계획 9월 항목 "자체 Chunking 방법과 벡터DB 사용법 공유"에 해당하는 글입니다. 계획서에는 Qdrant 로 적었지만 실제 구현은 **Milvus** 로 했습니다. 그 구성을 [`sm_db`](https://github.com/SceneMakerAI/sm_db) 와 [`agent-compose`](https://github.com/SceneMakerAI/agent-compose) 기준으로 공유합니다.
+계획서에는 Qdrant 라고 적었는데 실제로는 Milvus 를 쓰고 있다. 영상을 어떻게 잘라 넣었는지 적는다. 스키마는 [`sm_db`](https://github.com/SceneMakerAI/sm_db) , 검색 코드는 [`agent-compose`](https://github.com/SceneMakerAI/agent-compose) 에 있다.
 
-### 무엇을 청크로 삼는가
+#### 청크 단위
 
-문서 RAG 는 글을 일정 길이로 자릅니다. 영상은 그렇게 자를 수 없어서, **시간 구간을 가진 증거 한 건** 을 청크 단위로 삼았습니다. 증거는 세 종류입니다.
+문서는 길이로 자르면 되지만 영상은 그럴 수가 없다. 그래서 시간 구간이 붙은 증거 한 건을 청크로 삼았다.
 
-| `kind` | 내용 |
+| `kind` |  |
 | --- | --- |
 | `stt` | 해설 대사 |
 | `shot` | 화면 캡션 |
 | `etc` | 하단 자막 OCR |
 
-각 증거는 `start_sec` , `end_sec` 를 갖고, 자신이 속한 경기 구간(`scene_stream_seq` )에 귀속됩니다. 검색 결과가 곧 영상을 자를 좌표가 됩니다.
+증거마다 `start_sec` , `end_sec` 가 있고 자기가 속한 경기 구간(`scene_stream_seq` )에 묶인다. 검색에 걸린 증거의 좌표가 그대로 영상을 자를 위치가 된다.
 
-### 컬렉션 정의
+#### 컬렉션
 
-`milvus/sm_sport_baseball.json` (Milvus 2.6.18)
+[`milvus/sm_sport_baseball.json`](https://github.com/SceneMakerAI/sm_db/blob/HEAD/milvus/sm_sport_baseball.json) , Milvus 2.6.18.
 
-- 필드 18개, 동적 필드 사용 안 함
-- `vector` : 2560 차원, `Qwen3-Embedding-4B` , AUTOINDEX / COSINE
-- **임베딩하는 것은 `text` 필드 하나뿐입니다** (증거 원문, 1024 바이트에서 절단)
-- 나머지는 필터용 메타데이터입니다: `v_id` , `stream_id` , `kind` , `inning` , `home_team` , `away_team` , `labels` , `board_tags` , `score` , `score_delta` 등
+- 필드 18개, 동적 필드는 껐다
+- `vector` 는 2560차원, `Qwen3-Embedding-4B` , AUTOINDEX / COSINE
+- 임베딩하는 건 `text` 하나뿐이다. 증거 원문이고 1024바이트에서 자른다
+- 나머지는 전부 필터용이다: `v_id` , `stream_id` , `kind` , `inning` , `home_team` , `away_team` , `labels` , `board_tags` , `score` , `score_delta` …
 
-메타데이터는 귀속 구간의 값을 증거마다 복사해 둔 것입니다. 벡터 검색과 조건 필터를 한 번의 질의로 처리하기 위해서입니다.
+필터용 필드는 구간의 값을 증거마다 복사해 넣은 것이다. 중복이긴 한데, 벡터 검색과 조건 필터를 질의 한 번에 끝내려면 이게 편하다.
 
-### 관계형 DB 와의 관계
+원본은 MariaDB 이고 Milvus 는 거기서 뽑아낸 검색용 사본이다. 검색 결과는 `(v_id, stream_id, scene_stream_seq)` 로 원본 구간에 맞춘다. 통산 구간 번호(`scene_seq` )도 넣어 두긴 했지만 앞 청크를 다시 처리하면 값이 낡아서 매칭에는 안 쓴다.
 
-원본은 MariaDB 이고 Milvus 는 검색용 파생본입니다. 검색 히트는 `(v_id, stream_id, scene_stream_seq)` 로 원장의 구간에 매칭합니다.
+#### 검색할 때
 
-통산 구간 번호(`scene_seq` )도 함께 저장하지만, 앞 청크를 재처리하면 값이 낡을 수 있어 정본 매칭에는 쓰지 않습니다.
+- 항상 `v_id` 로 좁힌다. 한 경기 안에서만 찾는다.
+- `kind` 별로 따로 검색한다. 섞으면 `shot` ·`etc` 가 많아서 해설이 밀린다.
+- 질의 임베딩은 색인과 같은 서버, 같은 모델이어야 한다.
+- "하이라이트" 같은 추상적인 질의는 벡터 검색을 건너뛰고 필터만 쓴다.
 
-### 검색할 때 정한 것
-
-- **항상 `v_id` 로 범위를 좁힙니다.** 한 경기 안에서만 찾습니다.
-- **`kind` 별로 따로 검색합니다.** 한 번에 섞으면 개수가 많은 `shot` ·`etc` 가 상위를 독식해 해설(`stt` )이 밀려납니다.
-- **질의 임베딩은 색인과 같은 서버·같은 모델을 써야 합니다.** 색인은 `agent-vision` 이, 검색은 `agent-compose` 가 합니다.
-- **추상적인 질의는 벡터 검색을 생략합니다.** "하이라이트" 같은 말로 검색하면 매칭이 무너져서, 이때는 메타데이터 필터만 씁니다.
-
-### 빈 환경 만들기
+#### 빈 환경 띄우기
 
 ```bash
 git clone https://github.com/SceneMakerAI/sm_db.git && cd sm_db
-cp .env.example .env            # MARIADB_ROOT_PASSWORD 채우기
-docker compose up -d --wait     # MariaDB 12.3 + Milvus 2.6.18
+cp .env.example .env
+docker compose up -d --wait
 pip install -r requirements.txt
-python3 milvus/create.py        # Milvus DB 와 빈 컬렉션 생성
+python3 milvus/create.py
 ```
 
-### 막혔던 지점
+주의할 점이 몇 개 있다.
 
-- 이 구성은 Milvus 를 한 컨테이너(내장 etcd + 로컬 저장소)로 띄웁니다. 운영은 etcd 와 MinIO 를 따로 둡니다. 스키마에는 차이가 없습니다.
-- 상태 코드표(`t_code` )가 비어 있으면 첫 INSERT 가 실패합니다. 다른 테이블의 `status_code` 가 이 표를 FK 로 참조하기 때문입니다. `mariadb/code.sql` 이 있으면 함께 적재되지만, 이 파일은 현재 리포에 들어 있지 않아 직접 채워야 합니다.
-- 테이블은 볼륨이 비어 있는 첫 기동 때만 만들어집니다. 다시 만들려면 `docker compose down -v` .
+`t_code` (상태 코드표)가 비어 있으면 첫 INSERT 가 실패한다. 다른 테이블의 `status_code` 가 이 표를 FK 로 물고 있어서다. `mariadb/code.sql` 이 있으면 같이 올라가는데 이 파일이 지금 리포에 없다([sm_db#1](https://github.com/SceneMakerAI/sm_db/issues/1) ).
 
-### 증적
+테이블은 볼륨이 비어 있는 첫 기동 때만 만들어진다. 다시 만들려면 `docker compose down -v` .
 
-- 스키마: https://github.com/SceneMakerAI/sm_db
-  - `milvus/sm_sport_baseball.json` , `milvus/create.py` , `mariadb/schema.sql`
-
-- 검색 코드: https://github.com/SceneMakerAI/agent-compose (`src/domains/baseball/graph/retrieve_evidence.py` )
-- Milvus: https://github.com/milvus-io/milvus
+이 구성은 Milvus 를 컨테이너 하나(내장 etcd + 로컬 저장소)로 띄운다. 운영은 etcd 와 MinIO 를 따로 두지만 스키마는 같다.
 
