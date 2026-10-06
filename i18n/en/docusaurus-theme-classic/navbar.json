@@ -31,9 +31,9 @@
     "message": "Blog",
     "description": "Navbar item with label 블로그"
   },
-  "item.label.오픈소스 기여": {
-    "message": "Contribute",
-    "description": "Navbar item with label 오픈소스 기여"
+  "item.label.오픈소스 생태계 기여 30건": {
+    "message": "Open Source Contributions",
+    "description": "Navbar item with label 오픈소스 생태계 기여 30건"
   },
   "item.label.릴리즈 노트": {
     "message": "Release Notes",
