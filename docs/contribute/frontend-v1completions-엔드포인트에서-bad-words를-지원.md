@@ -6,7 +6,7 @@ slug: "4"
 tags: [PR, Merged]
 keywords: [PR, Merged]
 last_update:
-  date: 2026-10-06
+  date: 2026-10-07
 ---
 
 
@@ -50,4 +50,6 @@ CPU 전용 유닛 테스트 두 개를 추가했습니다.
 2 passed
 ruff: All checks passed! / 2 files already formatted
 ```
+
+머지 이후 다른 기여자 anxkhn 이 이 변경을 이어받아 공백뿐인 bad_words 를 거절하는 후속 PR [#47841](https://github.com/vllm-project/vllm/pull/47841) 을 올렸다 (2026-10-07 기준 열려 있음).
 

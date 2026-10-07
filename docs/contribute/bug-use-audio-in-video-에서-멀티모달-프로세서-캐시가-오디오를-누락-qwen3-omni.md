@@ -7,7 +7,7 @@ description: "Qwen3-Omni use_audio_in_video 요청에서 프로세서 캐시 충
 tags: [Issue]
 keywords: [Issue]
 last_update:
-  date: 2026-10-06
+  date: 2026-10-07
 ---
 
 [https://github.com/vllm-project/vllm/issues/44538](https://github.com/vllm-project/vllm/issues/44538)
@@ -68,4 +68,6 @@ ffmpeg -y -f lavfi -i testsrc=s=1920x1080:r=30:d=6 \
 #### 진행 상황
 
 2026-06-04 에 등록했다. 메인테이너 응답 없이 90일이 지나 stale 로 표시됐고, 2026-10-06 에 자동으로 닫혔다(not planned). 같은 캐시 계열의 관련 이슈는 #33865, #43941, #42995.
+
+이슈를 올린 당일 외부 개발자 abinggo 가 이 문제를 고치는 PR [#44543](https://github.com/vllm-project/vllm/pull/44543) (Couple audio+video in mm processor cache, "fixes #44538")을 올렸고, vLLM 메인테이너 Isotr0py 가 리뷰했다. 이 PR 은 2026-10-07 기준 열려 있고 머지되지 않았다.
 

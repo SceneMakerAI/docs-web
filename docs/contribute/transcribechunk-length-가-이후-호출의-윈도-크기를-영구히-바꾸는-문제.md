@@ -7,7 +7,7 @@ description: "faster-whisper: chunk_length 를 준 호출이 같은 모델의 �
 tags: [Issue]
 keywords: [Issue]
 last_update:
-  date: 2026-10-06
+  date: 2026-10-07
 ---
 
 [https://github.com/SYSTRAN/faster-whisper/issues/1661](https://github.com/SYSTRAN/faster-whisper/issues/1661)
@@ -45,4 +45,6 @@ print(seeks())                 # [0, 500, 1000, 1500, 2000, 2500]  <- [0, 2200] 
 #### 결과
 
 2026-10-06 등록했습니다. 메인테이너 답변 대기 중입니다.
+
+2026-10-07 갱신: 메인테이너(Purfview)가 2026-10-06 에 "AI bot problems." 라는 댓글과 함께 이 이슈를 닫았습니다. 내용에 대한 답은 없었습니다. 이 저장소에는 추가 제출을 하지 않습니다.
 

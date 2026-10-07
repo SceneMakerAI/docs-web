@@ -7,7 +7,7 @@ description: "Starlette: StaticFiles 의 405 응답에 RFC 9110 이 요구하는
 tags: [PR]
 keywords: [PR]
 last_update:
-  date: 2026-10-06
+  date: 2026-10-07
 ---
 
 [https://github.com/Kludex/starlette/pull/3635](https://github.com/Kludex/starlette/pull/3635)
@@ -54,4 +54,6 @@ Starlette 는 중복 PR 제출자를 차단한다고 `AI_POLICY.md` 에 명시�
 #### 결과
 
 2026-10-06 `main` 브랜치 대상으로 제출했습니다. 리뷰 대기 중입니다. 변경 규모는 2개 파일, +2 / -1 입니다.
+
+2026-10-07 갱신: 메인테이너(Kludex)가 이 PR 을 설명 없이 닫고, 같은 수정을 자신의 PR #3640 으로 올려 2026-10-06 에 main 에 머지했습니다. 버그 보고는 받아들여져 업스트림에 반영됐지만, 우리 PR 은 머지되지 않았습니다. 사전 논의 디스커션 #3634 는 열려 있습니다.
 

@@ -7,7 +7,7 @@ description: "faster-whisper: detect_language 가 문서에 적힌 dict 형태�
 tags: [PR]
 keywords: [PR]
 last_update:
-  date: 2026-10-06
+  date: 2026-10-07
 ---
 
 [https://github.com/SYSTRAN/faster-whisper/pull/1662](https://github.com/SYSTRAN/faster-whisper/pull/1662)
@@ -46,4 +46,6 @@ $ flake8 ...          # 통과
 #### 결과
 
 2026-10-06 `master` 브랜치 대상으로 제출했습니다. 리뷰 대기 중입니다. 변경 규모는 2개 파일, +14 입니다.
+
+2026-10-07 갱신: 메인테이너(Purfview)가 2026-10-06 에 이 PR 을 설명 없이 닫았습니다. 머지되지 않았습니다. 같은 날 올린 이슈 #1661 은 "AI bot problems." 라는 댓글과 함께 닫혔습니다. 이 저장소는 AI 보조 기여를 받지 않는 것으로 보고, 추가 제출을 하지 않습니다.
 

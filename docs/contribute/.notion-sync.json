@@ -22,8 +22,8 @@
   },
   "38be15b4-0359-80e3-8888-cbb1deee98a2": {
     "file": "docs/contribute/frontend-v1completions-엔드포인트에서-bad-words를-지원.md",
-    "last_edited": "2026-10-06T06:10:00.000Z",
-    "content_hash": "9ccd6e68baa3072671c27596d0667a7054d1b50958e7a2ba3a0cb41ed979f32a",
+    "last_edited": "2026-10-07T01:06:00.000Z",
+    "content_hash": "7f1856b76f8e4f913d997b57d628eb0fbeced6cfc2fbfc4d846d35f62394fc09",
     "order": 4,
     "parent_id": null
   },
@@ -78,8 +78,8 @@
   },
   "3f1e15b4-0359-816a-8828-e4a4d3b07839": {
     "file": "docs/contribute/bug-use-audio-in-video-에서-멀티모달-프로세서-캐시가-오디오를-누락-qwen3-omni.md",
-    "last_edited": "2026-10-06T06:15:00.000Z",
-    "content_hash": "d0770c4d9747e496ba64bdc8258d872cdb62f7f8e7b75c7fb69fe98cd5df6f65",
+    "last_edited": "2026-10-07T01:00:00.000Z",
+    "content_hash": "d259424f37f028d3b3d695b5f1911dfc12ce263836d642a4469f6b8761befe13",
     "order": 12,
     "parent_id": null
   },
@@ -155,15 +155,15 @@
   },
   "3f1e15b4-0359-818c-a0bc-f6f5e31e6c7b": {
     "file": "docs/contribute/transcribechunk-length-가-이후-호출의-윈도-크기를-영구히-바꾸는-문제.md",
-    "last_edited": "2026-10-06T07:48:00.000Z",
-    "content_hash": "3c54645b2d8de160158e409d7b566567f26d2c52ac2f513a03ebde20fbf0ad74",
+    "last_edited": "2026-10-07T00:18:00.000Z",
+    "content_hash": "40f628c72422c0cb90bb19c8130f021c4aa7720029e84745ae784763fd631c50",
     "order": 23,
     "parent_id": null
   },
   "3f1e15b4-0359-8105-9844-c644738eaa0a": {
     "file": "docs/contribute/detect-language-가-dict-형태의-vad-parameters-에서-크래시하는-문제-수정.md",
-    "last_edited": "2026-10-06T07:50:00.000Z",
-    "content_hash": "a7291b519081b64aed7ec2df7e6c98002f165812cb1717a99c64fdfb1ebf2016",
+    "last_edited": "2026-10-07T00:18:00.000Z",
+    "content_hash": "b594b4515af8efb0f7c36e36aafa299fbf13358418d7c8e50f1d8bffe8ddfe0f",
     "order": 24,
     "parent_id": null
   },
@@ -176,8 +176,8 @@
   },
   "3f1e15b4-0359-81ae-9505-c763ee76be2f": {
     "file": "docs/contribute/staticfiles-405-응답에-allow-헤더-추가.md",
-    "last_edited": "2026-10-06T07:54:00.000Z",
-    "content_hash": "b5ddb8491fabdcacfa5171469e658219006fcd496d67b03ee814b90a64f0f2a7",
+    "last_edited": "2026-10-07T00:18:00.000Z",
+    "content_hash": "b9793eb25d70aec0e701433c3ef05d8f4fa72926b238ac6d78f8eeba873f79c7",
     "order": 26,
     "parent_id": null
   },
@@ -274,8 +274,8 @@
   },
   "3f1e15b4-0359-8157-83b6-dfb52bfd6bc0": {
     "file": "docs/contribute/unpacktypeddict-kwargs-의-json-schema-가-검증-동작과-다르게-생성되는-문제.md",
-    "last_edited": "2026-10-06T09:34:00.000Z",
-    "content_hash": "0ba9fe06211d90bfc35ba7c6122d02012604bc7f741576046b0e924fcbec6c99",
+    "last_edited": "2026-10-07T01:06:00.000Z",
+    "content_hash": "085855b4a237ecb3a6353110448f642f626942774e0847a70f3316bfe7a44f14",
     "order": 40,
     "parent_id": null
   },
@@ -291,6 +291,20 @@
     "last_edited": "2026-10-06T09:37:00.000Z",
     "content_hash": "7dd49b4eae5f7289fd132a276a3967e5007ddbd64d84c5ddab1abedcbd4808d3",
     "order": 42,
+    "parent_id": null
+  },
+  "3f2e15b4-0359-816c-8aa3-ec8d0b49ecca": {
+    "file": "docs/contribute/state-에서-없는-속성을-del-하면-attributeerror-대신-keyerror-발생.md",
+    "last_edited": "2026-10-07T00:30:00.000Z",
+    "content_hash": "e9c3c1124cd4cc522682e6d571d68cf70c30debdd6f7a87b611aee3f79d4c145",
+    "order": 43,
+    "parent_id": null
+  },
+  "3f2e15b4-0359-8111-9936-c86abd1cd8b7": {
+    "file": "docs/contribute/hosted-vllm-이-호출자의-비디오-file-파트를-바꿔-폴백에서-영상이-누락되는-문제-수정.md",
+    "last_edited": "2026-10-07T00:31:00.000Z",
+    "content_hash": "e1af35ab71476142dffd90bc7542b78993f761aeaea75c026b5c5b8d619b468d",
+    "order": 44,
     "parent_id": null
   }
 }

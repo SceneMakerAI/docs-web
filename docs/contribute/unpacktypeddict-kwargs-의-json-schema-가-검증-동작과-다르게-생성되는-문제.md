@@ -7,7 +7,7 @@ description: "pydantic: 함수의 **kwargs: Unpack[TypedDict] 에 대해 생성�
 tags: [Issue]
 keywords: [Issue]
 last_update:
-  date: 2026-10-06
+  date: 2026-10-07
 ---
 
 ## pydantic: `**kwargs: Unpack[TypedDict]` 함수의 JSON Schema 가 검증 동작과 다르게 생성되는 문제 수정
@@ -56,4 +56,6 @@ TypeAdapter(run).json_schema()
 - 전체 Python 테스트: 수정 전 63 failed / 6151 passed, 수정 후 63 failed / 6153 passed. 실패 63건은 수정 전후 목록이 같고, 이 머신에 Rust 가 없어 체크아웃보다 오래된 `pydantic-core==2.49.0` 릴리스 휠로 돌렸기 때문에 생긴다.
 - `ruff check` , `ruff format --check` (uv.lock 의 0.15.10) 통과. pyright 는 같은 이유로 수정 전후 동일하게 66건이 나와 CI 와 같은 조건으로는 확인하지 못했다.
 - 저장소 규정상 사소하지 않은 변경은 이슈를 먼저 열어야 하므로 `issue.md` 에 버그 리포트 초안을 함께 두었다.
+
+2026-10-06 에 다른 사용자 pranavpk404 가 최신 main 에서 재현했다고 확인하고 수정 PR [#13939](https://github.com/pydantic/pydantic/pull/13939) 를 올렸다. 다만 pydantic 은 이슈에 배정된 사람만 PR 을 열 수 있어서 봇이 그 PR 을 자동으로 닫았고, 그는 메인테이너에게 배정을 요청한 상태다.
 
