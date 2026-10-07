@@ -204,3 +204,43 @@ class TestAddRegistersTheGithubThread:
 
         assert asked == [48084]
         assert _plain(appended[0])[0] == "3"
+
+
+class TestTableWithoutAuthorColumn:
+    """본표에서 작성자 열이 빠진 6열 표 (번호·유형·리포·제목·참여자·상태)."""
+
+    def _row(self, block_id, status):
+        cells = [[_text("5")], [_text("PR")], [_text("vllm")],
+                 [_text("글", "https://github.com/vllm-project/vllm/pull/46779")],
+                 [_text("DarkLight1337")], [_text(status)]]
+        return {"id": block_id, "type": "table_row", "table_row": {"cells": cells}}
+
+    def test_status_is_read_from_and_written_to_the_last_cell(self):
+        updates = c.plan_status_updates(
+            [self._row("r1", "Open")], lambda *a: {"state": "closed", "merged_at": "2026-10-06T01:00:00Z"})
+        assert [(u[0], u[2], u[3]) for u in updates] == [("r1", "Open", "Merged")]
+        assert _plain(updates[0][1]) == ["5", "PR", "vllm", "글", "DarkLight1337", "Merged"]
+
+    def test_unchanged_status_is_skipped(self):
+        assert c.plan_status_updates(
+            [self._row("r1", "Merged")], lambda *a: {"state": "closed", "merged_at": "2026-10-06T01:00:00Z"}) == []
+
+    def test_new_row_matches_the_table_width(self):
+        cells = c.row_cells(number=7, kind="PR", repo="vllm", title="제목",
+                            url="https://github.com/vllm-project/vllm/pull/1",
+                            author="sungbin1015", participants="b", status="Open", width=6)
+        assert _plain(cells) == ["7", "PR", "vllm", "제목", "b", "Open"]
+
+    def test_add_builds_a_row_as_wide_as_the_table(self, monkeypatch):
+        url = "https://github.com/vllm-project/vllm/pull/48084"
+        appended = []
+        monkeypatch.setenv("NOTION_DISCUSSION", "db")
+        monkeypatch.setattr(c, "fetch_github", lambda *a: {
+            "title": "t", "html_url": url, "user": {"login": "me"}, "state": "open", "merged_at": None})
+        monkeypatch.setattr(c, "load_table", lambda db: ("table", [self._row("r1", "Open")]))
+        monkeypatch.setattr(c, "fetch_participants", lambda *a: "")
+        monkeypatch.setattr(c, "append_row", lambda table_id, cells: appended.append(cells))
+
+        c.cmd_add(type("Args", (), {"url": url, "title": None, "body_file": None})())
+
+        assert _plain(appended[0]) == ["6", "PR", "vllm", "t", "", "Open"]
