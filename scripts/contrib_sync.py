@@ -1,8 +1,8 @@
 """
 contrib_sync.py — GitHub 기여(PR·Issue·Discussion) ↔ Notion '오픈소스 생태계 기여' 페이지의 표
 
-표는 NOTION_DISCUSSION DB 의 페이지 본문에 있고 열은 고정이다:
-  번호 | 유형 | 리포 | 제목(GitHub 링크) | 작성자 | 참여자 | 상태
+표는 NOTION_DISCUSSION DB 의 페이지 본문에 있다. 열 (작성자 열은 표에 따라 없을 수 있다):
+  번호 | 유형 | 리포 | 제목(GitHub 링크) | [작성자] | 참여자 | 상태
 
 Env vars (필수):
   NOTION_TOKEN          Notion API 토큰
@@ -33,7 +33,9 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from scripts import md_to_notion as notion  # noqa: E402  (.env 로드 포함)
 
-COL_TITLE, COL_STATUS = 3, 6
+# 본표는 작성자 열이 없는 6열, 미완료 표는 7열이다. 제목은 앞에서, 상태는 뒤에서 센다.
+COL_TITLE, COL_STATUS = 3, -1
+WIDTH_WITH_AUTHOR = 7
 
 _URL_KINDS = {"pull": "PR", "issues": "Issue", "discussions": "Discussion"}
 _API_PATHS = {"PR": "pulls", "Issue": "issues", "Discussion": "discussions"}
@@ -79,10 +81,12 @@ def _cell(text, url=None):
     return [{"type": "text", "text": {"content": text, "link": {"url": url} if url else None}}]
 
 
-def row_cells(number, kind, repo, title, url, author, participants, status) -> list:
-    """표 한 행의 칸 7개. number 는 표 안의 일련번호."""
-    return [_cell(str(number)), _cell(kind), _cell(repo), _cell(title, url),
-            _cell(author), _cell(participants), _cell(status)]
+def row_cells(number, kind, repo, title, url, author, participants, status, width=WIDTH_WITH_AUTHOR) -> list:
+    """표 한 행의 칸. number 는 표 안의 일련번호. 작성자 칸은 7열 표에만 있다."""
+    cells = [_cell(str(number)), _cell(kind), _cell(repo), _cell(title, url)]
+    if width == WIDTH_WITH_AUTHOR:
+        cells.append(_cell(author))
+    return [*cells, _cell(participants), _cell(status)]
 
 
 def _writable(cell):
@@ -260,7 +264,8 @@ def cmd_add(args):
     cells = row_cells(number=serial, kind=kind, repo=repo, title=title, url=gh["html_url"],
                       author=gh["user"]["login"],
                       participants=fetch_participants(owner, repo, kind, number, gh),
-                      status=status_label(kind, gh))
+                      status=status_label(kind, gh),
+                      width=len(rows[0]["table_row"]["cells"]) if rows else WIDTH_WITH_AUTHOR)
     if existing:
         update_row(existing, cells)
     else:
