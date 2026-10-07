@@ -306,5 +306,19 @@
     "content_hash": "e1af35ab71476142dffd90bc7542b78993f761aeaea75c026b5c5b8d619b468d",
     "order": 44,
     "parent_id": null
+  },
+  "3f2e15b4-0359-8109-9fb4-ed7081b215bf": {
+    "file": "docs/contribute/29975994-fps-에서-contentdetector-가-min-scene-len-만큼-떨어진-컷을-버리는-07-회귀.md",
+    "last_edited": "2026-10-07T05:40:00.000Z",
+    "content_hash": "107d9b31c0a63cae8ff09b5554096d8da26e293a66a464aa7af4f286bcc7df37",
+    "order": 45,
+    "parent_id": null
+  },
+  "3f2e15b4-0359-81f7-a3ea-e229f9b4f76c": {
+    "file": "docs/contribute/exif-transpose-이후-imagemagick-형식-exif-가-파생-이미지에서-사라지는-문제-수정.md",
+    "last_edited": "2026-10-07T05:41:00.000Z",
+    "content_hash": "68e8dbd52c24983eb771711ba1544b5238cd31aed7779be16dbb2d0d2c7935c6",
+    "order": 46,
+    "parent_id": null
   }
 }
