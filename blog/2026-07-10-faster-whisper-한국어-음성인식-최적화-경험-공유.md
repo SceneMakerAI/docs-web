@@ -1,10 +1,10 @@
 ---
 title: "faster-whisper 한국어 음성인식 최적화 경험 공유"
-date: 2026-07-10T12:00:00
+date: 2026-07-10T12:00:04
 slug: 4
 authors: [sbin]
-description: "이 글은 음성을 글자 변환  (Speech to Text) 하는 과정을 구체적으로 명시한 글이다"
-tags: [Fast-Whisper, Hugging face]
+description: "faster-whisper large-v3 를 한국어 방송에 쓸 때 생기는 환각과 언어 오분류를 줄이고 속도를 맞춘 설정"
+tags: [stt, faster-whisper, optimization]
 last_update:
   date: 2026-10-12
 ---
