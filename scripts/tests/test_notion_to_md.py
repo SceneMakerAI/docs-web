@@ -966,3 +966,23 @@ class TestBlogSortDate:
     def test_missing_prefix_defaults_to_noon(self):
         """접두번호 없는 제목 → 12:00:00 기본값."""
         assert n.blog_sort_date("2026-07-14", "제목없음") == "2026-07-14T12:00:00"
+
+    def test_same_day_ties_follow_notion_order(self):
+        """접두번호가 같거나 없는 같은 날짜 글 → Notion 생성 순서(order)대로 정렬."""
+        d1 = n.blog_sort_date("2026-07-14", "숏폼 자동 생성 파이프라인 해설_1", 17)
+        d2 = n.blog_sort_date("2026-07-14", "숏폼 자동 생성 파이프라인 해설_2", 18)
+        assert d1 < d2
+        assert d1 == "2026-07-14T12:00:17"
+
+    def test_prefix_still_wins_over_order(self):
+        """접두번호가 다르면 order 와 무관하게 접두번호 순."""
+        assert (n.blog_sort_date("2026-07-14", "09_DB 스키마 공개", 12)
+                < n.blog_sort_date("2026-07-14", "12_과제 성과 종합 정리 1건", 7))
+
+    def test_order_capped_within_minute(self):
+        """order 가 60 이상이어도 초 자리를 넘기지 않는다 (다음 접두번호 분을 침범하지 않음)."""
+        assert n.blog_sort_date("2026-07-14", "제목없음", 75) == "2026-07-14T12:00:59"
+
+    def test_leading_number_without_underscore_is_not_prefix(self):
+        """'2026년 …' 처럼 숫자로 시작해도 'NN_' 형태가 아니면 접두번호로 보지 않는다."""
+        assert n.blog_sort_date("2026-07-14", "2026년 회고") == "2026-07-14T12:00:00"
