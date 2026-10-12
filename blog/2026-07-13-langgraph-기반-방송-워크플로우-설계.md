@@ -1,12 +1,12 @@
 ---
-title: "07_Langgraph 기반 방송 워크플로우 설계"
-date: 2026-07-13T12:07:00
+title: "Langgraph 기반 방송 워크플로우 설계"
+date: 2026-07-13T12:00:00
 slug: 5
 authors: [sbin]
 description: "자연어 질의로 방송 클립 구간을 찾는 LangGraph(agent-search) 과정을 구체적으로 명시한 글"
 tags: [workflow, Langgraph]
 last_update:
-  date: 2026-09-29
+  date: 2026-10-12
 ---
 
 ### 들어가며

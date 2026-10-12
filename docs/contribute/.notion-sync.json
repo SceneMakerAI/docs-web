@@ -341,5 +341,40 @@
     "content_hash": "58e8d3303fb6c0796d873a45b8435ab5e01c88237ad8f5cff4f6cc2d101ed728",
     "order": 49,
     "parent_id": null
+  },
+  "3f7e15b4-0359-8196-b042-e3c117b0ccd9": {
+    "file": "docs/contribute/ifd1썸네일-ifd을-읽은-뒤-exiftobytes저장이-structerror-로-실패하는-회귀-수정.md",
+    "last_edited": "2026-10-12T03:40:00.000Z",
+    "content_hash": "34bf21a663b8e9d6948f1ac94f07bbcf6ab2dcec1ed4ebc6b0b7088fa7c3096a",
+    "order": 50,
+    "parent_id": null
+  },
+  "3f7e15b4-0359-8111-9bac-c8c2216340c4": {
+    "file": "docs/contribute/run-batch-가-toolreasoning-파서-플러그인을-import-하지-않는-문제-수정.md",
+    "last_edited": "2026-10-12T03:41:00.000Z",
+    "content_hash": "fda610ee6b6e4185d7ac2417e76dc7d7d207bb917f1760004982c63ebaf9fea0",
+    "order": 51,
+    "parent_id": null
+  },
+  "3f7e15b4-0359-812a-bc58-ca4dc642432c": {
+    "file": "docs/contribute/v1responses-에서-top-logprobs-1-이면-빈-리스트가-반환되는-문제-수정.md",
+    "last_edited": "2026-10-12T03:41:00.000Z",
+    "content_hash": "2e8a001e8b297ee6a05304a79e5575eec4c40db8b33d285ecc25bb24de8b5b65",
+    "order": 52,
+    "parent_id": null
+  },
+  "3f7e15b4-0359-810e-bf73-eb8b594ba090": {
+    "file": "docs/contribute/음성-인식번역-요청이-서버-기본-presencefrequency-penalty-를-무시하는-문제-수정.md",
+    "last_edited": "2026-10-12T03:41:00.000Z",
+    "content_hash": "d21fd6c6738c8276862acc4cbd4e237f4c70000ea941b1e4039b735d7723345a",
+    "order": 53,
+    "parent_id": null
+  },
+  "3f7e15b4-0359-8150-87c1-ee5abf66eecc": {
+    "file": "docs/contribute/get-all-files-가-exclude-and-에-걸린-파일-뒤의-파일까지-모두-제외하는-문제-수정.md",
+    "last_edited": "2026-10-12T03:41:00.000Z",
+    "content_hash": "b7cd95d8730802761180109267a8885f55a796c10272db4978d67e59d2b4f30e",
+    "order": 54,
+    "parent_id": null
   }
 }
