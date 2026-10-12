@@ -414,5 +414,11 @@
     "slug": "",
     "sidebar_position": "",
     "frontmatter_hash": "c8bcd67a5055f2e58abeb06d4c7fbaae408645dc6d5d0981bdf0b6f1461086e9"
+  },
+  "docs/discussion/오픈소스-생태계-기여.md": {
+    "body_hash": "fe1a7de78e55b70fe54005c9e0a13e0026afc1571027b1da520ec41a94fc6c84",
+    "slug": "1",
+    "sidebar_position": "1",
+    "frontmatter_hash": "e492541420a8fc1d18ff4a00b029446fded0538cede28ad7cc6b907cc7419a85"
   }
 }
