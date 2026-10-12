@@ -14,6 +14,7 @@ import json
 import os
 import re
 import sys
+import time
 import requests
 
 
@@ -134,7 +135,7 @@ def _rejoin_ol_markers(body):
 # 문장이 끝났다고 볼 수 있는 꼬리 — 이걸로 끝나면 구분선 위 문단은 완결된 것으로 본다.
 _SENTENCE_TAIL = ('.', '!', '?', ':', ';', '"', "'", ')', ']', '*', '`', '”', '」', '|')
 # 문장 조각으로 보지 않는 줄머리 — 제목·목록·인용·표·코드·주석·placeholder
-_NOT_A_FRAGMENT = re.compile(r'^\s*(#{1,6} |[-*+] |\d+[.)] |> |\| |```|<!--|<x id=)')
+_NOT_A_FRAGMENT = re.compile(r'^\s*(#{1,6} |[-*+] |\d+[.)] |> |\| |```|<!--|<x id=|__CODE\d+__)')
 
 
 def _rejoin_sentence_across_hr(body, hr_token):
@@ -168,8 +169,7 @@ def _rejoin_sentence_across_hr(body, hr_token):
             out.append(line)
             continue
         frag = out[j].strip()
-        if (len(frag) > 120 or frag.endswith(_SENTENCE_TAIL)
-                or _NOT_A_FRAGMENT.match(frag)):
+        if frag.endswith(_SENTENCE_TAIL) or _NOT_A_FRAGMENT.match(frag):
             out.append(line)
             continue
         # 아래쪽에서 첫 비어있지 않은 줄 찾기
@@ -179,12 +179,72 @@ def _rejoin_sentence_across_hr(body, hr_token):
         if k >= len(lines) or _NOT_A_FRAGMENT.match(lines[k].strip()):
             out.append(line)
             continue
+        # 긴 문단은 마침표 없이 끝난 완결 문단일 수 있다 — 아래가 소문자로 이어질 때만
+        # 문장이 갈린 것으로 본다 ('… episodes of a' / --- / 'drama—into …', /en/blog/8).
+        if len(frag) > 120 and not lines[k].lstrip()[:1].islower():
+            out.append(line)
+            continue
         del out[j]
         while out and not out[-1].strip():
             out.pop()
         out.extend(['', line])
         lines[k] = f"{frag} {lines[k].lstrip()}"
     return '\n'.join(out)
+
+
+def _rejoin_sentence_across_image(body, standalone):
+    """이미지 앞으로 올라간 문장 앞머리를 이미지 아래 문단으로 되돌린다.
+
+    실제 응답 (/en/blog/2): 'The <x id="IMG5"/>\n\nsearched segments are assembled …'
+    — 복원하면 'The ![image](…)' 가 되어 이미지가 문단 안으로 들어가고 문장이 갈린다.
+
+    KO 원문에서 혼자 한 줄을 차지하던 이미지(standalone)만 다룬다. 앞 글이 완결된
+    문장이면 줄만 가른다.
+    """
+    pat = re.compile(r'(?m)^(?P<head>[^\n]*?\S)[ \t]*(?P<img><x id="IMG\d+"/>)[ \t]*$'
+                     r'(?:\n+(?P<next>[^\n]+))?')
+
+    def _fix(m):
+        head, img, nxt = m.group('head'), m.group('img'), m.group('next')
+        if img not in standalone or _NOT_A_FRAGMENT.match(head):
+            return m.group(0)
+        if head.endswith(_SENTENCE_TAIL) or nxt is None or _NOT_A_FRAGMENT.match(nxt):
+            tail = f'\n\n{nxt}' if nxt is not None else ''
+            return f'{head}\n\n{img}{tail}'
+        return f'{img}\n\n{head} {nxt.lstrip()}'
+
+    return pat.sub(_fix, body)
+
+
+def _return_blockquote_marker_to_line_start(body):
+    """문장 한가운데로 옮겨진 인용문 마커를 줄머리로 되돌린다.
+
+    실제 응답 (/en/blog/2): 'We decided to adopt an <x id="BQ0"/>\n\nOpenWeight model …'
+    — 그대로 복원하면 인용문이 일반 문단으로 풀리고 '>' 가 본문에 찍힌다.
+    KO 원문의 마커는 항상 줄머리이므로, 같은 줄 앞쪽 글은 인용문 안에 있던 것이다.
+    앞 글이 완결된 문장이면 별개 문단으로 보고 줄만 가른다.
+    """
+    def _fix(m):
+        head, marker = m.group(1), m.group(2)
+        if head.endswith(_SENTENCE_TAIL):
+            return f'{head}\n\n{marker}'
+        return f'{marker}{head} '
+
+    return re.sub(r'(?m)^([^\n<]*\S)[ \t]*(<x id="BQ\d+"/>)\n*[ \t]*', _fix, body)
+
+
+def _drop_stray_bold_closer(body):
+    """줄 끝에 홀로 남은 '**' 를 지운다.
+
+    DeepL 이 굵게 범위를 문장 앞쪽으로 옮기면서 원래 닫는 마커를 남긴다:
+      '- I had **not yet determined a method** for grouping … scenes.**'
+    '**' 가 홀수인데 줄이 '**' 로 끝나면 마지막 것은 짝이 없다.
+    """
+    def _fix(m):
+        line = m.group(0)
+        return line[:-2].rstrip() if line.count('**') % 2 else line
+
+    return re.sub(r'(?m)^.*\*\*.*\S\*\*$', _fix, body)
 
 
 def _unglue_html_comments(body):
@@ -280,23 +340,52 @@ def _restore_inline_code(body, store):
     return body
 
 
-def translate_with_deepl(text):
-    if not text.strip():
-        return text
+_DEEPL_RETRY_STATUS = {408, 429, 500, 502, 503, 504}
+_DEEPL_ATTEMPTS = 4
+
+
+def _deepl_request(text, **extra):
+    """DeepL 호출. 일시 오류는 재시도하고, 끝내 실패하면 예외를 던진다.
+
+    실패 시 원문을 돌려주면 한글 본문이 EN 파일로 쓰이고 해시까지 캐시돼
+    다음 실행에서도 재번역되지 않는다 (실제 사례: 2026-10-12 숏폼-2, 408).
+    """
     endpoint = (
         "https://api-free.deepl.com/v2/translate"
         if DEEPL_API_KEY.endswith(":fx")
         else "https://api.deepl.com/v2/translate"
     )
-    resp = requests.post(
-        endpoint,
-        headers={"Authorization": f"DeepL-Auth-Key {DEEPL_API_KEY}"},
-        json={"text": [text], "source_lang": "KO", "target_lang": "EN-US", "tag_handling": "html"},
-    )
-    if resp.status_code != 200:
-        log(f"DeepL 오류 {resp.status_code}: {resp.text[:200]}")
+    last_error = "응답 없음"
+    for attempt in range(1, _DEEPL_ATTEMPTS + 1):
+        try:
+            resp = requests.post(
+                endpoint,
+                headers={"Authorization": f"DeepL-Auth-Key {DEEPL_API_KEY}"},
+                json={"text": [text], "source_lang": "KO", "target_lang": "EN-US", **extra},
+            )
+        except requests.exceptions.RequestException as e:
+            last_error = f"{type(e).__name__}: {e}"
+            retryable = True
+        else:
+            if resp.status_code == 200:
+                return resp.json()["translations"][0]["text"]
+            last_error = f"HTTP {resp.status_code}: {resp.text[:200]}"
+            retryable = resp.status_code in _DEEPL_RETRY_STATUS
+        log(f"DeepL 오류 (시도 {attempt}/{_DEEPL_ATTEMPTS}): {last_error}")
+        if not retryable:
+            break
+        if attempt < _DEEPL_ATTEMPTS:
+            time.sleep(2 ** attempt)
+    raise RuntimeError(f"DeepL 번역 실패: {last_error}")
+
+
+def translate_with_deepl(text):
+    if not text.strip():
         return text
-    return resp.json()["translations"][0]["text"]
+    # splitting_tags: <x …/> placeholder 를 문장 경계로 알린다. 없으면 DeepL 이 placeholder 를
+    # 문장 안의 인라인 요소로 보고 앞뒤 블록을 한 문장으로 엮어 어순대로 뒤섞는다
+    # (마커 분리·문장 조각 이동 등 아래 복구 로직 대부분이 다루는 증상의 원인).
+    return _deepl_request(text, tag_handling="html", splitting_tags=["x"])
 
 
 def clean_frontmatter_value(text):
@@ -305,24 +394,23 @@ def clean_frontmatter_value(text):
     return html.unescape(text).replace('"', '\\"')
 
 
+def _translate_title(kr_title):
+    """제목을 번역하되 정렬 접두('08_')와 건수 접미('1건')는 DeepL 에 보내지 않는다.
+
+    통째로 보내면 둘이 섞여 '08_1 Post on …', '12_1 Report on …' 처럼 번호가 바뀐 듯한
+    제목이 나오고, '1건' 표기도 글마다 달라진다 ((1) · 1 entry · 1 item · One …).
+    """
+    m = re.match(r'^(\d+_)?(.*?)(?:\s+(\d+)건)?$', kr_title)
+    prefix, core, count = m.group(1) or '', m.group(2), m.group(3)
+    en = clean_frontmatter_value(translate_with_deepl(core)).strip()
+    return f"{prefix}{en} ({count})" if count else f"{prefix}{en}"
+
+
 def translate_with_deepl_plain(text):
     """tag_handling 없이 번역 — mermaid·코드 주석용."""
     if not text.strip():
         return text
-    endpoint = (
-        "https://api-free.deepl.com/v2/translate"
-        if DEEPL_API_KEY.endswith(":fx")
-        else "https://api.deepl.com/v2/translate"
-    )
-    resp = requests.post(
-        endpoint,
-        headers={"Authorization": f"DeepL-Auth-Key {DEEPL_API_KEY}"},
-        json={"text": [text], "source_lang": "KO", "target_lang": "EN-US"},
-    )
-    if resp.status_code != 200:
-        log(f"DeepL 오류 {resp.status_code}: {resp.text[:200]}")
-        return text
-    return resp.json()["translations"][0]["text"]
+    return _deepl_request(text)
 
 
 def _protect_inline_in_line(line):
@@ -613,7 +701,7 @@ def translate_file(kr_path, hashes):
     title_match = re.search(r'^title: "(.+)"', en_frontmatter, re.MULTILINE)
     if title_match:
         kr_title = title_match.group(1)
-        en_title = clean_frontmatter_value(translate_with_deepl(kr_title))
+        en_title = _translate_title(kr_title)
         en_frontmatter = en_frontmatter.replace(f'title: "{kr_title}"', f'title: "{en_title}"', 1)
 
     desc_match = re.search(r'^description: "(.+)"', en_frontmatter, re.MULTILINE)
@@ -655,9 +743,38 @@ def translate_file(kr_path, hashes):
     # Protect images — hide the whole ![alt](/url) so DeepL can't translate Korean
     # path segments nor relocate the closing ) onto a new line (breaks the image)
     body_protected, _img_store = _protect_images(body_protected)
+    _standalone_imgs = {k for k in _img_store
+                        if re.search(rf'(?m)^{re.escape(k)}[ \t]*$', body_protected)}
+    # 코드블록 placeholder('__CODE0__')는 DeepL 에게 일반 단어라 문장에 섞이고 구분선과
+    # 자리가 바뀐다 ('GPU__CODE0__', /en/blog/3·11). 태그로 바꿔 문장 경계로 만든다.
+    body_protected = re.sub(r'__CODE(\d+)__', r'<x id="CODE\1"/>', body_protected)
+    # 혼자 한 줄인 HTML 주석(<!--truncate-->)도 같은 이유로 감춘다 — DeepL 이 앞 문장 위로
+    # 옮기거나 뒤 문단에 붙인다 (/en/blog/1·16·19).
+    _cmt_store: dict[str, str] = {}
+
+    def _protect_cmt(m: re.Match) -> str:
+        key = f'<x id="CMT{len(_cmt_store)}"/>'
+        _cmt_store[key] = m.group(1)
+        return key
+
+    body_protected = re.sub(r'(?m)^(<!--.*?-->)[ \t]*$', _protect_cmt, body_protected)
     translated = translate_with_deepl(body_protected) if body_no_inline.strip() else body_protected
+    # splitting_tags 를 쓰면 DeepL 이 placeholder 앞뒤 빈 줄을 먹는다 — 독립 블록으로 되돌린다.
+    translated = re.sub(r'\n*([ \t]*)<x id="CODE(\d+)"/>[ \t]*\n*', r'\n\n\1__CODE\2__\n\n', translated)
+    for _key, _cmt in _cmt_store.items():
+        translated = re.sub(rf'\n*[ \t]*{re.escape(_key)}[ \t]*\n*', f'\n\n{_cmt}\n\n', translated)
     # 주석 위치 복원이 먼저다 — 마커와 본문 사이에 낀 주석을 치워야 재결합이 붙는다.
     translated = _unglue_html_comments(translated)
+    # DeepL 이 제목 마커 앞에 공백을 넣는다 — 들여쓴 제목은 목록 뒤에서 제목이 되지 않는다.
+    translated = re.sub(r'(?m)^[ \t]+(?=<x id="HDR\d+"/>)', '', translated)
+    translated = _rejoin_sentence_across_image(translated, _standalone_imgs)
+    # splitting_tags 를 쓰면 DeepL 이 placeholder 뒤 빈 줄을 먹는다 ('<IMG>The searched …').
+    for _key in _standalone_imgs:
+        translated = re.sub(rf'\n*[ \t]*{re.escape(_key)}[ \t]*\n*', f'\n\n{_key}\n\n', translated)
+    # 이미지 아래 목록의 첫 '-' 가 이미지 위 줄 끝으로 올라간 경우 (/en/blog/8):
+    #   '**4-2. …**-' / <IMG> / 'Requesting …' / '- Scenes …'
+    translated = re.sub(r'(?m)(\S)[ \t]*-\n+(<x id="IMG\d+"/>)\n+(?![-*+] )(\S[^\n]*\n)(?=[-*+] )',
+                        r'\1\n\n\2\n\n- \3', translated)
     translated = _rejoin_ol_markers(translated)
     for key, num in _ol_store.items():
         translated = translated.replace(key, num)
@@ -696,8 +813,10 @@ def translate_file(kr_path, hashes):
     # Safety net: DeepL inserts blank lines after <br> inside table cells, breaking the row
     en_body = re.sub(r'(<br>)\n\n(?=[^|\n])', r'\1', en_body)
     en_body = re.sub(r'\n{3,}', '\n\n', en_body)
+    en_body = _drop_stray_bold_closer(en_body)
     en_body = _restore_inline_code(en_body, inline_store)
     en_body = _restore_code_blocks(en_body, code_store)
+    en_body = _return_blockquote_marker_to_line_start(en_body)
     en_body = _rejoin_blockquote_markers(en_body)
     en_body = _restore_blockquotes(en_body, _bq_store)
     en_body = _restore_images(en_body, _img_store)

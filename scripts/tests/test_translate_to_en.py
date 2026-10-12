@@ -1,6 +1,7 @@
 import os
 import re
 import sys
+import pytest
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 import translate_to_en as T
@@ -542,3 +543,241 @@ def test_translate_file_repairs_marker_inside_emphasis_end_to_end(tmp_path, monk
     assert "*The whole caption*" in en
     assert "### Conclusion" in en
     assert "deployed* Conclusion" not in en
+
+
+class _FakeResp:
+    def __init__(self, status_code, text="", payload=None):
+        self.status_code = status_code
+        self.text = text
+        self._payload = payload
+
+    def json(self):
+        return self._payload
+
+
+def _queue_deepl_responses(monkeypatch, responses):
+    calls = []
+
+    def fake_post(*args, **kwargs):
+        calls.append(kwargs.get("json"))
+        return responses[min(len(calls), len(responses)) - 1]
+
+    monkeypatch.setattr(T.requests, "post", fake_post)
+    monkeypatch.setattr(T.time, "sleep", lambda s: None)
+    monkeypatch.setattr(T, "DEEPL_API_KEY", "k:fx")
+    return calls
+
+
+def test_deepl_retries_transient_408_then_returns_translation(monkeypatch):
+    ok = _FakeResp(200, payload={"translations": [{"text": "Hello"}]})
+    calls = _queue_deepl_responses(monkeypatch, [_FakeResp(408, "Request Time-out"), ok])
+    assert T.translate_with_deepl("안녕") == "Hello"
+    assert len(calls) == 2
+
+
+def test_deepl_raises_instead_of_returning_korean_when_failure_persists(monkeypatch):
+    """실패 시 원문을 돌려주면 한글 본문이 EN 파일로 쓰이고 해시까지 캐시된다 (실제 사례: 숏폼-2, 408)."""
+    _queue_deepl_responses(monkeypatch, [_FakeResp(408, "Request Time-out")])
+    with pytest.raises(RuntimeError):
+        T.translate_with_deepl("안녕")
+    with pytest.raises(RuntimeError):
+        T.translate_with_deepl_plain("안녕")
+
+
+def test_translate_file_leaves_en_and_hash_untouched_when_deepl_fails(tmp_path, monkeypatch):
+    src = tmp_path / "post.md"
+    out = tmp_path / "en.md"
+    src.write_text('---\ntitle: "제목"\n---\n\n본문\n', encoding="utf-8")
+    _queue_deepl_responses(monkeypatch, [_FakeResp(408, "Request Time-out")])
+    monkeypatch.setattr(T, "kr_to_en_path", lambda p: str(out))
+    hashes = {}
+    with pytest.raises(RuntimeError):
+        T.translate_file(str(src), hashes)
+    assert not out.exists()
+    assert hashes == {}
+
+
+def test_deepl_retries_when_connection_drops(monkeypatch):
+    """SSL EOF 등 연결 예외도 일시 오류다 (실제 사례: SSLEOFError, 2026-10-12)."""
+    calls = []
+
+    def fake_post(*args, **kwargs):
+        calls.append(1)
+        if len(calls) == 1:
+            raise T.requests.exceptions.SSLError("EOF occurred in violation of protocol")
+        return _FakeResp(200, payload={"translations": [{"text": "Hello"}]})
+
+    monkeypatch.setattr(T.requests, "post", fake_post)
+    monkeypatch.setattr(T.time, "sleep", lambda s: None)
+    assert T.translate_with_deepl("안녕") == "Hello"
+    assert len(calls) == 2
+
+
+# ── 2026-10-12 블로그 재번역에서 나온 DeepL 실제 응답 형태 ──────────────────
+
+def _translate_with_fake_response(tmp_path, monkeypatch, kr_body, response):
+    kr = tmp_path / "post.md"
+    kr.write_text(f'---\ntitle: "T"\n---\n\n{kr_body}', encoding="utf-8")
+    out = tmp_path / "en.md"
+    monkeypatch.setattr(T, "translate_with_deepl", lambda t: "T" if t == "T" else response)
+    monkeypatch.setattr(T, "translate_with_deepl_plain", lambda t: t)
+    monkeypatch.setattr(T, "kr_to_en_path", lambda p: str(out))
+    T.translate_file(str(kr), {})
+    return out.read_text(encoding="utf-8").split("---\n\n", 1)[1]
+
+
+def test_heading_marker_indented_by_deepl_is_restored_to_column_zero(tmp_path, monkeypatch):
+    """' <x id="HDR8"/>\\n\\n3-1) …' — 들여쓴 채 복원하면 목록 뒤에서 제목이 되지 않는다 (/en/blog/3·4)."""
+    en = _translate_with_fake_response(
+        tmp_path, monkeypatch,
+        "- 항목\n\n#### 2. 발화 구간 추출\n\n본문\n",
+        '- Item\n\n <x id="HDR0"/>\n\n2. Speech Segment Extraction\n\nBody\n')
+    assert "\n#### 2. Speech Segment Extraction\n" in en
+
+
+def test_sentence_head_moved_before_image_is_rejoined(tmp_path, monkeypatch):
+    """'The <IMG>\\n\\nsearched segments …' — 문장 앞머리가 이미지 앞으로 올라갔다 (/en/blog/2)."""
+    en = _translate_with_fake_response(
+        tmp_path, monkeypatch,
+        "#### 단계\n\n![image](/img/a.png)\n\n검색된 구간을 조립한다.\n",
+        '<x id="HDR0"/> Step\n\nThe <x id="IMG0"/>\n\nsearched segments are assembled.\n')
+    assert "\n![image](/img/a.png)\n\nThe searched segments are assembled.\n" in en
+
+
+def test_complete_sentence_before_image_is_only_split_off(tmp_path, monkeypatch):
+    en = _translate_with_fake_response(
+        tmp_path, monkeypatch,
+        "설명이다.\n\n![image](/img/a.png)\n\n다음 문단.\n",
+        'This is it. <x id="IMG0"/>\n\nNext paragraph.\n')
+    assert "This is it.\n\n![image](/img/a.png)\n\nNext paragraph.\n" in en
+
+
+def test_blockquote_marker_moved_mid_sentence_returns_to_line_start(tmp_path, monkeypatch):
+    """'We decided to adopt an <BQ0>\\n\\nOpenWeight model …' — 인용문이 문단으로 풀렸다 (/en/blog/2)."""
+    en = _translate_with_fake_response(
+        tmp_path, monkeypatch,
+        "**요약**\n\n> 오픈웨이트 모델을 도입하기로 했다.\n\n다음.\n",
+        '**Summary**\n\nWe decided to adopt an <x id="BQ0"/>\n\nopen-weight model.\n\nNext.\n')
+    assert "**Summary**\n\n> We decided to adopt an open-weight model.\n\nNext.\n" in en
+
+
+def test_stray_bold_marker_at_line_end_is_dropped(tmp_path, monkeypatch):
+    """'- I had **not yet determined a method** for … scenes.**' — 굵게 범위를 옮기며 닫는 ** 가 남았다."""
+    en = _translate_with_fake_response(
+        tmp_path, monkeypatch,
+        "- 컷을 씬으로 묶는 **방법을 정하지 못했다.**\n- **둘째.**\n",
+        '- I had **not yet determined a method** for grouping cuts.**\n- **Second.**\n')
+    assert "- I had **not yet determined a method** for grouping cuts.\n- **Second.**\n" in en
+
+
+def test_long_sentence_split_by_hr_is_rejoined_when_tail_continues_in_lowercase():
+    """문장 한가운데에 구분선이 끼었다: '… episodes of a' / --- / 'drama—into …' (/en/blog/8)."""
+    hr = '<x id="HR"/>'
+    head = "This article outlines the process of turning a compilation of scenes related to a single theme from multiple episodes of a"
+    assert len(head) > 120
+    body = f'### Introduction\n\n{head} {hr}\n\ndrama into one query.\n'
+    assert T._rejoin_sentence_across_hr(body, hr) == f'### Introduction\n\n{hr}\n\n{head} drama into one query.\n'
+
+
+def test_long_unpunctuated_paragraph_above_hr_stays_when_next_starts_a_sentence():
+    hr = '<x id="HR"/>'
+    head = "x" * 130
+    body = f'{head}\n\n{hr}\n\nNext paragraph starts here.\n'
+    assert T._rejoin_sentence_across_hr(body, hr) == body
+
+
+def test_bullet_marker_moved_above_image_returns_to_first_list_item(tmp_path, monkeypatch):
+    """'**4-2. …**-\\n\\n<IMG>\\n\\nRequesting …\\n- Scenes …' — 첫 항목의 '-' 가 이미지 위로 올라갔다 (/en/blog/8)."""
+    en = _translate_with_fake_response(
+        tmp_path, monkeypatch,
+        "**4-2. 제목**\n\n![image](/img/a.png)\n\n- 첫째.\n- 둘째.\n",
+        '**4-2. Title**-\n\n<x id="IMG0"/>\n\nFirst.\n- Second.\n')
+    assert "**4-2. Title**\n\n![image](/img/a.png)\n\n- First.\n- Second.\n" in en
+
+
+def test_markup_translation_tells_deepl_placeholders_are_sentence_boundaries(monkeypatch):
+    """<x> 를 문장 경계로 알리지 않으면 DeepL 이 블록들을 한 문장으로 엮어 뒤섞는다.
+
+    실제 사례 (/en/blog/19): '들어가며 / --- / … 등을 기재 / 마무리' →
+    'Include / ### Conclusion / --- / GitHub discussions, … and conclude'.
+    """
+    ok = _FakeResp(200, payload={"translations": [{"text": "Hello"}]})
+    calls = _queue_deepl_responses(monkeypatch, [ok])
+    T.translate_with_deepl("안녕")
+    assert calls[0]["splitting_tags"] == ["x"]
+
+
+def test_text_glued_after_standalone_image_is_split_into_its_own_paragraph(tmp_path, monkeypatch):
+    """splitting_tags 를 쓰면 DeepL 이 placeholder 뒤 빈 줄을 먹는다: '<IMG>The searched …'."""
+    en = _translate_with_fake_response(
+        tmp_path, monkeypatch,
+        "#### 단계\n\n![image](/img/a.png)\n\n검색된 구간을 조립한다.\n",
+        '<x id="HDR0"/> Step\n\n<x id="IMG0"/>The searched segments are assembled.\n')
+    assert "#### Step\n\n![image](/img/a.png)\n\nThe searched segments are assembled.\n" in en
+
+
+def test_inline_image_inside_table_cell_stays_inline(tmp_path, monkeypatch):
+    en = _translate_with_fake_response(
+        tmp_path, monkeypatch,
+        "| 그림 |\n| --- |\n| ![image](/img/a.png) 설명 |\n",
+        '| Figure |\n| --- |\n| <x id="IMG0"/> Caption |\n')
+    assert "| ![image](/img/a.png) Caption |" in en
+
+
+def test_standalone_comment_is_hidden_from_deepl_and_restored_in_place(tmp_path, monkeypatch):
+    """DeepL 이 <!--truncate--> 를 앞 문장 위로 옮기거나 뒤 문단에 붙인다 (/en/blog/1·16·19).
+
+    placeholder 로 감춰 문장 경계로 만들고, 복원할 때 독립 문단으로 되돌린다.
+    """
+    kr = tmp_path / "post.md"
+    kr.write_text('---\ntitle: "T"\n---\n\n소개 글.\n\n<!--truncate-->\n\n다음 문단.\n', encoding="utf-8")
+    out = tmp_path / "en.md"
+    seen = []
+
+    def fake(text):
+        seen.append(text)
+        return text.replace("소개 글.", "Intro.").replace("\n\n다음 문단.", "Next paragraph.")
+
+    monkeypatch.setattr(T, "translate_with_deepl", fake)
+    monkeypatch.setattr(T, "kr_to_en_path", lambda p: str(out))
+    T.translate_file(str(kr), {})
+    assert not any("<!--" in t for t in seen)
+    assert "Intro.\n\n<!--truncate-->\n\nNext paragraph.\n" in out.read_text(encoding="utf-8")
+
+
+def test_code_block_placeholder_is_a_tag_and_restored_as_its_own_block(tmp_path, monkeypatch):
+    """'__CODE0__' 는 DeepL 에게 일반 단어라 문장에 섞인다: 'GPU__CODE0__', 구분선과 자리바꿈 (/en/blog/3·11)."""
+    kr = tmp_path / "post.md"
+    kr.write_text('---\ntitle: "T"\n---\n\nGPU\n\n```bash\nnvidia-smi\n```\n\n끝\n', encoding="utf-8")
+    out = tmp_path / "en.md"
+    seen = []
+
+    def fake(text):
+        seen.append(text)
+        return re.sub(r'GPU\n\n(<x id="CODE0"/>)\n\n끝', r'GPU\1End', text)
+
+    monkeypatch.setattr(T, "translate_with_deepl", fake)
+    monkeypatch.setattr(T, "kr_to_en_path", lambda p: str(out))
+    T.translate_file(str(kr), {})
+    assert any('<x id="CODE0"/>' in t for t in seen)
+    assert "GPU\n\n```bash\nnvidia-smi\n```\n\nEnd\n" in out.read_text(encoding="utf-8")
+
+
+def test_rejoin_sentence_across_hr_does_not_move_code_block_placeholder():
+    """구분선 위 코드블록은 문장 조각이 아니다 — 옮기면 코드와 구분선 순서가 바뀐다 (/en/blog/3)."""
+    hr = '<x id="HR"/>'
+    body = f'Input/Output Format\n\n__CODE6__\n\n{hr}\n\nWhisper-large-v3 is the latest model.\n'
+    assert T._rejoin_sentence_across_hr(body, hr) == body
+
+
+def test_title_keeps_sort_prefix_and_count_suffix_out_of_translation(monkeypatch):
+    """'08_모아보기 서비스 구현기 1건' 을 통째로 보내면 '08_1 Post on …' 처럼 번호가 섞인다."""
+    seen = []
+    monkeypatch.setattr(T, "translate_with_deepl", lambda t: seen.append(t) or "Compilation Service Implementation")
+    assert T._translate_title("08_모아보기 서비스 구현기 1건") == "08_Compilation Service Implementation (1)"
+    assert seen == ["모아보기 서비스 구현기"]
+
+
+def test_title_without_prefix_or_suffix_is_translated_whole(monkeypatch):
+    monkeypatch.setattr(T, "translate_with_deepl", lambda t: 'Say "hi" &amp; go')
+    assert T._translate_title("인사") == 'Say \\"hi\\" & go'
