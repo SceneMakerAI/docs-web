@@ -129,10 +129,10 @@
     "frontmatter_hash": "c2464d949f779129553600a7224f1433ee62f27708389223adee424687fd1171"
   },
   "docs/contribute/vllm.md": {
-    "body_hash": "a376a0ff559597d76dbdc1e771fb5c0834fe2d42745c72a953997ea21ac9f035",
+    "body_hash": "1e4613228e83f7c4f51903b43a6b5a4da5c1cb9115ad6b70e54fe93435274076",
     "slug": "1",
     "sidebar_position": "1",
-    "frontmatter_hash": "7d15df42e55fd30e99c39ef9dbee05b3aa440400848c63ebd3c1a0442acc5e5b"
+    "frontmatter_hash": "45292a17c647f949627e0b6795b59d72f09bc2a36771426a3fb2a9fbc4e7839c"
   },
   "docs/poc/audio-bench/poc-기획안-초고속초고품질-다국어-ai-자막-생성-시스템-구축.md": {
     "body_hash": "2f280704931a7250492869c09f1b53bdb73e26fb23c193558933098f4e40d7da",
@@ -228,7 +228,7 @@
     "body_hash": "fe69133f1ae3a605070d2a13974d084e53fa9147e3a8effb301c666c91bee1c3",
     "slug": "3",
     "sidebar_position": "3",
-    "frontmatter_hash": "2ca0bb80c002d6e4ef00902acfcc86195a03b81998616065061f777e1e878e4d"
+    "frontmatter_hash": "f91b261b96423e9d204bf4ce5bf9029886f2f595ca6e11aa63cc51e7c9f4c99e"
   },
   "docs/contribute/ci빌드-v1completions-엔드포인트에서-bad-words를-지원.md": {
     "body_hash": "9ccd6e68baa3072671c27596d0667a7054d1b50958e7a2ba3a0cb41ed979f32a",
@@ -258,55 +258,55 @@
     "body_hash": "59e2f5090bb6e45268797d56d91de2750f4e84b331a78faa86469746cd3cfa02",
     "slug": "",
     "sidebar_position": "",
-    "frontmatter_hash": "78b8b6c76a11ae9cb47764cb17070001808d401709ace65bd11639b25b999dce"
+    "frontmatter_hash": "179ee763ed91e2b22585617598c4f0986989a0b87c650f505d05dc18a8e39db3"
   },
   "blog/2026-07-14-09-맥락-기반-광고-최적화-기술-해설-1건.md": {
     "body_hash": "4b0a61b6f018b2a404a750dba9893b702887532ff1768dcc22e46bc37233ab86",
     "slug": "",
     "sidebar_position": "",
-    "frontmatter_hash": "1b63cf53eb3a8421a7203039e6b0aff2939af7a2c761a33d1ce3b48aa1c38a07"
+    "frontmatter_hash": "2ac4735e25fa38cc68d36e709eab72893ffdd527f9256985f5375c89cf3c9b76"
   },
   "blog/2026-07-14-10-sbsi-실증-테스트-사례-공유-1건.md": {
-    "body_hash": "140412f2db6a6f2c9e83b2fad1ecdfdaab8a01394519910fb6c6b6b1dd9b975d",
+    "body_hash": "8777e5a3520908be066bf7612465268caf64e82d8022da18a137492320090b27",
     "slug": "",
     "sidebar_position": "",
-    "frontmatter_hash": "e75aa4711497e3008b77fcf41e268cb8adb575ae5b9174f330750cf14266b67e"
+    "frontmatter_hash": "c18e21e06aaeae3db9ec2f70ab36894593a6f998660ccd930b54076842cc3950"
   },
   "blog/2026-07-14-10-방송-ai-서비스-성능-벤치마크-결과-분석-1건.md": {
-    "body_hash": "6183855c7bc1cc2518694697f308e03a731c2faa105ace09943455cec3e4af1e",
+    "body_hash": "6579d72a24a585ad51a8b994dcf51a65729c0f6e7343ffb88b57165acccb1f39",
     "slug": "",
     "sidebar_position": "",
-    "frontmatter_hash": "278d0a7e8b9aee15b25ea7a043154a694825729643fe6073b45f0033ffae06d9"
+    "frontmatter_hash": "e5aada8c7f70f895012903fe83a1d7c01b330160800d4291c732baf72a63d0cd"
   },
   "blog/2026-07-14-11-방송-ai-오픈웨이트-모델-활용-사례-1건.md": {
     "body_hash": "188b96622b530e71cd00d752a17d13a7fd5a971d26305d823a5eff576fc5e467",
     "slug": "",
     "sidebar_position": "",
-    "frontmatter_hash": "2754afbdeb3b0fe38b2b6952bf91fb12c0dae0c500617e0c967cb4c3938680dd"
+    "frontmatter_hash": "84558a2dbc9024452a9b65877974149b95ed7965e504f27d3b2a15aea751d7c9"
   },
   "blog/2026-07-14-11-테스트-케이스-작성-1건.md": {
-    "body_hash": "8547ff07b44fc41219719469036adae86c2954eb7c8cc8758cb449b3cf139a50",
+    "body_hash": "2d51eca08fa0eaf7ed68faa091b34adddcb1335ab233297a8f9bb8124301d68a",
     "slug": "",
     "sidebar_position": "",
-    "frontmatter_hash": "2bb8f343149fa921272c3c9320b9e6aab786203369a9f27043c3d88cc02e732b"
+    "frontmatter_hash": "9defb8eb72f84f4f0ffcf654ee3ca654aaa85f684623e130a481f7bb40e6066d"
   },
   "blog/2026-07-14-12-과제-성과-종합-정리-1건.md": {
     "body_hash": "10c45f4806d39a2ac627a47966b70474f6e11770157a27cc1140275615a96c11",
     "slug": "",
     "sidebar_position": "",
-    "frontmatter_hash": "358b992365730e2850b139f271687c708cd7b35cec39e196049a22bcfb3e2bac"
+    "frontmatter_hash": "8e4e8a371915416e19d7c87705426e03a749c482a9a8742c1d118c94a49476d3"
   },
   "blog/2026-07-14-12-오픈소스-생태계-기여-실적-보고-1건.md": {
     "body_hash": "c3120528e62b22bd310b7370df6e9ec900413b18b02e0180ca917c2be42d8bc1",
     "slug": "",
     "sidebar_position": "",
-    "frontmatter_hash": "aee960563c32131deda582beb1bb9f7f76869e2f7bf701c1a93b8a36e4a7429e"
+    "frontmatter_hash": "cf1f30721f478fdcc3ea85f9a6c5cac6ac5d4b3af6626e70adb5149de6065c10"
   },
   "blog/2026-07-14-12-향후-로드맵-및-지속-기여-계획-공유-1건.md": {
     "body_hash": "21a619d8697b7f206da9440466b70225b8e3c6183434a19a7fed6c9f8891a4e6",
     "slug": "",
     "sidebar_position": "",
-    "frontmatter_hash": "bb60fd8891dfa1124f66a654635378e595d6539da48bf073a21d27a3ecff8c18"
+    "frontmatter_hash": "c6cf4d6b792f43e9c18b43bb7b69e3e6aca9217308294738d637766a8901aa6f"
   },
   "docs/contribute/제목없음.md": {
     "body_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
@@ -350,69 +350,387 @@
     "frontmatter_hash": "c8bcd67a5055f2e58abeb06d4c7fbaae408645dc6d5d0981bdf0b6f1461086e9"
   },
   "docs/discussion/오픈소스-생태계-기여.md": {
-    "body_hash": "fe1a7de78e55b70fe54005c9e0a13e0026afc1571027b1da520ec41a94fc6c84",
+    "body_hash": "b482e604347bde2587be9b0ea45d8fbac6302755ce67ff41080ea47e27d0e3b1",
     "slug": "1",
     "sidebar_position": "1",
     "frontmatter_hash": "e492541420a8fc1d18ff4a00b029446fded0538cede28ad7cc6b907cc7419a85"
   },
   "blog/2026-06-22-기술-블로그-개설.md": {
-    "body_hash": "f9b799b93b6c94bd8a22f8eafade74a8d44c7c3dfcd6ae7f62bcb367b363f5fb",
+    "body_hash": "e9f435615fde98a90fe3fd59bc69045c802eac0231fbdad328c38983b91b4bde",
     "slug": "",
     "sidebar_position": "",
-    "frontmatter_hash": "40769eb3ec83a9097c7030a7ff4522c4de2e6227389667444f802deb8948ffe5"
+    "frontmatter_hash": "518e1a9e490567779be82b04d251d81bd61fe68bce5dc17789e8a20837a3374e"
   },
   "blog/2026-07-09-프로젝트-소개-및-qwen36-방송-도메인-적용기.md": {
-    "body_hash": "e9940f3d0c913dd68497717da8fe457398c89bd06303b5cc091bc94b98def04b",
+    "body_hash": "bc655b61491f968f801113430e6e8bfd53ca3aea484f70c985345bca19b15fb0",
     "slug": "",
     "sidebar_position": "",
-    "frontmatter_hash": "cfb28e0a85703f1ceac57fa00283c1a52d64c5e5b5092d6ebdf962370427754a"
+    "frontmatter_hash": "80340741b86ab91b818cfa7779fe74af2dd8023d7f2613a9b788180842b418b7"
   },
   "blog/2026-07-10-faster-whisper-한국어-음성인식-최적화-경험-공유.md": {
     "body_hash": "bfee59b46ce777f0c6e93ea819b8af330138d4249311b033f4c66109f28585c4",
     "slug": "",
     "sidebar_position": "",
-    "frontmatter_hash": "41a7c08d065b8e5f3b47b69a435e4fce266dd1ac84c5f7af1c62bf4cb0eee275"
+    "frontmatter_hash": "c79ae98a2893ee2109a4fdf1cd577c265daa64dc3e9ca54e9ec199d7af9baf03"
   },
   "blog/2026-07-10-음성분석-처리-과정-및-결과.md": {
-    "body_hash": "0994adffb8271510036c71ef01f7e302e89414f010aaa8ae833e11375cf2b65b",
+    "body_hash": "6544aa1a8145083e25d8298923832066184f5d4b958f2a34e0a3d733f188a9c2",
     "slug": "",
     "sidebar_position": "",
-    "frontmatter_hash": "cb5b59a3c449bb74f74fe68b2662cbb6f070035d361d9bebf73a0c3bfd58066e"
+    "frontmatter_hash": "1e5984a44f6fa56986a65f22b8885e49c97aab91ac819789a7ad2c99f4fb0718"
   },
   "blog/2026-07-13-langgraph-기반-방송-워크플로우-설계.md": {
     "body_hash": "4434dac8813a8f0ccdef43b9106431b3854e0d1d8dfab0720856a2a32ad6d733",
     "slug": "",
     "sidebar_position": "",
-    "frontmatter_hash": "46cf3844371eca36defa21f69a53b3b07cbcd5bd9f8caf58edbb71c09857be9c"
+    "frontmatter_hash": "6dbae78d67b8e2202b3ae22bb11e78fa8f342f523118c7ad858470fad32e8d57"
   },
   "blog/2026-07-13-rag-파이프라인-구축.md": {
-    "body_hash": "8c9497c4065b083ff3855d939d33359c88f85d93e96946f39675a8746d5772f1",
+    "body_hash": "8f463ab716394a1c90aadaca04002f5d4aa704d0390632b6991d1ab236523aee",
     "slug": "",
     "sidebar_position": "",
-    "frontmatter_hash": "6a9c8a54e1c8316e519b6dbf4c4e7134216290e8ec34fedf1703d9a7dcb12ad2"
+    "frontmatter_hash": "e3f460f8fabcb96b87775ae4bf38332321cb8f0799140b17cfec00229a77a582"
   },
   "blog/2026-07-14-모아보기-서비스-구현기-1건.md": {
-    "body_hash": "b46128302157c1308aa62c9ec45e2bb2a952fa28e46ae6352e790686a23b6cc4",
+    "body_hash": "3efcc502a8fbcc61a7bc661faca8ab0d1e23d5ee325fab931266751571644620",
     "slug": "",
     "sidebar_position": "",
-    "frontmatter_hash": "782d31c3fd40d8533ece62a5ccc13ce4e695cc03a6a31ccc9078bd800ca0166c"
+    "frontmatter_hash": "be761cb4b65e0b1e2d1ed2aa4d03f16a826b33277cc912dde9e5c75eade33bc2"
   },
   "blog/2026-07-14-숏폼-자동-생성-파이프라인-해설-1.md": {
-    "body_hash": "57917dd01adf9bc480c049e30247216a6024a9e9f8d57860427f5faad469e018",
+    "body_hash": "ab7c3ba0edfd786ea10166f45ed0474524099730dd5174fd8c7280fea12daf1e",
     "slug": "",
     "sidebar_position": "",
-    "frontmatter_hash": "a020d8bf4c8a56e028fc0e4a3ced09d3a44ec385d93a67e21d51a2c07d2fef32"
+    "frontmatter_hash": "c37ab4c53ac8fdaae435af7ffd2437be4ce69375194b237cabbffa71e5aa1d64"
   },
   "blog/2026-07-14-숏폼-자동-생성-파이프라인-해설-2.md": {
     "body_hash": "f7208f2de070f1f6561ffdae1d256e3afb4fb5770a82224ef8f5777b1c3478b1",
     "slug": "",
     "sidebar_position": "",
-    "frontmatter_hash": "31b16cf2c8b0a940405472c66e55d6e7507e4c1ac6bf66fb6903c47e58f12bb9"
+    "frontmatter_hash": "4ccab35e722362909928546fd02a22dd6aa2718bdff2dc62ee67f956b71944e8"
   },
   "blog/2026-07-14-오픈-소스-기여-종합-가이드-1건.md": {
-    "body_hash": "823d1cdbf793902b88cffa0c2f25ccd7eaf7df497928952b9f8653ff7b9d49de",
+    "body_hash": "98d2583e5f75ce3f6841692095a50cc89318b34a9530f6822206fc6ecc3f9688",
     "slug": "",
     "sidebar_position": "",
-    "frontmatter_hash": "8482cfe609c982d921d79c2ec6137ee28d93751e4578084ed4f05ec43a20f166"
+    "frontmatter_hash": "a86600a24f1c91965d0b9dad1910ab8fbf12eb9f68d3fe4ef7d8bd54d5ee1926"
+  },
+  "docs/contribute/10분-이상-파일에서-sfinfo-duration-이-지수-표기로-깨지는-문제-수정.md": {
+    "body_hash": "d983da59c37e87c9c94d72f300d9f23204a4cf56d1aae11868803bd761a6bfee",
+    "slug": "32",
+    "sidebar_position": "32",
+    "frontmatter_hash": "9bbee345dcad9da0e2552637373e7f16e94427287cc8a2472169d1c6c79d8274"
+  },
+  "docs/contribute/29975994-fps-에서-contentdetector-가-min-scene-len-만큼-떨어진-컷을-버리는-07-회귀.md": {
+    "body_hash": "107d9b31c0a63cae8ff09b5554096d8da26e293a66a464aa7af4f286bcc7df37",
+    "slug": "45",
+    "sidebar_position": "45",
+    "frontmatter_hash": "6dc6810e722c9416d77a6c488aa188b2c45497220a38f52c99c3bff29a9f7b16"
+  },
+  "docs/contribute/audiocrop-pad-모드가-범위-밖-구간에서-틀린-길이실제-오디오-반환.md": {
+    "body_hash": "9cbf7b4c3dbaac7b4db9c207ced1db36b282a5378c0875279cec4b4a020f66ed",
+    "slug": "20",
+    "sidebar_position": "20",
+    "frontmatter_hash": "dc1a3ab1cd03e82ae9dbf0ceb9f67eaaaeea0d25eecaf90f892c31d23c8a2684"
+  },
+  "docs/contribute/bug-use-audio-in-video-에서-멀티모달-프로세서-캐시가-오디오를-누락-qwen3-omni.md": {
+    "body_hash": "d259424f37f028d3b3d695b5f1911dfc12ce263836d642a4469f6b8761befe13",
+    "slug": "12",
+    "sidebar_position": "12",
+    "frontmatter_hash": "35f14d808ba3b91d90f27f1c276e40104738e0bb4610cff1dcd9e81c637c5cd9"
+  },
+  "docs/contribute/collect-env-가-uv-환경에서-다른-환경의-패키지를-읽거나-죽는-문제-수정.md": {
+    "body_hash": "1f4104948af0d695e0acf358eb507334c32f1a421b8a177cd299b829ac155d70",
+    "slug": "18",
+    "sidebar_position": "18",
+    "frontmatter_hash": "638a13abf135f0cf25523a3b6d452468b30fd8a92593ef76f740e7f8967abdda"
+  },
+  "docs/contribute/copy-skip-cache-에서-fetch-가-없는-경로를-반환하는-문제-수정.md": {
+    "body_hash": "6ac046cf3a97393432547641f64287a875595e57816a0c55de23c4a265db3d4d",
+    "slug": "34",
+    "sidebar_position": "34",
+    "frontmatter_hash": "99bc1023fb4e7dc17284acce17efe378a1eb369739dfdc38ed25f29fa06aa44e"
+  },
+  "docs/contribute/copy-skip-cache-에서-save-filename-이-무시되어-label-encoder-가-로드되지-않는-문제.md": {
+    "body_hash": "0a8ea0096527051689fe3fc7fa11e0d06b0734996f63ca0aaf1287ec945c6cf5",
+    "slug": "19",
+    "sidebar_position": "19",
+    "frontmatter_hash": "c4640db8317120d73faa9ac4282144dcdefcaa84c8ad4cb3d65018c6df9527ac"
+  },
+  "docs/contribute/detect-language-가-dict-형태의-vad-parameters-에서-크래시하는-문제-수정.md": {
+    "body_hash": "b594b4515af8efb0f7c36e36aafa299fbf13358418d7c8e50f1d8bffe8ddfe0f",
+    "slug": "24",
+    "sidebar_position": "24",
+    "frontmatter_hash": "2e7c01cc9355d890e47350a0f9f2de680eec4fb4e9eb419bf04e3eee3bebc1c4"
+  },
+  "docs/contribute/dotenv-run-이-fifo-형태의-env-를-거부하는-문제-수정.md": {
+    "body_hash": "e7ee7f98032b034f9916f18cae8dca964f7e73bee1e31dbae78c49d1acc8a025",
+    "slug": "27",
+    "sidebar_position": "27",
+    "frontmatter_hash": "5f545eca74f6a5fbec2ca7655e394c83184fbd72ff9d7a231884557379a2feb7"
+  },
+  "docs/contribute/exif-transpose-이후-imagemagick-형식-exif-가-파생-이미지에서-사라지는-문제-수정.md": {
+    "body_hash": "68e8dbd52c24983eb771711ba1544b5238cd31aed7779be16dbb2d0d2c7935c6",
+    "slug": "46",
+    "sidebar_position": "46",
+    "frontmatter_hash": "e1e2014e8e5caf8ded843f78f8a1abe2b79b67844ceae7c421c00e3f364fd218"
+  },
+  "docs/contribute/frontend-responses-api-에서-min-p-를-지원.md": {
+    "body_hash": "a32366a0f9a6213f094a7d721f0fe992b88b7bea5e082057d51199e81beff479",
+    "slug": "13",
+    "sidebar_position": "13",
+    "frontmatter_hash": "fc9848da024f99d7ab555f465a74ad49ebfd4525a7610ec610cf1af704c6e9db"
+  },
+  "docs/contribute/frontend-v1completions-엔드포인트에서-bad-words를-지원.md": {
+    "body_hash": "7f1856b76f8e4f913d997b57d628eb0fbeced6cfc2fbfc4d846d35f62394fc09",
+    "slug": "4",
+    "sidebar_position": "4",
+    "frontmatter_hash": "deee38c2e90fe74dc0ab29c19904aef78a3333965f288b4ab938db892e61e400"
+  },
+  "docs/contribute/get-all-files-가-exclude-and-에-걸린-파일-뒤의-파일까지-모두-제외하는-문제-수정.md": {
+    "body_hash": "b7cd95d8730802761180109267a8885f55a796c10272db4978d67e59d2b4f30e",
+    "slug": "54",
+    "sidebar_position": "54",
+    "frontmatter_hash": "70a90b8ab4af9fad1bcbf1f81abdb54f148cee50ced541d426985d22a7f4f514"
+  },
+  "docs/contribute/header-값의-콜론-뒤-공백-때문에-h11wsproto-응답이-전부-실패하는-문제.md": {
+    "body_hash": "707013a30d3ec93ebbd03a30a991540032871848731fda18abbed22f25d90353",
+    "slug": "29",
+    "sidebar_position": "29",
+    "frontmatter_hash": "d1a840edf6e190b0e3676412a405d71a85dfce1cc84b54f51c968de4e3efd789"
+  },
+  "docs/contribute/hosted-vllm-이-호출자의-비디오-file-파트를-바꿔-폴백에서-영상이-누락되는-문제-수정.md": {
+    "body_hash": "e1af35ab71476142dffd90bc7542b78993f761aeaea75c026b5c5b8d619b468d",
+    "slug": "44",
+    "sidebar_position": "44",
+    "frontmatter_hash": "5bd1627e4f350ef40aa8c0bcce0a23747fbfdd6ecda0584c5ea55d64ab098b34"
+  },
+  "docs/contribute/hosted-vllm-텍스트-완성에서-토큰-id-프롬프트가-unmapped-prompt-format-으로-거부되는-문제.md": {
+    "body_hash": "58e8d3303fb6c0796d873a45b8435ab5e01c88237ad8f5cff4f6cc2d101ed728",
+    "slug": "49",
+    "sidebar_position": "49",
+    "frontmatter_hash": "ea8891b619da816429108ba11dbed4980f8411826044730334063a673a1c9555"
+  },
+  "docs/contribute/httpsredirectmiddleware-가-ipv6-호스트의-대괄호를-떼어-잘못된-location-을-만드는-문제-수정.md": {
+    "body_hash": "27d438f7d85b219cb5bcb8f24868a61732f709c1b3373dd58059c7717e6f847a",
+    "slug": "37",
+    "sidebar_position": "37",
+    "frontmatter_hash": "267f916e9e7564e290f969486558ba0fe4d1901232accf36615d483b405d7df1"
+  },
+  "docs/contribute/ids-로-조회삭제할-때-varchar-primary-key-이스케이프-누락-수정.md": {
+    "body_hash": "278692762d144b1e2a3f79a991c86ad7f734f196d9729e6aa43b181c5a1656c6",
+    "slug": "22",
+    "sidebar_position": "22",
+    "frontmatter_hash": "056971028e9fa35e32652f63fa1ed0e6c2541bb9c514e99bc3ad1c1a54457612"
+  },
+  "docs/contribute/ifd1썸네일-ifd을-읽은-뒤-exiftobytes저장이-structerror-로-실패하는-회귀-수정.md": {
+    "body_hash": "34bf21a663b8e9d6948f1ac94f07bbcf6ab2dcec1ed4ebc6b0b7088fa7c3096a",
+    "slug": "50",
+    "sidebar_position": "50",
+    "frontmatter_hash": "dd0d2c3cb21f52ddc4a5e6944502380ec267dd83887ffd46e32297b864d0671e"
+  },
+  "docs/contribute/max-speech-duration-s-강제-분할-시-이어지는-음성이-누락되는-문제-수정.md": {
+    "body_hash": "bd53e01776f932422118d58bb0e397b35e248d6dfe59c3bafea3cbc3255678b0",
+    "slug": "33",
+    "sidebar_position": "33",
+    "frontmatter_hash": "a06c9fa19e22d99e743094c5897d98fc7d7da36567db901746addcd23c82a991"
+  },
+  "docs/contribute/querysearch-결과를-제자리-정렬하면-벡터동적-필드가-다른-행에-붙는-문제.md": {
+    "body_hash": "f5db82593cc85195a38bb39cd587d2372c23084479d86fe5e961d99d6b04d6c4",
+    "slug": "31",
+    "sidebar_position": "31",
+    "frontmatter_hash": "a89b03ca86289a419ee48663074d1689cd9c8bfdedd757561df112fa665364e0"
+  },
+  "docs/contribute/run-batch-가-toolreasoning-파서-플러그인을-import-하지-않는-문제-수정.md": {
+    "body_hash": "fda610ee6b6e4185d7ac2417e76dc7d7d207bb917f1760004982c63ebaf9fea0",
+    "slug": "51",
+    "sidebar_position": "51",
+    "frontmatter_hash": "82a114a1fc9e8d15b9007fba20e101365e97effd5640d25c95b929e9d46ad82b"
+  },
+  "docs/contribute/ssdictcursor-가-dict-대신-tuple-을-반환하는-문제-수정.md": {
+    "body_hash": "f01f5ee96c733cc0ab555b72dfead3bf7407d820f514c4cf9515075edf7a258f",
+    "slug": "17",
+    "sidebar_position": "17",
+    "frontmatter_hash": "689a7962b3875986501d358c28d87bb6bfa68b6b6044d6da450b60638a8a7155"
+  },
+  "docs/contribute/ssl-verify-identity-만-켜면-sslcontext-생성에서-valueerror-발생.md": {
+    "body_hash": "a68f607fed86882aa03fde89d120e27f573f9e41decfd7ce44b5999142025a71",
+    "slug": "25",
+    "sidebar_position": "25",
+    "frontmatter_hash": "45e69ab858588ff1420cf8c2f87aae7e037a7d293bc3a406dfe8ec0de7f2e0a0"
+  },
+  "docs/contribute/state-에서-없는-속성을-del-하면-attributeerror-대신-keyerror-발생.md": {
+    "body_hash": "e9c3c1124cd4cc522682e6d571d68cf70c30debdd6f7a87b611aee3f79d4c145",
+    "slug": "43",
+    "sidebar_position": "43",
+    "frontmatter_hash": "766224a4ae89e1428bc2eefacc52eff609b11d210eec1f960a8f4119af1d420e"
+  },
+  "docs/contribute/staticfiles-405-응답에-allow-헤더-추가.md": {
+    "body_hash": "b9793eb25d70aec0e701433c3ef05d8f4fa72926b238ac6d78f8eeba873f79c7",
+    "slug": "26",
+    "sidebar_position": "26",
+    "frontmatter_hash": "271f0781cb9e913d4056d8b7e78377364ec52b618a9872a2a33ae7b66877430c"
+  },
+  "docs/contribute/support-partitioned-in-responsedelete-cookie.md": {
+    "body_hash": "3a5eee0f424c410c537af4caa594c923357dbe3085ad1c45b70c66b238264269",
+    "slug": "5",
+    "sidebar_position": "5",
+    "frontmatter_hash": "8eef333d793ba6b51d5b63294fa7161800d8f9cf3aa5f81cfb050a032fdb6e5e"
+  },
+  "docs/contribute/textencoder-가-n-most-commonmin-count-인자를-무시하는-문제-수정.md": {
+    "body_hash": "7dd49b4eae5f7289fd132a276a3967e5007ddbd64d84c5ddab1abedcbd4808d3",
+    "slug": "42",
+    "sidebar_position": "42",
+    "frontmatter_hash": "6c3e4f2bb83977e62621a4c0595953edd20463831df980a278d79dfb63e972b5"
+  },
+  "docs/contribute/torchcodec-없이도-오디오-경로바이트를-인코딩하도록-수정-audiofolder-from-dict.md": {
+    "body_hash": "4a60af0849a61ba10b768a005694a3f8ad717fd00b2a0004f3ffc3215eaedf42",
+    "slug": "38",
+    "sidebar_position": "38",
+    "frontmatter_hash": "44548d3bafc78e466eb1f3b74a5f87187128fc42bc962c72a3203ed07fa9999b"
+  },
+  "docs/contribute/transcribechunk-length-가-이후-호출의-윈도-크기를-영구히-바꾸는-문제.md": {
+    "body_hash": "40f628c72422c0cb90bb19c8130f021c4aa7720029e84745ae784763fd631c50",
+    "slug": "23",
+    "sidebar_position": "23",
+    "frontmatter_hash": "8c529688a4b96b28dc0a5c66af69112b51f3d18296ec54f2eb4219a3726e944b"
+  },
+  "docs/contribute/unpacktypeddict-kwargs-의-json-schema-가-검증-동작과-다르게-생성되는-문제.md": {
+    "body_hash": "085855b4a237ecb3a6353110448f642f626942774e0847a70f3316bfe7a44f14",
+    "slug": "40",
+    "sidebar_position": "40",
+    "frontmatter_hash": "ae38e09d2aa130411abe055448b0b4904249730ea8747b6a75b49a73b7fe0a31"
+  },
+  "docs/contribute/upload-dir-를-str-로-주고-upload-keep-filename-을-켜면-나는-typeerror-수정.md": {
+    "body_hash": "df77aa939bccb9b299ca74065a36a2856d1eea8d76dbbf520ee7d3c26a00b588",
+    "slug": "28",
+    "sidebar_position": "28",
+    "frontmatter_hash": "be6caa257f3f257db65b279b9b2ca13cc79b858825f0ff2895b6a3d63509fe2b"
+  },
+  "docs/contribute/use-caselanggraph-개발-architecture-질의를-타임코드-구간으로-바꾸는-7노드-편성-그래프.md": {
+    "body_hash": "1af6d80747e990965c8a437733e49a4e4dd6e34b7672e8751dfb51ca03f0c104",
+    "slug": "9",
+    "sidebar_position": "9",
+    "frontmatter_hash": "d03392c6e360c6f1f5779e54dbd8c3839c80363c0cbf6b974d7aaf8f55c1d0eb"
+  },
+  "docs/contribute/use-caselanggraph-설치-절차-agent-compose-langgraph-7노드-편성-api-설치와-systemd-등록.md": {
+    "body_hash": "bb217b2662f743364e1f31495807168785ead7016384f9cd67c257f8a4aa934f",
+    "slug": "11",
+    "sidebar_position": "11",
+    "frontmatter_hash": "5a47793383f01132a0e29b6804dcab1fe1050ccafd8fb328063d384f8ac26577"
+  },
+  "docs/contribute/use-casemilvus-자체-chunking-방법과-벡터db-사용법-시간-구간-증거-색인.md": {
+    "body_hash": "7be8a308b9056a463a64f896cf8b6e9d13bd553b7f57e59c7c6e63b442b16d74",
+    "slug": "6",
+    "sidebar_position": "6",
+    "frontmatter_hash": "d087da5b831be8081f23ff3764ad011ea69cc84001f0e5edcaa65835b429021d"
+  },
+  "docs/contribute/use-caseqwen-설치-절차-aws-g7eblackwell-vllm-으로-qwen-3x-qwen3-omni-서빙.md": {
+    "body_hash": "67e3c424056f81e32cfcac1e20c40c5e90473a5ecf6031b6d2e67cc04e00ff0f",
+    "slug": "10",
+    "sidebar_position": "10",
+    "frontmatter_hash": "a4e59ba8c2a69f45da118dd15c4d5e647737d94cb6a08dfc17cf49bfa836d9be"
+  },
+  "docs/contribute/use-casewhisper-단위테스트-결과-한국어-방송-6종에서-faster-whisper-large-v3-vs-qwen3-asr.md": {
+    "body_hash": "6d62fd717aa993446ef556ae853586c94a40a551e7d63641989516533c092f88",
+    "slug": "8",
+    "sidebar_position": "8",
+    "frontmatter_hash": "686443ecfdef627c1bdab252e1a90dc677b4ef2edace7ebb14332730e83e12df"
+  },
+  "docs/contribute/use-case음성분석-단위테스트-결과-언어-식별lid-whisper-vs-voxlingua107-rawdenoise.md": {
+    "body_hash": "441c97f7938abddc378cb6cdeff2feaf242f85f9c2cc35c7d56fcaf4b55187db",
+    "slug": "7",
+    "sidebar_position": "7",
+    "frontmatter_hash": "4b7777474437e6cc9f178dfb9226d4e2b2734aa074a08c808bc3f7892faeade5"
+  },
+  "docs/contribute/v1responses-에서-top-logprobs-1-이면-빈-리스트가-반환되는-문제-수정.md": {
+    "body_hash": "2e8a001e8b297ee6a05304a79e5575eec4c40db8b33d285ecc25bb24de8b5b65",
+    "slug": "52",
+    "sidebar_position": "52",
+    "frontmatter_hash": "3694ea91cdfa1c8a8090b440e0958aa830b7365084597d35074a2b4fae563636"
+  },
+  "docs/contribute/word-timestamps-에서-단어-안의-구두점이-단어를-쪼개는-문제.md": {
+    "body_hash": "c7139c36b2beee1e4fee93c7ac7d70b2d244d3acd3e845c832904a43d99f76bc",
+    "slug": "41",
+    "sidebar_position": "41",
+    "frontmatter_hash": "5e359a54fd28991a779f239a80409e580667c1857e4dd476dfaab256417ed923"
+  },
+  "docs/contribute/경로에-16k-가-들어가면-기본-onnx-모델이-16-khz-전용으로-오인되는-문제-수정.md": {
+    "body_hash": "77badd3765aa213b39ef5e5a8800c2aede93313633351b7f0964c246914721a2",
+    "slug": "35",
+    "sidebar_position": "35",
+    "frontmatter_hash": "ecec57c527b01ce8b102d7543c1f4e7726e9199f353431d94ab19ccc57aeab0a"
+  },
+  "docs/contribute/긴-오디오-청크-병합-시-공백-누락으로-한국어영어-단어가-붙는-문제.md": {
+    "body_hash": "24a7b530a2c918adcee311ec21439c894737ee4ef9954744123e712d95369e41",
+    "slug": "30",
+    "sidebar_position": "30",
+    "frontmatter_hash": "e21aa6ab4205f1047bdaed9261971e1182773ed23da7850bbb1fcd9e3ca139d4"
+  },
+  "docs/contribute/대소문자-무시-모드에서-중첩-dataclass-의-대문자-필드-누락-수정.md": {
+    "body_hash": "7bd70c25c2d6b9e87d0f5b9c7bf05b2710595d8608db7ebd48984663f4401155",
+    "slug": "15",
+    "sidebar_position": "15",
+    "frontmatter_hash": "64a3254738ab5ef55e4dd39630cb7ac3b7b9fc3b15dd11483fd91e2d3de1e992"
+  },
+  "docs/contribute/앞-esm-블록에서-선언한-값을-다시-내보내면-파싱이-실패하고-오류가-엉뚱한-줄을-가리키는-문제.md": {
+    "body_hash": "28f06a1bc6887257de85877e0f3e59ee16fa4e8fd4143f0480b2e112bf238fcc",
+    "slug": "48",
+    "sidebar_position": "48",
+    "frontmatter_hash": "6c7bb09c1a5f1c7c8c65f2dc12e7e97a745f7e28049369b5abf3f025af0858aa"
+  },
+  "docs/contribute/웹-검색-본문-추출-중-rust-panic-으로-stt-svc-프로세스가-죽는-문제.md": {
+    "body_hash": "2dc0395d058e0848b6845a7ef7a02af70540d3016272160711e6050442521718",
+    "slug": "36",
+    "sidebar_position": "36",
+    "frontmatter_hash": "f0e3a14f93ed67f0cae326ef90a532b4540dcbd1c5254ca413f76499b391c15d"
+  },
+  "docs/contribute/음성-인식번역-요청이-서버-기본-presencefrequency-penalty-를-무시하는-문제-수정.md": {
+    "body_hash": "d21fd6c6738c8276862acc4cbd4e237f4c70000ea941b1e4039b735d7723345a",
+    "slug": "53",
+    "sidebar_position": "53",
+    "frontmatter_hash": "ca08fb37a782150bd48ad822787088852b07e9a613e0af0350dae4cdd73f4a0c"
+  },
+  "docs/contribute/정렬-실패-세그먼트가-srtvtt-출력에서-누락되는-문제.md": {
+    "body_hash": "ae7d1a4e4f886243efe80f653e5049fe2c1c15a0a86f3828c3b4684cf072e0f5",
+    "slug": "16",
+    "sidebar_position": "16",
+    "frontmatter_hash": "2d26e29d2e37e50247011fdc9a59bc43804c89c872e4d020c051305794ec972e"
+  },
+  "docs/contribute/정렬-실패-세그먼트를-srtvtt-에-남기도록-수정.md": {
+    "body_hash": "b0fec38a667731ad228ab523d0cad6a64b3f99f4585ed1087f80e67c64036f15",
+    "slug": "39",
+    "sidebar_position": "39",
+    "frontmatter_hash": "6dde9582372791ec4eb480f4438f11596bf267ad30ac8343c5fb54aea0c38c0f"
+  },
+  "docs/contribute/추론-진행률-hook-이-전체보다-큰-완료-수를-보고하는-문제-수정.md": {
+    "body_hash": "42af2a9dde97ebfa547d59237bdcf3c11f997340811ed07bcadcff6abbe9901f",
+    "slug": "21",
+    "sidebar_position": "21",
+    "frontmatter_hash": "7b736da02accaba29dafecf926e9b9c444480a493f1ba6499b7d2b553d7ea25e"
+  },
+  "docs/contribute/파일-객체를-dict-로-넘길-때-keyerror-uri-수정.md": {
+    "body_hash": "4a57f25c480b56694140d2da188453266a239012403b0d9ee44dfd0f40d4fa92",
+    "slug": "14",
+    "sidebar_position": "14",
+    "frontmatter_hash": "483aafe692514edc0d93973a3b2091900328005ce008ef3442e96e4c9813b203"
+  },
+  "docs/contribute/프레임-수가-없는-영상파이프-webmmkv-raw-h264이-1프레임음수-메타데이터로-로드되는-문제.md": {
+    "body_hash": "ef285382ec1dec3f18a150dccfb5f6d56dab2d607d1026e1cedb9317966f19d8",
+    "slug": "47",
+    "sidebar_position": "47",
+    "frontmatter_hash": "19878e2bba5246585d3a5333b34f98c95f0f528d2f8fd89da39fd4a3f050cd2a"
+  },
+  "docs/test/오픈소스-생태계-기여-미완료.md": {
+    "body_hash": "9bdea8588c38407e3d12e2726af3b5449f19ed8b472807a17b71a38d45820bb6",
+    "slug": "2",
+    "sidebar_position": "2",
+    "frontmatter_hash": "57e42ab790fae71faf43fc3464d70f7c9160089f3d9ed442570a20b63fc8fa15"
+  },
+  "blog/2026-07-14-db-스키마-공개.md": {
+    "body_hash": "df70d42637a8fd3051b86ac071fcdd98091148c7addcc232f971da380c7f31c6",
+    "slug": "",
+    "sidebar_position": "",
+    "frontmatter_hash": "ff7ffa259312b31968900b68a1b2c13e71c7490ece1a06d5d1982da968f8b118"
   }
 }
