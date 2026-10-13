@@ -781,3 +781,12 @@ def test_title_keeps_sort_prefix_and_count_suffix_out_of_translation(monkeypatch
 def test_title_without_prefix_or_suffix_is_translated_whole(monkeypatch):
     monkeypatch.setattr(T, "translate_with_deepl", lambda t: 'Say "hi" &amp; go')
     assert T._translate_title("인사") == 'Say \\"hi\\" & go'
+
+
+
+def test_midline_blockquote_marker_fix_skips_code_blocks():
+    """코드블록의 반환 타입 화살표는 인용문 마커가 아니다 (/en/blog/4)."""
+    body = 'If an> `x` is set\n\n```python\ndef process(a: int) -> tuple[int, int]:\n    ...\n```\n'
+    out = T._return_midline_blockquote_marker(body)
+    assert 'def process(a: int) -> tuple[int, int]:' in out
+    assert out.startswith('> If an `x` is set')
