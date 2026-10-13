@@ -959,6 +959,19 @@ class TestBlogSortDate:
         assert n.blog_sort_date("2026-07-14", "08_숏폼 자동 생성") == "2026-07-14T12:08:00"
         assert n.blog_sort_date("2026-07-14", "12_과제 성과 종합 정리") == "2026-07-14T12:12:00"
 
+    def test_numeric_slug_overrides_prefix(self):
+        """숫자 slug 가 있으면 제목 접두번호 대신 slug 순으로 정렬된다."""
+        d12 = n.blog_sort_date("2026-07-14", "DB 스키마 공개", 12, "12")
+        d13 = n.blog_sort_date("2026-07-14", "10_SBSi 실증 테스트 사례 공유 1건", 13, "13")
+        d15 = n.blog_sort_date("2026-07-14", "오픈 소스 기여 종합 가이드 1건", 15, "15")
+        d16 = n.blog_sort_date("2026-07-14", "11_테스트 케이스 작성 1건", 16, "16")
+        assert d12 == "2026-07-14T12:12:00"
+        assert d12 < d13 < d15 < d16
+
+    def test_non_numeric_slug_falls_back_to_prefix(self):
+        """숫자가 아닌 slug 는 기존 규칙(접두번호 분 + 생성 순서 초)을 따른다."""
+        assert n.blog_sort_date("2026-07-14", "08_숏폼 자동 생성", 3, "my-post") == "2026-07-14T12:08:03"
+
     def test_leading_zero_prefix_parsed(self):
         """접두번호 05 → 정수 5로 파싱 (12:05)."""
         assert n.blog_sort_date("2026-06-22", "05_기술 블로그 개설") == "2026-06-22T12:05:00"

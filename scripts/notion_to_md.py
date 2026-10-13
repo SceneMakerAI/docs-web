@@ -300,18 +300,22 @@ def read_last_edited_time_prop(props, name):
     return None
 
 
-def blog_sort_date(date_str, title, order=0):
+def blog_sort_date(date_str, title, order=0, slug=None):
     """블로그 정렬용 date 문자열 생성.
 
-    실제 날짜(일)는 그대로 두고 제목 접두번호(예: "12_...")를 하루 안의 시각(분)으로
-    인코딩한다(정오 기준, 번호 클수록 늦은 시각). 접두번호가 같거나 없는 글은
-    Notion 생성 순서(order)를 초 자리에 넣어 그 순서대로 정렬되게 한다.
+    실제 날짜(일)는 그대로 두고 하루 안의 시각으로 순서를 인코딩한다(정오 기준).
+    slug 가 숫자면 그 번호를 분 자리에 넣어 주소 번호 순으로 정렬한다.
+    slug 가 숫자가 아니면 제목 접두번호(예: "12_...")를 분, Notion 생성 순서(order)를
+    초 자리에 넣는다.
     sortPosts:'ascending' 과 함께 동작한다.
     정오 기준이라 타임존에 따른 표시 날짜(일) 이동이 없다.
     """
+    if slug is not None and str(slug).isdigit():
+        hh, mm = divmod(720 + min(int(slug), 719), 60)  # 720분 = 12:00
+        return f"{date_str}T{hh:02d}:{mm:02d}:00"
     m = re.match(r"\s*0*(\d{1,2})_", title or "")
     prefix = int(m.group(1)) if m else 0
-    hh, mm = divmod(720 + prefix, 60)  # 720분 = 12:00
+    hh, mm = divmod(720 + prefix, 60)
     ss = min(max(int(order or 0), 0), 59)
     return f"{date_str}T{hh:02d}:{mm:02d}:{ss:02d}"
 
@@ -846,7 +850,7 @@ def save_doc_page(page, position, existing_map, parent_slug=None, is_parent=Fals
         if not safe_slug:
             safe_slug = str(order)
 
-        lines = ["---", f'title: "{safe_title}"', f"date: {blog_sort_date(date_str, title, order)}"]
+        lines = ["---", f'title: "{safe_title}"', f"date: {blog_sort_date(date_str, title, order, safe_slug)}"]
         if safe_slug:
             lines.append(f"slug: {safe_slug}")
         if authors_list:
