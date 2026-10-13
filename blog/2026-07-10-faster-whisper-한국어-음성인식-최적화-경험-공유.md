@@ -1,7 +1,7 @@
 ---
 title: "faster-whisper 한국어 음성인식 최적화 경험 공유"
-date: 2026-07-10T12:00:04
-slug: 4
+date: 2026-07-10T12:03:00
+slug: 3
 authors: [sbin]
 description: "faster-whisper large-v3 를 한국어 방송에 쓸 때 생기는 환각과 언어 오분류를 줄이고 속도를 맞춘 설정"
 tags: [stt, faster-whisper, optimization]

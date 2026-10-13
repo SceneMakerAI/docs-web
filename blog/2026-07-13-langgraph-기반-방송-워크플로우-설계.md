@@ -1,7 +1,7 @@
 ---
 title: "Langgraph 기반 방송 워크플로우 설계"
-date: 2026-07-13T12:00:05
-slug: 5
+date: 2026-07-13T12:06:00
+slug: 6
 authors: [sbin]
 description: "자연어 질의를 방송 클립 구간으로 바꾸는 LangGraph 여섯 단계 — 범위, 계획, 검색, 확장, 선택, 조립"
 tags: [rag, Langgraph, workflow]

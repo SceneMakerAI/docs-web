@@ -72,5 +72,5 @@ uv venv .venv-qwen --python 3.12
 
 Qwen 쪽은 의존성이 부딪혀서 venv 를 따로 뒀다.
 
-콘텐츠별 수치는 [`output/report.csv`](https://github.com/SceneMakerAI/poc-stt-bench/blob/HEAD/output/report.csv) , 튜닝 과정은 [블로그](https://doc.scenemaker.solbox.com/blog/4) 에 있다.
+콘텐츠별 수치는 [`output/report.csv`](https://github.com/SceneMakerAI/poc-stt-bench/blob/HEAD/output/report.csv) , 튜닝 과정은 [블로그](https://doc.scenemaker.solbox.com/blog/3) 에 있다.
 
