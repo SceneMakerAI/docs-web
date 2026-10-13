@@ -1,12 +1,12 @@
 ---
-title: "07_Sharing My Experience with Optimizing \"faster-whisper\" for Korean Speech Recognition"
-date: 2026-07-10T12:07:00
-slug: 4
+title: "Sharing My Experience with Optimizing \"faster-whisper\" for Korean Speech Recognition"
+date: 2026-07-10T12:03:00
+slug: 3
 authors: [sbin]
 description: "This article provides a detailed explanation of the speech-to-text conversion process."
-tags: [Fast-Whisper, Hugging face]
+tags: [stt, faster-whisper, optimization]
 last_update:
-  date: 2026-09-29
+  date: 2026-10-12
 ---
 
 ### Introduction

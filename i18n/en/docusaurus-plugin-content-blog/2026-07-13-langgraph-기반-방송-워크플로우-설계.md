@@ -1,12 +1,12 @@
 ---
-title: "07_Designing a Langgraph-Based Broadcast Workflow"
-date: 2026-07-13T12:07:00
-slug: 5
+title: "Designing a Langgraph-Based Broadcast Workflow"
+date: 2026-07-13T12:06:00
+slug: 6
 authors: [sbin]
 description: "An article detailing the LangGraph (agent-search) process for finding segments of broadcast clips using natural language queries"
-tags: [workflow, Langgraph]
+tags: [rag, Langgraph, workflow]
 last_update:
-  date: 2026-09-29
+  date: 2026-10-12
 ---
 
 ### Introduction
