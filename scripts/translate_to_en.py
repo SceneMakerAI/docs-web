@@ -399,11 +399,12 @@ def _translate_title(kr_title):
 
     통째로 보내면 둘이 섞여 '08_1 Post on …', '12_1 Report on …' 처럼 번호가 바뀐 듯한
     제목이 나오고, '1건' 표기도 글마다 달라진다 ((1) · 1 entry · 1 item · One …).
+    건수 접미는 EN 제목에 옮기지 않는다 — '(1)' 은 영어 독자에게 뜻이 통하지 않는다.
     """
     m = re.match(r'^(\d+_)?(.*?)(?:\s+(\d+)건)?$', kr_title)
-    prefix, core, count = m.group(1) or '', m.group(2), m.group(3)
+    prefix, core = m.group(1) or '', m.group(2)
     en = clean_frontmatter_value(translate_with_deepl(core)).strip()
-    return f"{prefix}{en} ({count})" if count else f"{prefix}{en}"
+    return f"{prefix}{en}"
 
 
 def translate_with_deepl_plain(text):
