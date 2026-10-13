@@ -63,7 +63,7 @@ SCOPE_VOTE_LIMIT = 40     # Top-k chapters for voting
 
 # lib/graph/scope.py
 
-> async def run(state: dict, deps) - dict:
+async def run(state: dict, deps) -> dict:
     req = state["request"]
 
     # ① User specifies the episode → As is
@@ -157,7 +157,7 @@ SEARCH_TOPK = 10
 
 # lib/graph/retrieve.py
 
-> def search_beat(client, beat: dict, cast_filter: list[str] | None) - list[dict]:
+def search_beat(client, beat: dict, cast_filter: list[str] | None) -> list[dict]:
     queries = beat.get("queries") or [...]
     qvecs = embed.embed_query(queries)
     # Soft filter steps: [cast+event] → [event] → [cast] → [none]
@@ -196,7 +196,7 @@ _TOP_HITS = 4 # Number of top hits to expand per beat
 
 # lib/graph/expand.py
 
-> def expand_beat(client, beat: dict) - list[dict]:
+def expand_beat(client, beat: dict) -> list[dict]:
     ctxs = []
     for h in beat["candidates"][:_TOP_HITS]:
         s = max(0, h["start_sec"] - EXPAND_PAD_SEC)

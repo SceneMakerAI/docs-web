@@ -134,7 +134,7 @@ Since they cover different levels (windows vs. tokens, soft vs. hard), all three
 # poc/poc-stt-bench/lib/audio/whisper/whisper_stt.py
 # Line 97-116
 
-> def _do_transcribe(audio_np: np.ndarray, language: str) - tuple[list, float]:
+def _do_transcribe(audio_np: np.ndarray, language: str) -> tuple[list, float]:
     """Call faster-whisper transcribe. Returns segments (list) + mean avg_logprob."""
     segments_gen, _info = _model.transcribe(
         audio_np,
@@ -175,7 +175,7 @@ MAX_SPEECH_S = 30.0    # If too long, it causes a processing load (Whisper 30-se
 MIN_SILENCE_S = 0.3    # Silences shorter than this are ignored (adjacent utterances are merged)
 
 
-> def detect(audio_np: np.ndarray, sr: int = 16000) - list[tuple[float, float]]:
+def detect(audio_np: np.ndarray, sr: int = 16000) -> list[tuple[float, float]]:
     """Extracts timestamps for speech segments. Returns: [(start_sec, end_sec), ...]"""
     if _model is None:
         load_model()
@@ -310,7 +310,7 @@ for seg in segments_out:
         if _hangul_ratio(text) < KO_MIN_HANGUL_RATIO:    # Less than 0.3
             continue
             
-> def _hangul_ratio(text: str) - float:
+def _hangul_ratio(text: str) -> float:
     """The ratio of Korean syllables to alphanumeric characters (excluding spaces and punctuation). If the denominator is 0, the value is 1.0 (validation skipped)."""
     chars = [c for c in text if c.isalnum()]
     if not chars:

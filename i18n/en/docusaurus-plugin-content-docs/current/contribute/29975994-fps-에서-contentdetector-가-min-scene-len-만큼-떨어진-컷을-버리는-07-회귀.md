@@ -42,8 +42,8 @@ gap.seconds            : 0.5005
 15 / float(fps)        : 0.5005000000000001
 gap >= 15 / float(fps) : False  <- what FlashFilter evaluates
 gap >= 15              : True  <- what the other detectors evaluate
-> MERGE    cuts every 15 frames - []
-> SUPPRESS cuts every 15 frames - [30, 60, 90, 120, 150, 180, 210, 240, 270]
+MERGE    cuts every 15 frames -> []
+SUPPRESS cuts every 15 frames -> [30, 60, 90, 120, 150, 180, 210, 240, 270]
 ```
 
 The expected values for both modes are 15, 30, 45, ..., 285, and version 0.6.7 of `FlashFilter` returns these values correctly.

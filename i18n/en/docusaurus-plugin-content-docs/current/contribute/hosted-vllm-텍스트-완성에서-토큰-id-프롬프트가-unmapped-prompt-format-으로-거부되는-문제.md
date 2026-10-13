@@ -43,8 +43,8 @@ for model in ("openai/Qwen/Qwen3-8B", "hosted_vllm/Qwen/Qwen3-8B"):
 
 ```text
   stub got /v1/completions {"model": "Qwen/Qwen3-8B", "prompt": [151644, 872, 198, 14990, 151645], "max_tokens": 4}
-> openai/Qwen/Qwen3-8B - Hello!
-> hosted_vllm/Qwen/Qwen3-8B - Exception Unmapped prompt format. Your prompt is neither a list of strings nor a string. prompt=[151644, 872, 198, 14990, 151645]. File an issue - https://github.com/BerriAI/litellm/issues
+openai/Qwen/Qwen3-8B ->  Hello!
+hosted_vllm/Qwen/Qwen3-8B -> Exception Unmapped prompt format. Your prompt is neither a list of strings nor a string. prompt=[151644, 872, 198, 14990, 151645]. File an issue - https://github.com/BerriAI/litellm/issues
 ```
 
 ### Verification
