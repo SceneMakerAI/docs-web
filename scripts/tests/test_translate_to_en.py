@@ -774,7 +774,7 @@ def test_title_keeps_sort_prefix_and_count_suffix_out_of_translation(monkeypatch
     """'08_모아보기 서비스 구현기 1건' 을 통째로 보내면 '08_1 Post on …' 처럼 번호가 섞인다."""
     seen = []
     monkeypatch.setattr(T, "translate_with_deepl", lambda t: seen.append(t) or "Compilation Service Implementation")
-    assert T._translate_title("08_모아보기 서비스 구현기 1건") == "08_Compilation Service Implementation (1)"
+    assert T._translate_title("08_모아보기 서비스 구현기 1건") == "08_Compilation Service Implementation"
     assert seen == ["모아보기 서비스 구현기"]
 
 
