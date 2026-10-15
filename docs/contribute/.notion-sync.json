@@ -390,5 +390,12 @@
     "content_hash": "98f5ef46ae9b203d248d63a775134ff16f18e597fc17e44a9cc18e9b15e6dbfa",
     "order": 56,
     "parent_id": null
+  },
+  "3fae15b4-0359-81e6-a6a4-e146840553ca": {
+    "file": "docs/contribute/tga-32비트-컬러맵-이미지-로드-실패-수정.md",
+    "last_edited": "2026-10-15T07:26:00.000Z",
+    "content_hash": "4eb98f9e5bf17977c5f592dceb4de496e154f66b0a3fa864bc5933ba6b4ba58d",
+    "order": 57,
+    "parent_id": null
   }
 }
