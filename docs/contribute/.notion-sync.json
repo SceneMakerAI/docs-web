@@ -376,5 +376,19 @@
     "content_hash": "b7cd95d8730802761180109267a8885f55a796c10272db4978d67e59d2b4f30e",
     "order": 54,
     "parent_id": null
+  },
+  "3fae15b4-0359-8188-8732-c9466ebe4c73": {
+    "file": "docs/contribute/responses-api-에서-textformat-이-text-일-때-structured-outputs-를-거부하는-문제.md",
+    "last_edited": "2026-10-15T04:17:00.000Z",
+    "content_hash": "dd396380bc8b9427de90cfc6cbc46389e492783a3cb51d13c1f80105d0f2a5db",
+    "order": 55,
+    "parent_id": null
+  },
+  "3fae15b4-0359-81ae-a74a-e683a968bf56": {
+    "file": "docs/contribute/존재하지-않는-파일을-가리키는-file-url-에-500-대신-400-반환.md",
+    "last_edited": "2026-10-15T04:17:00.000Z",
+    "content_hash": "98f5ef46ae9b203d248d63a775134ff16f18e597fc17e44a9cc18e9b15e6dbfa",
+    "order": 56,
+    "parent_id": null
   }
 }
