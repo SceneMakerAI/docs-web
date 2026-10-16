@@ -397,5 +397,12 @@
     "content_hash": "4eb98f9e5bf17977c5f592dceb4de496e154f66b0a3fa864bc5933ba6b4ba58d",
     "order": 57,
     "parent_id": null
+  },
+  "3fbe15b4-0359-81f7-a380-cb13140f6632": {
+    "file": "docs/contribute/textencoder-boseos-인덱스-추가-시-정수-텐서가-float-로-바뀌는-문제-수정.md",
+    "last_edited": "2026-10-16T00:38:00.000Z",
+    "content_hash": "398a6b41034ab621dea1a85ee89212225a10c57390e70f43ab209f27b57f1158",
+    "order": 58,
+    "parent_id": null
   }
 }
