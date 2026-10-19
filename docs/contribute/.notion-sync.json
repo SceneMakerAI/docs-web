@@ -432,5 +432,12 @@
     "content_hash": "4229b50046ef4f8591dcb8930da29fb876b220e758bfebf00f3942de05acf45b",
     "order": 62,
     "parent_id": null
+  },
+  "3fee15b4-0359-8100-9709-fa4b3ffe0572": {
+    "file": "docs/contribute/opencv-백엔드에서-vfr-영상-끝에-위치가-뒤로-돌아가-마지막-장면이-잘리는-문제-수정.md",
+    "last_edited": "2026-10-19T09:16:00.000Z",
+    "content_hash": "0a599c705dc72be29f1d7c23090a340512b9f8c48974f6b77233429e40774936",
+    "order": 63,
+    "parent_id": null
   }
 }
