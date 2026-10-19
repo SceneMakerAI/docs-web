@@ -70,9 +70,9 @@
     "parent_id": null
   },
   "39de15b4-0359-80b7-ae6a-da99070db110": {
-    "file": "blog/2026-07-14-09-맥락-기반-광고-최적화-기술-해설-1건.md",
-    "last_edited": "2026-10-12T06:58:00.000Z",
-    "content_hash": "d7ae08f97db7c5b219588fc72720da8e2f981506bfdd356f4637a1d03feccd17",
+    "file": "blog/2026-07-14-맥락-기반-광고-최적화-기술-해설-서비스-배포-시-확인.md",
+    "last_edited": "2026-10-19T06:43:00.000Z",
+    "content_hash": "f5037fe695a20b332bb2f61064e3ac2e9171a438a877983aea701f99a17167dc",
     "order": 11,
     "parent_id": null
   },
@@ -84,9 +84,9 @@
     "parent_id": null
   },
   "39de15b4-0359-80cf-bde8-f114c7d20501": {
-    "file": "blog/2026-07-14-10-sbsi-실증-테스트-사례-공유-1건.md",
-    "last_edited": "2026-10-12T07:29:00.000Z",
-    "content_hash": "3bf8149174103c320b9cbaae8d3e4c833185f06e52387f036389aef56006049a",
+    "file": "blog/2026-07-14-sbsi-실증-테스트-사례-공유-1건.md",
+    "last_edited": "2026-10-19T07:01:00.000Z",
+    "content_hash": "88e14b4329114972ddd065427f9082e38035d4691868f66c45c9ee92c7ff6b50",
     "order": 13,
     "parent_id": null
   },
@@ -106,7 +106,7 @@
   },
   "39de15b4-0359-80e7-aa28-fd4d9b4583d2": {
     "file": "blog/2026-07-14-11-테스트-케이스-작성-1건.md",
-    "last_edited": "2026-10-15T05:48:00.000Z",
+    "last_edited": "2026-10-19T06:07:00.000Z",
     "content_hash": "f3d760a8256783b4e259666dd227d3036f952bb7dcfd0ed02fe09d2e39854dec",
     "order": 16,
     "parent_id": null
@@ -134,7 +134,7 @@
   },
   "39de15b4-0359-80a0-9905-d27d7561bb8d": {
     "file": "blog/2026-07-14-12-오픈소스-생태계-기여-실적-보고-1건.md",
-    "last_edited": "2026-10-12T06:52:00.000Z",
+    "last_edited": "2026-10-19T06:07:00.000Z",
     "content_hash": "eda42b455748cc1ec89e04afe75652dc7cef8918a8366c0832170ea441e04c46",
     "order": 20,
     "parent_id": null

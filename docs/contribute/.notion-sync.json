@@ -404,5 +404,33 @@
     "content_hash": "398a6b41034ab621dea1a85ee89212225a10c57390e70f43ab209f27b57f1158",
     "order": 58,
     "parent_id": null
+  },
+  "3fee15b4-0359-810b-b440-f5ddb440e6cb": {
+    "file": "docs/contribute/crop-박스-모서리가-5-일-때-위치에-따라-잘리는-크기가-달라지는-문제-짝수-반올림.md",
+    "last_edited": "2026-10-19T07:23:00.000Z",
+    "content_hash": "a5f30203f7a913421db507c0abb6de7aac6214e33fc2a1b8ad465821a0dc00b6",
+    "order": 59,
+    "parent_id": null
+  },
+  "3fee15b4-0359-81b4-b446-c4a677f4a6f7": {
+    "file": "docs/contribute/앞쪽의-짧은-장면-하나-때문에-한참-뒤의-컷이-밀리거나-사라지는-contentdetector-병합-필터-동작.md",
+    "last_edited": "2026-10-19T07:31:00.000Z",
+    "content_hash": "b06f3ebb559447f8dcdf203894e7a797e9facc1bcc39f3241f2b867b440a7907",
+    "order": 60,
+    "parent_id": null
+  },
+  "3fee15b4-0359-8108-8c86-ed89c4b8726e": {
+    "file": "docs/contribute/호스트-스코프가-먼저-취소되면-asyncio-에서-from-threadrun-이-취소되지-않는-문제-trio-는-cancelled.md",
+    "last_edited": "2026-10-19T07:33:00.000Z",
+    "content_hash": "cccade38d21c04ab8566d9046348d0574234a66c5c76cfea38143d865a23a7af",
+    "order": 61,
+    "parent_id": null
+  },
+  "3fee15b4-0359-8158-b4c4-ebcd6be364f1": {
+    "file": "docs/contribute/crop-에서-5-좌표를-짝수-대신-위로-반올림하도록-수정.md",
+    "last_edited": "2026-10-19T08:21:00.000Z",
+    "content_hash": "4229b50046ef4f8591dcb8930da29fb876b220e758bfebf00f3942de05acf45b",
+    "order": 62,
+    "parent_id": null
   }
 }
