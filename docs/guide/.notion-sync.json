@@ -1,15 +1,15 @@
 {
   "387e15b4-0359-80b4-9ec2-c72611a32a31": {
     "file": "docs/guide/외부-연동-규격-sbs.md",
-    "last_edited": "2026-10-22T01:42:00.000Z",
+    "last_edited": "2026-10-22T09:21:00.000Z",
     "content_hash": "726e5589324a12fa6fa6064969abbd6846aab0f53b58c34cd8f5dd5747808990",
     "order": 1,
     "parent_id": null
   },
   "401e15b4-0359-80a7-9886-ed979e8bf96d": {
     "file": "docs/guide/외부-연동-규격.md",
-    "last_edited": "2026-10-22T06:57:00.000Z",
-    "content_hash": "47c669bb0d294063a3782a0e8f994855531a946cf6d7ee986bc572bca0583fea",
+    "last_edited": "2026-10-22T10:16:00.000Z",
+    "content_hash": "44335c16f4cd655a85e87664f5d179e863442f1ea91215290d151aa7998118ca",
     "order": 2,
     "parent_id": null
   }
