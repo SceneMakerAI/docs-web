@@ -1,0 +1,342 @@
+---
+id: 외부-연동-규격-sbs
+title: "외부 연동 규격-SBS"
+sidebar_position: 1
+slug: "1"
+description: "고객사 및 외부와 해당 시스템이 연동 방법 정의"
+last_update:
+  date: 2026-10-22
+---
+
+
+## 연동 Flow
+
+### 영상 등록/분석 절차
+
+![image](/img/guide/외부-연동-규격-sbs/img-00.png)
+
+
+### 영상 검색 절차
+
+![image](/img/guide/외부-연동-규격-sbs/img-01.png)
+
+
+
+---
+
+## 연동 상세
+
+### 영상 등록/분석 - 요청
+
+#### Request 
+
+```text
+POST http://{HOST}:{PORT}/api/v1/stt_svc
+Content-Type: application/json
+
+{
+  "v_id": 202,
+  "file_path": "vod/2/202.mp4",
+  "title": "2026 KBO KT vs NC",
+  "category": "스포츠-야구",
+  "year": 2026,
+  "callback_url" : "http://sbs.co.kr/",
+  "stream_mode": "N",
+  "stream_id" : "20260831120000"
+}
+```
+
+
+각 필드 설명은 아래와 같다
+
+<table>
+<tbody>
+<tr>
+<td>필드</td>
+<td>타입</td>
+<td>필수</td>
+<td>기본값</td>
+<td>설명</td>
+</tr>
+<tr>
+<td>v_id</td>
+<td>int</td>
+<td>X</td>
+<td>N/A</td>
+<td>최초에는 발급(-100 값)이고, 이후에는 Key 값으로 사용
+한개의 게임(영상 전체-1회\~9회)를 관리하는 Key</td>
+</tr>
+<tr>
+<td>file_path</td>
+<td>String</td>
+<td>O</td>
+<td>N/A</td>
+<td></td>
+</tr>
+<tr>
+<td>title</td>
+<td>String</td>
+<td>O</td>
+<td>N/A</td>
+<td>“대한민국 vs 미국” 처럼 사실 대로 적어야 함. 의미 없는 title 금지</td>
+</tr>
+<tr>
+<td>category</td>
+<td>String</td>
+<td>O</td>
+<td>N/A</td>
+<td>“스포츠-야구” 로 고정 (현재 이것만 가능 합니다.)</td>
+</tr>
+<tr>
+<td>year</td>
+<td>int</td>
+<td>O</td>
+<td>N/A</td>
+<td>2026 으로 고정</td>
+</tr>
+<tr>
+<td>callback_url</td>
+<td>String</td>
+<td>X</td>
+<td>N/A</td>
+<td>완료보고(Callback) 을 받고 싶을때</td>
+</tr>
+<tr>
+<td>stream_mode</td>
+<td>String</td>
+<td>O</td>
+<td>“N”</td>
+<td>N = VOD 모드, 영상 전체를 넣고 한번에 분석할 경우
+Y = Stream 모드, 영상 일부를 지속적으로 넣을 경우</td>
+</tr>
+<tr>
+<td>stream_id</td>
+<td>String</td>
+<td>X</td>
+<td>N/A</td>
+<td data-notion-bg="red_background">잘라진 영상의 고유값
+stream_mode=stream 일 경우에는 필수
+stream_mode=vod 일 경우에는 무시
+우리가 만들 것인가? 아니면 고객사에서 받아서 우리가 쓸 것인가?</td>
+</tr>
+<tr>
+<td>stream_last</td>
+<td>String</td>
+<td>X</td>
+<td>Y</td>
+<td>stream_mode=’Y’ 일 경우 
+stream 의 마지막 영상임을 알림. 
+서버 측은 Y를 받으면 해당 v_id 의 stream 을 더 이상 받지 않는다.</td>
+</tr>
+<tr>
+<td>forced_yn</td>
+<td>String</td>
+<td>X</td>
+<td>“Y”</td>
+<td>Y|N
+vod 모드 : v_id 로 영상이 있을 경우 기존 영상을 지우고 다시 분석
+stream 모드: v_id, stream_id 로 영상이 있을 경우 기존 영상을 지우고 다시 분석
+Stream_mode 에서 stream_id=a,b,c,d 까지 온 상태에서 b를 지울 경우에 이후를 다 지운다.</td>
+</tr>
+</tbody></table>
+
+
+#### Response
+
+| 상황 | HTTP | 본문 |
+| --- | --- | --- |
+| 접수됨 (vod) | 200 | `{"v_id": 202, "stream_id": "VOD", "code": 0, "result": "OK"}` |
+| 접수됨(stream) | 200 | `{"v_id": 202, "stream_id": "333", "code": 0, "result": "OK"}` |
+| 처리량 초과 | 200 | `{"v_id": 202, "code": -1, "result": "busy, retry later"}`   |
+| 요청 형식 오류 | 422 | 표준 검증 오류 |
+
+
+---
+
+### 영상 등록/분석 - 보고
+
+#### Request
+
+```text
+[vod 모드]
+POST {callback_url}
+Content-Type: application/json
+
+{
+  "v_id": 202,
+  "stream_id": "VOD",
+  "result": "OK",
+  "code": 0
+}
+
+[Stream 모드]
+POST {callback_url}
+Content-Type: application/json
+
+{
+  "v_id": 202,
+  "stream_id": "abc",
+  "result": "OK",
+  "code": 0
+}
+```
+
+
+각 필드 설명은 아래와 같다
+
+<table>
+<tbody>
+<tr>
+<td>필드</td>
+<td>설명</td>
+</tr>
+<tr>
+<td>v_id</td>
+<td>영상 전체에 대한 고유 값</td>
+</tr>
+<tr>
+<td>stream_id</td>
+<td>stream 모드일 경우 같이 return</td>
+</tr>
+<tr>
+<td>result</td>
+<td><code>OK</code>| fail</td>
+</tr>
+<tr>
+<td>code</td>
+<td>0</td>
+</tr>
+</tbody></table>
+
+#### Response
+
+```text
+HTTP 200 OK
+```
+
+
+---
+
+### 영상 검색 - 요청
+
+#### Request
+
+```text
+POST http://{HOST}:{PORT}/api/v1/search_svc
+Content-Type: application/json
+
+{
+  "v_id": 202,
+  "stream_id": "ABC"
+  "query": "KT 선발투수가 삼진 잡는 장면",
+  "callback_url": "http://sbs.co.kr/"
+}
+```
+
+
+각 필드 설명은 아래와 같다
+
+| 필드 | 타입 | 필수 | 설명 |
+| --- | --- | --- | --- |
+| `v_id` | int | O | 검색 대상 영상 |
+| stream_id | String | X | 영상의 stream_id. 서버는 받은 stream_id 를 그대로 return 검색시 해당 스트림만 검색하는 용도는 아님 |
+| `query` | String | O | 찾고 싶은 장면을 문장으로. "홈런", "역전 장면" 등 |
+| `callback_url` | String | X | 검색 결과를 Callback 으로 받고 싶을 때 |
+
+
+#### Reponse
+
+```text
+[성공시]
+{"v_id": 201, "stream_id": "a", "search_id": "20260902-0001", "code": 0, "result": "OK"}
+
+[성공시]
+{"v_id": 201, "stream_id": "ABC", "search_id": "20260902-0001", "code": 0, "result": "OK"}
+
+[대상 영상 없음]
+{"v_id": 201, "code": -1, "result": "Not found v_id"}
+
+[처리량 초과]
+{"v_id": 201, "code": -1, "result": "busy, retry later"}
+
+[요청 형식 오류]
+HTTP 4XX
+```
+
+  
+각 필드 설명
+
+| 필드 | 타입 | 필수 | 설명 |
+| --- | --- | --- | --- |
+| v_id | int | O | 영상 전체의 Key 값 |
+| stream_id | String | X | stream_id 가 있는 경우 그대로 return |
+| search_id | string | X | Search 를 시작할 조건이 모두 만족되면 발급 |
+| code | int | O | 0: 성공, other: 실패 |
+| result | string | O | 상태 메시지 |
+
+---
+
+### 영상 검색 - 보고
+
+#### Request
+
+```text
+[성공시]
+POST {callback_url}
+Content-Type: application/json
+
+{
+  "v_id": 202,
+  "stream_id": "abc",
+  "search_id": "20260902-0001",  
+  "query": "KT 선발투수가 삼진 잡는 장면",
+  "result": "OK",
+  "code": 0,
+  "scenes": [
+    {
+      "stream_id": "ABC",
+      "start_time": "01:12:33.4",
+      "end_time": "01:12:48.9",
+      "start_sec": 4353.4,
+      "end_sec": 4368.9,
+      "text": "[5회초]\n득점"
+    },
+    {
+      "stream_id": "ABC",
+      "start_time": "02:05:11.0",
+      "end_time": "02:05:26.2",
+      "start_sec": 7511.0,
+      "end_sec": 7526.2,
+      "text": "[6회말]\n삼진"
+    }
+  ]
+}
+
+[실패시]
+{
+  "v_id": 202,
+  "stream_id": "abc",
+  "search_id": "20260902-0001",
+  "query": "KT 선발투수가 삼진 잡는 장면",
+  "result": "fail",
+  "code": -1,
+  "scenes": []
+}
+```
+
+
+#### Response
+
+```bash
+HTTP 200 OK
+```
+
+
+---
+
+
+
+
+
+
+

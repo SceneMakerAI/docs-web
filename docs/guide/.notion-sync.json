@@ -1,9 +1,16 @@
 {
   "387e15b4-0359-80b4-9ec2-c72611a32a31": {
-    "file": "docs/guide/외부-연동-규격.md",
-    "last_edited": "2026-09-14T07:13:00.000Z",
-    "content_hash": "5ea76fbbdf381619809b92410b1ab815b7133017170c989d0dab9f67a41a2cbc",
+    "file": "docs/guide/외부-연동-규격-sbs.md",
+    "last_edited": "2026-10-22T01:42:00.000Z",
+    "content_hash": "726e5589324a12fa6fa6064969abbd6846aab0f53b58c34cd8f5dd5747808990",
     "order": 1,
+    "parent_id": null
+  },
+  "401e15b4-0359-80a7-9886-ed979e8bf96d": {
+    "file": "docs/guide/외부-연동-규격.md",
+    "last_edited": "2026-10-22T02:36:00.000Z",
+    "content_hash": "bb3e4a09994aa741386b4b83fe9860974fa0899cd749be9ff7fa59bc957a3a36",
+    "order": 2,
     "parent_id": null
   }
 }
