@@ -146,7 +146,8 @@ docs-web/
 │   ├── install/        # 설치 (NOTION_INSTALL)
 │   ├── poc/            # PoC (NOTION_POC) — 서브디렉토리 구조
 │   ├── release-notes/  # 릴리즈 노트 (NOTION_RELEASE)
-│   └── test/           # 테스트 (NOTION_TEST)
+│   ├── test/           # 테스트 (NOTION_TEST)
+│   └── achievement/    # 성과 (NOTION_ACHIEVEMENT)
 ├── blog/               # 블로그 (NOTION_BLOG) — Notion sync 대상
 ├── i18n/en/            # EN 번역 파일 — translate_to_en.py가 자동 생성 (수동 편집 금지)
 │   ├── docusaurus-theme-classic/
@@ -201,6 +202,7 @@ docs-web/
 | `NOTION_RELEASE`      | "릴리즈 노트" DB ID → `docs/release-notes/`                                   |
 | `NOTION_INSTALL`      | "설치" DB ID → `docs/install/`                                             |
 | `NOTION_TEST`         | "테스트" DB ID → `docs/test/`                                              |
+| `NOTION_ACHIEVEMENT`  | "성과" DB ID → `docs/achievement/`                                          |
 | `DEEPL_API_KEY`       | DeepL Free API 키 — `translate_to_en.py` 및 `monthly-translate.yml` Secret |
 
 
@@ -497,9 +499,10 @@ grep -rlE '^!\[[^]]*\]\([^)]*$' i18n/en/   # 출력 없으면 정상
 | `contributeSidebar`   | `contribute/`    | `NOTION_CONTRIBUTE`   | ✅                               |
 | `releaseNotesSidebar` | `release-notes/` | `NOTION_RELEASE`      | ❌ placeholder.md 자동 생성 (navbar 숨김) |
 | `testSidebar`         | `test/`          | `NOTION_TEST`         | ✅                               |
+| `achievementSidebar`  | `achievement/`   | `NOTION_ACHIEVEMENT`  | ✅                               |
 
 
-블로그는 `sidebars.ts` 미포함 — navbar에 `{to: '/blog'}` 방식.
+블로그는 2026-10-23 부터 비공개 — `docusaurus.config.ts` 에서 `blog: false` 로 플러그인을 껐고 navbar·footer 링크도 뺐다. `blog/` 의 Notion 동기화·EN 번역은 그대로 돈다. 다시 켜려면 커밋 이력에서 `blog: {...}` 설정을 되살린다.
 
 ---
 

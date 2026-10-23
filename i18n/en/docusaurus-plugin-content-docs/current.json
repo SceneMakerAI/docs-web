@@ -42,5 +42,9 @@
   "sidebar.testSidebar.category.테스트": {
     "message": "Tests",
     "description": "The label for category '테스트' in sidebar 'testSidebar'"
+  },
+  "sidebar.achievementSidebar.category.성과": {
+    "message": "Achievements",
+    "description": "The label for category '성과' in sidebar 'achievementSidebar'"
   }
 }

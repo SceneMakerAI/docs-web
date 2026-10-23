@@ -47,6 +47,10 @@
     "message": "Open Source Ecosystem Contributions",
     "description": "Navbar item with label 오픈소스 생태계 기여"
   },
+  "item.label.성과": {
+    "message": "Achievements",
+    "description": "Navbar item with label 성과"
+  },
   "item.label.GitHub": {
     "message": "GitHub",
     "description": "Navbar item with label GitHub"
