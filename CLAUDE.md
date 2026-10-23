@@ -148,16 +148,13 @@ docs-web/
 │   ├── release-notes/  # 릴리즈 노트 (NOTION_RELEASE)
 │   ├── test/           # 테스트 (NOTION_TEST)
 │   └── achievement/    # 성과 (NOTION_ACHIEVEMENT)
-├── blog/               # 블로그 (NOTION_BLOG) — Notion sync 대상
 ├── i18n/en/            # EN 번역 파일 — translate_to_en.py가 자동 생성 (수동 편집 금지)
 │   ├── docusaurus-theme-classic/
 │   │   ├── navbar.json         # 네비바 항목 EN 번역
 │   │   └── footer.json         # 푸터 항목 EN 번역
-│   ├── docusaurus-plugin-content-docs/
-│   │   ├── current.json        # 사이드바 카테고리 라벨 EN 번역
-│   │   └── current/            # docs/ 미러 — 번역된 .md 파일들
-│   └── docusaurus-plugin-content-blog/
-│       └── (번역된 블로그 .md 파일들)
+│   └── docusaurus-plugin-content-docs/
+│       ├── current.json        # 사이드바 카테고리 라벨 EN 번역
+│       └── current/            # docs/ 미러 — 번역된 .md 파일들
 ├── .notion-translate-hashes.json  # EN 번역 해시 캐시 — 삭제 금지 (CI 재번역 방지)
 ├── src/css/custom.css  # 전역 CSS — design 브랜치에서 수정
 ├── sidebars.ts         # 사이드바 ID↔dirName 매핑
@@ -197,7 +194,7 @@ docs-web/
 | `NOTION_ARCHITECTURE` | "아키텍처" DB ID → `docs/architecture/`                                      |
 | `NOTION_POC`          | "PoC" DB ID → `docs/poc/`                                                |
 | `NOTION_DOCS`         | "문서(가이드)" DB ID → `docs/guide/`                                          |
-| `NOTION_BLOG`         | "블로그" DB ID → `blog/`                                                    |
+| `NOTION_BLOG`         | (미사용 — 2026-10-23 블로그 삭제 후 동기화 대상 아님)                              |
 | `NOTION_CONTRIBUTE`   | "오픈소스 기여" DB ID → `docs/contribute/`                                     |
 | `NOTION_RELEASE`      | "릴리즈 노트" DB ID → `docs/release-notes/`                                   |
 | `NOTION_INSTALL`      | "설치" DB ID → `docs/install/`                                             |
@@ -502,7 +499,7 @@ grep -rlE '^!\[[^]]*\]\([^)]*$' i18n/en/   # 출력 없으면 정상
 | `achievementSidebar`  | `achievement/`   | `NOTION_ACHIEVEMENT`  | ✅                               |
 
 
-블로그는 2026-10-23 부터 비공개 — `docusaurus.config.ts` 에서 `blog: false` 로 플러그인을 껐고 navbar·footer 링크도 뺐다. `blog/` 의 Notion 동기화·EN 번역은 그대로 돈다. 다시 켜려면 커밋 이력에서 `blog: {...}` 설정을 되살린다.
+블로그는 2026-10-23 에 삭제했다 — `blog/`·`i18n/en/docusaurus-plugin-content-blog/`·`static/img/blog/` 를 저장소에서 지우고, `docusaurus.config.ts` 는 `blog: false`, `server-sync.sh` 는 `NOTION_BLOG` 를 더 이상 내려받지 않는다. 문서 곳곳의 `blog/` 언급(번역 파이프라인 등)은 그 이전 기록이다. 되살리려면 해당 커밋들을 revert 한다.
 
 ---
 

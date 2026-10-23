@@ -65,10 +65,6 @@ pids=()
   NOTION_DATABASE_ID="$NOTION_ARCHITECTURE" SAVE_DIR=docs/architecture FETCH_MODE=ALL \
   python3 scripts/notion_to_md.py & pids+=($!)
 
-[ -n "$NOTION_BLOG" ] && \
-  NOTION_DATABASE_ID="$NOTION_BLOG" SAVE_DIR=blog FETCH_MODE=ALL \
-  python3 scripts/notion_to_md.py & pids+=($!)
-
 [ -n "$NOTION_CONTRIBUTE" ] && \
   NOTION_DATABASE_ID="$NOTION_CONTRIBUTE" SAVE_DIR=docs/contribute FETCH_MODE=ALL \
   python3 scripts/notion_to_md.py & pids+=($!)
@@ -108,7 +104,7 @@ for pid in "${pids[@]}"; do
 done
 [ $failed -ne 0 ] && exit 1
 
-git add docs/ blog/ static/img/
+git add docs/ static/img/
 if ! git diff --staged --quiet; then
   git -c user.name="server-cron" -c user.email="sbin@solbox.com" \
     commit -m "chore: Notion 동기화 $(date +'%Y-%m-%d %H:%M')"

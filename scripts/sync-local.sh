@@ -19,14 +19,6 @@ fi
 echo ">> Notion 동기화 시작 (FETCH_MODE=$FETCH_MODE)"
 pids=()
 
-# Blog
-BLOG_DB="${NOTION_BLOG:-$NOTION_DATABASE_ID}"
-if [ -n "$BLOG_DB" ]; then
-  NOTION_DATABASE_ID="$BLOG_DB" SAVE_DIR=docs/blog FETCH_MODE="$FETCH_MODE" \
-    python scripts/notion_to_md.py &
-  pids+=($!)
-fi
-
 # Contribute
 CONTRIBUTE_DB="${NOTION_CONTRIBUTE:-$NOTION_CONTRIBUTE_DATABASE_ID}"
 if [ -n "$CONTRIBUTE_DB" ]; then

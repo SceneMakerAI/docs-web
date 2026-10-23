@@ -170,12 +170,6 @@
     "sidebar_position": "1",
     "frontmatter_hash": "007727c458d7f9d57b9c5314565fdd592a8e86a292ddaabd6f52b9ee1ec3b18f"
   },
-  "blog/2026-05-27-오픈소스-ai-방송-콘텐츠-재가공-플랫폼.md": {
-    "body_hash": "4bb1385336fc4d0caf4918ab8be18fa8eb5043bcfa3fec873d076a426c60874d",
-    "slug": "",
-    "sidebar_position": "",
-    "frontmatter_hash": "2901b66edcdaa817b613633ac6e2f5135b1bede77dc021295d65b46eb6ad7e9a"
-  },
   "docs/install/qwen-3x-설치.md": {
     "body_hash": "7e1dd889c25bbdcf8592e4b672c51d1d71d0d151ff1db4c5b259ba5bc850e042",
     "slug": "1",
@@ -199,12 +193,6 @@
     "slug": "placeholder",
     "sidebar_position": "1",
     "frontmatter_hash": "007727c458d7f9d57b9c5314565fdd592a8e86a292ddaabd6f52b9ee1ec3b18f"
-  },
-  "blog/2026-06-22-블로그-개설.md": {
-    "body_hash": "69ef6143aa7d480a10ed7ddfd7e7af538cbc2557c9b7d56e8fc0c13e36430164",
-    "slug": "1",
-    "sidebar_position": "",
-    "frontmatter_hash": "b8689d6b2f00f73dbc0d9c169305f4ff9417ed55105843d48eff2d28a0ee446b"
   },
   "docs/guide/제목없음.md": {
     "body_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
@@ -254,60 +242,6 @@
     "sidebar_position": "4",
     "frontmatter_hash": "b51d662bd6aaf51b52862020a4abc4ea5dd0eaad0199b254ccb275820b18eb6f"
   },
-  "blog/2026-07-14-09-vllm-기본-추론-최적화-노하우-1건.md": {
-    "body_hash": "59e2f5090bb6e45268797d56d91de2750f4e84b331a78faa86469746cd3cfa02",
-    "slug": "",
-    "sidebar_position": "",
-    "frontmatter_hash": "179ee763ed91e2b22585617598c4f0986989a0b87c650f505d05dc18a8e39db3"
-  },
-  "blog/2026-07-14-09-맥락-기반-광고-최적화-기술-해설-1건.md": {
-    "body_hash": "4b0a61b6f018b2a404a750dba9893b702887532ff1768dcc22e46bc37233ab86",
-    "slug": "",
-    "sidebar_position": "",
-    "frontmatter_hash": "2ac4735e25fa38cc68d36e709eab72893ffdd527f9256985f5375c89cf3c9b76"
-  },
-  "blog/2026-07-14-10-sbsi-실증-테스트-사례-공유-1건.md": {
-    "body_hash": "8777e5a3520908be066bf7612465268caf64e82d8022da18a137492320090b27",
-    "slug": "",
-    "sidebar_position": "",
-    "frontmatter_hash": "c18e21e06aaeae3db9ec2f70ab36894593a6f998660ccd930b54076842cc3950"
-  },
-  "blog/2026-07-14-10-방송-ai-서비스-성능-벤치마크-결과-분석-1건.md": {
-    "body_hash": "6579d72a24a585ad51a8b994dcf51a65729c0f6e7343ffb88b57165acccb1f39",
-    "slug": "",
-    "sidebar_position": "",
-    "frontmatter_hash": "e5aada8c7f70f895012903fe83a1d7c01b330160800d4291c732baf72a63d0cd"
-  },
-  "blog/2026-07-14-11-방송-ai-오픈웨이트-모델-활용-사례-1건.md": {
-    "body_hash": "188b96622b530e71cd00d752a17d13a7fd5a971d26305d823a5eff576fc5e467",
-    "slug": "",
-    "sidebar_position": "",
-    "frontmatter_hash": "84558a2dbc9024452a9b65877974149b95ed7965e504f27d3b2a15aea751d7c9"
-  },
-  "blog/2026-07-14-11-테스트-케이스-작성-1건.md": {
-    "body_hash": "2d51eca08fa0eaf7ed68faa091b34adddcb1335ab233297a8f9bb8124301d68a",
-    "slug": "",
-    "sidebar_position": "",
-    "frontmatter_hash": "9defb8eb72f84f4f0ffcf654ee3ca654aaa85f684623e130a481f7bb40e6066d"
-  },
-  "blog/2026-07-14-12-과제-성과-종합-정리-1건.md": {
-    "body_hash": "10c45f4806d39a2ac627a47966b70474f6e11770157a27cc1140275615a96c11",
-    "slug": "",
-    "sidebar_position": "",
-    "frontmatter_hash": "8e4e8a371915416e19d7c87705426e03a749c482a9a8742c1d118c94a49476d3"
-  },
-  "blog/2026-07-14-12-오픈소스-생태계-기여-실적-보고-1건.md": {
-    "body_hash": "c3120528e62b22bd310b7370df6e9ec900413b18b02e0180ca917c2be42d8bc1",
-    "slug": "",
-    "sidebar_position": "",
-    "frontmatter_hash": "cf1f30721f478fdcc3ea85f9a6c5cac6ac5d4b3af6626e70adb5149de6065c10"
-  },
-  "blog/2026-07-14-12-향후-로드맵-및-지속-기여-계획-공유-1건.md": {
-    "body_hash": "21a619d8697b7f206da9440466b70225b8e3c6183434a19a7fed6c9f8891a4e6",
-    "slug": "",
-    "sidebar_position": "",
-    "frontmatter_hash": "c6cf4d6b792f43e9c18b43bb7b69e3e6aca9217308294738d637766a8901aa6f"
-  },
   "docs/contribute/제목없음.md": {
     "body_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "slug": "5",
@@ -332,88 +266,17 @@
     "sidebar_position": "1",
     "frontmatter_hash": "7bd3e21f666605b3b10395f8ad702fe3d33bef770a636f2a05b6af544387c4ba"
   },
-  "blog/authors.yml": {
-    "body_hash": "27f512732a5cc4910b2e369efa5bb583bd46be2951827be9640cd14395b6341e",
-    "slug": null,
-    "sidebar_position": null
-  },
   "docs/install/aws-g7e24xlarge-초기-세팅.md": {
     "body_hash": "9081c0ff6a75267c9507d797dcb5703d99b326c8f7f4f5978cf84631859ec549",
     "slug": "4",
     "sidebar_position": "4",
     "frontmatter_hash": "f63481060644625c84038565ffc3c0de9081c4410fbb48716327bf9b74bd0d09"
   },
-  "blog/2026-07-14-09-db-스키마-공개-김부장꺼로-변경할-수도.md": {
-    "body_hash": "491a71891777c82db942a7d1ef9d89a6aece320bf7208c083b6443c4f5751a47",
-    "slug": "",
-    "sidebar_position": "",
-    "frontmatter_hash": "c8bcd67a5055f2e58abeb06d4c7fbaae408645dc6d5d0981bdf0b6f1461086e9"
-  },
   "docs/discussion/오픈소스-생태계-기여.md": {
     "body_hash": "b482e604347bde2587be9b0ea45d8fbac6302755ce67ff41080ea47e27d0e3b1",
     "slug": "1",
     "sidebar_position": "1",
     "frontmatter_hash": "e492541420a8fc1d18ff4a00b029446fded0538cede28ad7cc6b907cc7419a85"
-  },
-  "blog/2026-06-22-기술-블로그-개설.md": {
-    "body_hash": "e9f435615fde98a90fe3fd59bc69045c802eac0231fbdad328c38983b91b4bde",
-    "slug": "",
-    "sidebar_position": "",
-    "frontmatter_hash": "518e1a9e490567779be82b04d251d81bd61fe68bce5dc17789e8a20837a3374e"
-  },
-  "blog/2026-07-09-프로젝트-소개-및-qwen36-방송-도메인-적용기.md": {
-    "body_hash": "bc655b61491f968f801113430e6e8bfd53ca3aea484f70c985345bca19b15fb0",
-    "slug": "",
-    "sidebar_position": "",
-    "frontmatter_hash": "80340741b86ab91b818cfa7779fe74af2dd8023d7f2613a9b788180842b418b7"
-  },
-  "blog/2026-07-10-faster-whisper-한국어-음성인식-최적화-경험-공유.md": {
-    "body_hash": "bfee59b46ce777f0c6e93ea819b8af330138d4249311b033f4c66109f28585c4",
-    "slug": "",
-    "sidebar_position": "",
-    "frontmatter_hash": "c79ae98a2893ee2109a4fdf1cd577c265daa64dc3e9ca54e9ec199d7af9baf03"
-  },
-  "blog/2026-07-10-음성분석-처리-과정-및-결과.md": {
-    "body_hash": "6544aa1a8145083e25d8298923832066184f5d4b958f2a34e0a3d733f188a9c2",
-    "slug": "",
-    "sidebar_position": "",
-    "frontmatter_hash": "1e5984a44f6fa56986a65f22b8885e49c97aab91ac819789a7ad2c99f4fb0718"
-  },
-  "blog/2026-07-13-langgraph-기반-방송-워크플로우-설계.md": {
-    "body_hash": "4434dac8813a8f0ccdef43b9106431b3854e0d1d8dfab0720856a2a32ad6d733",
-    "slug": "",
-    "sidebar_position": "",
-    "frontmatter_hash": "6dbae78d67b8e2202b3ae22bb11e78fa8f342f523118c7ad858470fad32e8d57"
-  },
-  "blog/2026-07-13-rag-파이프라인-구축.md": {
-    "body_hash": "8f463ab716394a1c90aadaca04002f5d4aa704d0390632b6991d1ab236523aee",
-    "slug": "",
-    "sidebar_position": "",
-    "frontmatter_hash": "e3f460f8fabcb96b87775ae4bf38332321cb8f0799140b17cfec00229a77a582"
-  },
-  "blog/2026-07-14-모아보기-서비스-구현기-1건.md": {
-    "body_hash": "3efcc502a8fbcc61a7bc661faca8ab0d1e23d5ee325fab931266751571644620",
-    "slug": "",
-    "sidebar_position": "",
-    "frontmatter_hash": "be761cb4b65e0b1e2d1ed2aa4d03f16a826b33277cc912dde9e5c75eade33bc2"
-  },
-  "blog/2026-07-14-숏폼-자동-생성-파이프라인-해설-1.md": {
-    "body_hash": "ab7c3ba0edfd786ea10166f45ed0474524099730dd5174fd8c7280fea12daf1e",
-    "slug": "",
-    "sidebar_position": "",
-    "frontmatter_hash": "c37ab4c53ac8fdaae435af7ffd2437be4ce69375194b237cabbffa71e5aa1d64"
-  },
-  "blog/2026-07-14-숏폼-자동-생성-파이프라인-해설-2.md": {
-    "body_hash": "f7208f2de070f1f6561ffdae1d256e3afb4fb5770a82224ef8f5777b1c3478b1",
-    "slug": "",
-    "sidebar_position": "",
-    "frontmatter_hash": "4ccab35e722362909928546fd02a22dd6aa2718bdff2dc62ee67f956b71944e8"
-  },
-  "blog/2026-07-14-오픈-소스-기여-종합-가이드-1건.md": {
-    "body_hash": "98d2583e5f75ce3f6841692095a50cc89318b34a9530f6822206fc6ecc3f9688",
-    "slug": "",
-    "sidebar_position": "",
-    "frontmatter_hash": "a86600a24f1c91965d0b9dad1910ab8fbf12eb9f68d3fe4ef7d8bd54d5ee1926"
   },
   "docs/contribute/10분-이상-파일에서-sfinfo-duration-이-지수-표기로-깨지는-문제-수정.md": {
     "body_hash": "d983da59c37e87c9c94d72f300d9f23204a4cf56d1aae11868803bd761a6bfee",
@@ -726,11 +589,5 @@
     "slug": "2",
     "sidebar_position": "2",
     "frontmatter_hash": "57e42ab790fae71faf43fc3464d70f7c9160089f3d9ed442570a20b63fc8fa15"
-  },
-  "blog/2026-07-14-db-스키마-공개.md": {
-    "body_hash": "df70d42637a8fd3051b86ac071fcdd98091148c7addcc232f971da380c7f31c6",
-    "slug": "",
-    "sidebar_position": "",
-    "frontmatter_hash": "ff7ffa259312b31968900b68a1b2c13e71c7490ece1a06d5d1982da968f8b118"
   }
 }
