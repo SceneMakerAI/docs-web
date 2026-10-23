@@ -223,6 +223,9 @@ const config: Config = {
         ...(hasNotionContent('discussion')
           ? [{type: 'docSidebar' as const, sidebarId: 'discussionSidebar',   label: '오픈소스 생태계 기여', position: 'left' as const}]
           : []),
+        ...(hasNotionContent('achievement')
+          ? [{type: 'docSidebar' as const, sidebarId: 'achievementSidebar',  label: '성과',          position: 'left' as const}]
+          : []),
         {href: 'https://github.com/SceneMakerAI', label: 'GitHub', position: 'right'},
         {type: 'localeDropdown', position: 'right'},
       ],

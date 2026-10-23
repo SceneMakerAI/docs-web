@@ -50,6 +50,7 @@ SECTION_DIRS = [
     "docs/release-notes",
     "docs/test",
     "docs/discussion",
+    "docs/achievement",
 ]
 
 SECTION_DB_MAP = {
@@ -62,6 +63,7 @@ SECTION_DB_MAP = {
     "docs/release-notes": os.environ.get("NOTION_RELEASE", ""),
     "docs/test":          os.environ.get("NOTION_TEST", ""),
     "docs/discussion":    os.environ.get("NOTION_DISCUSSION", ""),
+    "docs/achievement":   os.environ.get("NOTION_ACHIEVEMENT", ""),
 }
 
 _LANG_MAP = {

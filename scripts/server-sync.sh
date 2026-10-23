@@ -97,6 +97,10 @@ pids=()
   NOTION_DATABASE_ID="$NOTION_DISCUSSION" SAVE_DIR=docs/discussion FETCH_MODE=ALL \
   python3 scripts/notion_to_md.py & pids+=($!)
 
+[ -n "$NOTION_ACHIEVEMENT" ] && \
+  NOTION_DATABASE_ID="$NOTION_ACHIEVEMENT" SAVE_DIR=docs/achievement FETCH_MODE=ALL \
+  python3 scripts/notion_to_md.py & pids+=($!)
+
 # 모든 동기화 완료 대기
 failed=0
 for pid in "${pids[@]}"; do

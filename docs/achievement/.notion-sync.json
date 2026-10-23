@@ -1,0 +1,37 @@
+{
+  "402e15b4-0359-80dd-82f4-f81c1866e5e5": {
+    "file": "docs/achievement/2026년-나고야-아시안게임-야구-시범서비스.md",
+    "last_edited": "2026-10-23T06:41:00.000Z",
+    "content_hash": "391b52a79e04e6ab5c94dc6accc0c24bb3abf9d32579aa086c64e8f093b2a7df",
+    "order": 1,
+    "parent_id": null
+  },
+  "402e15b4-0359-80c8-a004-c81f166f45d2": {
+    "file": "docs/achievement/2026-asian-nagoya-baseball-test-service.md",
+    "last_edited": "2026-10-23T06:21:00.000Z",
+    "content_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "order": 2,
+    "parent_id": null
+  },
+  "402e15b4-0359-8078-8460-f9c1cc586a7b": {
+    "file": "docs/achievement/한국방송-미디어-공학회-논문-발표.md",
+    "last_edited": "2026-10-23T06:20:00.000Z",
+    "content_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "order": 3,
+    "parent_id": null
+  },
+  "402e15b4-0359-80ae-84f4-cea9818dbf6f": {
+    "file": "docs/achievement/오픈소스-기여.md",
+    "last_edited": "2026-10-23T06:23:00.000Z",
+    "content_hash": "498b48ce2e4ba5ccdc4653f674ebe79be65439e36a4b93088928b75a75db626d",
+    "order": 4,
+    "parent_id": null
+  },
+  "402e15b4-0359-80be-9643-e5d9f37d8222": {
+    "file": "docs/achievement/언론사-홍보.md",
+    "last_edited": "2026-10-23T06:40:00.000Z",
+    "content_hash": "114dd2d811fe92d131ab4aa70b2c9fe959dbbb47d0a30d489e06e92288fc7e44",
+    "order": 5,
+    "parent_id": null
+  }
+}
