@@ -502,7 +502,7 @@ grep -rlE '^!\[[^]]*\]\([^)]*$' i18n/en/   # 출력 없으면 정상
 | `achievementSidebar`  | `achievement/`   | `NOTION_ACHIEVEMENT`  | ✅                               |
 
 
-블로그는 `sidebars.ts` 미포함 — navbar에 `{to: '/blog'}` 방식.
+블로그는 2026-10-23 부터 비공개 — `docusaurus.config.ts` 에서 `blog: false` 로 플러그인을 껐고 navbar·footer 링크도 뺐다. `blog/` 의 Notion 동기화·EN 번역은 그대로 돈다. 다시 켜려면 커밋 이력에서 `blog: {...}` 설정을 되살린다.
 
 ---
 
