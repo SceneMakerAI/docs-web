@@ -5,6 +5,7 @@ TC-5: last_edited 기반 스킵 (불필요한 파일 덮어쓰기 방지)
 import hashlib
 import json
 import os
+import re
 import shutil
 import sys
 import tempfile
@@ -728,6 +729,30 @@ class TestListItemImageHoisting:
         counter = [5]
         n.block_to_markdown(block, "blog/x", counter)
         assert counter[0] == 6
+
+
+# ── 빈 불릿이 setext 제목 밑줄로 읽히지 않게 ──────────────────────────────────
+
+class TestEmptyBulletNotSetextUnderline:
+    """Notion 의 빈 불릿이 '  - ' 로 나가면 바로 윗줄(부모 항목 텍스트)이 h2 로 렌더된다
+    (실제 사례: 성과 > 오픈소스 기여의 'Pillow · exif_transpose()…' 항목)."""
+
+    def _rt(self, text):
+        return [{"plain_text": text, "annotations": {"code": False, "bold": False, "italic": False, "strikethrough": False}, "href": None}] if text else []
+
+    def _bullet(self, text, children=()):
+        return {"type": "bulleted_list_item", "bulleted_list_item": {"rich_text": self._rt(text)},
+                "_children": list(children), "has_children": bool(children)}
+
+    def test_empty_leaf_child_dropped(self):
+        out = n.block_to_markdown(self._bullet("부모", [self._bullet("")]), "docs/x", [0])
+        assert not re.search(r"^\s*-\s*$", out, re.M), f"빈 불릿 줄이 남음: {out!r}"
+        assert "- 부모" in out
+
+    def test_empty_bullet_with_children_keeps_marker(self):
+        out = n.block_to_markdown(self._bullet("부모", [self._bullet("", [self._bullet("손자")])]), "docs/x", [0])
+        assert not re.search(r"^\s*-\s*$", out, re.M), f"빈 불릿 줄이 남음: {out!r}"
+        assert "  - &nbsp;" in out and "    - 손자" in out
 
 
 # ── TC-14: toggle summary 인라인 마크다운 → HTML 변환 ──────────────────────────

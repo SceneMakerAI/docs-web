@@ -523,6 +523,11 @@ def block_to_markdown(block, slug, image_counter, item_num=1):
             # "2. 내용" 같이 숫자+점으로 시작하면 GFM이 nested ordered list로 파싱 — 이스케이프
             safe = re.sub(r'^(\d+)\. ', r'\1\\. ', content)
             nested, hoisted = render_children_hoist_images()
+            # 빈 불릿 '- ' 은 윗줄 텍스트 바로 밑에 오면 setext 제목 밑줄로 읽혀 윗줄이 h2 가 된다
+            if not safe.strip():
+                if not nested:
+                    return hoisted
+                safe = "&nbsp;"
             item = f"- {safe}\n{indent_md(nested)}\n" if nested else f"- {safe}\n\n"
             return item + hoisted
         elif b_type == "numbered_list_item":
