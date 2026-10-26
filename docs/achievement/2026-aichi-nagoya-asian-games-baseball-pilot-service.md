@@ -7,16 +7,6 @@ last_update:
   date: 2026-10-26
 ---
 
-**원본: 2026_추계학술대회논문_대표저자정규혁.pdf**
-
-  
-**아래 내용 ‘영어’로 번역 ←————-검증중**
-
----
-
----
-
-
 ##### 2026 Fall Conference of the Korean Institute of Broadcast and Media Engineers
 
 Paper presented at an academic conference
