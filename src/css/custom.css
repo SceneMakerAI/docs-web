@@ -113,6 +113,13 @@
   --ifm-link-hover-decoration: underline;
 }
 
+/* ─────────── 한글 줄바꿈 ─────────── */
+/* 기본값은 한글을 글자 단위로 끊어 표 머리글 '번호'가 '번/호'로 꺾인다. 단어 단위로 끊고 긴 토큰만 강제로 자른다 */
+.markdown {
+  word-break: keep-all;
+  overflow-wrap: break-word;
+}
+
 /* ─────────── Heading 간격·행간 — Notion 기준 ─────────── */
 /* Docusaurus가 h1을 CSS 변수 없이 직접 3rem으로 선언하므로 덮어씀 */
 h1 {
