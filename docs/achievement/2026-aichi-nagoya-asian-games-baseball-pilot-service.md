@@ -7,9 +7,9 @@ last_update:
   date: 2026-10-26
 ---
 
-##### 2026 Fall Conference of the Korean Institute of Broadcast and Media Engineers
+##### The 2026 Fall Conference of the Korean Institute of Broadcast and Media Engineers
 
-Paper presented at an academic conference
+Presented at the 2026 KIBME Fall Conference
 
 ### Design and Validation of an Automatic Media Video Clip Generation System Using Broadcast Metadata and AI Content Analysis
 
@@ -29,7 +29,7 @@ SBS I SOLBOX
 
 October 2026
 
-Research Presenter: Kyu-Hyuk Jung (SBSI)
+Presenter: Kyu-Hyuck Jung (SBSI)
 
 ---
 
@@ -37,13 +37,17 @@ Research Presenter: Kyu-Hyuk Jung (SBSI)
 
 ##### Research Background
 
-A vast amount of broadcast content—spanning news, sports, entertainment, and factual programming—is produced daily. Following the initial broadcast, this original content is often repurposed into highlights and short-form videos for various platforms, including mobile, web, OTT services, and social media. However, the process of manually reviewing long-form footage to identify key moments, determining the start and end points for clips, and verifying the synchronization of subtitles and audio remains highly labor-intensive and time-consuming. This challenge is particularly pronounced in environments involving continuous video streams, such as live broadcasts or major sporting events, where maintaining both production speed and consistent quality is difficult to achieve.
+A vast amount of broadcast content—spanning news, sports, entertainment, and cultural programs—is produced daily. Following the initial broadcast, this original content is often repurposed into highlights and short-form videos for various platforms, including mobile, web, OTT services, and social media. However, the process of manually reviewing long-form footage to identify key moments, determining the start and end points for clips, and verifying the synchronization of subtitles and audio remains highly labor-intensive and time-consuming. This challenge is particularly pronounced in environments involving continuous video streams, such as live broadcasts or major sporting events, where maintaining both production speed and consistent quality is difficult to achieve.  
 
-Recent achievements in government-funded R&D projects and the growth of the open-source ecosystem have expanded the technical foundation for addressing these real-world challenges. By combining video frame analysis, speech recognition, subtitle and text extraction, natural language processing, and multimodal AI, it is possible to gain a more multidimensional understanding of the events and situations captured in video. Open-source technologies—such as FFmpeg—along with AI-driven analytical tools, provide a framework for integration with existing broadcasting systems. Furthermore, the metadata that broadcasters have accumulated regarding schedules, programs, and sporting events plays a crucial role in interpreting AI analysis results within the specific context of the actual content.
 
-The introduction of AI goes beyond a simple attempt to replace human tasks with machines. Its core purpose is to automate processes like repetitive segment searching and the creation of draft clips—thereby reducing the workload on creators—while enabling humans to focus more on interpreting the meaning and context of scenes, refining the quality of the edit, ensuring suitability for the intended service, and overseeing final quality control. This collaborative framework between humans and AI not only enhances operational efficiency but also plays a vital role in maintaining the credibility of broadcast content and upholding editorial responsibility.
+Recent achievements in government-funded R&D projects and the growth of the open-source ecosystem have expanded the technical foundation for addressing these real-world challenges. By combining video frame analysis, speech recognition, subtitle and text extraction, natural language processing, and multimodal AI, it is possible to gain a more multidimensional understanding of the events and situations captured in video. Open-source technologies—such as FFmpeg—along with AI-driven analytical tools, provide a framework for integration with existing broadcasting systems. Furthermore, the metadata that broadcasters have accumulated regarding schedules, programs, and sporting events plays a crucial role in interpreting AI analysis results within the specific context of the actual content.  
 
-Against this backdrop, this study aimed to design a practical system—integrating broadcast metadata with AI-based video analysis—that encompasses key scene detection, clip segmentation, automated content generation, operator review, and service integration, while also evaluating its feasibility within an actual production environment. It is hoped that this research will serve as a useful reference for enhancing the utility of large-scale broadcast video archives, streamlining repetitive tasks, and fostering the internal adoption of technology within production workflows.
+
+The introduction of AI goes beyond a simple attempt to replace human tasks with machines. Its core purpose is to automate processes like repetitive segment searching and the creation of draft clips—thereby reducing the workload on creators—while enabling humans to focus more on interpreting the meaning and context of scenes, refining the quality of the edit, ensuring suitability for the intended service, and overseeing final quality control. This collaborative framework between humans and AI not only enhances operational efficiency but also plays a vital role in maintaining the credibility of broadcast content and upholding editorial responsibility.  
+
+
+Against this backdrop, this study aimed to design a practical system—integrating broadcast metadata with AI-based video analysis—that encompasses key scene detection, clip segmentation, automated content generation, operator review, and service integration, while evaluating its feasibility within an actual production environment. It is hoped that this research will serve as a useful reference for enhancing the utility of large-scale broadcast video archives, streamlining repetitive tasks, and internalizing core technologies within production workflows.  
+
 
 ##### Acknowledgments
 
@@ -55,7 +59,7 @@ Finally, I would like to express special appreciation to the CEO of SBSI for the
 
 October 2026
 
-Research Presenter: Kyu-Hyuk Jung (SBSI)
+**Presenter: Kyu-Hyuck Jung (SBSI)**
 
 ---
 
@@ -77,7 +81,7 @@ SBS I SOLBOX
 
 October 2026
 
-Research Presenter: Kyu-Hyuk Jung (SBSI)
+Research Presenter: Kyu-Hyuck Jung (SBSI)
 
 ##### Abstract
 
@@ -99,7 +103,8 @@ Research on the automated generation of sports highlights has primarily focused 
 
 2.1 Overall Architecture
 
-In terms of the division of roles, the SOLBOX analysis core generates structured scene information from video, audio, OCR, and subtitles, while the SBSI (SOLBOX Service Integration) component manages source content and broadcast metadata, handles integration with analysis APIs, performs segment verification, generates clips, and facilitates service connectivity. As illustrated in Figure 1, the processing workflow consists of four stages: ① multimodal indexing, ② temporal alignment and semantic chunking, ③ segment retrieval and candidate generation, and ④ clip generation and operator review. Each stage utilizes a combination of a source key and a specific time interval (in seconds) as a common identifier. Broadcast metadata is employed twice—as a criterion for chunking in stage ② and as a search filter in stage ③—while any modifications made by operators during stage ④ are recorded as evaluation logs.
+In terms of the division of roles, the SOLBOX analysis core generates structured scene information from video, audio, OCR, and subtitles, while **SBSI** manages source content and broadcast metadata, handles integration with analysis APIs, performs segment verification, generates clips, and facilitates service connectivity. As illustrated in Figure 1, the processing workflow consists of four stages: ① multimodal indexing, ② temporal alignment and semantic chunking, ③ segment retrieval and candidate generation, and ④ clip generation and operator review. Each stage utilizes a combination of a source key and a specific time interval (in seconds) as a common identifier. Broadcast metadata is employed twice—as a criterion for chunking in stage ② and as a search filter in stage ③—while any modifications made by operators during stage ④ are recorded as evaluation logs.  
+
 
 ![image](/img/achievement/2026-aichi-nagoya-asian-games-baseball-pilot-service/img-00.png)
 
@@ -208,15 +213,15 @@ This research was conducted as part of the "Support Project for Open-Source AI/S
 
 ##### References
 
-- Merler et al., “Automatic Curation of Sports Highlights Using Multimodal Excitement Features,” IEEE Trans. Multimedia, vol. 21, no. 5, pp. 1147-1160, 2019.
-- Lei, T. L. Berg, and M. Bansal, “QVHighlights: Detecting Moments and Highlights in Videos via Natural Language Queries,” Proc. NeurIPS, 2021.
-- Souček and J. Lokoč, “TransNet V2: An Effective Deep Network Architecture for Fast Shot Transition Detection,” Proc. ACM Multimedia, 2024.
-- Bredin, "pyannote.audio 2.1 Speaker Diarization Pipeline: Principle, Benchmark, and Recipe," Proc. Interspeech, pp. 1983-1987, 2023.
-- Shi et al., "Qwen3-ASR Technical Report," arXiv:2601.21337, 2026.
-- Qwen Team, "Qwen3.6 and 8 Open Model Series," GitHub, 2026. Available: [https://github.com/QwenLM/Qwen3.8](https://github.com/QwenLM/Qwen3.8)
-- Wang et al., "Milvus: A Purpose-Built Vector Data Management System," Proc. ACM SIGMOD, pp. 2614-2627, 2021.
-- Lewis et al., “Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks,” Proc. NeurIPS, 2020.
-- Aichi -Nagoya 2026 Asian Games Organizing Committee, “20th Asian Games Aichi-Nagoya 2026,” 2026.
-- SBS, "2026 아이치나고야 아시안게임 야구 AI PICK 클립," SBS Sports, 2026. Available: [https://programs.sbs.co.kr/sports/ag2026/clips/90399](https://programs.sbs.co.kr/sports/ag2026/clips/90399)
-- Caba Heilbron et al., “ActivityNet: A Large-Scale Video Benchmark for Human Activity Understanding,” Proc. IEEE CVPR, 2015.
+- M. Merler et al., “Automatic Curation of Sports Highlights Using Multimodal Excitement Features,” *IEEE Trans. Multimedia* , vol. 21, no. 5, pp. 1147-1160, 2019.
+- J. Lei, T. L. Berg, and M. Bansal, “QVHighlights: Detecting Moments and Highlights in Videos via Natural Language Queries,” *Proc. NeurIPS* , 2021.
+- T. Souček and J. Lokoč, “TransNet V2: An Effective Deep Network Architecture for Fast Shot Transition Detection,” *Proc. ACM Multimedia* , 2024.
+- H. Bredin, "pyannote.audio 2.1 Speaker Diarization Pipeline: Principle, Benchmark, and Recipe," *Proc. Interspeech* , pp. 1983-1987, 2023.
+- X. Shi et al., "Qwen3-ASR Technical Report," *arXiv:2601.21337* , 2026.
+- Qwen Team, "Qwen3.6 and Qwen3.8 Open Model Series," GitHub, 2026. Available: [https://github.com/QwenLM/Qwen3.8](https://github.com/QwenLM/Qwen3.8)
+- J. Wang et al., "Milvus: A Purpose-Built Vector Data Management System," *Proc. ACM SIGMOD* , pp. 2614-2627, 2021.
+- P. Lewis et al., “Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks,” *Proc. NeurIPS* , 2020.
+- Aichi-Nagoya 2026 Asian Games Organizing Committee, “20th Asian Games Aichi-Nagoya 2026,” 2026.
+- SBS, "2026 Aichi-Nagoya Asian Games Baseball AI PICK Clips," *SBS Sports* , 2026. Available: [https://programs.sbs.co.kr/sports/ag2026/clips/90399](https://programs.sbs.co.kr/sports/ag2026/clips/90399)
+- F. Caba Heilbron et al., “ActivityNet: A Large-Scale Video Benchmark for Human Activity Understanding,” *Proc. IEEE CVPR* , 2015.
 
