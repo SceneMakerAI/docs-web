@@ -19,14 +19,6 @@ fi
 echo ">> Notion 동기화 시작 (FETCH_MODE=$FETCH_MODE)"
 pids=()
 
-# Contribute
-CONTRIBUTE_DB="${NOTION_CONTRIBUTE:-$NOTION_CONTRIBUTE_DATABASE_ID}"
-if [ -n "$CONTRIBUTE_DB" ]; then
-  NOTION_DATABASE_ID="$CONTRIBUTE_DB" SAVE_DIR=docs/contribute FETCH_MODE=ALL \
-    python scripts/notion_to_md.py &
-  pids+=($!)
-fi
-
 # Generic docs sections
 if [ -n "$NOTION_ABOUT" ]; then
   NOTION_DATABASE_ID="$NOTION_ABOUT" SAVE_DIR=docs/about FETCH_MODE=ALL \
@@ -60,12 +52,6 @@ fi
 
 if [ -n "$NOTION_INSTALL" ]; then
   NOTION_DATABASE_ID="$NOTION_INSTALL" SAVE_DIR=docs/install FETCH_MODE=ALL \
-    python scripts/notion_to_md.py &
-  pids+=($!)
-fi
-
-if [ -n "$NOTION_DISCUSSION" ]; then
-  NOTION_DATABASE_ID="$NOTION_DISCUSSION" SAVE_DIR=docs/discussion FETCH_MODE=ALL \
     python scripts/notion_to_md.py &
   pids+=($!)
 fi

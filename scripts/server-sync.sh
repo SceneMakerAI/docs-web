@@ -49,11 +49,6 @@ if ! git pull --rebase origin main --quiet; then
   exit 1
 fi
 
-# Notion 기여 표의 상태 칸을 GitHub 현재 값으로 맞춘다 — 아래 동기화가 같은 실행에서 사이트에 반영한다.
-# 실패해도 콘텐츠 동기화는 계속한다 (상태는 다음 실행에서 다시 맞춰진다).
-[ -n "$NOTION_DISCUSSION" ] && \
-  { python3 scripts/contrib_sync.py status || echo "[$(date)] WARN: 기여 상태 동기화 실패 — 건너뜀"; }
-
 # Notion DB 병렬 동기화
 pids=()
 
@@ -63,10 +58,6 @@ pids=()
 
 [ -n "$NOTION_ARCHITECTURE" ] && \
   NOTION_DATABASE_ID="$NOTION_ARCHITECTURE" SAVE_DIR=docs/architecture FETCH_MODE=ALL \
-  python3 scripts/notion_to_md.py & pids+=($!)
-
-[ -n "$NOTION_CONTRIBUTE" ] && \
-  NOTION_DATABASE_ID="$NOTION_CONTRIBUTE" SAVE_DIR=docs/contribute FETCH_MODE=ALL \
   python3 scripts/notion_to_md.py & pids+=($!)
 
 [ -n "$NOTION_DOCS" ] && \
@@ -87,10 +78,6 @@ pids=()
 
 [ -n "$NOTION_TEST" ] && \
   NOTION_DATABASE_ID="$NOTION_TEST" SAVE_DIR=docs/test FETCH_MODE=ALL \
-  python3 scripts/notion_to_md.py & pids+=($!)
-
-[ -n "$NOTION_DISCUSSION" ] && \
-  NOTION_DATABASE_ID="$NOTION_DISCUSSION" SAVE_DIR=docs/discussion FETCH_MODE=ALL \
   python3 scripts/notion_to_md.py & pids+=($!)
 
 [ -n "$NOTION_ACHIEVEMENT" ] && \

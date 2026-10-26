@@ -141,7 +141,6 @@ docs-web/
 ├── docs/               # KR 원본 — Notion sync가 덮어씀 (수동 수정 금지)
 │   ├── about/          # 프로젝트 소개 (NOTION_ABOUT)
 │   ├── architecture/   # 아키텍처 (NOTION_ARCHITECTURE)
-│   ├── contribute/     # 오픈소스 기여 (NOTION_CONTRIBUTE)
 │   ├── guide/          # 문서 (NOTION_DOCS)
 │   ├── install/        # 설치 (NOTION_INSTALL)
 │   ├── poc/            # PoC (NOTION_POC) — 서브디렉토리 구조
@@ -195,7 +194,8 @@ docs-web/
 | `NOTION_POC`          | "PoC" DB ID → `docs/poc/`                                                |
 | `NOTION_DOCS`         | "문서(가이드)" DB ID → `docs/guide/`                                          |
 | `NOTION_BLOG`         | (미사용 — 2026-10-23 블로그 삭제 후 동기화 대상 아님)                              |
-| `NOTION_CONTRIBUTE`   | "오픈소스 기여" DB ID → `docs/contribute/`                                     |
+| `NOTION_CONTRIBUTE`   | (미사용 — 2026-10-26 DB 삭제, 동기화 대상 아님)                                  |
+| `NOTION_DISCUSSION`   | (미사용 — 2026-10-26 DB 삭제, 동기화 대상 아님)                                  |
 | `NOTION_RELEASE`      | "릴리즈 노트" DB ID → `docs/release-notes/`                                   |
 | `NOTION_INSTALL`      | "설치" DB ID → `docs/install/`                                             |
 | `NOTION_TEST`         | "테스트" DB ID → `docs/test/`                                              |
@@ -493,7 +493,6 @@ grep -rlE '^!\[[^]]*\]\([^)]*$' i18n/en/   # 출력 없으면 정상
 | `installSidebar`      | `install/`       | `NOTION_INSTALL`      | ✅                               |
 | `pocSidebar`          | `poc/`           | `NOTION_POC`          | ✅                               |
 | `docsSidebar`         | `guide/`         | `NOTION_DOCS`         | ✅                               |
-| `contributeSidebar`   | `contribute/`    | `NOTION_CONTRIBUTE`   | ✅                               |
 | `releaseNotesSidebar` | `release-notes/` | `NOTION_RELEASE`      | ❌ placeholder.md 자동 생성 (navbar 숨김) |
 | `testSidebar`         | `test/`          | `NOTION_TEST`         | ✅                               |
 | `achievementSidebar`  | `achievement/`   | `NOTION_ACHIEVEMENT`  | ✅                               |
@@ -544,6 +543,8 @@ Notion 인라인 서브페이지(`child_page`)와 페이지 링크(`link_to_page
 
 
 ## 오픈소스 기여 표 — `contrib_sync.py`
+
+> ⚠️ **2026-10-26 폐지.** 사용자가 Notion 의「오픈소스 기여」(`NOTION_CONTRIBUTE`)·기여 표(`NOTION_DISCUSSION`) DB 를 지웠다. 기여 내용은 성과 DB 의 "오픈소스 기여" 페이지 하나로 옮겼다. `docs/contribute`·`docs/discussion` 섹션과 navbar 항목, `server-sync.sh` 의 동기화·`contrib_sync.py status` 단계를 모두 뺐다. 아래는 그 이전 기록이고, `contrib_sync.py` 는 대상 DB 가 없어 동작하지 않는다.
 
 기여 목록은 `NOTION_DISCUSSION` DB 의 페이지 **본문에 있는 표 한 장**이다. 열은 `번호 | 유형 | 리포 | 제목(GitHub 링크) | 참여자 | 상태` 이고(번호는 1부터 붙는 일련번호. 2026-10-07 에 작성자 열이 빠졌다 — 미완료 표에는 작성자 열이 남아 있어 7열이다. 스크립트는 제목을 앞에서, 상태를 뒤에서 세어 두 형태를 모두 다룬다), 상태 표기는 `Open`·`Merged`·`Closed`(PR·Issue), `Posted`(Discussion)다. 일반 Notion sync 가 이 페이지를 `docs/discussion/오픈소스-생태계-기여.md` 로 내려받는다 (파일명은 Notion 페이지 제목을 따른다).
 

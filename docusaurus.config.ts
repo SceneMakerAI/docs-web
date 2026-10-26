@@ -190,9 +190,6 @@ const config: Config = {
         ...(hasNotionContent('release-notes')
           ? [{type: 'docSidebar' as const, sidebarId: 'releaseNotesSidebar', label: '릴리즈 노트',   position: 'left' as const}]
           : [{to: '/docs/release-notes', label: '릴리즈 노트',   position: 'left' as const}]),
-        ...(hasNotionContent('discussion')
-          ? [{type: 'docSidebar' as const, sidebarId: 'discussionSidebar',   label: '오픈소스 생태계 기여', position: 'left' as const}]
-          : []),
         ...(hasNotionContent('achievement')
           ? [{type: 'docSidebar' as const, sidebarId: 'achievementSidebar',  label: '성과',          position: 'left' as const}]
           : []),

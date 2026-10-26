@@ -31,10 +31,6 @@
     "message": "Blog",
     "description": "Navbar item with label 블로그"
   },
-  "item.label.오픈소스 기여": {
-    "message": "Contribute",
-    "description": "Navbar item with label 오픈소스 기여"
-  },
   "item.label.릴리즈 노트": {
     "message": "Release Notes",
     "description": "Navbar item with label 릴리즈 노트"
@@ -42,10 +38,6 @@
   "item.label.테스트": {
     "message": "Tests",
     "description": "Navbar item with label 테스트"
-  },
-  "item.label.오픈소스 생태계 기여": {
-    "message": "Open Source Ecosystem Contributions",
-    "description": "Navbar item with label 오픈소스 생태계 기여"
   },
   "item.label.성과": {
     "message": "Achievements",
