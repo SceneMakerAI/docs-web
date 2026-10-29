@@ -220,10 +220,10 @@
     "frontmatter_hash": "4cd87bcfc3e45e4e01c8689ae219d537af44ce8fe149ecf58d9c0b0a493884d9"
   },
   "docs/guide/외부-연동-규격.md": {
-    "body_hash": "5ea76fbbdf381619809b92410b1ab815b7133017170c989d0dab9f67a41a2cbc",
-    "slug": "1",
-    "sidebar_position": "1",
-    "frontmatter_hash": "e75c9cf1206b3d6b87e80ecc757258fcd1447392cad397ecc42e974d7fce0084"
+    "body_hash": "7491ad5036e5d2dfa3538deeae5252820b73834f79eb6ac8ec65447594a90e47",
+    "slug": "2",
+    "sidebar_position": "2",
+    "frontmatter_hash": "d57d1d32b3c208c502ca860a7d29f6396305b0d01f71b070f40fdafa1f9eba47"
   },
   "docs/test/야구-질의.md": {
     "body_hash": "074b0a6e65a74d4a7e9b03f5a6e2d4d53dc4663050ffa8c8dab0f8219675103b",
@@ -242,5 +242,41 @@
     "slug": "2",
     "sidebar_position": "2",
     "frontmatter_hash": "57e42ab790fae71faf43fc3464d70f7c9160089f3d9ed442570a20b63fc8fa15"
+  },
+  "docs/guide/외부-연동-규격-sbs.md": {
+    "body_hash": "726e5589324a12fa6fa6064969abbd6846aab0f53b58c34cd8f5dd5747808990",
+    "slug": "1",
+    "sidebar_position": "1",
+    "frontmatter_hash": "5a74d16145e7f8d1c8908417c3a2d9c9b7273bb7c2b269445af86aee63277536"
+  },
+  "docs/achievement/2026-aichi-nagoya-asian-games-baseball-pilot-service.md": {
+    "body_hash": "bf5de464084737c037312ceec6e5f7c9d28fe7082564340987862d10b4869a50",
+    "slug": "1",
+    "sidebar_position": "1",
+    "frontmatter_hash": "13e7e164ca255459bc149426c8bf9ea413a2f6cc5be1c212bd5fa6a30aa72262"
+  },
+  "docs/achievement/2026-한국방송-미디어-공학회-논문-발표.md": {
+    "body_hash": "3374020ac2cca9cafa40e62e95d9ea4573b9a16b2c479c70a261a0ecb7a3ca3e",
+    "slug": "2",
+    "sidebar_position": "2",
+    "frontmatter_hash": "d57d1d32b3c208c502ca860a7d29f6396305b0d01f71b070f40fdafa1f9eba47"
+  },
+  "docs/achievement/언론사-홍보.md": {
+    "body_hash": "114dd2d811fe92d131ab4aa70b2c9fe959dbbb47d0a30d489e06e92288fc7e44",
+    "slug": "4",
+    "sidebar_position": "4",
+    "frontmatter_hash": "a4cab74a5f371f3e9a824034dd2fb83f513836268dd8031a10962c047f99911b"
+  },
+  "docs/achievement/오픈소스-기여.md": {
+    "body_hash": "8d818969ced3d0e90c282ac6234ca0398fd895b667be49bb53fe97f1baf5cdcf",
+    "slug": "3",
+    "sidebar_position": "3",
+    "frontmatter_hash": "f13948e54d73558b74921c2ff68e4642f84bb9a7c50cbb1e29fa1371bddc2c5b"
+  },
+  "docs/achievement/제목없음.md": {
+    "body_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "slug": "5",
+    "sidebar_position": "5",
+    "frontmatter_hash": "0d2e729441a3e9915403162fadc1006bab1a6ba9527230a9c2eb54f4ee93c51b"
   }
 }
