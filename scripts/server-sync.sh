@@ -84,6 +84,11 @@ pids=()
   NOTION_DATABASE_ID="$NOTION_ACHIEVEMENT" SAVE_DIR=docs/achievement FETCH_MODE=ALL \
   python3 scripts/notion_to_md.py & pids+=($!)
 
+# 공개용 블로그 DB「공개용_블로그 20건」— 상태가 완료인 글만 게시. 2026-10-23 에 지운 옛 NOTION_BLOG 와 다른 DB
+[ -n "$NOTION_BLOG_1029" ] && \
+  NOTION_DATABASE_ID="$NOTION_BLOG_1029" SAVE_DIR=blog FETCH_MODE=ALL NOTION_PUBLISH_STATUS=완료 \
+  python3 scripts/notion_to_md.py & pids+=($!)
+
 # 모든 동기화 완료 대기
 failed=0
 for pid in "${pids[@]}"; do
@@ -91,7 +96,7 @@ for pid in "${pids[@]}"; do
 done
 [ $failed -ne 0 ] && exit 1
 
-git add docs/ static/img/
+git add docs/ blog/ static/img/
 if ! git diff --staged --quiet; then
   git -c user.name="server-cron" -c user.email="sbin@solbox.com" \
     commit -m "chore: Notion 동기화 $(date +'%Y-%m-%d %H:%M')"
