@@ -12,8 +12,6 @@ Env vars (선택):
   NOTION_PROPERTY_ORDER 순서 속성명, Number 타입 (기본: 순서)
   NOTION_PROPERTY_DATE  날짜 속성명, DAILY 모드용 (기본: 날짜)
   FETCH_MODE            ALL | DAILY (기본: ALL)
-  NOTION_PUBLISH_STATUS 이 상태값인 페이지만 내보냄, 쉼표 구분 (기본: 비움 = 전부)
-  NOTION_PROPERTY_STATUS 상태 속성명 (기본: 상태)
 """
 import hashlib
 import html as _html
@@ -152,8 +150,6 @@ NOTION_PROPERTY_SLUG             = os.environ.get("NOTION_PROPERTY_SLUG", "slug"
 # Docs mode 선택 속성 (없으면 frontmatter에서 생략)
 NOTION_PROPERTY_DOCS_LAST_EDITED = os.environ.get("NOTION_PROPERTY_DOCS_LAST_EDITED", "최종 편집 일시")
 NOTION_PROPERTY_KEYWORDS         = os.environ.get("NOTION_PROPERTY_KEYWORDS", "keywords")
-NOTION_PROPERTY_STATUS           = os.environ.get("NOTION_PROPERTY_STATUS", "상태")
-PUBLISH_STATUSES = {s.strip() for s in os.environ.get("NOTION_PUBLISH_STATUS", "").split(",") if s.strip()}
 
 
 SYNC_MAP_FILE = f"{SAVE_DIR}/.notion-sync.json"
@@ -255,22 +251,6 @@ def read_multi_select(props, prop_name):
     if p.get("type") != "multi_select":
         return []
     return [item["name"] for item in p.get("multi_select", [])]
-
-
-def read_status(props, prop_name):
-    p = props.get(prop_name, {})
-    if p.get("type") != "status":
-        return None
-    return (p.get("status") or {}).get("name")
-
-
-def publishable_root_pages(root_pages):
-    """(위치, 페이지) 중 PUBLISH_STATUSES 에 맞는 것만. 위치는 전체 목록 기준이라
-    초안이 완료로 바뀌어도 이미 공개된 글의 번호 slug 가 밀리지 않는다."""
-    for position, page in enumerate(root_pages, start=1):
-        if PUBLISH_STATUSES and read_status(page.get("properties", {}), NOTION_PROPERTY_STATUS) not in PUBLISH_STATUSES:
-            continue
-        yield position, page
 
 
 def read_people(props, prop_name):
@@ -967,8 +947,6 @@ def remove_orphans(synced_files, previously_tracked):
             os.remove(fpath)
             log(f"미추적 파일 삭제: {fpath}")
             slug = os.path.splitext(fname)[0]
-            if BLOG_MODE:
-                slug = re.sub(r"^\d{4}-\d{2}-\d{2}-", "", slug)
             img_dir = f"static/img/{section}/{slug}"
             if os.path.isdir(img_dir):
                 shutil.rmtree(img_dir)
@@ -1093,9 +1071,7 @@ def main():
         log(f"저장: {filepath} ({title})")
         return title, filepath
 
-    if PUBLISH_STATUSES:
-        log(f"공개 상태 필터: {NOTION_PROPERTY_STATUS} ∈ {sorted(PUBLISH_STATUSES)}")
-    for root_position, page in publishable_root_pages(root_pages):
+    for root_position, page in enumerate(root_pages, start=1):
         page_id = page["id"]
         if page_id in children_map:
             # 부모 페이지

@@ -47,19 +47,6 @@ class TestRemoveOrphans:
 
         assert not os.path.exists(synced_path), "Notion에서 삭제된 파일이 로컬에 남아 있음"
 
-    def test_blog_mode_removes_image_dir_without_date_prefix(self, monkeypatch):
-        """블로그 파일명은 '날짜-slug.md' 지만 이미지는 static/img/blog/<slug>/ 에 있다.
-        글이 빠지면(공개 상태 해제 등) 이미지 폴더도 지워야 초안 이미지가 남아 공개되지 않는다."""
-        monkeypatch.chdir(self.tmpdir)
-        post = self._create_file("blog/2026-10-29-db-스키마-공개.md")
-        img = self._create_file("static/img/blog/db-스키마-공개/img-00.jpg")
-
-        with patch.object(n, "SAVE_DIR", "blog"), patch.object(n, "BLOG_MODE", True):
-            n.remove_orphans(set(), {"blog/2026-10-29-db-스키마-공개.md"})
-
-        assert not os.path.exists(post)
-        assert not os.path.exists(os.path.dirname(img)), "비공개 전환된 글의 이미지 폴더가 남아 있음"
-
     def test_manual_file_preserved(self):
         """sync_map에 없는 수동 작성 파일은 삭제되지 않음."""
         manual_path = self._create_file("manual.md")
@@ -1037,28 +1024,3 @@ class TestBlogSortDate:
     def test_leading_number_without_underscore_is_not_prefix(self):
         """'2026년 …' 처럼 숫자로 시작해도 'NN_' 형태가 아니면 접두번호로 보지 않는다."""
         assert n.blog_sort_date("2026-07-14", "2026년 회고") == "2026-07-14T12:00:00"
-
-
-class TestPublishStatusFilter:
-    """NOTION_PUBLISH_STATUS: 상태 속성이 지정 값인 페이지만 내보낸다.
-    공개용 블로그 DB 에서 '시작 전'·'진행 중' 초안(작성 메모)이 공개되지 않게 한다.
-    번호 slug 가 공개 여부에 따라 바뀌지 않도록 위치는 전체 목록 기준을 유지한다."""
-
-    @staticmethod
-    def _page(pid, status):
-        return {"id": pid, "properties": {"상태": {"type": "status", "status": {"name": status}}}}
-
-    def test_only_matching_status_kept_with_original_positions(self, monkeypatch):
-        monkeypatch.setattr(n, "PUBLISH_STATUSES", {"완료"})
-        pages = [self._page("a", "완료"), self._page("b", "시작 전"),
-                 self._page("c", "진행 중"), self._page("d", "완료")]
-        assert [(pos, p["id"]) for pos, p in n.publishable_root_pages(pages)] == [(1, "a"), (4, "d")]
-
-    def test_no_filter_keeps_all(self, monkeypatch):
-        monkeypatch.setattr(n, "PUBLISH_STATUSES", set())
-        pages = [self._page("a", "완료"), self._page("b", "시작 전")]
-        assert [(pos, p["id"]) for pos, p in n.publishable_root_pages(pages)] == [(1, "a"), (2, "b")]
-
-    def test_page_without_status_property_excluded_when_filtering(self, monkeypatch):
-        monkeypatch.setattr(n, "PUBLISH_STATUSES", {"완료"})
-        assert list(n.publishable_root_pages([{"id": "x", "properties": {}}])) == []

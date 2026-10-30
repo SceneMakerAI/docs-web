@@ -194,7 +194,6 @@ docs-web/
 | `NOTION_POC`          | "PoC" DB ID → `docs/poc/`                                                |
 | `NOTION_DOCS`         | "문서(가이드)" DB ID → `docs/guide/`                                          |
 | `NOTION_BLOG`         | (미사용 — 2026-10-23 블로그 삭제 후 동기화 대상 아님)                              |
-| `NOTION_BLOG_1029`    | 「공개용_블로그 20건」DB ID → `blog/` (상태=완료만 게시, 2026-10-30~)          |
 | `NOTION_CONTRIBUTE`   | (미사용 — 2026-10-26 DB 삭제, 동기화 대상 아님)                                  |
 | `NOTION_DISCUSSION`   | (미사용 — 2026-10-26 DB 삭제, 동기화 대상 아님)                                  |
 | `NOTION_RELEASE`      | "릴리즈 노트" DB ID → `docs/release-notes/`                                   |
@@ -500,8 +499,6 @@ grep -rlE '^!\[[^]]*\]\([^)]*$' i18n/en/   # 출력 없으면 정상
 
 
 블로그는 2026-10-23 에 삭제했다 — `blog/`·`i18n/en/docusaurus-plugin-content-blog/`·`static/img/blog/` 를 저장소에서 지우고, `docusaurus.config.ts` 는 `blog: false`, `server-sync.sh` 는 `NOTION_BLOG` 를 더 이상 내려받지 않는다. 문서 곳곳의 `blog/` 언급(번역 파이프라인 등)은 그 이전 기록이다. 되살리려면 해당 커밋들을 revert 한다.
-
-**2026-10-30 블로그 재개.** 새 DB「공개용_블로그 20건 (수정 중)」(`NOTION_BLOG_1029`)을 `/blog` 로 동기화한다. `docusaurus.config.ts` 의 blog 플러그인·navbar·footer 링크와 `blog/authors.yml` 을 되살렸고, `server-sync.sh` 가 `NOTION_PUBLISH_STATUS=완료` 로 내려받아 **`상태`가 `완료`인 글만** 게시한다. 완료에서 다른 상태로 돌리면 다음 동기화 때 글과 `static/img/blog/<slug>/` 이미지가 함께 지워진다. 번호 slug(`/blog/N`)는 DB 전체의 생성 순서 기준이라 초안이 완료로 바뀌어도 기존 글 주소가 밀리지 않는다.
 
 ---
 

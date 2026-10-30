@@ -127,36 +127,7 @@ const config: Config = {
           remarkPlugins: [remarkMath],
           rehypePlugins: [rehypeKatex],
         },
-        blog: {
-          path: 'blog',
-          routeBasePath: 'blog',
-          blogTitle: 'SceneMakerAI 블로그',
-          blogDescription: 'SceneMakerAI 기술 블로그 — 오픈소스 AI로 방송 콘텐츠를 재가공하는 플랫폼 개발 이야기',
-          blogSidebarTitle: '전체 글',
-          blogSidebarCount: 'ALL',
-          sortPosts: 'ascending', // 날짜 → 주소 번호(slug). date 인코딩(blog_sort_date)과 함께 동작
-          showReadingTime: true,
-          readingTime: ({content}) => {
-            const koreanChars = (content.match(/[가-힯]/g) ?? []).length;
-            const englishWords = (
-              content.replace(/[가-힯ᄀ-ᇿ㄰-㆏]/g, ' ').match(/\S+/g) ?? []
-            ).length;
-            const minutes = koreanChars / 500 + englishWords / 200;
-            return Math.max(1, Math.round(minutes));
-          },
-          feedOptions: {
-            type: ['rss', 'atom', 'json'],
-            title: 'SceneMakerAI 블로그',
-            description: 'SceneMakerAI 기술 블로그 — 오픈소스 AI로 방송 콘텐츠를 재가공하는 플랫폼 개발 이야기',
-            copyright: `Copyright © ${new Date().getFullYear()} SceneMakerAI · Solbox Inc.`,
-            language: 'ko',
-            limit: false,
-          },
-          onInlineTags: 'warn',
-          onInlineAuthors: 'warn',
-          remarkPlugins: [remarkMath],
-          rehypePlugins: [rehypeKatex],
-        },
+        blog: false,
         theme: {
           customCss: [
             './src/css/custom.css',
@@ -216,7 +187,6 @@ const config: Config = {
         ...(hasNotionContent('guide')
           ? [{type: 'docSidebar' as const, sidebarId: 'docsSidebar',         label: '문서',          position: 'left' as const}]
           : [{to: '/docs/guide',           label: '문서',          position: 'left' as const}]),
-        {to: '/blog', label: '블로그', position: 'left'},
         ...(hasNotionContent('release-notes')
           ? [{type: 'docSidebar' as const, sidebarId: 'releaseNotesSidebar', label: '릴리즈 노트',   position: 'left' as const}]
           : [{to: '/docs/release-notes', label: '릴리즈 노트',   position: 'left' as const}]),
@@ -256,10 +226,6 @@ const config: Config = {
         {
           title: '더 보기',
           items: [
-            {
-              label: '블로그',
-              to: '/blog',
-            },
             {
               label: 'GitHub',
               href: 'https://github.com/SceneMakerAI',

@@ -62,12 +62,6 @@ if [ -n "$NOTION_ACHIEVEMENT" ]; then
   pids+=($!)
 fi
 
-if [ -n "$NOTION_BLOG_1029" ]; then
-  NOTION_DATABASE_ID="$NOTION_BLOG_1029" SAVE_DIR=blog FETCH_MODE=ALL NOTION_PUBLISH_STATUS=완료 \
-    python scripts/notion_to_md.py &
-  pids+=($!)
-fi
-
 if [ ${#pids[@]} -eq 0 ]; then
   echo "동기화할 DB가 없습니다. .env 파일에 NOTION_* 변수를 설정하세요."
   exit 0
