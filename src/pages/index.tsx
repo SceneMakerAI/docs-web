@@ -40,7 +40,7 @@ function HomepageHero() {
             </Translate>
           </p>
           <div className={styles.ctaGroup}>
-            <Link className={styles.ctaPrimary} to="/docs/guide">
+            <Link className={styles.ctaPrimary} to="/docs/about">
               <Translate id="homepage.hero.cta.docs">문서 시작하기</Translate>
             </Link>
             <Link
