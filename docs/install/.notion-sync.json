@@ -26,5 +26,12 @@
     "content_hash": "9081c0ff6a75267c9507d797dcb5703d99b326c8f7f4f5978cf84631859ec549",
     "order": 4,
     "parent_id": null
+  },
+  "40fe15b4-0359-80e8-bac3-eb16260c9134": {
+    "file": "docs/install/vllm-서빙-옵션-정리.md",
+    "last_edited": "2026-11-05T12:17:00.000Z",
+    "content_hash": "0b84d602d45c32712e2f5ecdbddcaaa25364962ad293e8def05b93ac5f52d2ac",
+    "order": 5,
+    "parent_id": null
   }
 }

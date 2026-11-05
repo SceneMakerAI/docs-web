@@ -12,5 +12,12 @@
     "content_hash": "7491ad5036e5d2dfa3538deeae5252820b73834f79eb6ac8ec65447594a90e47",
     "order": 2,
     "parent_id": null
+  },
+  "40fe15b4-0359-800b-ad52-c1db72021d62": {
+    "file": "docs/guide/멀티모달-장면-검색-평가-체계-구축-야구-드라마.md",
+    "last_edited": "2026-11-05T08:21:00.000Z",
+    "content_hash": "8e5decc33915e8fbee16a0e995a4b22706199032b878b0efde73be1589844bbb",
+    "order": 3,
+    "parent_id": null
   }
 }
