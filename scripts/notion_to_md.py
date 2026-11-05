@@ -60,16 +60,21 @@ def _color_to_admonition(color: str) -> str:
 
 
 def _get_cell_bg(cell_rich_text):
-    """셀 rich_text 목록에서 Notion 배경색 이름 반환. 없으면 None."""
-    for rt in cell_rich_text:
-        color = rt.get("annotations", {}).get("color", "default")
-        if color in _NOTION_BG_COLOR_NAMES:
-            return color
+    """셀의 모든 글자가 같은 Notion 배경색이면 그 이름, 아니면 None.
+    일부 글자만 칠한 경우는 _rich_text_to_html 이 그 글자에만 색을 입힌다."""
+    colors = {
+        rt.get("annotations", {}).get("color", "default")
+        for rt in cell_rich_text
+        if rt.get("plain_text", "").strip()
+    }
+    if len(colors) == 1 and (color := colors.pop()) in _NOTION_BG_COLOR_NAMES:
+        return color
     return None
 
 
 def _rich_text_to_html(rich_text_list):
     """rich_text 목록 → HTML 문자열 변환 (HTML 테이블 셀 내용용)."""
+    whole_cell_bg = _get_cell_bg(rich_text_list)
     parts = []
     for text in rich_text_list:
         plain = text["plain_text"]
@@ -92,6 +97,9 @@ def _rich_text_to_html(rich_text_list):
                 content = f"<del>{content}</del>"
         if href:
             content = f'<a href="{_html.escape(_resolve_notion_href(href))}">{content}</a>'
+        bg = ann.get("color", "default")
+        if bg in _NOTION_BG_COLOR_NAMES and not whole_cell_bg:
+            content = f'<span data-notion-bg="{bg}">{content}</span>'
         parts.append(content)
     return "".join(parts)
 

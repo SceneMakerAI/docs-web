@@ -1024,3 +1024,31 @@ class TestBlogSortDate:
     def test_leading_number_without_underscore_is_not_prefix(self):
         """'2026년 …' 처럼 숫자로 시작해도 'NN_' 형태가 아니면 접두번호로 보지 않는다."""
         assert n.blog_sort_date("2026-07-14", "2026년 회고") == "2026-07-14T12:00:00"
+
+
+class TestPartialCellBackground:
+    """표 칸의 일부 글자만 배경색이면 그 글자에만 색을 입힌다.
+    칸 전체를 칠하는 것은 칸의 모든 글자가 같은 배경색일 때뿐이다
+    (실제 사례: 외부 연동 규격-SBS 의 stream_id 설명 칸, 마지막 문장만 red_background)."""
+
+    @staticmethod
+    def _rt(text, color="default"):
+        return {"plain_text": text, "annotations": {"color": color}}
+
+    def test_partial_background_does_not_color_whole_cell(self):
+        cell = [self._rt("잘라진 영상의 고유값\n"), self._rt("우리가 만들 것인가?", "red_background")]
+        assert n._get_cell_bg(cell) is None
+
+    def test_partial_background_wraps_only_colored_text(self):
+        cell = [self._rt("고유값 "), self._rt("우리가 만들 것인가?", "red_background")]
+        assert n._rich_text_to_html(cell) == (
+            '고유값 <span data-notion-bg="red_background">우리가 만들 것인가?</span>'
+        )
+
+    def test_fully_colored_cell_keeps_cell_background(self):
+        cell = [self._rt("A", "red_background"), self._rt("B", "red_background")]
+        assert n._get_cell_bg(cell) == "red_background"
+
+    def test_whitespace_only_segment_does_not_break_full_cell(self):
+        cell = [self._rt("A", "red_background"), self._rt("\n"), self._rt("B", "red_background")]
+        assert n._get_cell_bg(cell) == "red_background"
