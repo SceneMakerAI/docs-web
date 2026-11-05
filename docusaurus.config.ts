@@ -59,6 +59,11 @@ const config: Config = {
 
   onBrokenLinks: 'throw',
 
+  // 홈 "문서 시작하기" 버튼이 docs/guide 가 비었을 때 깨진 링크를 만들지 않도록 빌드 시점 값을 넘긴다
+  customFields: {
+    docsStartPath: hasNotionContent('guide') ? '/docs/guide' : '/docs/about',
+  },
+
   headTags: [
     // 파비콘 변형 (SVG 우선 — favicon 옵션 / PNG·ICO·apple-touch-icon fallback)
     { tagName: 'link', attributes: { rel: 'icon', type: 'image/png', sizes: '32x32', href: '/img/favicon-32x32.png' } },
@@ -184,9 +189,9 @@ const config: Config = {
           : [{to: '/docs/architecture',  label: '아키텍처',      position: 'left' as const}]),
         {type: 'docSidebar', sidebarId: 'installSidebar',      label: '설치',          position: 'left'},
         {type: 'docSidebar', sidebarId: 'pocSidebar',          label: 'PoC',           position: 'left'},
-        ...(hasNotionContent('test')
-          ? [{type: 'docSidebar' as const, sidebarId: 'testSidebar',         label: '테스트',        position: 'left' as const}]
-          : [{to: '/docs/test',            label: '테스트',        position: 'left' as const}]),
+        ...(hasNotionContent('guide')
+          ? [{type: 'docSidebar' as const, sidebarId: 'docsSidebar',         label: '문서',          position: 'left' as const}]
+          : []),
         ...(hasNotionContent('release-notes')
           ? [{type: 'docSidebar' as const, sidebarId: 'releaseNotesSidebar', label: '릴리즈 노트',   position: 'left' as const}]
           : [{to: '/docs/release-notes', label: '릴리즈 노트',   position: 'left' as const}]),
@@ -205,7 +210,7 @@ const config: Config = {
           items: [
             {
               label: '시작하기',
-              to: '/docs/about',
+              to: hasNotionContent('guide') ? '/docs/guide/1' : '/docs/about',
             },
             {label: '아키텍처', to: '/docs/architecture'},
           ],

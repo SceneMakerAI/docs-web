@@ -6,6 +6,7 @@
 
 import type {ReactNode} from 'react';
 import Link from '@docusaurus/Link';
+import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
 import Translate, {translate} from '@docusaurus/Translate';
 import Layout from '@theme/Layout';
 import Heading from '@theme/Heading';
@@ -15,6 +16,8 @@ import HomepageKPI from '@site/src/components/HomepageKPI';
 import styles from './index.module.css';
 
 function HomepageHero() {
+  const {siteConfig} = useDocusaurusContext();
+  const docsStartPath = siteConfig.customFields?.docsStartPath as string;
   return (
     <header className={styles.hero}>
       <div className="container">
@@ -40,7 +43,7 @@ function HomepageHero() {
             </Translate>
           </p>
           <div className={styles.ctaGroup}>
-            <Link className={styles.ctaPrimary} to="/docs/about">
+            <Link className={styles.ctaPrimary} to={docsStartPath}>
               <Translate id="homepage.hero.cta.docs">문서 시작하기</Translate>
             </Link>
             <Link
