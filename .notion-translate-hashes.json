@@ -147,12 +147,6 @@
     "sidebar_position": "3",
     "frontmatter_hash": "bd91f34677ec986b1dbcf42afb33a3f0f38ba6cb21973e32edc51d31dcc06fa1"
   },
-  "docs/guide/scenemakerai-문서.md": {
-    "body_hash": "78fecbe8088c45ab98f1e36c1bb7bb6863019a7892a590101a1031398b55d0b0",
-    "slug": "1",
-    "sidebar_position": "1",
-    "frontmatter_hash": "4b57759c2e22e0fde584ad7547b5633e6ff22649876fdd1de2cb546be6717e15"
-  },
   "docs/about/placeholder.md": {
     "body_hash": "9c3c6fc3d407d5f72357eba0a1d4a19225debf92e023b664be415835ae8fc01b",
     "slug": "placeholder",
@@ -176,18 +170,6 @@
     "slug": "3",
     "sidebar_position": "3",
     "frontmatter_hash": "52140b6fb78670aecc238df70efd33a542752501c94375d7e687c36bb1775d6a"
-  },
-  "docs/guide/placeholder.md": {
-    "body_hash": "9c3c6fc3d407d5f72357eba0a1d4a19225debf92e023b664be415835ae8fc01b",
-    "slug": "placeholder",
-    "sidebar_position": "1",
-    "frontmatter_hash": "007727c458d7f9d57b9c5314565fdd592a8e86a292ddaabd6f52b9ee1ec3b18f"
-  },
-  "docs/guide/제목없음.md": {
-    "body_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-    "slug": "1",
-    "sidebar_position": "1",
-    "frontmatter_hash": "f50d4bfcaa1b2b1a86679326fa70c66a09348c41ab2ea248d1c10c01eb721248"
   },
   "docs/install/milvus.md": {
     "body_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
@@ -219,12 +201,6 @@
     "sidebar_position": "1",
     "frontmatter_hash": "4cd87bcfc3e45e4e01c8689ae219d537af44ce8fe149ecf58d9c0b0a493884d9"
   },
-  "docs/guide/외부-연동-규격.md": {
-    "body_hash": "7491ad5036e5d2dfa3538deeae5252820b73834f79eb6ac8ec65447594a90e47",
-    "slug": "2",
-    "sidebar_position": "2",
-    "frontmatter_hash": "d57d1d32b3c208c502ca860a7d29f6396305b0d01f71b070f40fdafa1f9eba47"
-  },
   "docs/test/야구-질의.md": {
     "body_hash": "074b0a6e65a74d4a7e9b03f5a6e2d4d53dc4663050ffa8c8dab0f8219675103b",
     "slug": "1",
@@ -242,12 +218,6 @@
     "slug": "2",
     "sidebar_position": "2",
     "frontmatter_hash": "57e42ab790fae71faf43fc3464d70f7c9160089f3d9ed442570a20b63fc8fa15"
-  },
-  "docs/guide/외부-연동-규격-sbs.md": {
-    "body_hash": "726e5589324a12fa6fa6064969abbd6846aab0f53b58c34cd8f5dd5747808990",
-    "slug": "1",
-    "sidebar_position": "1",
-    "frontmatter_hash": "5a74d16145e7f8d1c8908417c3a2d9c9b7273bb7c2b269445af86aee63277536"
   },
   "docs/achievement/2026-aichi-nagoya-asian-games-baseball-pilot-service.md": {
     "body_hash": "bf5de464084737c037312ceec6e5f7c9d28fe7082564340987862d10b4869a50",

@@ -184,9 +184,9 @@ const config: Config = {
           : [{to: '/docs/architecture',  label: '아키텍처',      position: 'left' as const}]),
         {type: 'docSidebar', sidebarId: 'installSidebar',      label: '설치',          position: 'left'},
         {type: 'docSidebar', sidebarId: 'pocSidebar',          label: 'PoC',           position: 'left'},
-        ...(hasNotionContent('guide')
-          ? [{type: 'docSidebar' as const, sidebarId: 'docsSidebar',         label: '문서',          position: 'left' as const}]
-          : [{to: '/docs/guide',           label: '문서',          position: 'left' as const}]),
+        ...(hasNotionContent('test')
+          ? [{type: 'docSidebar' as const, sidebarId: 'testSidebar',         label: '테스트',        position: 'left' as const}]
+          : [{to: '/docs/test',            label: '테스트',        position: 'left' as const}]),
         ...(hasNotionContent('release-notes')
           ? [{type: 'docSidebar' as const, sidebarId: 'releaseNotesSidebar', label: '릴리즈 노트',   position: 'left' as const}]
           : [{to: '/docs/release-notes', label: '릴리즈 노트',   position: 'left' as const}]),
@@ -205,7 +205,7 @@ const config: Config = {
           items: [
             {
               label: '시작하기',
-              to: hasNotionContent('guide') ? '/docs/guide/1' : '/docs/guide',
+              to: '/docs/about',
             },
             {label: '아키텍처', to: '/docs/architecture'},
           ],

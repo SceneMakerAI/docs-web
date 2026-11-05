@@ -141,7 +141,6 @@ docs-web/
 ├── docs/               # KR 원본 — Notion sync가 덮어씀 (수동 수정 금지)
 │   ├── about/          # 프로젝트 소개 (NOTION_ABOUT)
 │   ├── architecture/   # 아키텍처 (NOTION_ARCHITECTURE)
-│   ├── guide/          # 문서 (NOTION_DOCS)
 │   ├── install/        # 설치 (NOTION_INSTALL)
 │   ├── poc/            # PoC (NOTION_POC) — 서브디렉토리 구조
 │   ├── release-notes/  # 릴리즈 노트 (NOTION_RELEASE)
@@ -192,7 +191,7 @@ docs-web/
 | `NOTION_ABOUT`        | "프로젝트 소개" DB ID → `docs/about/`                                          |
 | `NOTION_ARCHITECTURE` | "아키텍처" DB ID → `docs/architecture/`                                      |
 | `NOTION_POC`          | "PoC" DB ID → `docs/poc/`                                                |
-| `NOTION_DOCS`         | "문서(가이드)" DB ID → `docs/guide/`                                          |
+| `NOTION_DOCS`         | (미사용 — 2026-11-05 「문서」 섹션을 사이트에서 뺌, 동기화 대상 아님)                 |
 | `NOTION_BLOG`         | (미사용 — 2026-10-23 블로그 삭제 후 동기화 대상 아님)                              |
 | `NOTION_CONTRIBUTE`   | (미사용 — 2026-10-26 DB 삭제, 동기화 대상 아님)                                  |
 | `NOTION_DISCUSSION`   | (미사용 — 2026-10-26 DB 삭제, 동기화 대상 아님)                                  |
@@ -492,11 +491,12 @@ grep -rlE '^!\[[^]]*\]\([^)]*$' i18n/en/   # 출력 없으면 정상
 | `architectureSidebar` | `architecture/`  | `NOTION_ARCHITECTURE` | ❌ placeholder.md 자동 생성 (navbar 숨김) |
 | `installSidebar`      | `install/`       | `NOTION_INSTALL`      | ✅                               |
 | `pocSidebar`          | `poc/`           | `NOTION_POC`          | ✅                               |
-| `docsSidebar`         | `guide/`         | `NOTION_DOCS`         | ✅                               |
 | `releaseNotesSidebar` | `release-notes/` | `NOTION_RELEASE`      | ❌ placeholder.md 자동 생성 (navbar 숨김) |
 | `testSidebar`         | `test/`          | `NOTION_TEST`         | ✅                               |
 | `achievementSidebar`  | `achievement/`   | `NOTION_ACHIEVEMENT`  | ✅                               |
 
+
+「문서」(`docs/guide`, `NOTION_DOCS`) 섹션은 2026-11-05 사용자 요청으로 사이트에서 뺐다 — Notion 의 SceneMaker 페이지 목록(프로젝트 소개·아키텍처·설치·PoC·테스트·릴리즈 노트·성과)과 메뉴를 맞추기 위해서다. 그 자리에 「테스트」(`testSidebar`)를 다시 메뉴에 올렸다(2026-10-12 08970ba 에서 숨겼던 것). 홈의 "문서 시작하기" 버튼과 footer "시작하기"는 `/docs/about` 으로 간다.
 
 블로그는 2026-10-23 에 삭제했다 — `blog/`·`i18n/en/docusaurus-plugin-content-blog/`·`static/img/blog/` 를 저장소에서 지우고, `docusaurus.config.ts` 는 `blog: false`, `server-sync.sh` 는 `NOTION_BLOG` 를 더 이상 내려받지 않는다. 문서 곳곳의 `blog/` 언급(번역 파이프라인 등)은 그 이전 기록이다. 되살리려면 해당 커밋들을 revert 한다.
 
