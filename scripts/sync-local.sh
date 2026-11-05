@@ -38,6 +38,12 @@ if [ -n "$NOTION_POC" ]; then
   pids+=($!)
 fi
 
+if [ -n "$NOTION_DOCS" ]; then
+  NOTION_DATABASE_ID="$NOTION_DOCS" SAVE_DIR=docs/guide FETCH_MODE=ALL \
+    python scripts/notion_to_md.py &
+  pids+=($!)
+fi
+
 if [ -n "$NOTION_RELEASE" ]; then
   NOTION_DATABASE_ID="$NOTION_RELEASE" SAVE_DIR=docs/release-notes FETCH_MODE=ALL \
     python scripts/notion_to_md.py &

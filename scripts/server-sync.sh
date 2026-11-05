@@ -60,6 +60,10 @@ pids=()
   NOTION_DATABASE_ID="$NOTION_ARCHITECTURE" SAVE_DIR=docs/architecture FETCH_MODE=ALL \
   python3 scripts/notion_to_md.py & pids+=($!)
 
+[ -n "$NOTION_DOCS" ] && \
+  NOTION_DATABASE_ID="$NOTION_DOCS" SAVE_DIR=docs/guide FETCH_MODE=ALL \
+  python3 scripts/notion_to_md.py & pids+=($!)
+
 [ -n "$NOTION_INSTALL" ] && \
   NOTION_DATABASE_ID="$NOTION_INSTALL" SAVE_DIR=docs/install FETCH_MODE=ALL \
   python3 scripts/notion_to_md.py & pids+=($!)
