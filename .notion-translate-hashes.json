@@ -268,15 +268,129 @@
     "frontmatter_hash": "a4cab74a5f371f3e9a824034dd2fb83f513836268dd8031a10962c047f99911b"
   },
   "docs/achievement/오픈소스-기여.md": {
-    "body_hash": "8d818969ced3d0e90c282ac6234ca0398fd895b667be49bb53fe97f1baf5cdcf",
+    "body_hash": "a4066c25806feab616b49bc5c0e48d9c4cf5779c05c6577a78fc4c52c12cce6f",
     "slug": "3",
     "sidebar_position": "3",
-    "frontmatter_hash": "f13948e54d73558b74921c2ff68e4642f84bb9a7c50cbb1e29fa1371bddc2c5b"
+    "frontmatter_hash": "2517e9cc991b8b6424e4abe5630c3d851f16e6ba9a4bbe9feea5cfb532d67905"
   },
   "docs/achievement/제목없음.md": {
     "body_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "slug": "5",
     "sidebar_position": "5",
     "frontmatter_hash": "0d2e729441a3e9915403162fadc1006bab1a6ba9527230a9c2eb54f4ee93c51b"
+  },
+  "docs/notes/faster-whisper-한국어-음성인식-최적화-경험-공유.md": {
+    "body_hash": "192cea9b3ae9747881324335a653ee03ffab01667995815cf494a08277100051",
+    "slug": "3",
+    "sidebar_position": "3",
+    "frontmatter_hash": "0fc24d0e65d8d3c4635af4baadb1700052ebf941fb781563bd7c52f60bcfa2b6"
+  },
+  "docs/notes/langgraph-기반-방송-워크플로우-설계.md": {
+    "body_hash": "610a358d8d052be4b85dbb836b45ef015681d86cde888b63f1ed764371490837",
+    "slug": "6",
+    "sidebar_position": "6",
+    "frontmatter_hash": "b296e256cd463dffc66e3216338d207f9c10a561aacfe53d8e3d8cc54ad7fbd6"
+  },
+  "docs/notes/rag-파이프라인-구축.md": {
+    "body_hash": "61fadb0f1cc2c7ed92c7d8a9cbcea7439da945bdfb2bc27cb3ff5d22b6036d82",
+    "slug": "5",
+    "sidebar_position": "5",
+    "frontmatter_hash": "b421d56535d88070146386f3df78c8369698cf235595d2d9d0abea9d52f1c09c"
+  },
+  "docs/notes/vllm-기본-추론-최적화-노하우-1건.md": {
+    "body_hash": "35e13e729d74564dba1734a309fd7f0745685ab3af06d0fb6f795f45010fe05b",
+    "slug": "10",
+    "sidebar_position": "10",
+    "frontmatter_hash": "2bb5d8ad32b90b71323f4276051d5be0c8ecdd0bc77635a98a90ca7a274eb8dd"
+  },
+  "docs/notes/기술-블로그-개설.md": {
+    "body_hash": "9eb28aabd97bd3e968eb569265fd475ea78a774807c6545549cb5e03989dfb5d",
+    "slug": "1",
+    "sidebar_position": "1",
+    "frontmatter_hash": "0e6cf8c210066a6caaae3d1a04ef175291fec8cfb2e9395ec0ca9ef138c95102"
+  },
+  "docs/notes/맥락-기반-광고-최적화-기술-해설.md": {
+    "body_hash": "225d12b64dff21c385bd7e6a73e4e259351c2e4ff2192fafee1e87e0c467016e",
+    "slug": "11",
+    "sidebar_position": "11",
+    "frontmatter_hash": "a8d597378cc7aef26e000ddeaee43a5236ecb03c7235915ae51b89c547793d3f"
+  },
+  "docs/notes/모아보기-서비스-구현기-1건.md": {
+    "body_hash": "58d01e77592045b4e35e82170a1b001fa199361442cc976b17523118c22dc612",
+    "slug": "9",
+    "sidebar_position": "9",
+    "frontmatter_hash": "fe00aa6523cb61ee7b8f2a11db14a7f8034b8615933c713925f169211cb8397b"
+  },
+  "docs/notes/방송-ai-서비스-성능-벤치마크-결과-분석-1건.md": {
+    "body_hash": "225b50248df10842abe597debd5101b30978c4c41acac47a3e07800cc2143c45",
+    "slug": "12",
+    "sidebar_position": "12",
+    "frontmatter_hash": "881db5b342e32984992ee9e440320471fb4c3afbd2f3ef9c5ad719d5ff3b8197"
+  },
+  "docs/notes/숏폼-자동-생성-파이프라인-해설-1.md": {
+    "body_hash": "d6a0ce8bff3b94066e15ed2db0c86c81ab374598f83908f5379c47ed1d783f09",
+    "slug": "7",
+    "sidebar_position": "7",
+    "frontmatter_hash": "4a6a904f8c5681c5fd6a27236d558ce56a97a53d956886b32a9ccb202c9d5d13"
+  },
+  "docs/notes/숏폼-자동-생성-파이프라인-해설-2.md": {
+    "body_hash": "ef244e22b2e6c3f7a8d618be30a8d01e1a420d737af1d31e41450b8c1c7a4274",
+    "slug": "8",
+    "sidebar_position": "8",
+    "frontmatter_hash": "2f009043b2373cd069a2d2d7e40ffae24f6997ba24e8ca06b914ff7aa727824e"
+  },
+  "docs/notes/오픈-소스-기여-종합-가이드-1건.md": {
+    "body_hash": "813ebc2c45e1f2369ae2b4d9dd704e49df381b1557500d86433a3a11d5c9d86d",
+    "slug": "13",
+    "sidebar_position": "13",
+    "frontmatter_hash": "a7038f88bc5a5c0e9ce211cc61cafeed23ec08f84fe45eebb7a18187979f6682"
+  },
+  "docs/notes/오픈소스-생태계-기여-실적-보고-1건.md": {
+    "body_hash": "be085e72187d7a5e06267c1b24863a00f407bfb90b902b87e4c5038266a89c6c",
+    "slug": "14",
+    "sidebar_position": "14",
+    "frontmatter_hash": "0557d89fb64c460a71a99c1208c9a718ca77ef65fcf9b9b43b34d0217298806b"
+  },
+  "docs/notes/음성분석-처리-과정-및-결과.md": {
+    "body_hash": "1f33bd3b437e73b3b07de9cf2f40ce169f2b0f549a7be63a1be6eaff2359b74c",
+    "slug": "4",
+    "sidebar_position": "4",
+    "frontmatter_hash": "a422020d176fcd187b781fda3bfc46c4a855b8e53116094cf85b0e76cf7372f2"
+  },
+  "docs/notes/프로젝트-소개-및-qwen36-방송-도메인-적용기.md": {
+    "body_hash": "3874f32e6e37e3e3912a076c518b9ed09b820acc234461a28539af6325178bd7",
+    "slug": "2",
+    "sidebar_position": "2",
+    "frontmatter_hash": "55a7cb5b19a4bf5d5b5dbb669205e4bddd913f81b01df6d3e74a8a6ec34bfc94"
+  },
+  "docs/notes/향후-로드맵-및-지속-기여-계획-공유-1건.md": {
+    "body_hash": "1e0c435923b44af07bdc1b7bbc22a04acf1be683d5b963c9a85cc6fb159a9d13",
+    "slug": "15",
+    "sidebar_position": "15",
+    "frontmatter_hash": "948a2b793bcb16c94ae17c946ffb9117220a736690d055845c076baa475a4ba4"
+  },
+  "docs/achievement/오픈소스-공급망-보안-ci-구축-sbom-취약점-라이선스-자동-점검.md": {
+    "body_hash": "a040b604fe4f3a8f2f7c2547d4f0c95d3a54d4bcf4386412bcf16daf14cff50e",
+    "slug": "5",
+    "sidebar_position": "5",
+    "frontmatter_hash": "413f59e19948e3cb9389b093d4a6db44d5b6480ab7dee27e3402b2d01ba095e1"
+  },
+  "docs/install/vllm-서빙-옵션-정리.md": {
+    "body_hash": "0b84d602d45c32712e2f5ecdbddcaaa25364962ad293e8def05b93ac5f52d2ac",
+    "slug": "5",
+    "sidebar_position": "5",
+    "frontmatter_hash": "413f59e19948e3cb9389b093d4a6db44d5b6480ab7dee27e3402b2d01ba095e1"
+  },
+  "docs/guide/멀티모달-장면-검색-평가-체계-구축-야구-드라마.md": {
+    "body_hash": "89ed218bd30cf04d27ed96a6dbaded35168158c0b1cc90c2c8eae433c46df690",
+    "slug": "3",
+    "sidebar_position": "3",
+    "frontmatter_hash": "0fc24d0e65d8d3c4635af4baadb1700052ebf941fb781563bd7c52f60bcfa2b6"
+  },
+  "docs/architecture/시스템-아키텍처.md": {
+    "body_hash": "9a79d7c2f43d1ee0e5544e37780e23e4d8b0a4eb66ccda020613ba3818d1f8ab",
+    "slug": "1",
+    "sidebar_position": "1",
+    "frontmatter_hash": "6db398c9ea83f63d80d173c6972f188b3bd0effb10331ebba212e806f70b4fce"
   }
 }
