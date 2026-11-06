@@ -144,7 +144,7 @@ docs-web/
 │   ├── guide/          # 문서 (NOTION_DOCS)
 │   ├── install/        # 설치 (NOTION_INSTALL)
 │   ├── poc/            # PoC (NOTION_POC) — 서브디렉토리 구조
-│   ├── posts/          # 게시글 (NOTION_POSTS) — 2026-11-06 「릴리즈 노트」에서 개명
+│   ├── posts/          # 개발 노트 (NOTION_POSTS, Notion DB 「게시글」) — 2026-11-06 「릴리즈 노트」에서 개명
 │   ├── test/           # 테스트 (NOTION_TEST)
 │   └── achievement/    # 성과 (NOTION_ACHIEVEMENT)
 ├── i18n/en/            # EN 번역 파일 — translate_to_en.py가 자동 생성 (수동 편집 금지)
@@ -196,7 +196,7 @@ docs-web/
 | `NOTION_BLOG`         | (미사용 — 2026-10-23 블로그 삭제 후 동기화 대상 아님)                              |
 | `NOTION_CONTRIBUTE`   | (미사용 — 2026-10-26 DB 삭제, 동기화 대상 아님)                                  |
 | `NOTION_DISCUSSION`   | (미사용 — 2026-10-26 DB 삭제, 동기화 대상 아님)                                  |
-| `NOTION_POSTS`        | "게시글" DB ID → `docs/posts/` (2026-11-06 Notion 에서 「릴리즈 노트」→「게시글」 개명, 옛 이름 `NOTION_RELEASE`) |
+| `NOTION_POSTS`        | "게시글" DB ID → `docs/posts/`, 메뉴 「개발 노트」 (2026-11-06 Notion 에서 「릴리즈 노트」→「게시글」 개명, 옛 이름 `NOTION_RELEASE`) |
 | `NOTION_INSTALL`      | "설치" DB ID → `docs/install/`                                             |
 | `NOTION_TEST`         | "테스트" DB ID → `docs/test/`                                              |
 | `NOTION_ACHIEVEMENT`  | "성과" DB ID → `docs/achievement/`                                          |

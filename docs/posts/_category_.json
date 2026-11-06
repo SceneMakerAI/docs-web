@@ -1,8 +1,8 @@
 {
-  "label": "게시글",
+  "label": "개발 노트",
   "position": 4,
   "link": {
     "type": "generated-index",
-    "description": "SceneMakerAI 프로젝트 게시글을 모읍니다."
+    "description": "SceneMakerAI 개발 과정을 기록합니다."
   }
 }

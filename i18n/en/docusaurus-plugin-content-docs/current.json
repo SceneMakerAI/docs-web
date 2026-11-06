@@ -31,9 +31,9 @@
     "message": "Vision-bench",
     "description": "The label for category 'Vision-bench' in sidebar 'pocSidebar'"
   },
-  "sidebar.postsSidebar.category.게시글": {
-    "message": "Posts",
-    "description": "The label for category '게시글' in sidebar 'postsSidebar'"
+  "sidebar.postsSidebar.category.개발 노트": {
+    "message": "Dev Notes",
+    "description": "The label for category '개발 노트' in sidebar 'postsSidebar'"
   },
   "sidebar.testSidebar.category.테스트": {
     "message": "Tests",

@@ -31,9 +31,9 @@
     "message": "Blog",
     "description": "Navbar item with label 블로그"
   },
-  "item.label.게시글": {
-    "message": "Posts",
-    "description": "Navbar item with label 게시글"
+  "item.label.개발 노트": {
+    "message": "Dev Notes",
+    "description": "Navbar item with label 개발 노트"
   },
   "item.label.테스트": {
     "message": "Tests",
