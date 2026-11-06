@@ -1,1 +1,107 @@
-{}
+{
+  "410e15b4-0359-801b-b56c-e5aa7442d138": {
+    "file": "docs/notes/기술-블로그-개설.md",
+    "last_edited": "2026-11-06T04:47:00.000Z",
+    "content_hash": "9eb28aabd97bd3e968eb569265fd475ea78a774807c6545549cb5e03989dfb5d",
+    "order": 1,
+    "parent_id": null
+  },
+  "410e15b4-0359-80e1-bc2d-d72cf9931ddf": {
+    "file": "docs/notes/프로젝트-소개-및-qwen36-방송-도메인-적용기.md",
+    "last_edited": "2026-11-06T04:47:00.000Z",
+    "content_hash": "3874f32e6e37e3e3912a076c518b9ed09b820acc234461a28539af6325178bd7",
+    "order": 2,
+    "parent_id": null
+  },
+  "410e15b4-0359-805d-bc77-d2cb3c2bee1e": {
+    "file": "docs/notes/faster-whisper-한국어-음성인식-최적화-경험-공유.md",
+    "last_edited": "2026-11-06T04:47:00.000Z",
+    "content_hash": "192cea9b3ae9747881324335a653ee03ffab01667995815cf494a08277100051",
+    "order": 3,
+    "parent_id": null
+  },
+  "410e15b4-0359-8049-bee8-ee70112c4817": {
+    "file": "docs/notes/음성분석-처리-과정-및-결과.md",
+    "last_edited": "2026-11-06T04:47:00.000Z",
+    "content_hash": "1f33bd3b437e73b3b07de9cf2f40ce169f2b0f549a7be63a1be6eaff2359b74c",
+    "order": 4,
+    "parent_id": null
+  },
+  "410e15b4-0359-8054-8850-d302c61c15a9": {
+    "file": "docs/notes/rag-파이프라인-구축.md",
+    "last_edited": "2026-11-06T04:47:00.000Z",
+    "content_hash": "61fadb0f1cc2c7ed92c7d8a9cbcea7439da945bdfb2bc27cb3ff5d22b6036d82",
+    "order": 5,
+    "parent_id": null
+  },
+  "410e15b4-0359-807e-9189-f506eba9a949": {
+    "file": "docs/notes/langgraph-기반-방송-워크플로우-설계.md",
+    "last_edited": "2026-11-06T04:47:00.000Z",
+    "content_hash": "610a358d8d052be4b85dbb836b45ef015681d86cde888b63f1ed764371490837",
+    "order": 6,
+    "parent_id": null
+  },
+  "410e15b4-0359-80b5-b0cb-d0025d5ba18c": {
+    "file": "docs/notes/숏폼-자동-생성-파이프라인-해설-1.md",
+    "last_edited": "2026-11-06T04:47:00.000Z",
+    "content_hash": "d6a0ce8bff3b94066e15ed2db0c86c81ab374598f83908f5379c47ed1d783f09",
+    "order": 7,
+    "parent_id": null
+  },
+  "410e15b4-0359-80b8-b155-c98e0559731e": {
+    "file": "docs/notes/숏폼-자동-생성-파이프라인-해설-2.md",
+    "last_edited": "2026-11-06T04:47:00.000Z",
+    "content_hash": "ef244e22b2e6c3f7a8d618be30a8d01e1a420d737af1d31e41450b8c1c7a4274",
+    "order": 8,
+    "parent_id": null
+  },
+  "410e15b4-0359-80b9-9aea-cb873921e19a": {
+    "file": "docs/notes/모아보기-서비스-구현기-1건.md",
+    "last_edited": "2026-11-06T04:47:00.000Z",
+    "content_hash": "58d01e77592045b4e35e82170a1b001fa199361442cc976b17523118c22dc612",
+    "order": 9,
+    "parent_id": null
+  },
+  "410e15b4-0359-803e-a2b1-d2a7f6b3fe7d": {
+    "file": "docs/notes/vllm-기본-추론-최적화-노하우-1건.md",
+    "last_edited": "2026-11-06T04:47:00.000Z",
+    "content_hash": "35e13e729d74564dba1734a309fd7f0745685ab3af06d0fb6f795f45010fe05b",
+    "order": 10,
+    "parent_id": null
+  },
+  "410e15b4-0359-80ba-a8db-fe93acfe4f18": {
+    "file": "docs/notes/맥락-기반-광고-최적화-기술-해설.md",
+    "last_edited": "2026-11-06T04:47:00.000Z",
+    "content_hash": "225d12b64dff21c385bd7e6a73e4e259351c2e4ff2192fafee1e87e0c467016e",
+    "order": 11,
+    "parent_id": null
+  },
+  "410e15b4-0359-805f-960b-febc3cae2627": {
+    "file": "docs/notes/방송-ai-서비스-성능-벤치마크-결과-분석-1건.md",
+    "last_edited": "2026-11-06T04:47:00.000Z",
+    "content_hash": "225b50248df10842abe597debd5101b30978c4c41acac47a3e07800cc2143c45",
+    "order": 12,
+    "parent_id": null
+  },
+  "410e15b4-0359-803c-828c-f95635e539e8": {
+    "file": "docs/notes/오픈-소스-기여-종합-가이드-1건.md",
+    "last_edited": "2026-11-06T04:47:00.000Z",
+    "content_hash": "813ebc2c45e1f2369ae2b4d9dd704e49df381b1557500d86433a3a11d5c9d86d",
+    "order": 13,
+    "parent_id": null
+  },
+  "410e15b4-0359-80da-8513-e35dad989421": {
+    "file": "docs/notes/오픈소스-생태계-기여-실적-보고-1건.md",
+    "last_edited": "2026-11-06T04:47:00.000Z",
+    "content_hash": "be085e72187d7a5e06267c1b24863a00f407bfb90b902b87e4c5038266a89c6c",
+    "order": 14,
+    "parent_id": null
+  },
+  "410e15b4-0359-80a2-b061-c1c748a50b3d": {
+    "file": "docs/notes/향후-로드맵-및-지속-기여-계획-공유-1건.md",
+    "last_edited": "2026-11-06T04:47:00.000Z",
+    "content_hash": "1e0c435923b44af07bdc1b7bbc22a04acf1be683d5b963c9a85cc6fb159a9d13",
+    "order": 15,
+    "parent_id": null
+  }
+}
