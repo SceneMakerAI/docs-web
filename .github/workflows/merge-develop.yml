@@ -43,10 +43,19 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: npm
+
+      - name: Cache node_modules
+        id: node-modules-cache
+        if: steps.diff.outputs.has_changes == 'true'
+        uses: actions/cache@v4
+        with:
+          path: |
+            node_modules
+            !node_modules/.cache
+          key: node-modules-${{ runner.os }}-node20-${{ hashFiles('package-lock.json') }}
 
       - name: Install dependencies
-        if: steps.diff.outputs.has_changes == 'true'
+        if: steps.node-modules-cache.outputs.cache-hit != 'true' && steps.diff.outputs.has_changes == 'true'
         run: npm ci
 
       - name: Checkout docs/ from main (빌드용 콘텐츠 완전 교체)
