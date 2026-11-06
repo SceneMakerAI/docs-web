@@ -13,7 +13,7 @@ docs-web/
 │   ├── guide/                     # 시작하기 / 문서 인덱스
 │   ├── install/                   # 설치 가이드 (Qwen, LLM 등)
 │   ├── poc/                       # PoC 기획안 및 벤치마크
-│   └── release-notes/             # 릴리즈 노트
+│   └── notes/                     # 개발 노트
 │
 ├── blog/                          # 블로그 (독립 blog 플러그인, Notion 자동 동기화 대상)
 │   ├── authors.yml                # 저자 프로필 목록
@@ -107,7 +107,7 @@ docs/poc/vision-bench/child.md         (slug: "1")                              
 | `pocSidebar` | PoC | `poc/` |
 | `docsSidebar` | 문서 | `guide/` |
 | `contributeSidebar` | 오픈소스 기여 | `contribute/` |
-| `releaseNotesSidebar` | 릴리즈 노트 | `release-notes/` |
+| `notesSidebar` | 개발 노트 | `notes/` |
 
 > 블로그는 독립 blog 플러그인이 자체 사이드바를 관리하므로 `sidebars.ts`에 포함되지 않는다. navbar 링크는 `{to: '/blog'}` 방식.
 

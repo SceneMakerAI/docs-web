@@ -236,6 +236,18 @@ def read_number(props, prop_name):
     return p.get("number")
 
 
+def sort_pages_for_sync(pages):
+    """「순서」(Number) 값이 있는 페이지를 그 값 순으로 앞에 두고, 나머지는 created_time 순.
+
+    Notion 화면에서 끌어 정한 순서는 API 로 읽을 수 없고 created_time 은 분 단위라,
+    한꺼번에 옮긴 페이지는 created_time 만으로는 순서가 임의가 된다.
+    """
+    def key(page):
+        order = read_number(page.get("properties", {}), NOTION_PROPERTY_ORDER)
+        return (order is None, order if order is not None else 0, page.get("created_time", ""))
+    return sorted(pages, key=key)
+
+
 def read_date_start(props, prop_name):
     p = props.get(prop_name, {})
     if p.get("type") != "date":
@@ -1039,10 +1051,10 @@ def main():
         has_more = data.get("has_more", False)
         next_cursor = data.get("next_cursor")
 
-    # FETCH_MODE=ALL: created_time 오름차순 정렬 후 position 배정
+    # FETCH_MODE=ALL: 「순서」 값 → created_time 오름차순 정렬 후 position 배정
     if FETCH_MODE != "DAILY":
-        all_pages.sort(key=lambda p: p.get("created_time", ""))
-        log(f"총 {len(all_pages)}개 페이지, created_time 오름차순 정렬")
+        all_pages = sort_pages_for_sync(all_pages)
+        log(f"총 {len(all_pages)}개 페이지, 「{NOTION_PROPERTY_ORDER}」·created_time 오름차순 정렬")
 
     # 부모-자식 관계 구성
     page_by_id = {p["id"]: p for p in all_pages}

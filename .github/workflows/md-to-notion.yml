@@ -22,7 +22,7 @@ jobs:
       NOTION_DOCS:         ${{ secrets.NOTION_DOCS }}
       NOTION_INSTALL:      ${{ secrets.NOTION_INSTALL }}
       NOTION_POC:          ${{ secrets.NOTION_POC }}
-      NOTION_RELEASE:      ${{ secrets.NOTION_RELEASE }}
+      NOTION_NOTES:        ${{ secrets.NOTION_NOTES || secrets.NOTION_POSTS || secrets.NOTION_RELEASE }}
       NOTION_TEST:         ${{ secrets.NOTION_TEST }}
       NOTION_ACHIEVEMENT:  ${{ secrets.NOTION_ACHIEVEMENT }}
 

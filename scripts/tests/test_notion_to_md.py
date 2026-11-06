@@ -1052,3 +1052,33 @@ class TestPartialCellBackground:
     def test_whitespace_only_segment_does_not_break_full_cell(self):
         cell = [self._rt("A", "red_background"), self._rt("\n"), self._rt("B", "red_background")]
         assert n._get_cell_bg(cell) == "red_background"
+
+
+class TestSortPagesForSync:
+    """Notion 화면에서 끌어 정한 순서는 API 로 읽을 수 없고, created_time 은 분 단위라
+    한꺼번에 옮긴 페이지는 순서가 임의가 된다. 「순서」(Number) 값이 있으면 그 순서를 쓴다."""
+
+    @staticmethod
+    def _page(pid, created, order=None):
+        props = {"제목": {"type": "title", "title": [{"plain_text": pid}]}}
+        if order is not None or pid.startswith("o"):
+            props["순서"] = {"type": "number", "number": order}
+        return {"id": pid, "created_time": created, "properties": props}
+
+    def test_order_property_wins_over_same_created_time(self):
+        t = "2026-11-06T04:00:00.000Z"
+        pages = [self._page("b", t, 2), self._page("c", t, 3), self._page("a", t, 1)]
+        assert [p["id"] for p in n.sort_pages_for_sync(pages)] == ["a", "b", "c"]
+
+    def test_pages_without_order_follow_by_created_time(self):
+        pages = [
+            self._page("late", "2026-11-07T00:00:00.000Z"),
+            self._page("o-empty", "2026-11-05T00:00:00.000Z"),   # 열은 있지만 값이 빈 칸
+            self._page("second", "2026-11-08T00:00:00.000Z", 2),
+            self._page("first", "2026-11-09T00:00:00.000Z", 1),
+        ]
+        assert [p["id"] for p in n.sort_pages_for_sync(pages)] == ["first", "second", "o-empty", "late"]
+
+    def test_no_order_property_keeps_created_time_order(self):
+        pages = [self._page("y", "2026-02-01T00:00:00.000Z"), self._page("x", "2026-01-01T00:00:00.000Z")]
+        assert [p["id"] for p in n.sort_pages_for_sync(pages)] == ["x", "y"]

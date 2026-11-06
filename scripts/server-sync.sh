@@ -50,39 +50,29 @@ if ! git pull --rebase origin main --quiet; then
 fi
 
 # Notion DB 병렬 동기화
+# DB ID 가 비어 있는 섹션은 건너뛴다. 예전처럼 `[ -n "$X" ] && … &` 로 띄우면
+# 빈 변수의 백그라운드 작업이 상태 1 로 끝나 아래 wait 가 실패로 받고, 동기화 전체가 멈췄다.
 pids=()
+sync_db() {
+  local db_id="$1" save_dir="$2"
+  if [ -z "$db_id" ]; then
+    echo "[$(date)] $save_dir: DB ID 없음, 스킵"
+    return 0
+  fi
+  NOTION_DATABASE_ID="$db_id" SAVE_DIR="$save_dir" FETCH_MODE=ALL \
+    python3 scripts/notion_to_md.py &
+  pids+=($!)
+}
 
-[ -n "$NOTION_ABOUT" ] && \
-  NOTION_DATABASE_ID="$NOTION_ABOUT" SAVE_DIR=docs/about FETCH_MODE=ALL \
-  python3 scripts/notion_to_md.py & pids+=($!)
-
-[ -n "$NOTION_ARCHITECTURE" ] && \
-  NOTION_DATABASE_ID="$NOTION_ARCHITECTURE" SAVE_DIR=docs/architecture FETCH_MODE=ALL \
-  python3 scripts/notion_to_md.py & pids+=($!)
-
-[ -n "$NOTION_DOCS" ] && \
-  NOTION_DATABASE_ID="$NOTION_DOCS" SAVE_DIR=docs/guide FETCH_MODE=ALL \
-  python3 scripts/notion_to_md.py & pids+=($!)
-
-[ -n "$NOTION_INSTALL" ] && \
-  NOTION_DATABASE_ID="$NOTION_INSTALL" SAVE_DIR=docs/install FETCH_MODE=ALL \
-  python3 scripts/notion_to_md.py & pids+=($!)
-
-[ -n "$NOTION_POC" ] && \
-  NOTION_DATABASE_ID="$NOTION_POC" SAVE_DIR=docs/poc FETCH_MODE=ALL \
-  python3 scripts/notion_to_md.py & pids+=($!)
-
-[ -n "$NOTION_RELEASE" ] && \
-  NOTION_DATABASE_ID="$NOTION_RELEASE" SAVE_DIR=docs/release-notes FETCH_MODE=ALL \
-  python3 scripts/notion_to_md.py & pids+=($!)
-
-[ -n "$NOTION_TEST" ] && \
-  NOTION_DATABASE_ID="$NOTION_TEST" SAVE_DIR=docs/test FETCH_MODE=ALL \
-  python3 scripts/notion_to_md.py & pids+=($!)
-
-[ -n "$NOTION_ACHIEVEMENT" ] && \
-  NOTION_DATABASE_ID="$NOTION_ACHIEVEMENT" SAVE_DIR=docs/achievement FETCH_MODE=ALL \
-  python3 scripts/notion_to_md.py & pids+=($!)
+sync_db "${NOTION_ABOUT:-}"        docs/about
+sync_db "${NOTION_ARCHITECTURE:-}" docs/architecture
+sync_db "${NOTION_DOCS:-}"         docs/guide
+sync_db "${NOTION_INSTALL:-}"      docs/install
+sync_db "${NOTION_POC:-}"          docs/poc
+# 옛 이름: NOTION_POSTS·NOTION_RELEASE (2026-11-06 「릴리즈 노트」→「게시글」→「개발 노트」 개명)
+sync_db "${NOTION_NOTES:-${NOTION_POSTS:-${NOTION_RELEASE:-}}}" docs/notes
+sync_db "${NOTION_TEST:-}"         docs/test
+sync_db "${NOTION_ACHIEVEMENT:-}"  docs/achievement
 
 # 모든 동기화 완료 대기
 failed=0

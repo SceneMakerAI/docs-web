@@ -16,7 +16,7 @@
 
 | 기여 종류 | 어디서 작업 | 어떻게 반영되나 |
 | --- | --- | --- |
-| **콘텐츠** (문서·블로그·기여 로그·릴리즈 노트) | **Notion DB** | 서버 crontab이 2분마다 `docs/`로 동기화 → DeepL이 `docs_en/`로 번역 → `main` push → 자동 배포 |
+| **콘텐츠** (문서·블로그·기여 로그·개발 노트) | **Notion DB** | 서버 crontab이 2분마다 `docs/`로 동기화 → DeepL이 `docs_en/`로 번역 → `main` push → 자동 배포 |
 | **코드·사이트** (`src/`·`scripts/`·`sidebars.ts`·`docusaurus.config.ts`·`static/`·디자인) | **GitHub** | `feature/*` → `develop` → `main` PR 플로우 (§7) |
 
 - **콘텐츠는 GitHub의 `docs/`를 직접 편집하지 않습니다** — Notion에 쓰면 sync가 가져옵니다 (§2). 예외는 수동 구조 파일뿐 (§2.3).
@@ -42,7 +42,7 @@
 | **PoC 기획·벤치마크** | `NOTION_POC` → `docs/poc/` | "Vision 벤치마크" |
 | **프로젝트 소개** | `NOTION_ABOUT` → `docs/about/` | "SceneMakerAI 소개" |
 | **외부 OSS 기여 인덱스** | `NOTION_CONTRIBUTE` → `docs/contribute/` | Qwen PR 링크 (§4) |
-| **릴리즈 노트** | `NOTION_RELEASE` → `docs/release-notes/` | `v0.1.0` (§5) |
+| **개발 노트** | `NOTION_NOTES` → `docs/notes/` | (§5) |
 
 > DB ↔ 경로 매핑 상세는 [dev-docs/notion-sync.md](./dev-docs/notion-sync.md).
 
@@ -100,11 +100,13 @@ EN 번역본 실파일은 **`docs_en/`**에 있고, `i18n/en/docusaurus-plugin-c
 
 ---
 
-## 5. 릴리즈 노트 (Notion release DB)
+## 5. 개발 노트 (Notion 「개발 노트」 DB)
+
+> 2026-11-06 Notion DB 이름이 「릴리즈 노트」→「게시글」→「개발 노트」로 바뀌었고, 사이트 경로도 `docs/release-notes/` → `docs/notes/`, 환경변수도 `NOTION_RELEASE` → `NOTION_NOTES` 로 바꿨습니다. 아래 버전 명명·본문 구조 규칙은 릴리즈 노트 시절에 쓴 것입니다.
 
 릴리즈 노트는 **SceneMakerAI 프로젝트(4대 서비스: 모아보기·리믹스·광고·Batch)** 의 버전 단위 공식 발표 기록입니다. docs-web 사이트 자체의 변경은 대상이 아니며 — [GitHub Release](https://github.com/SceneMakerAI/docs-web/releases) 또는 `git log`로 갈음합니다.
 
-**Notion release DB**(`NOTION_RELEASE` → `docs/release-notes/`)에 버전별 페이지를 작성하면 sync가 반영합니다. 파일명·slug·정렬은 sync가 자동 처리하므로(§2.2), 아래는 **Notion 페이지에 담을 내용 규칙**입니다.
+**Notion 개발 노트 DB**(`NOTION_NOTES` → `docs/notes/`)에 버전별 페이지를 작성하면 sync가 반영합니다. 파일명·slug·정렬은 sync가 자동 처리하므로(§2.2), 아래는 **Notion 페이지에 담을 내용 규칙**입니다.
 
 ### 버전 명명
 - **SemVer**(`vMAJOR.MINOR.PATCH`)를 따릅니다.

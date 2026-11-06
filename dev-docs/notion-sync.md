@@ -38,7 +38,7 @@ tail -f /var/log/notion-sync.log
 | `NOTION_DOCS` | `docs/guide/` |
 | `NOTION_INSTALL` | `docs/install/` |
 | `NOTION_POC` | `docs/poc/` |
-| `NOTION_RELEASE` | `docs/release-notes/` |
+| `NOTION_NOTES` | `docs/notes/` |
 | `NOTION_TOKEN` | API 인증 토큰 |
 
 ## 동기화 내부 로직 (`notion_to_md.py`)

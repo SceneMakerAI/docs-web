@@ -144,7 +144,7 @@ docs-web/
 │   ├── guide/          # 문서 (NOTION_DOCS)
 │   ├── install/        # 설치 (NOTION_INSTALL)
 │   ├── poc/            # PoC (NOTION_POC) — 서브디렉토리 구조
-│   ├── release-notes/  # 릴리즈 노트 (NOTION_RELEASE)
+│   ├── notes/          # 개발 노트 (NOTION_NOTES) — 2026-11-06 「릴리즈 노트」에서 개명
 │   ├── test/           # 테스트 (NOTION_TEST)
 │   └── achievement/    # 성과 (NOTION_ACHIEVEMENT)
 ├── i18n/en/            # EN 번역 파일 — translate_to_en.py가 자동 생성 (수동 편집 금지)
@@ -196,7 +196,7 @@ docs-web/
 | `NOTION_BLOG`         | (미사용 — 2026-10-23 블로그 삭제 후 동기화 대상 아님)                              |
 | `NOTION_CONTRIBUTE`   | (미사용 — 2026-10-26 DB 삭제, 동기화 대상 아님)                                  |
 | `NOTION_DISCUSSION`   | (미사용 — 2026-10-26 DB 삭제, 동기화 대상 아님)                                  |
-| `NOTION_RELEASE`      | "릴리즈 노트" DB ID → `docs/release-notes/`                                   |
+| `NOTION_NOTES`        | "개발 노트" DB ID → `docs/notes/` (2026-11-06 Notion DB 를 「릴리즈 노트」→「게시글」→「개발 노트」로 개명, 사이트도 `docs/release-notes` → `docs/notes`. 옛 변수명 `NOTION_POSTS`·`NOTION_RELEASE` 도 대체값으로 읽는다) |
 | `NOTION_INSTALL`      | "설치" DB ID → `docs/install/`                                             |
 | `NOTION_TEST`         | "테스트" DB ID → `docs/test/`                                              |
 | `NOTION_ACHIEVEMENT`  | "성과" DB ID → `docs/achievement/`                                          |
@@ -467,7 +467,7 @@ grep -rlE '^!\[[^]]*\]\([^)]*$' i18n/en/   # 출력 없으면 정상
 
 - **깨진 내부 링크** — PR 전 `npm run build` 로컬 통과 필수
 - **MDX 컴파일 오류** — frontmatter·JSX 문법 오류
-- **사이드바 비어있음** — Notion DB에 콘텐츠가 없는 섹션은 `placeholder.md` 필수. `notion_to_md.py`가 sync 결과 0건이면 자동 생성하고, 실제 문서가 생기면 자동 제거한다 (현재 보유: `architecture/`, `release-notes/`)
+- **사이드바 비어있음** — Notion DB에 콘텐츠가 없는 섹션은 `placeholder.md` 필수. `notion_to_md.py`가 sync 결과 0건이면 자동 생성하고, 실제 문서가 생기면 자동 제거한다 (현재 보유: `architecture/`)
 
 ---
 
@@ -489,11 +489,11 @@ grep -rlE '^!\[[^]]*\]\([^)]*$' i18n/en/   # 출력 없으면 정상
 | 사이드바 ID               | `docs/` 경로       | 환경변수                  | Notion 콘텐츠 유무                   |
 | --------------------- | ---------------- | --------------------- | ------------------------------- |
 | `aboutSidebar`        | `about/`         | `NOTION_ABOUT`        | ✅                               |
-| `architectureSidebar` | `architecture/`  | `NOTION_ARCHITECTURE` | ❌ placeholder.md 자동 생성 (navbar 숨김) |
+| `architectureSidebar` | `architecture/`  | `NOTION_ARCHITECTURE` | ❌ placeholder.md 자동 생성 (navbar 는 숨기지 않고 「준비 중」 페이지로 링크) |
 | `installSidebar`      | `install/`       | `NOTION_INSTALL`      | ✅                               |
 | `pocSidebar`          | `poc/`           | `NOTION_POC`          | ✅                               |
 | `docsSidebar`         | `guide/`         | `NOTION_DOCS`         | ✅                               |
-| `releaseNotesSidebar` | `release-notes/` | `NOTION_RELEASE`      | ❌ placeholder.md 자동 생성 (navbar 숨김) |
+| `notesSidebar`        | `notes/`         | `NOTION_NOTES`        | ✅ 메뉴 「개발 노트」 (2026-11-06 블로그 글 15건 이동) |
 | `testSidebar`         | `test/`          | `NOTION_TEST`         | ✅                               |
 | `achievementSidebar`  | `achievement/`   | `NOTION_ACHIEVEMENT`  | ✅                               |
 
@@ -505,6 +505,12 @@ grep -rlE '^!\[[^]]*\]\([^)]*$' i18n/en/   # 출력 없으면 정상
 
 
 ## notion_to_md.py 핵심 동작
+
+
+
+### 정렬 순서 (`sidebar_position`·숫자 slug)
+
+Notion 「순서」(Number) 열에 값이 있으면 그 순서가 먼저, 값이 없으면 `created_time` 순으로 뒤에 붙는다. Notion 화면에서 끌어 정한 순서는 API 로 읽을 수 없고 `created_time` 은 분 단위라, 한꺼번에 옮긴 페이지는 「순서」 열이 없으면 순서가 임의가 된다 (2026-11-06 개발 노트 15건). 순서를 바꾸면 숫자 slug(`/docs/notes/N`)도 바뀐다.
 
 
 
