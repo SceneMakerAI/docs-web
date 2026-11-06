@@ -4,7 +4,7 @@
     "slug": "2",
     "sidebar_position": "2"
   },
-  "docs/release-notes/페이지-추가-테스트.md": {
+  "docs/posts/페이지-추가-테스트.md": {
     "body_hash": "aa64f5ba70d05c8ad3d6afeb6c0a0e6575984aa7591be9a65c52f8ee6060211f",
     "slug": "2",
     "sidebar_position": "2"
@@ -112,7 +112,7 @@
     "sidebar_position": "1",
     "frontmatter_hash": "fafc1ea43911b6d9e36d0365c33157eb6649687f1356f4dfd824cf70bb93d783"
   },
-  "docs/release-notes/릴리즈-노트.md": {
+  "docs/posts/릴리즈-노트.md": {
     "body_hash": "7c811edcdff1927ac5ed0cd27d9548bf26cd84a83d0da0347b76a20c6c216f06",
     "slug": "1",
     "sidebar_position": "1"
@@ -135,7 +135,7 @@
     "sidebar_position": "1",
     "frontmatter_hash": "007727c458d7f9d57b9c5314565fdd592a8e86a292ddaabd6f52b9ee1ec3b18f"
   },
-  "docs/release-notes/placeholder.md": {
+  "docs/posts/placeholder.md": {
     "body_hash": "9c3c6fc3d407d5f72357eba0a1d4a19225debf92e023b664be415835ae8fc01b",
     "slug": "placeholder",
     "sidebar_position": "1",

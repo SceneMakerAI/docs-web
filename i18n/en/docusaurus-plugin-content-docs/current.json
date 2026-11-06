@@ -31,9 +31,9 @@
     "message": "Vision-bench",
     "description": "The label for category 'Vision-bench' in sidebar 'pocSidebar'"
   },
-  "sidebar.releaseNotesSidebar.category.릴리즈 노트": {
-    "message": "Release Notes",
-    "description": "The label for category '릴리즈 노트' in sidebar 'releaseNotesSidebar'"
+  "sidebar.postsSidebar.category.게시글": {
+    "message": "Posts",
+    "description": "The label for category '게시글' in sidebar 'postsSidebar'"
   },
   "sidebar.testSidebar.category.테스트": {
     "message": "Tests",

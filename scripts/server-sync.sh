@@ -72,8 +72,8 @@ pids=()
   NOTION_DATABASE_ID="$NOTION_POC" SAVE_DIR=docs/poc FETCH_MODE=ALL \
   python3 scripts/notion_to_md.py & pids+=($!)
 
-[ -n "$NOTION_RELEASE" ] && \
-  NOTION_DATABASE_ID="$NOTION_RELEASE" SAVE_DIR=docs/release-notes FETCH_MODE=ALL \
+[ -n "$NOTION_POSTS" ] && \
+  NOTION_DATABASE_ID="$NOTION_POSTS" SAVE_DIR=docs/posts FETCH_MODE=ALL \
   python3 scripts/notion_to_md.py & pids+=($!)
 
 [ -n "$NOTION_TEST" ] && \

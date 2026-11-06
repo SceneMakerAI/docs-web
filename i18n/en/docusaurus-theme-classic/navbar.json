@@ -31,9 +31,9 @@
     "message": "Blog",
     "description": "Navbar item with label 블로그"
   },
-  "item.label.릴리즈 노트": {
-    "message": "Release Notes",
-    "description": "Navbar item with label 릴리즈 노트"
+  "item.label.게시글": {
+    "message": "Posts",
+    "description": "Navbar item with label 게시글"
   },
   "item.label.테스트": {
     "message": "Tests",
