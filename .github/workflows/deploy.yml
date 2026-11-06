@@ -3,6 +3,18 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches: [main]
+    # 사이트 결과물과 무관한 파일만 바뀐 push 는 배포하지 않는다.
+    # 제외 목록 방식이라, 새 파일이 생겨도 기본은 배포된다. 수동 배포는 workflow_dispatch.
+    paths:
+      - '**'
+      - '!scripts/**'
+      - '!dev-docs/**'
+      - '!.github/**'
+      - '.github/workflows/deploy.yml'
+      - '!*.md'
+      - '!.gitignore'
+      - '!.notion-translate-hashes.json'
+      - '!**/.notion-sync.json'
   workflow_dispatch:
 
 permissions:
