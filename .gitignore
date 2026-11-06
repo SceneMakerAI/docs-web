@@ -7,6 +7,10 @@ node_modules/
 .pnp.js
 .yarn/install-state.gz
 
+# 루트에 받아 둔 기밀 PDF·Notion export zip
+/*.pdf
+/*.zip
+
 # ──────────────────────────────────────────────────────────
 # Build outputs
 # ──────────────────────────────────────────────────────────
