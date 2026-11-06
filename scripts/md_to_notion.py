@@ -46,7 +46,7 @@ SECTION_DIRS = [
     "docs/guide",
     "docs/install",
     "docs/poc",
-    "docs/posts",
+    "docs/notes",
     "docs/test",
     "docs/achievement",
 ]
@@ -57,7 +57,7 @@ SECTION_DB_MAP = {
     "docs/guide":         os.environ.get("NOTION_DOCS", ""),
     "docs/install":       os.environ.get("NOTION_INSTALL", ""),
     "docs/poc":           os.environ.get("NOTION_POC", ""),
-    "docs/posts":         os.environ.get("NOTION_POSTS", ""),
+    "docs/notes":         os.environ.get("NOTION_NOTES") or os.environ.get("NOTION_POSTS", ""),
     "docs/test":          os.environ.get("NOTION_TEST", ""),
     "docs/achievement":   os.environ.get("NOTION_ACHIEVEMENT", ""),
 }

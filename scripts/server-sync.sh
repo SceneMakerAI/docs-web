@@ -69,8 +69,8 @@ sync_db "${NOTION_ARCHITECTURE:-}" docs/architecture
 sync_db "${NOTION_DOCS:-}"         docs/guide
 sync_db "${NOTION_INSTALL:-}"      docs/install
 sync_db "${NOTION_POC:-}"          docs/poc
-# NOTION_RELEASE 는 2026-11-06 「릴리즈 노트」→「게시글」 개명 전 이름
-sync_db "${NOTION_POSTS:-${NOTION_RELEASE:-}}" docs/posts
+# 옛 이름: NOTION_POSTS·NOTION_RELEASE (2026-11-06 「릴리즈 노트」→「게시글」→「개발 노트」 개명)
+sync_db "${NOTION_NOTES:-${NOTION_POSTS:-${NOTION_RELEASE:-}}}" docs/notes
 sync_db "${NOTION_TEST:-}"         docs/test
 sync_db "${NOTION_ACHIEVEMENT:-}"  docs/achievement
 

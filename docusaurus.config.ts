@@ -192,9 +192,9 @@ const config: Config = {
         ...(hasNotionContent('guide')
           ? [{type: 'docSidebar' as const, sidebarId: 'docsSidebar',         label: '문서',          position: 'left' as const}]
           : []),
-        ...(hasNotionContent('posts')
-          ? [{type: 'docSidebar' as const, sidebarId: 'postsSidebar',        label: '개발 노트',        position: 'left' as const}]
-          : [{to: '/docs/posts',         label: '개발 노트',        position: 'left' as const}]),
+        ...(hasNotionContent('notes')
+          ? [{type: 'docSidebar' as const, sidebarId: 'notesSidebar',        label: '개발 노트',     position: 'left' as const}]
+          : [{to: '/docs/notes',         label: '개발 노트',     position: 'left' as const}]),
         ...(hasNotionContent('achievement')
           ? [{type: 'docSidebar' as const, sidebarId: 'achievementSidebar',  label: '성과',          position: 'left' as const}]
           : []),

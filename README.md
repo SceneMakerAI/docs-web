@@ -47,7 +47,7 @@
 docs-web/
 ├── docs/                  # KR 원본 문서 (Notion 자동 동기화)
 │   ├── about/  architecture/  blog/  contribute/
-│   └── guide/  install/  poc/  posts/
+│   └── guide/  install/  poc/  notes/
 ├── docs_en/               # EN 번역본 (실파일 위치, DeepL 자동 번역)
 ├── i18n/en/
 │   ├── docusaurus-plugin-content-docs/current → ../../../docs_en   (symlink)
