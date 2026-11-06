@@ -44,6 +44,7 @@ if [ -n "$NOTION_DOCS" ]; then
   pids+=($!)
 fi
 
+NOTION_POSTS="${NOTION_POSTS:-${NOTION_RELEASE:-}}"
 if [ -n "$NOTION_POSTS" ]; then
   NOTION_DATABASE_ID="$NOTION_POSTS" SAVE_DIR=docs/posts FETCH_MODE=ALL \
     python scripts/notion_to_md.py &
