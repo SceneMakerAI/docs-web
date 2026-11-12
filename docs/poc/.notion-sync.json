@@ -43,7 +43,7 @@
   },
   "365e15b4-0359-804b-87c8-f1acee149564": {
     "file": "docs/poc/vision-bench/index.md",
-    "last_edited": "2026-06-08T07:09:00.000Z",
+    "last_edited": "2026-11-12T07:26:00.000Z",
     "content_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "order": 2,
     "parent_id": null
@@ -53,6 +53,13 @@
     "last_edited": "2026-06-29T19:59:00.000Z",
     "content_hash": "1a6db84d0445191f35add470fdcd1e8eded88512642cf5c9ed325acb3410fa21",
     "order": 4,
+    "parent_id": "vision-bench"
+  },
+  "416e15b4-0359-809b-8aaa-d1273d722e62": {
+    "file": "docs/poc/vision-bench/얼굴-감정-분석-벤치마크.md",
+    "last_edited": "2026-11-12T08:24:00.000Z",
+    "content_hash": "f3f1b0c5207f1e56d3c70fa24ddfadc0ea0ae85bd7ecb3a0cf14d3884cf2584f",
+    "order": 5,
     "parent_id": "vision-bench"
   }
 }
