@@ -57,8 +57,8 @@
   },
   "416e15b4-0359-809b-8aaa-d1273d722e62": {
     "file": "docs/poc/vision-bench/얼굴-감정-분석-벤치마크.md",
-    "last_edited": "2026-11-12T08:24:00.000Z",
-    "content_hash": "f3f1b0c5207f1e56d3c70fa24ddfadc0ea0ae85bd7ecb3a0cf14d3884cf2584f",
+    "last_edited": "2026-11-13T01:54:00.000Z",
+    "content_hash": "fc1d784b39ea3f38b91f0afa823ffb85c24d2b94870712264d843d8756d37784",
     "order": 5,
     "parent_id": "vision-bench"
   }
