@@ -5,5 +5,12 @@
     "content_hash": "9a79d7c2f43d1ee0e5544e37780e23e4d8b0a4eb66ccda020613ba3818d1f8ab",
     "order": 1,
     "parent_id": null
+  },
+  "417e15b4-0359-81b0-ba94-c7e51dfec997": {
+    "file": "docs/architecture/gpu-인프라-비용-분석.md",
+    "last_edited": "2026-11-13T05:45:00.000Z",
+    "content_hash": "5c318790df79017c77ae5403cd9e87eb015e43648645a5a2a69fd00c465efb76",
+    "order": 2,
+    "parent_id": null
   }
 }
