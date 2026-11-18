@@ -1,6 +1,6 @@
 name: develop → main 자동 머지
 
-# docs/ blog/ static/img/ 제외한 코드 변경이 develop에 있을 때만
+# docs/ blog/ static/img/ static/files/ 제외한 코드 변경이 develop에 있을 때만
 # npm run build 통과 후 main으로 머지한다.
 
 on:
@@ -29,7 +29,8 @@ jobs:
           DIFF=$(git diff origin/main..HEAD -- . \
             ':(exclude)docs/' \
             ':(exclude)blog/' \
-            ':(exclude)static/img/')
+            ':(exclude)static/img/' \
+            ':(exclude)static/files/')
           if [ -z "$DIFF" ]; then
             echo "has_changes=false" >> $GITHUB_OUTPUT
             echo "변경 없음 — 머지 스킵"
@@ -63,8 +64,12 @@ jobs:
         # rm -rf 없이 git checkout만 하면 develop에만 있고 main엔 없는 파일이 그대로 남아,
         # 옛 콘텐츠가 새 authors.yml·sidebar와 충돌해 빌드 게이트가 깨진다.
         run: |
-          rm -rf docs static/img
+          rm -rf docs static/img static/files
           git checkout origin/main -- docs static/img
+          # static/files(Notion 첨부)는 main 에 있을 때만 — 없으면 pathspec 오류로 단계가 실패한다
+          if git ls-tree -d --name-only origin/main static/files | grep -q .; then
+            git checkout origin/main -- static/files
+          fi
 
       - name: Build gate
         if: steps.diff.outputs.has_changes == 'true'

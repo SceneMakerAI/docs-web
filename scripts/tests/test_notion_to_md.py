@@ -1082,3 +1082,125 @@ class TestSortPagesForSync:
     def test_no_order_property_keeps_created_time_order(self):
         pages = [self._page("y", "2026-02-01T00:00:00.000Z"), self._page("x", "2026-01-01T00:00:00.000Z")]
         assert [p["id"] for p in n.sort_pages_for_sync(pages)] == ["x", "y"]
+
+
+# ── 첨부 파일(file·pdf) 블록 ────────────────────────────────────────────────
+
+class TestFileAttachmentBlock:
+    """Notion 첨부 파일 블록은 서명 URL 이 1시간 뒤 만료되므로 static/files 로 내려받고,
+    Notion 처럼 '확장자 · 파일명 · 크기' 한 줄 카드로 새 탭에 연다."""
+
+    def setup_method(self):
+        self.tmpdir = tempfile.mkdtemp()
+        self._orig = n.STATIC_FILE_DIR
+        n.STATIC_FILE_DIR = os.path.join(self.tmpdir, "files", "achievement")
+
+    def teardown_method(self):
+        n.STATIC_FILE_DIR = self._orig
+        shutil.rmtree(self.tmpdir, ignore_errors=True)
+
+    @staticmethod
+    def _resp(content):
+        m = MagicMock()
+        m.content = content
+        m.raise_for_status = lambda: None
+        return m
+
+    @staticmethod
+    def _block(name, url="https://prod-files-secure.s3.amazonaws.com/x/abc.pdf?X-Amz-Signature=1", b_type="file", kind="file"):
+        return {"type": b_type, "id": "f-1", "has_children": False,
+                b_type: {"type": kind, kind: {"url": url}, "name": name, "caption": []}}
+
+    def test_safe_name_keeps_korean_and_drops_spaces_parens(self):
+        assert n.safe_attachment_name("2026 추계학술대회 프로그램_1022 (3).pdf") == "2026-추계학술대회-프로그램_1022-3.pdf"
+        assert n.safe_attachment_name("논문 SBS.PDF") == "논문-SBS.PDF"
+        assert n.safe_attachment_name("(  ).pdf") == "file.pdf"
+
+    def test_format_size(self):
+        assert n.format_file_size(512) == "512 B"
+        assert n.format_file_size(2048) == "2.0 KB"
+        assert n.format_file_size(1_258_291) == "1.2 MB"
+
+    @patch.object(n, "requests")
+    def test_file_block_downloads_and_renders_card(self, mock_requests):
+        mock_requests.get.return_value = self._resp(b"%PDF-" + b"x" * 2043)
+        md = n.block_to_markdown(self._block("2026 추계학술대회 프로그램_1022 (3).pdf"), "논문-발표", [0])
+        saved = os.path.join(n.STATIC_FILE_DIR, "논문-발표", "2026-추계학술대회-프로그램_1022-3.pdf")
+        assert os.path.exists(saved)
+        from urllib.parse import quote
+        assert f'href="{quote("/files/achievement/논문-발표/2026-추계학술대회-프로그램_1022-3.pdf")}"' in md
+        assert all(ord(c) < 128 for c in md.split('<a ')[1].split('>')[0])   # 태그 안은 ASCII 만
+        assert 'target="_blank"' in md
+        assert ">PDF<" in md
+        assert ">2026 추계학술대회 프로그램_1022 (3).pdf<" in md   # 화면에는 원래 이름
+        assert ">2.0 KB<" in md
+        assert md.startswith("<div") and md.endswith("\n\n")
+
+    @patch.object(n, "requests")
+    def test_pdf_block_rendered_same_way(self, mock_requests):
+        mock_requests.get.return_value = self._resp(b"%PDF-1")
+        md = n.block_to_markdown(self._block("a.pdf", b_type="pdf"), "p", [0])
+        assert 'href="/files/achievement/p/a.pdf"' in md
+
+    def test_external_file_links_directly_without_download(self):
+        md = n.block_to_markdown(self._block("spec.pdf", url="https://example.com/spec.pdf", kind="external"), "p", [0])
+        assert 'href="https://example.com/spec.pdf"' in md
+        assert not os.path.exists(os.path.join(n.STATIC_FILE_DIR, "p"))
+
+    def test_name_falls_back_to_url_basename_and_is_html_escaped(self):
+        md = n.block_to_markdown(self._block("", url="https://example.com/a%20%3Cb%3E.pdf", kind="external"), "p", [0])
+        assert ">a &lt;b&gt;.pdf<" in md
+
+    @patch.object(n, "requests")
+    def test_download_failure_keeps_name_without_expiring_link(self, mock_requests):
+        mock_requests.get.side_effect = RuntimeError("boom")
+        md = n.block_to_markdown(self._block("x.pdf"), "p", [0])
+        assert "x.pdf" in md and "X-Amz-Signature" not in md
+
+    @patch.object(n, "requests")
+    def test_card_survives_blocks_to_markdown_postprocessing(self, mock_requests):
+        mock_requests.get.return_value = self._resp(b"%PDF-1")
+        body = n.blocks_to_markdown([self._block("논문 <최종>.pdf")], "p")
+        assert '<a class="notion-file__link"' in body
+        assert "\\<" not in body.split('class="notion-file__name">')[1].split("</span>")[0]
+
+
+class TestFileAttachmentCleanup:
+    """첨부를 Notion 에서 빼면 사이트에서도 빠져야 한다 — 페이지 재변환 때 안 쓰인 파일 삭제,
+    페이지가 사라지면 이미지와 함께 첨부 디렉토리도 삭제."""
+
+    def setup_method(self):
+        self.tmpdir = tempfile.mkdtemp()
+        self._orig = (n.STATIC_FILE_DIR, n.SAVE_DIR, n.STATIC_IMG_DIR)
+        self.cwd = os.getcwd(); os.chdir(self.tmpdir)
+        n.SAVE_DIR = "docs/achievement"
+        n.STATIC_FILE_DIR = "static/files/achievement"
+        n.STATIC_IMG_DIR = "static/img/achievement"
+
+    def teardown_method(self):
+        n.STATIC_FILE_DIR, n.SAVE_DIR, n.STATIC_IMG_DIR = self._orig
+        os.chdir(self.cwd)
+        shutil.rmtree(self.tmpdir, ignore_errors=True)
+
+    @patch.object(n, "requests")
+    def test_rerender_removes_attachment_no_longer_in_page(self, mock_requests):
+        m = MagicMock(); m.content = b"%PDF-1"; m.raise_for_status = lambda: None
+        mock_requests.get.return_value = m
+        stale = "static/files/achievement/p/old.pdf"
+        os.makedirs(os.path.dirname(stale)); open(stale, "wb").write(b"old")
+        blk = {"type": "file", "id": "f", "has_children": False,
+               "file": {"type": "file", "file": {"url": "https://s3/x.pdf?sig=1"}, "name": "new.pdf", "caption": []}}
+        n.blocks_to_markdown([blk], "p")
+        assert os.path.exists("static/files/achievement/p/new.pdf")
+        assert not os.path.exists(stale)
+
+    def test_rerender_without_attachments_removes_dir(self):
+        os.makedirs("static/files/achievement/p"); open("static/files/achievement/p/a.pdf", "wb").write(b"x")
+        n.blocks_to_markdown([], "p")
+        assert not os.path.exists("static/files/achievement/p")
+
+    def test_remove_orphans_deletes_attachment_dir_with_page(self):
+        os.makedirs("docs/achievement"); open("docs/achievement/p.md", "w").write("x")
+        os.makedirs("static/files/achievement/p"); open("static/files/achievement/p/a.pdf", "wb").write(b"x")
+        n.remove_orphans(set(), {"docs/achievement/p.md"})
+        assert not os.path.exists("static/files/achievement/p")

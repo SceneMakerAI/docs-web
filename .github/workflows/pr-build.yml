@@ -31,8 +31,12 @@ jobs:
         # 옛 콘텐츠가 새 authors.yml·sidebar와 충돌해 빌드 게이트가 깨진다.
         run: |
           git fetch origin main
-          rm -rf docs static/img
+          rm -rf docs static/img static/files
           git checkout origin/main -- docs static/img
+          # static/files(Notion 첨부)는 main 에 있을 때만 — 없으면 pathspec 오류로 단계가 실패한다
+          if git ls-tree -d --name-only origin/main static/files | grep -q .; then
+            git checkout origin/main -- static/files
+          fi
 
       - name: Setup Node.js
         uses: actions/setup-node@v4

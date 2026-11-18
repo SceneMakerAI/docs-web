@@ -514,6 +514,10 @@ Notion 「순서」(Number) 열에 값이 있으면 그 순서가 먼저, 값이
 
 
 
+### 첨부 파일 (`file`·`pdf` 블록)
+
+Notion 첨부는 서명 URL 이 1시간 뒤 만료되므로 링크로 걸지 않고 `static/files/<섹션>/<페이지 slug>/` 에 내려받아, Notion 처럼 「확장자 · 파일명 · 크기」 한 줄 카드(`<div class="notion-file">`, CSS 는 `custom.css`)로 렌더한다. 클릭하면 새 탭에서 열린다. 파일명은 한글·영숫자·`._-` 만 남기고, href 는 퍼센트 인코딩한다 (꺾쇠 안에 한글이 있으면 `escape_mdx_angle_brackets` 가 태그를 글자로 바꾼다). 외부 URL 첨부는 내려받지 않고 바로 링크한다. 페이지를 다시 변환할 때 쓰이지 않은 첨부와, 페이지가 사라지면 그 첨부 디렉토리를 지운다. `server-sync.sh` 는 `static/files/` 도 커밋하고, `pr-build`·`merge-develop` 게이트는 main 의 `static/files/` 도 가져온다.
+
 ### 번호 매기기 목록 (OL) 순서 번호
 
 스크립트가 `numbered_list_item` 블록에 실제 순서 번호(1, 2, 3…)를 출력한다.
