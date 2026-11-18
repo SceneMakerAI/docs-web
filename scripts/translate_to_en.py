@@ -89,6 +89,32 @@ def _restore_images(body, store):
     return body
 
 
+def _protect_file_cards(body):
+    """Notion 첨부 카드(<div class="notion-file">…</div>)를 앞뒤 공백째 placeholder 로 감춘다.
+
+    카드 HTML 을 DeepL 에 보내면 span 사이로 '.pdf' 를 옮기고 '</div>' 를 다음 줄 목록
+    마커 자리에 'div' 로 남긴다. 파일명·크기는 번역 대상이 아니므로 통째로 되돌린다.
+    """
+    store = {}
+
+    def _sub(m):
+        key = f'<x id="FILE{len(store)}"/>'
+        store[key] = m.group(0)
+        return key
+
+    protected = re.sub(r'\n?[ \t]*<div class="notion-file">.*?</div>\n*', _sub, body)
+    return protected, store
+
+
+def _restore_file_cards(body, store):
+    """DeepL 이 placeholder 를 앞 줄 끝으로 올리거나 빈 줄을 먹어도 원래 줄 배치로 되돌린다.
+    한 번의 치환으로 처리해야 연속 카드에서 앞 카드가 넣은 빈 줄을 뒤 카드가 먹지 않는다."""
+    if not store:
+        return body
+    return re.sub(r'[ \t]*\n*[ \t]*(<x id="FILE\d+"/>)\n*',
+                  lambda m: store.get(m.group(1), m.group(0)), body)
+
+
 def _protect_blockquotes(body):
     """blockquote '> ' 마커를 placeholder 태그로 보호.
 
@@ -405,6 +431,10 @@ def clean_frontmatter_value(text):
     return html.unescape(text).replace('"', '\\"')
 
 
+# Notion 제목 끝 줄바꿈이 따옴표 안에 들어오면 값이 두 줄이 된다 — [^"] 로 줄을 넘겨 잡는다.
+_TITLE_RE = re.compile(r'^title: "((?:[^"\\]|\\.)*)"', re.MULTILINE)
+
+
 def _translate_title(kr_title):
     """제목을 번역하되 정렬 접두('08_')와 건수 접미('1건')는 DeepL 에 보내지 않는다.
 
@@ -682,13 +712,10 @@ def translate_file(kr_path, hashes):
             existing_en = f.read()
         en_match = re.match(r"^(---\n.*?\n---\n\n)(.*)", existing_en, re.DOTALL)
         if en_match and en_match.group(2).strip():
-            kr_title_m = re.search(r'^title: "(.+)"', en_frontmatter, re.MULTILINE)
-            en_title_m = re.search(r'^title: "(.+)"', en_match.group(1), re.MULTILINE)
+            kr_title_m = _TITLE_RE.search(en_frontmatter)
+            en_title_m = _TITLE_RE.search(en_match.group(1))
             if kr_title_m and en_title_m:
-                en_frontmatter = en_frontmatter.replace(
-                    f'title: "{kr_title_m.group(1)}"',
-                    f'title: "{en_title_m.group(1)}"', 1
-                )
+                en_frontmatter = en_frontmatter.replace(kr_title_m.group(0), en_title_m.group(0), 1)
             kr_desc_m = re.search(r'^description: "(.+)"', en_frontmatter, re.MULTILINE)
             en_desc_m = re.search(r'^description: "(.+)"', en_match.group(1), re.MULTILINE)
             if kr_desc_m:
@@ -710,11 +737,10 @@ def translate_file(kr_path, hashes):
             return
 
     # 전체 번역
-    title_match = re.search(r'^title: "(.+)"', en_frontmatter, re.MULTILINE)
+    title_match = _TITLE_RE.search(en_frontmatter)
     if title_match:
-        kr_title = title_match.group(1)
-        en_title = _translate_title(kr_title)
-        en_frontmatter = en_frontmatter.replace(f'title: "{kr_title}"', f'title: "{en_title}"', 1)
+        en_title = _translate_title(re.sub(r'\s+', ' ', title_match.group(1)).strip())
+        en_frontmatter = en_frontmatter.replace(title_match.group(0), f'title: "{en_title}"', 1)
 
     desc_match = re.search(r'^description: "(.+)"', en_frontmatter, re.MULTILINE)
     if desc_match:
@@ -755,6 +781,7 @@ def translate_file(kr_path, hashes):
     # Protect images — hide the whole ![alt](/url) so DeepL can't translate Korean
     # path segments nor relocate the closing ) onto a new line (breaks the image)
     body_protected, _img_store = _protect_images(body_protected)
+    body_protected, _file_store = _protect_file_cards(body_protected)
     _standalone_imgs = {k for k in _img_store
                         if re.search(rf'(?m)^{re.escape(k)}[ \t]*$', body_protected)}
     # 코드블록 placeholder('__CODE0__')는 DeepL 에게 일반 단어라 문장에 섞이고 구분선과
@@ -832,6 +859,7 @@ def translate_file(kr_path, hashes):
     en_body = _rejoin_blockquote_markers(en_body)
     en_body = _restore_blockquotes(en_body, _bq_store)
     en_body = _restore_images(en_body, _img_store)
+    en_body = _restore_file_cards(en_body, _file_store)
     # Safety net: DeepL relocates blockquote '> ' marker mid-sentence
     # e.g. "If an>  `code` ..." → "> If an `code` ..."
     en_body = _return_midline_blockquote_marker(en_body)
