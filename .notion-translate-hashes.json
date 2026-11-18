@@ -392,5 +392,17 @@
     "slug": "1",
     "sidebar_position": "1",
     "frontmatter_hash": "6db398c9ea83f63d80d173c6972f188b3bd0effb10331ebba212e806f70b4fce"
+  },
+  "docs/poc/vision-bench/얼굴-감정-분석-벤치마크.md": {
+    "body_hash": "fc1d784b39ea3f38b91f0afa823ffb85c24d2b94870712264d843d8756d37784",
+    "slug": "5",
+    "sidebar_position": "5",
+    "frontmatter_hash": "77d7a8071b7d38048b12191999d4d8b98bc721d073812bb951b8c6db73082250"
+  },
+  "docs/architecture/gpu-인프라-비용-분석.md": {
+    "body_hash": "5c318790df79017c77ae5403cd9e87eb015e43648645a5a2a69fd00c465efb76",
+    "slug": "2",
+    "sidebar_position": "2",
+    "frontmatter_hash": "e0c191abff9acc57b76edc9f9037341c5668bcb02c47afbbc663824715b514f6"
   }
 }
