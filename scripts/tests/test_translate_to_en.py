@@ -790,3 +790,56 @@ def test_midline_blockquote_marker_fix_skips_code_blocks():
     out = T._return_midline_blockquote_marker(body)
     assert 'def process(a: int) -> tuple[int, int]:' in out
     assert out.startswith('> If an `x` is set')
+
+
+_CARD_A = ('<div class="notion-file"><a class="notion-file__link" href="/files/achievement/p/a.pdf" '
+           'target="_blank" rel="noopener noreferrer"><span class="notion-file__ext">PDF</span>'
+           '<span class="notion-file__name">논문_a.pdf</span><span class="notion-file__size">461.1 KB</span></a></div>')
+_CARD_B = _CARD_A.replace("a.pdf", "b.pdf")
+
+
+def _card_page(tmp_path, title='"논문 발표"'):
+    kr = tmp_path / "post.md"
+    kr.write_text(
+        f'---\ntitle: {title}\nslug: "6"\n---\n\n'
+        f'##### 자료\n\n- 논문 PDF: \n  {_CARD_A}\n\n  {_CARD_B}\n\n- 학회 홈페이지: [ADIP](https://adip.org/)\n',
+        encoding="utf-8")
+    return kr
+
+
+def test_translate_file_keeps_notion_file_card_verbatim(tmp_path, monkeypatch):
+    """첨부 카드 HTML 을 DeepL 에 보내지 않는다 — 보내면 '.pdf' 가 크기 칸으로 옮겨가고
+    다음 목록 마커가 'div' 로 바뀐다 (/en/docs/achievement/6, 2026-11-18)."""
+    out = tmp_path / "en.md"
+    sent = []
+
+    def fake_deepl(text):
+        sent.append(text)
+        # 실제 응답처럼 placeholder 를 앞 줄 끝으로 끌어올리고 사이 빈 줄을 먹는다
+        text = re.sub(r'\n[ \t]*(<x id="FILE\d+"/>)\n*', r' \1', text)
+        return (text.replace("자료", "Resources").replace("논문 PDF", "Paper PDF")
+                    .replace("학회 홈페이지", "Conference Website").replace("논문 발표", "Paper"))
+
+    monkeypatch.setattr(T, "translate_with_deepl", fake_deepl)
+    monkeypatch.setattr(T, "translate_with_deepl_plain", fake_deepl)
+    monkeypatch.setattr(T, "kr_to_en_path", lambda p: str(out))
+    T.translate_file(str(_card_page(tmp_path)), {})
+
+    assert not any("notion-file" in s for s in sent)
+    en = out.read_text(encoding="utf-8")
+    assert (f"- Paper PDF:\n  {_CARD_A}\n\n  {_CARD_B}\n\n- Conference Website: [ADIP](https://adip.org/)"
+            in en)
+
+
+def test_translate_file_translates_title_with_trailing_newline(tmp_path, monkeypatch):
+    """Notion 제목 끝 줄바꿈이 따옴표 안에 들어온 경우('title: "…(SPIE)\\n"')도
+    번역한다 — 한 줄 정규식이 못 잡아 EN 제목이 한글로 남았다 (/en/docs/achievement/6)."""
+    out = tmp_path / "en.md"
+    fake = lambda t: t.replace("논문 발표", "Paper Presentation")
+    monkeypatch.setattr(T, "translate_with_deepl", fake)
+    monkeypatch.setattr(T, "translate_with_deepl_plain", fake)
+    monkeypatch.setattr(T, "kr_to_en_path", lambda p: str(out))
+    T.translate_file(str(_card_page(tmp_path, title='"2026 ADIP 논문 발표 (SPIE)\n"')), {})
+
+    en = out.read_text(encoding="utf-8")
+    assert 'title: "2026 ADIP Paper Presentation (SPIE)"\n' in en
