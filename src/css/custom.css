@@ -527,3 +527,63 @@ h1 {
   color: var(--ifm-color-emphasis-600);
   font-size: 0.85rem;
 }
+
+/* ─────────── Notion 첨부 파일 카드 (notion_to_md.py render_file_card) ─────────── */
+/* Notion 첨부 블록처럼 '확장자 · 파일명 · 크기' 한 줄. 클릭하면 새 탭에서 연다. */
+.notion-file {
+  margin: 0 0 0.6rem;
+}
+.markdown .notion-file__link,
+.notion-file--missing {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  max-width: 100%;
+  padding: 0.6rem 0.85rem;
+  border: 1px solid var(--ifm-color-emphasis-300);
+  border-radius: 6px;
+  background: var(--ifm-background-surface-color);
+  color: var(--ifm-font-color-base);
+  text-decoration: none;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+.markdown .notion-file__link:hover {
+  border-color: var(--ifm-color-primary);
+  background: var(--ifm-color-emphasis-100);
+  color: var(--ifm-font-color-base);
+  text-decoration: none;
+}
+.notion-file__ext {
+  flex: none;
+  min-width: 2.6rem;
+  padding: 0.15rem 0.4rem;
+  border-radius: 4px;
+  background: var(--ifm-color-primary);
+  color: var(--ifm-color-white);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-align: center;
+}
+.notion-file__name {
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  font-weight: 500;
+}
+.notion-file__size {
+  flex: none;
+  color: var(--ifm-color-emphasis-600);
+  font-size: 0.85rem;
+}
+.notion-file--missing {
+  opacity: 0.6;
+}
+/* .markdown a 의 회색 !important·밑줄을 카드에서는 끈다 (라이트·다크 모두 특이도를 한 단계 높여 덮음) */
+[data-theme] .markdown a.notion-file__link,
+[data-theme] .markdown a.notion-file__link:link,
+[data-theme] .markdown a.notion-file__link:visited,
+[data-theme] .markdown a.notion-file__link:hover {
+  color: var(--ifm-font-color-base) !important;
+  text-decoration: none;
+}

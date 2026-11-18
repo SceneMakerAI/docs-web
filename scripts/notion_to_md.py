@@ -8,6 +8,7 @@ Env vars (필수):
 Env vars (선택):
   SAVE_DIR              저장 경로 (기본: docs/guide)
   STATIC_IMG_DIR        이미지 저장 경로 (기본: static/img/<SAVE_DIR 마지막 세그먼트>)
+  STATIC_FILE_DIR       첨부 파일 저장 경로 (기본: static/files/<SAVE_DIR 마지막 세그먼트>)
   NOTION_PROPERTY_TITLE 제목 속성명 (기본: 제목)
   NOTION_PROPERTY_ORDER 순서 속성명, Number 타입 (기본: 순서)
   NOTION_PROPERTY_DATE  날짜 속성명, DAILY 모드용 (기본: 날짜)
@@ -20,7 +21,7 @@ import re
 import sys
 import json
 import requests
-from urllib.parse import urlparse
+from urllib.parse import quote, unquote, urlparse
 from datetime import datetime, timezone, timedelta
 
 _NOTION_LANG_MAP = {
@@ -139,6 +140,7 @@ DATABASE_ID_RAW = os.environ["NOTION_DATABASE_ID"]
 SAVE_DIR = os.environ.get("SAVE_DIR", "docs/guide")
 _last_seg = SAVE_DIR.rstrip("/").split("/")[-1]
 STATIC_IMG_DIR = os.environ.get("STATIC_IMG_DIR", f"static/img/{_last_seg}")
+STATIC_FILE_DIR = os.environ.get("STATIC_FILE_DIR", f"static/files/{_last_seg}")
 NOTION_PROPERTY_TITLE = os.environ.get("NOTION_PROPERTY_TITLE", "제목")
 NOTION_PROPERTY_ORDER = os.environ.get("NOTION_PROPERTY_ORDER", "순서")
 NOTION_PROPERTY_DATE = os.environ.get("NOTION_PROPERTY_DATE", "날짜")
@@ -435,6 +437,81 @@ def download_image(url: str, slug: str, index: int) -> str:
     return f"/img/{_last_seg}/{slug}/{filename}"
 
 
+def safe_attachment_name(name: str) -> str:
+    """URL·파일시스템에 안전한 파일명. 한글·영숫자·`._-` 만 남기고 공백은 `-` 로."""
+    stem, ext = os.path.splitext(name)
+    stem = re.sub(r"\s+", "-", stem.strip())
+    stem = re.sub(r"[^\w.-]", "", stem)
+    stem = re.sub(r"-{2,}", "-", stem).strip("-.")
+    ext = re.sub(r"[^\w.]", "", ext)
+    return f"{stem or 'file'}{ext}"
+
+
+def format_file_size(size: int) -> str:
+    if size < 1024:
+        return f"{size} B"
+    if size < 1024 * 1024:
+        return f"{size / 1024:.1f} KB"
+    return f"{size / (1024 * 1024):.1f} MB"
+
+
+_attachments_written = set()  # blocks_to_markdown 한 번(=한 페이지)에서 쓴 첨부 경로
+
+
+def prune_attachments(slug: str) -> None:
+    """이번 변환에서 쓰지 않은 첨부를 지운다 (Notion 에서 첨부를 뺀 경우). 비면 디렉토리도 지운다."""
+    save_dir = f"{STATIC_FILE_DIR}/{slug}"
+    if not os.path.isdir(save_dir):
+        return
+    for fname in os.listdir(save_dir):
+        fpath = f"{save_dir}/{fname}"
+        if os.path.isfile(fpath) and fpath not in _attachments_written:
+            os.remove(fpath)
+            log(f"첨부 삭제: {fpath}")
+    if not os.listdir(save_dir):
+        os.rmdir(save_dir)
+
+
+def download_attachment(url: str, slug: str, name: str):
+    """첨부 파일을 static/files 로 받는다. 이미지와 같이 서명 URL 이라 매번 받고 내용이 다를 때만 쓴다.
+    반환: (사이트 경로, 바이트 수)"""
+    save_dir = f"{STATIC_FILE_DIR}/{slug}"
+    os.makedirs(save_dir, exist_ok=True)
+    filename = safe_attachment_name(name)
+    filepath = f"{save_dir}/{filename}"
+    _attachments_written.add(filepath)
+    r = requests.get(url, timeout=60)
+    r.raise_for_status()
+    new_content = r.content
+    unchanged = False
+    if os.path.exists(filepath):
+        with open(filepath, "rb") as f:
+            unchanged = f.read() == new_content
+    if unchanged:
+        log(f"첨부 변경 없음: {filepath}")
+    else:
+        with open(filepath, "wb") as f:
+            f.write(new_content)
+        log(f"첨부 저장: {filepath}")
+    return f"/files/{os.path.basename(STATIC_FILE_DIR.rstrip('/'))}/{slug}/{filename}", len(new_content)
+
+
+def render_file_card(name: str, href: str = "", size_label: str = "") -> str:
+    """Notion 첨부 블록처럼 '확장자 · 파일명 · 크기' 한 줄 카드. href 가 없으면 링크 없이 이름만."""
+    ext = os.path.splitext(name)[1].lstrip(".").upper() or "FILE"
+    inner = (f'<span class="notion-file__ext">{_html.escape(ext)}</span>'
+             f'<span class="notion-file__name">{_html.escape(name)}</span>')
+    if size_label:
+        inner += f'<span class="notion-file__size">{size_label}</span>'
+    if href:
+        # href 를 ASCII 로 인코딩한다 — 꺾쇠 안에 한글이 있으면 escape_mdx_angle_brackets 가 태그를 글자로 바꾼다
+        href = quote(href, safe=":/?#[]@!$&'()*+,;=%~")
+        inner = (f'<a class="notion-file__link" href="{_html.escape(href, quote=True)}" '
+                 f'target="_blank" rel="noopener noreferrer">{inner}</a>')
+        return f'<div class="notion-file">{inner}</div>\n\n'
+    return f'<div class="notion-file notion-file--missing">{inner}</div>\n\n'
+
+
 def indent_md(text, prefix="  "):
     lines = text.rstrip("\n").splitlines()
     return "\n".join(prefix + line if line.strip() else line for line in lines) + "\n"
@@ -611,6 +688,22 @@ def block_to_markdown(block, slug, image_counter, item_num=1):
             log(f"WARN: 이미지 다운로드 실패 ({url[:60]}...): {e}")
             return f"![image]({url})\n\n"
 
+    elif b_type in ("file", "pdf"):
+        data = block.get(b_type, {})
+        kind = data.get("type")
+        url = (data.get(kind) or {}).get("url", "") if kind else ""
+        name = (data.get("name") or "").strip() or unquote(os.path.basename(urlparse(url).path)) or "첨부 파일"
+        if not url:
+            return render_file_card(name)
+        if kind == "external":
+            return render_file_card(name, url)
+        try:
+            href, size = download_attachment(url, slug, name)
+            return render_file_card(name, href, format_file_size(size))
+        except Exception as e:
+            log(f"WARN: 첨부 다운로드 실패 ({name}): {e}")
+            return render_file_card(name)
+
     elif b_type == "divider":
         return "---\n\n"
 
@@ -680,6 +773,7 @@ _OL_RESET_TYPES = {
 
 
 def blocks_to_markdown(blocks, slug):
+    _attachments_written.clear()
     image_counter = [0]
     ol_seq = [0]  # numbered_list_item 연속 카운터
 
@@ -693,6 +787,7 @@ def blocks_to_markdown(blocks, slug):
         return block_to_markdown(b, slug, image_counter, ol_seq[0])
 
     body = "".join(convert(b) for b in blocks)
+    prune_attachments(slug)
     body = escape_mdx_angle_brackets(body)
     body = re.sub(r'(<[a-zA-Z][^>]*/)\s*&gt;', r'\1>', body)
     body = escape_single_tildes(body)
@@ -967,10 +1062,10 @@ def remove_orphans(synced_files, previously_tracked):
             os.remove(fpath)
             log(f"미추적 파일 삭제: {fpath}")
             slug = os.path.splitext(fname)[0]
-            img_dir = f"static/img/{section}/{slug}"
-            if os.path.isdir(img_dir):
-                shutil.rmtree(img_dir)
-                log(f"연관 이미지 삭제: {img_dir}")
+            for asset_dir in (f"static/img/{section}/{slug}", f"static/files/{section}/{slug}"):
+                if os.path.isdir(asset_dir):
+                    shutil.rmtree(asset_dir)
+                    log(f"연관 이미지·첨부 삭제: {asset_dir}")
 
     # 서브디렉토리(부모 페이지 디렉토리) 정리
     for dname in os.listdir(SAVE_DIR):
@@ -994,19 +1089,19 @@ def remove_orphans(synced_files, previously_tracked):
                 os.remove(fpath)
                 log(f"미추적 파일 삭제: {fpath}")
                 slug = os.path.splitext(fname)[0]
-                img_dir = f"static/img/{section}/{slug}"
-                if os.path.isdir(img_dir):
-                    shutil.rmtree(img_dir)
-                    log(f"연관 이미지 삭제: {img_dir}")
+                for asset_dir in (f"static/img/{section}/{slug}", f"static/files/{section}/{slug}"):
+                    if os.path.isdir(asset_dir):
+                        shutil.rmtree(asset_dir)
+                        log(f"연관 이미지·첨부 삭제: {asset_dir}")
         # 해당 디렉토리의 모든 파일이 synced_files에서 제거됐는지 확인
         remaining = [f for f in synced_files if f.startswith(dpath + os.sep)]
         if not remaining:
             shutil.rmtree(dpath)
             log(f"빈 부모 디렉토리 삭제: {dpath}")
-            img_dir = f"static/img/{section}/{dname}"
-            if os.path.isdir(img_dir):
-                shutil.rmtree(img_dir)
-                log(f"연관 이미지 삭제: {img_dir}")
+            for asset_dir in (f"static/img/{section}/{dname}", f"static/files/{section}/{dname}"):
+                if os.path.isdir(asset_dir):
+                    shutil.rmtree(asset_dir)
+                    log(f"연관 이미지·첨부 삭제: {asset_dir}")
 
 
 def main():

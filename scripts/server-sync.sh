@@ -82,6 +82,8 @@ done
 [ $failed -ne 0 ] && exit 1
 
 git add docs/ static/img/
+# Notion 첨부 파일 (notion_to_md.py 가 static/files/<섹션>/<페이지>/ 에 받는다)
+if [ -d static/files ]; then git add static/files/; fi
 if ! git diff --staged --quiet; then
   git -c user.name="server-cron" -c user.email="sbin@solbox.com" \
     commit -m "chore: Notion 동기화 $(date +'%Y-%m-%d %H:%M')"
