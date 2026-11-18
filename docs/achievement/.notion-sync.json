@@ -33,5 +33,12 @@
     "content_hash": "a040b604fe4f3a8f2f7c2547d4f0c95d3a54d4bcf4386412bcf16daf14cff50e",
     "order": 5,
     "parent_id": null
+  },
+  "41ce15b4-0359-8019-84dd-c8d33db6bc16": {
+    "file": "docs/achievement/2026-adip-국제학술대회-논문-발표-spie.md",
+    "last_edited": "2026-11-18T06:45:00.000Z",
+    "content_hash": "cd0abe8c6fc6629ca63b17b40e60ad0ca27b762faba877ac3fce98236b945c77",
+    "order": 6,
+    "parent_id": null
   }
 }
