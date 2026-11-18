@@ -256,7 +256,7 @@
     "frontmatter_hash": "13e7e164ca255459bc149426c8bf9ea413a2f6cc5be1c212bd5fa6a30aa72262"
   },
   "docs/achievement/2026-한국방송-미디어-공학회-논문-발표.md": {
-    "body_hash": "3374020ac2cca9cafa40e62e95d9ea4573b9a16b2c479c70a261a0ecb7a3ca3e",
+    "body_hash": "5e716e0ace5b68ec8f44aaa54d8f60e115cc683163a8f7075d5fc26627f30c75",
     "slug": "2",
     "sidebar_position": "2",
     "frontmatter_hash": "d57d1d32b3c208c502ca860a7d29f6396305b0d01f71b070f40fdafa1f9eba47"
@@ -404,5 +404,11 @@
     "slug": "2",
     "sidebar_position": "2",
     "frontmatter_hash": "e0c191abff9acc57b76edc9f9037341c5668bcb02c47afbbc663824715b514f6"
+  },
+  "docs/achievement/2026-adip-국제학술대회-논문-발표-spie.md": {
+    "body_hash": "cd0abe8c6fc6629ca63b17b40e60ad0ca27b762faba877ac3fce98236b945c77",
+    "slug": "6",
+    "sidebar_position": "6",
+    "frontmatter_hash": "b48d70f194761639561b1281eed46a347abc96716cf77a3cef10e9dfce10d8f1"
   }
 }
